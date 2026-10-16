@@ -49,7 +49,7 @@
   gap: 7px;
   padding: 0 12px;
   border: 1px solid var(--chrome-border);
-  border-radius: 10px;
+  border-radius: var(--radius-control);
   background: #fffaf057;
   color: var(--chrome-text);
   font-size: 11px;
@@ -92,7 +92,7 @@
   gap: 10px;
   padding: 0 12px;
   border: 1px solid transparent;
-  border-radius: 9px;
+  border-radius: var(--radius-control);
   background: transparent;
   color: var(--chrome-muted);
   font-size: 12px;
@@ -125,7 +125,7 @@
   min-height: 44px;
   padding: 0 10px;
   border: 1px solid var(--chrome-border);
-  border-radius: 9px;
+  border-radius: var(--radius-control);
   background: var(--chrome-raised);
   color: var(--chrome-text);
   font: inherit;
@@ -138,7 +138,7 @@
   height: 236px;
   overflow: hidden;
   border: 1px solid #ffffff5c;
-  border-radius: 14px;
+  border-radius: var(--radius-tile);
   background:
     radial-gradient(ellipse at 24% 100%, #ae61372b, transparent 70%), #302622ed;
   box-shadow:
@@ -291,7 +291,7 @@
   gap: 8px;
   padding: 0 13px;
   border: 1px solid #ffd3ae;
-  border-radius: 10px;
+  border-radius: var(--radius-control);
   background: var(--accent);
   box-shadow:
     0 4px 12px #bd602c21,

@@ -5,31 +5,6 @@
   height: 100%;
   color: var(--ink);
   background: var(--field);
-  background-image:
-    radial-gradient(ellipse at 51% 112%, #e9692d99, transparent 58%),
-    radial-gradient(ellipse at 95% 30%, #ffe9da8c, transparent 60%),
-    radial-gradient(ellipse at 5% 0%, #ffffffd9, transparent 65%),
-    linear-gradient(135deg, #e2e1df, #eee8df 48%, #dbd4ce);
-}
-
-.desktop::before {
-  position: absolute;
-  inset: 0;
-  content: '';
-  background:
-    radial-gradient(
-      ellipse at 50% 130%,
-      transparent 52%,
-      #ffffff50 52.2%,
-      transparent 52.7%
-    ),
-    radial-gradient(
-      ellipse at 50% 130%,
-      transparent 65%,
-      #ffffff30 65.2%,
-      transparent 65.6%
-    );
-  pointer-events: none;
 }
 
 .viewport {
@@ -59,7 +34,8 @@
 
 .world {
   position: relative;
-  background-image: radial-gradient(#8f766129 0.7px, transparent 0.9px);
+  background-color: var(--field);
+  background-image: radial-gradient(var(--field-dot) 1px, transparent 1.2px);
   background-size: 28px 28px;
 }
 
@@ -67,6 +43,7 @@
   position: absolute;
   display: flex;
   flex-direction: column;
+  gap: 6px;
   min-width: 0;
   min-height: 0;
   cursor: default;
@@ -85,7 +62,14 @@
   justify-content: space-between;
   gap: 12px;
   min-width: 0;
-  padding: 0 8px 6px;
+  padding: 0 6px;
+  border: 1px solid var(--chrome-border);
+  border-radius: var(--radius-panel);
+  background: var(--chrome-raised);
+  backdrop-filter: var(--glass-blur);
+  box-shadow:
+    var(--glass-edge),
+    0 4px 12px #6c4d2d14;
   color: #67564b;
   cursor: grab;
   user-select: none;
@@ -94,11 +78,11 @@
 
 .titlebar::after {
   position: absolute;
-  top: 17px;
+  top: calc(50% - 2px);
   left: 50%;
   width: 28px;
   height: 4px;
-  border-radius: 2px;
+  border-radius: var(--radius-round);
   background: #86716438;
   transform: translateX(-50%);
   content: '';
@@ -115,12 +99,8 @@
   gap: 9px;
   min-width: 0;
   min-height: 0;
-  max-width: calc(100% - 110px);
+  max-width: calc(50% - 24px);
   padding-right: 10px;
-  border: 1px solid #ffffff80;
-  border-radius: 11px;
-  background: #fffbf56b;
-  backdrop-filter: blur(12px);
   font-size: 12px;
   font-weight: 550;
   letter-spacing: -0.15px;
@@ -131,9 +111,7 @@
   box-sizing: content-box;
   padding: 7px;
   border: 0;
-  border-radius: 10px;
-  background: #fffaf08c;
-  box-shadow: 0 2px 5px #6f432209;
+  border-radius: var(--radius-control);
 }
 
 .window[data-active='true'] .windowTitle > svg {
@@ -153,11 +131,6 @@
   flex-shrink: 0;
   align-items: center;
   gap: 4px;
-  padding: 2px;
-  border: 1px solid #ffffff70;
-  border-radius: 20px;
-  background: #fffbf559;
-  backdrop-filter: blur(12px);
 }
 
 .windowActions button {
@@ -167,8 +140,8 @@
   padding: 0;
   place-items: center;
   border: 0;
-  border-radius: 50%;
-  background: #fffaf04d;
+  border-radius: var(--radius-control);
+  background: transparent;
   color: inherit;
   opacity: 0.8;
 }
@@ -189,7 +162,7 @@
   min-height: 0;
   overflow: auto;
   border: 1px solid #ffffffd9;
-  border-radius: 16px;
+  border-radius: var(--radius-panel);
   background: var(--paper);
   backdrop-filter: var(--glass-blur);
   box-shadow:
@@ -314,7 +287,7 @@
 .selection {
   position: absolute;
   border: 1px solid var(--accent);
-  border-radius: 8px;
+  border-radius: var(--radius-detail);
   background: #e9642a12;
   pointer-events: none;
 }
@@ -335,7 +308,7 @@
   max-width: calc(100vw - 28px);
   padding: 20px;
   border: 1px solid var(--chrome-border);
-  border-radius: 20px;
+  border-radius: var(--radius-panel);
   background: var(--chrome);
   color: var(--chrome-text);
   backdrop-filter: var(--glass-blur);
@@ -384,7 +357,7 @@
   min-height: 44px;
   padding: 0 8px;
   border: 1px solid var(--chrome-border);
-  border-radius: 12px;
+  border-radius: var(--radius-control);
   background: var(--chrome-raised);
   color: var(--chrome-text);
   font: inherit;

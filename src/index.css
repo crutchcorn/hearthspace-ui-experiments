@@ -13,7 +13,13 @@
   --ink: #362a25;
   --muted: #88776c;
   --line: #9c7d661f;
-  --field: #e8e2da;
+  --field: #eee8e1;
+  --field-dot: #ad836b73;
+  --radius-detail: 4px;
+  --radius-control: 8px;
+  --radius-tile: 12px;
+  --radius-panel: 16px;
+  --radius-round: 999px;
   --glass-blur: blur(24px) saturate(1.25);
   --glass-edge: inset 0 1px 0 #fff, inset 0 -1px 0 #84674d0f;
   --mono: 'SFMono-Regular', consolas, 'Liberation Mono', monospace;

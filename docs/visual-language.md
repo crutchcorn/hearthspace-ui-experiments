@@ -1,18 +1,18 @@
 # Visual language
 
-Hearthspace pairs warm glass with orange light. The four corners keep distinct roles: activity at top left, device status at top right, navigation at bottom left, and applications at bottom right. The canvas leaves the center available for work.
+Hearthspace pairs warm glass with orange accents. The four corners keep distinct roles: activity at top left, device status at top right, navigation at bottom left, and applications at bottom right. The canvas leaves the center available for work.
 
 ## Light and layers
 
-The pale canvas has a warm ambient glow and fine white arcs. A subtle dot pattern moves with the world so panning remains visible. Orange light provides warmth without turning the entire background into a saturated color.
+The canvas is a flat warm surface with amber-gray dots spaced 28 pixels apart in both axes. The dot pattern moves with the world so horizontal and vertical panning remain visible. Orange highlights belong to controls and interaction states.
 
 Windows and controls share translucent surfaces, bright edges, backdrop blur, and soft shadows. Clear glass holds most controls and documents; smoked glass gives the terminal a darker reading surface. Keep enough surface color behind text for it to remain readable as windows overlap.
 
-Each window has a floating horizontal title rail above its translucent body. The title, drag handle, and window controls form separate pieces along that rail. An active window gains an orange icon and edge light. The body keeps its own content hierarchy and scrolling area.
+Each window has a floating horizontal title rail above its translucent body. A continuous glass backplate supports the title, drag handle, and window controls so content underneath does not compete with them. An active window gains an orange icon and edge light. The body keeps its own content hierarchy and scrolling area.
 
 ## Four corners, four forms
 
-Activity is a narrow glass ribbon with an orange signal and unread text. It opens into a stream with a fine orange guide, app icons, and quiet timestamps. The 24-hour clock floats above three separate status modules for network, sound, and power.
+Activity is a narrow glass ribbon with an orange signal and unread text. It opens into a stream with a fine orange guide, app icons, and quiet timestamps. The 24-hour clock sits on its own glass backplate above three separate status modules for network, sound, and power. Its backplate keeps the time readable over window content.
 
 The navigator puts a circular Move control beside Select, Map, and Arrange. Its map opens above the controls and supports continuous dragging. At narrow widths, the navigator becomes a compact row.
 
@@ -24,11 +24,21 @@ These forms share light, materials, and interaction states while retaining diffe
 
 Use orange for active controls, launch actions, focus, and selected windows. Strong orange gradients use the light `--accent-ink` foreground; quieter states use orange text on `--accent-soft`. Counts, labels, and borders accompany state markers. Destructive hover states use red.
 
-Shared properties live in `src/index.css`. `--paper`, `--ink`, `--muted`, and `--line` describe content. `--chrome` and related properties describe controls. `--field` is the canvas; `--accent` and `--accent-ink` describe the main signal colors. Reuse `--glass-blur`, `--glass-edge`, and `--shadow-panel` for the shared depth treatment.
+Shared properties live in `src/index.css`. `--paper`, `--ink`, `--muted`, and `--line` describe content. `--chrome` and related properties describe controls. `--field` and `--field-dot` describe the canvas; `--accent` and `--accent-ink` describe the main signal colors. Reuse `--glass-blur`, `--glass-edge`, and `--shadow-panel` for the shared depth treatment.
 
 ## Type, shape, and space
 
-Use restrained sans-serif headings and readable labels. Reserve monospace for shortcuts, coordinates, and terminal content. Radius follows the surface: rounded document bodies, smaller controls, and a circular navigation target. White edge highlights establish boundaries; shadows and blur establish depth.
+Use restrained sans-serif headings and readable labels. Reserve monospace for shortcuts, coordinates, and terminal content. White edge highlights establish boundaries; shadows and blur establish depth.
+
+Use the shared radius scale consistently across windows and controls:
+
+| Property           | Radius | Role                                        |
+| ------------------ | ------ | ------------------------------------------- |
+| `--radius-detail`  | 4px    | Small badges and details.                   |
+| `--radius-control` | 8px    | Buttons and other compact controls.         |
+| `--radius-tile`    | 12px   | App tiles and compact glass modules.        |
+| `--radius-panel`   | 16px   | Window bodies, title rails, and panels.     |
+| `--radius-round`   | 999px  | Circular targets and fully rounded markers. |
 
 Keep the four corners reachable when windows are maximized or panels open. On narrow screens, app tiles move into a horizontally scrolling row above Apps. Panels reserve space for those controls and scroll internally when height is limited. Content windows retain their spatial dimensions and remain reachable through the map and window picker.
 
