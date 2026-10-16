@@ -2,12 +2,11 @@
   position: fixed;
   z-index: 800;
   bottom: 104px;
-  left: 50%;
+  right: 24px;
   overflow: auto;
   width: 520px;
   max-width: calc(100vw - 24px);
-  max-height: calc(100dvh - 168px);
-  transform: translateX(-50%);
+  max-height: calc(100dvh - 200px);
   border: 1px solid #d6d9cd;
   border-radius: 18px;
   background: #fbfbf7f5;
@@ -336,12 +335,15 @@
   padding: 20px 23px;
 }
 
-@media (width <= 480px) {
+@media (width <= 760px) {
   .launcher {
+    right: 12px;
     bottom: 90px;
-    max-height: calc(100dvh - 154px);
+    max-height: calc(100dvh - 174px);
   }
+}
 
+@media (width <= 480px) {
   .header {
     gap: 6px;
     padding-left: 17px;

@@ -58,18 +58,33 @@
 }
 
 .popover {
-  overflow: hidden;
+  overflow: auto;
   width: 250px;
   max-width: calc(100vw - 24px);
+  max-height: calc(100dvh - 180px);
   border-radius: 14px;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
 }
 
-.popover h2 {
+.panelHeading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   padding: 17px 17px 12px;
+}
+
+.panelHeading h2 {
   margin: 0;
   color: #50594a;
   font-size: 12px;
   font-weight: 600;
+}
+
+.panelHeading > span {
+  color: #8b9480;
+  font-size: 9px;
 }
 
 .actions {
@@ -98,6 +113,10 @@
 
 .actions button:disabled {
   color: #959b8d;
+}
+
+.actions .textOnlyAction {
+  padding-left: 37px;
 }
 
 .divider {

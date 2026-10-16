@@ -7,6 +7,7 @@ import {
   LayoutGrid,
   Map,
   Plus,
+  RotateCcw,
   Scan,
 } from 'lucide-react'
 import styles from './CanvasTools.module.css'
@@ -20,7 +21,10 @@ interface CanvasToolsProps {
   onToggleMore: () => void
   onCloseMore: () => void
   onNewWindow: () => void
+  onHome: () => void
+  onReset: () => void
   onHelp: () => void
+  windowCount: number
   selectedCount: number
   showHint: boolean
 }
@@ -34,7 +38,10 @@ export default function CanvasTools({
   onToggleMore,
   onCloseMore,
   onNewWindow,
+  onHome,
+  onReset,
   onHelp,
+  windowCount,
   selectedCount,
   showHint,
 }: CanvasToolsProps) {
@@ -130,7 +137,12 @@ export default function CanvasTools({
           className={styles.popover}
           aria-label="More canvas tools"
         >
-          <h2>Canvas tools</h2>
+          <header className={styles.panelHeading}>
+            <h2>Canvas tools</h2>
+            <span>
+              {windowCount} {windowCount === 1 ? 'window' : 'windows'}
+            </span>
+          </header>
           <div className={styles.actions}>
             <button type="button" onClick={() => onAction(onNewWindow)}>
               <Plus size={17} aria-hidden="true" />
@@ -139,6 +151,17 @@ export default function CanvasTools({
             <button type="button" onClick={() => onAction(onHelp)}>
               <Compass size={17} aria-hidden="true" />
               <span>How to explore</span>
+            </button>
+            <button
+              type="button"
+              className={styles.textOnlyAction}
+              onClick={() => onAction(onHome)}
+            >
+              Return to starting area
+            </button>
+            <button type="button" onClick={() => onAction(onReset)}>
+              <RotateCcw size={17} aria-hidden="true" />
+              <span>Reset layout</span>
             </button>
             <div className={styles.divider} />
             <button type="button" disabled>

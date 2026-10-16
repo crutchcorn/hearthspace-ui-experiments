@@ -1,14 +1,17 @@
 .bar {
   position: fixed;
   z-index: 1000;
-  inset: 0 0 auto;
+  top: 24px;
+  right: 24px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  height: 52px;
-  padding: 0 22px;
-  border-bottom: 1px solid #deded5;
+  padding: 5px;
+  border: 1px solid #d6d9cd;
+  border-radius: 16px;
   background: #f9f8f4e6;
+  box-shadow:
+    0 5px 18px #3d44350b,
+    0 1px 3px #3d443506;
   backdrop-filter: blur(24px);
   color: #363a34;
   font-size: 12px;
@@ -16,15 +19,10 @@
   user-select: none;
 }
 
-.leftGroup,
 .rightGroup {
   display: flex;
   align-items: center;
-  height: 100%;
-}
-
-.rightGroup {
-  gap: 5px;
+  gap: 2px;
 }
 
 .bar button {
@@ -33,7 +31,7 @@
   align-items: center;
   justify-content: center;
   border: 0;
-  border-radius: 6px;
+  border-radius: 10px;
   background: transparent;
   color: inherit;
   font: inherit;
@@ -60,33 +58,25 @@
 }
 
 .rightGroup > .divider {
-  margin: 0 11px 0 8px;
+  margin: 0 7px;
 }
 
 .anchor {
-  position: relative;
   display: flex;
   align-items: center;
 }
 
-.bar .workspaceButton {
-  gap: 9px;
-  min-height: 31px;
-  padding: 0 8px;
-  margin-left: -8px;
-  color: #72776e;
-}
-
 .bar .iconButton {
-  width: 31px;
-  height: 31px;
+  width: 44px;
+  height: 44px;
   padding: 0;
 }
 
 .bar .clockButton {
   gap: 10px;
-  height: 31px;
-  padding: 0 7px;
+  min-width: 44px;
+  height: 44px;
+  padding: 0 10px;
   font-size: 11px;
   font-variant-numeric: tabular-nums;
 }
@@ -97,13 +87,15 @@
 
 .popover {
   position: absolute;
-  top: 42px;
+  top: calc(100% + 12px);
   right: 0;
-  overflow: hidden;
+  overflow: auto;
   width: 260px;
+  max-width: calc(100vw - 48px);
+  max-height: calc(100dvh - 116px);
   box-sizing: border-box;
   border: 1px solid #d8d9cf;
-  border-radius: 11px;
+  border-radius: 14px;
   background: #fcfbf7f5;
   box-shadow:
     0 10px 34px #3d44351a,
@@ -111,56 +103,8 @@
   text-align: left;
   line-height: 1.4;
   backdrop-filter: blur(26px);
-}
-
-.workspacePopover {
-  right: auto;
-  left: -8px;
-  width: 246px;
-}
-
-.panelHeading {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 17px 17px 14px;
-  border-bottom: 1px solid #e7e8e0;
-}
-
-.panelHeading strong {
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.panelHeading > span {
-  color: #8b8f84;
-  font-size: 10px;
-}
-
-.menuItems {
-  padding: 6px;
-}
-
-.bar .menuItems button {
-  display: flex;
-  justify-content: start;
-  gap: 11px;
-  width: 100%;
-  padding: 11px 10px;
-  font-size: 11px;
-  text-align: left;
-}
-
-.bar .menuItems .textOnlyAction {
-  padding-left: 37px;
-}
-
-.menuItems svg {
-  color: #7a8271;
-}
-
-.menuEndIcon {
-  margin-left: auto;
+  scrollbar-color: #cbd1bf transparent;
+  scrollbar-width: thin;
 }
 
 .systemPopover {
@@ -351,51 +295,42 @@
   font-size: 9px;
 }
 
-@media (width <= 700px) {
+@media (width <= 760px) {
   .bar {
-    padding-inline: 14px;
+    top: 12px;
+    right: 12px;
   }
 
   .date {
     display: none;
   }
 
-  .bar .workspaceButton {
-    margin-left: -5px;
-    padding: 0 4px;
-  }
-
-  .rightGroup {
-    gap: 1px;
-  }
-
-  .rightGroup > .divider {
-    margin-inline: 6px;
-  }
-
-  .systemPopover {
-    position: fixed;
-    top: 56px;
-    right: 14px;
-  }
-
-  .workspacePopover {
-    left: -5px;
+  .popover {
+    max-width: calc(100vw - 24px);
+    max-height: calc(100dvh - 92px);
   }
 }
 
 @media (width <= 390px) {
   .bar {
-    padding-inline: 10px;
+    padding-inline: 3px;
   }
 
-  .bar .iconButton {
-    width: 27px;
+  .rightGroup {
+    gap: 0;
+  }
+
+  .rightGroup > .divider {
+    margin-inline: 3px;
   }
 
   .bar .clockButton {
-    gap: 5px;
-    padding-inline: 3px;
+    padding-inline: 4px;
+    font-size: 10px;
+  }
+
+  .clockChevron {
+    display: none;
   }
 }
 

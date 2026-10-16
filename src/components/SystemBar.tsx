@@ -1,11 +1,8 @@
 import { useEffect, useState } from 'react'
 import {
-  ArrowUpRight,
   BatteryFull,
   Check,
   ChevronDown,
-  Plus,
-  RotateCcw,
   Volume2,
   VolumeX,
   Wifi,
@@ -13,22 +10,17 @@ import {
 } from 'lucide-react'
 import styles from './SystemBar.module.css'
 
+export type SystemPanel = 'wifi' | 'volume' | 'battery' | 'clock' | null
+
 interface SystemBarProps {
-  onReset: () => void
-  onHome: () => void
-  onNewWindow: () => void
-  windowCount: number
+  openPanel: SystemPanel
+  onPanelChange: (panel: SystemPanel) => void
 }
 
-type OpenPanel = 'workspace' | 'wifi' | 'volume' | 'battery' | 'clock' | null
-
 export default function SystemBar({
-  onReset,
-  onHome,
-  onNewWindow,
-  windowCount,
+  openPanel,
+  onPanelChange,
 }: SystemBarProps) {
-  const [openPanel, setOpenPanel] = useState<OpenPanel>(null)
   const [wifiEnabled, setWifiEnabled] = useState(true)
   const [volume, setVolume] = useState(64)
   const [now, setNow] = useState(() => new Date())
@@ -46,12 +38,12 @@ export default function SystemBar({
         event.target instanceof Element &&
         !event.target.closest('[data-system-popover-root]')
       ) {
-        setOpenPanel(null)
+        onPanelChange(null)
       }
     }
 
     function dismissOnEscape(event: KeyboardEvent) {
-      if (event.key === 'Escape') setOpenPanel(null)
+      if (event.key === 'Escape') onPanelChange(null)
     }
 
     document.addEventListener('pointerdown', dismissOnPointer, true)
@@ -60,15 +52,10 @@ export default function SystemBar({
       document.removeEventListener('pointerdown', dismissOnPointer, true)
       document.removeEventListener('keydown', dismissOnEscape)
     }
-  }, [openPanel])
+  }, [openPanel, onPanelChange])
 
-  function togglePanel(panel: Exclude<OpenPanel, null>) {
-    setOpenPanel((current) => (current === panel ? null : panel))
-  }
-
-  function runAction(action: () => void) {
-    setOpenPanel(null)
-    action()
+  function togglePanel(panel: Exclude<SystemPanel, null>) {
+    onPanelChange(openPanel === panel ? null : panel)
   }
 
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).getDay()
@@ -79,48 +66,11 @@ export default function SystemBar({
   ).getDate()
 
   return (
-    <header className={styles.bar}>
-      <div className={styles.leftGroup}>
-        <div className={styles.anchor} data-system-popover-root>
-          <button
-            type="button"
-            className={`${styles.workspaceButton} ${openPanel === 'workspace' ? styles.active : ''}`}
-            onClick={() => togglePanel('workspace')}
-            aria-label="Personal space menu"
-            aria-expanded={openPanel === 'workspace'}
-          >
-            <span>Personal space</span>
-            <ChevronDown size={12} />
-          </button>
-          {openPanel === 'workspace' && (
-            <div className={`${styles.popover} ${styles.workspacePopover}`}>
-              <div className={styles.panelHeading}>
-                <strong>Personal space</strong>
-                <span>{windowCount} open windows</span>
-              </div>
-              <div className={styles.menuItems}>
-                <button type="button" onClick={() => runAction(onNewWindow)}>
-                  <Plus size={16} />
-                  <span>Add a window</span>
-                  <ArrowUpRight size={12} className={styles.menuEndIcon} />
-                </button>
-                <button
-                  type="button"
-                  className={styles.textOnlyAction}
-                  onClick={() => runAction(onHome)}
-                >
-                  <span>Return home</span>
-                </button>
-                <button type="button" onClick={() => runAction(onReset)}>
-                  <RotateCcw size={15} />
-                  <span>Reset layout</span>
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-
+    <header
+      className={styles.bar}
+      aria-label="Device status"
+      data-system-popover-root
+    >
       <div className={styles.rightGroup}>
         <div className={styles.anchor} data-system-popover-root>
           <button
@@ -251,7 +201,7 @@ export default function SystemBar({
                 minute: '2-digit',
               })}
             </span>
-            <ChevronDown size={11} />
+            <ChevronDown className={styles.clockChevron} size={11} />
           </button>
           {openPanel === 'clock' && (
             <div className={`${styles.popover} ${styles.calendarPopover}`}>

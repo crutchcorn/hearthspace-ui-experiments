@@ -401,6 +401,8 @@
   inset: auto 24px 24px;
   display: flex;
   align-items: flex-end;
+  justify-content: space-between;
+  gap: 10px;
   height: 60px;
   pointer-events: none;
 }
@@ -410,14 +412,10 @@
 }
 
 .launchDock {
-  position: absolute;
-  bottom: 0;
-  left: 50%;
   display: flex;
   align-items: center;
   gap: 4px;
   padding: 5px;
-  transform: translateX(-50%);
   border: 1px solid #d6d9cd;
   border-radius: 15px;
   background: #fcfcf6f0;
@@ -589,11 +587,6 @@
     justify-content: space-between;
   }
 
-  .launchDock {
-    position: static;
-    transform: none;
-  }
-
   .launchDock button {
     min-width: 46px;
     padding-inline: 8px;
@@ -603,6 +596,27 @@
   .mapPanel {
     bottom: 90px;
     left: 12px;
+  }
+}
+
+@media (width <= 360px) {
+  .docks {
+    inset-inline: 8px;
+    gap: 6px;
+  }
+
+  .launchDock {
+    gap: 0;
+    padding: 4px;
+  }
+
+  .launchDock button {
+    min-width: 44px;
+    padding-inline: 4px;
+  }
+
+  .dockDivider {
+    display: none;
   }
 }
 

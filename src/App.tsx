@@ -1,4 +1,5 @@
 import {
+  useCallback,
   useEffect,
   useEffectEvent,
   useLayoutEffect,
@@ -23,7 +24,10 @@ import {
   Spline,
   X,
 } from 'lucide-react'
-import SystemBar from './components/SystemBar'
+import SystemBar, { type SystemPanel } from './components/SystemBar'
+import NotificationInbox, {
+  type NotificationTarget,
+} from './components/NotificationInbox'
 import Minimap from './components/Minimap'
 import CanvasTools from './components/CanvasTools'
 import AppLauncher from './components/AppLauncher'
@@ -70,6 +74,8 @@ function App() {
   const [showMap, setShowMap] = useState(false)
   const [showHelp, setShowHelp] = useState(false)
   const [showMore, setShowMore] = useState(false)
+  const [notificationsOpen, setNotificationsOpen] = useState(false)
+  const [systemPanel, setSystemPanel] = useState<SystemPanel>(null)
   const [tool, setTool] = useState<'pan' | 'lasso'>('pan')
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [selection, setSelection] = useState<Bounds | null>(null)
@@ -80,6 +86,11 @@ function App() {
   const captureTarget = useRef<Element | null>(null)
   const latestPointer = useRef({ x: 0, y: 0 })
   const home = workspace.home
+
+  const closeTopPanels = useCallback(() => {
+    setNotificationsOpen(false)
+    setSystemPanel(null)
+  }, [])
 
   useLayoutEffect(() => {
     viewport.current?.scrollTo(home.x, home.y)
@@ -112,6 +123,7 @@ function App() {
         setShowMap(false)
         setShowHelp(false)
         setShowMore(false)
+        closeTopPanels()
         return
       }
       if (event.key === 'Escape') {
@@ -119,6 +131,7 @@ function App() {
         setShowMap(false)
         setShowMore(false)
         setLauncher(null)
+        closeTopPanels()
         setTool('pan')
         setSelectedIds([])
         setSelection(null)
@@ -135,26 +148,38 @@ function App() {
         return
       if (launcher || event.metaKey || event.ctrlKey || event.altKey) return
       if (event.key.toLowerCase() === 'h') {
+        closeTopPanels()
         setTool('pan')
         setSelectedIds([])
         setShowMore(false)
       }
       if (event.key.toLowerCase() === 'l') {
+        closeTopPanels()
         setTool('lasso')
         setShowMap(false)
         setShowHelp(false)
         setShowMore(false)
       }
       if (event.key.toLowerCase() === 'm') {
+        closeTopPanels()
         setShowMap((current) => !current)
         setShowHelp(false)
         setShowMore(false)
       }
       if (event.key.toLowerCase() === 'g') {
+        closeTopPanels()
         setLauncher('gestures')
         setShowMap(false)
         setShowHelp(false)
         setShowMore(false)
+      }
+      if (event.key.toLowerCase() === 'n') {
+        setNotificationsOpen((current) => !current)
+        setSystemPanel(null)
+        setShowMap(false)
+        setShowHelp(false)
+        setShowMore(false)
+        setSpaceHeld(false)
       }
       if (event.code === 'Space') {
         if (event.target instanceof Element && event.target.closest('button'))
@@ -186,7 +211,7 @@ function App() {
       window.removeEventListener('keyup', keyup)
       window.removeEventListener('blur', release)
     }
-  }, [home.x, home.y, launcher])
+  }, [home.x, home.y, launcher, closeTopPanels])
 
   useEffect(() => {
     if (!launcher) return
@@ -362,7 +387,7 @@ function App() {
         )
         const height = Math.min(
           current.height,
-          Math.max(MIN_HEIGHT, view.height - 160),
+          Math.max(MIN_HEIGHT, view.height - 200),
         )
         return {
           ...entry,
@@ -373,7 +398,7 @@ function App() {
             height: entry.height,
           },
           x: clamp(canvas.scrollLeft + 24, 0, current.width - width),
-          y: clamp(canvas.scrollTop + 76, 0, current.height - height),
+          y: clamp(canvas.scrollTop + 96, 0, current.height - height),
           width,
           height,
         }
@@ -416,6 +441,7 @@ function App() {
   }
 
   function openLauncher(mode: 'apps' | 'gestures') {
+    closeTopPanels()
     setLauncher((current) => (current === mode ? null : mode))
     setShowMap(false)
     setShowHelp(false)
@@ -435,10 +461,46 @@ function App() {
     setSelectedIds([])
   }
 
+  function openNotificationTarget(target: NotificationTarget) {
+    closeTopPanels()
+    setLauncher(null)
+    setShowMap(false)
+    setShowHelp(false)
+    setShowMore(false)
+    setTool('pan')
+    setSelectedIds([])
+    const item = workspace.windows.find(
+      (entry) =>
+        entry.appId === target ||
+        (target === 'notes' && entry.kind === 'notes'),
+    )
+    if (!item) {
+      addWindow(APP_CATALOG.find((app) => app.id === target))
+      return
+    }
+    focusWindow(item.id)
+    viewport.current?.scrollTo({
+      left: clamp(
+        item.x - Math.max(12, (view.width - item.width) / 2),
+        0,
+        Math.max(0, workspace.width - view.width),
+      ),
+      top: clamp(
+        item.y - Math.max(96, (view.height - item.height) / 2),
+        0,
+        Math.max(0, workspace.height - view.height),
+      ),
+      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches
+        ? 'instant'
+        : 'smooth',
+    })
+  }
+
   function goHome() {
     viewport.current?.scrollTo(home.x, home.y)
   }
   function reset() {
+    closeTopPanels()
     setWorkspace((current) => ({ ...createWorkspace(), note: current.note }))
     setActiveId('welcome')
     setShowMap(false)
@@ -452,10 +514,34 @@ function App() {
   return (
     <main className={styles.desktop}>
       <SystemBar
-        onReset={reset}
-        onHome={goHome}
-        onNewWindow={addWindow}
-        windowCount={workspace.windows.length}
+        openPanel={systemPanel}
+        onPanelChange={(panel) => {
+          setSystemPanel(panel)
+          if (panel) {
+            setNotificationsOpen(false)
+            setLauncher(null)
+            setShowMap(false)
+            setShowHelp(false)
+            setShowMore(false)
+          }
+        }}
+      />
+      <NotificationInbox
+        open={notificationsOpen}
+        previewVisible={
+          !systemPanel && !launcher && !showMap && !showHelp && !showMore
+        }
+        onToggle={() => {
+          setNotificationsOpen(!notificationsOpen)
+          setSystemPanel(null)
+          setLauncher(null)
+          setShowMap(false)
+          setShowHelp(false)
+          setShowMore(false)
+          setSpaceHeld(false)
+        }}
+        onClose={() => setNotificationsOpen(false)}
+        onNavigate={openNotificationTarget}
       />
       <div
         ref={viewport}
@@ -510,7 +596,10 @@ function App() {
                   height: item.height,
                   zIndex: index + 1,
                 }}
-                onPointerDown={() => focusWindow(item.id)}
+                onPointerDown={(event) => {
+                  if (!(event.target as Element).closest('button'))
+                    focusWindow(item.id)
+                }}
               >
                 <header
                   className={styles.titlebar}
@@ -644,14 +733,22 @@ function App() {
           mode={tool}
           moreOpen={showMore}
           onToggleMore={() => {
+            closeTopPanels()
             setShowMore(!showMore)
             setShowMap(false)
             setShowHelp(false)
             setLauncher(null)
           }}
           onCloseMore={() => setShowMore(false)}
-          showHint={!showMap && !showHelp && !launcher}
+          showHint={
+            !showMap &&
+            !showHelp &&
+            !launcher &&
+            !notificationsOpen &&
+            !systemPanel
+          }
           onModeChange={(mode) => {
+            closeTopPanels()
             setTool(mode)
             if (mode === 'pan') setSelectedIds([])
             setShowMap(false)
@@ -661,13 +758,18 @@ function App() {
           }}
           mapOpen={showMap}
           onToggleMap={() => {
+            closeTopPanels()
             setShowMap(!showMap)
             setShowHelp(false)
             setLauncher(null)
             setShowMore(false)
           }}
           onNewWindow={addWindow}
+          onHome={goHome}
+          onReset={reset}
+          windowCount={workspace.windows.length}
           onHelp={() => {
+            closeTopPanels()
             setShowHelp(!showHelp)
             setShowMap(false)
             setLauncher(null)
