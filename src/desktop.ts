@@ -20,7 +20,7 @@ export const MIN_HEIGHT = 200
 export const clamp = (value: number, min: number, max: number) =>
   Math.max(min, Math.min(value, max))
 
-export function createWorkspace(): Workspace {
+function createWorkspace(): Workspace {
   const width = Math.max(window.innerWidth, 960)
   const height = Math.max(window.innerHeight, 720)
   const home = { x: width * 4.5, y: height * 4.5 }
@@ -72,8 +72,6 @@ export function loadWorkspace(): Workspace {
       !Number.isFinite(value.height) ||
       value.width < 9600 ||
       value.height < 7200 ||
-      value.width > 100000 ||
-      value.height > 100000 ||
       !Number.isFinite(value.home?.x) ||
       !Number.isFinite(value.home?.y) ||
       typeof value.note !== 'string' ||
@@ -123,6 +121,44 @@ export function loadWorkspace(): Workspace {
     }
   } catch {
     return createWorkspace()
+  }
+}
+
+export function arrangeWindows(
+  workspace: Workspace,
+  origin: { x: number; y: number },
+): Workspace {
+  if (workspace.windows.length === 0) return workspace
+
+  const windows = workspace.windows.map(({ restore, ...item }) => ({
+    ...item,
+    ...restore,
+  }))
+  const columns = Math.ceil(Math.sqrt(windows.length))
+  const rows = Math.ceil(windows.length / columns)
+  const cellWidth = Math.max(...windows.map((item) => item.width))
+  const cellHeight = Math.max(...windows.map((item) => item.height))
+  const gap = 24
+  const x = origin.x + 24
+  const y = origin.y + 96
+  const arranged = new Map(
+    windows
+      .toSorted((a, b) => a.y - b.y || a.x - b.x || a.id.localeCompare(b.id))
+      .map((item, index) => [
+        item.id,
+        {
+          ...item,
+          x: x + (index % columns) * (cellWidth + gap),
+          y: y + Math.floor(index / columns) * (cellHeight + gap),
+        },
+      ]),
+  )
+
+  return {
+    ...workspace,
+    width: Math.max(workspace.width, x + columns * (cellWidth + gap)),
+    height: Math.max(workspace.height, y + rows * (cellHeight + gap)),
+    windows: workspace.windows.map((item) => arranged.get(item.id)!),
   }
 }
 

@@ -35,107 +35,24 @@
   touch-action: manipulation;
 }
 
-.tool:hover {
+.tool:hover:not(:disabled) {
   background: #ebeee4;
   color: #4d5944;
 }
 
-.tool[aria-pressed='true'],
-.tool[aria-expanded='true'] {
+.tool[aria-pressed='true'] {
   background: #e3e8d9;
   color: #536448;
 }
 
-.popover,
+.tool:disabled {
+  color: #959b8d;
+}
+
 .selectionHint {
   position: absolute;
   bottom: calc(100% + 12px);
   left: 0;
-  border: 1px solid #d6d9cd;
-  background: #fcfcf6f5;
-  box-shadow: 0 8px 28px #3d443512;
-  backdrop-filter: blur(24px);
-}
-
-.popover {
-  overflow: auto;
-  width: 250px;
-  max-width: calc(100vw - 24px);
-  max-height: calc(100dvh - 180px);
-  border-radius: 14px;
-  overscroll-behavior: contain;
-  scrollbar-width: thin;
-}
-
-.panelHeading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 17px 17px 12px;
-}
-
-.panelHeading h2 {
-  margin: 0;
-  color: #50594a;
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.panelHeading > span {
-  color: #8b9480;
-  font-size: 9px;
-}
-
-.actions {
-  padding: 0 6px 6px;
-}
-
-.actions button {
-  display: flex;
-  width: 100%;
-  min-height: 44px;
-  align-items: center;
-  gap: 10px;
-  padding: 10px;
-  border: 0;
-  border-radius: 8px;
-  background: transparent;
-  color: #626c59;
-  font-size: 11px;
-  text-align: left;
-  touch-action: manipulation;
-}
-
-.actions button:hover:not(:disabled) {
-  background: #ebeee4;
-}
-
-.actions button:disabled {
-  color: #959b8d;
-}
-
-.actions .textOnlyAction {
-  padding-left: 37px;
-}
-
-.divider {
-  height: 1px;
-  margin: 5px 10px;
-  background: #e5e8de;
-}
-
-.later {
-  padding: 3px 5px;
-  margin-left: auto;
-  border-radius: 4px;
-  background: #eeefe8;
-  color: #858d7d;
-  font-size: 8px;
-  line-height: 1;
-}
-
-.selectionHint {
   display: flex;
   min-height: 37px;
   width: max-content;
@@ -143,7 +60,11 @@
   align-items: center;
   gap: 13px;
   padding: 9px 11px;
+  border: 1px solid #d6d9cd;
   border-radius: 9px;
+  background: #fcfcf6f5;
+  box-shadow: 0 8px 28px #3d443512;
+  backdrop-filter: blur(24px);
   color: #6c765f;
   font-size: 10px;
 }

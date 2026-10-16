@@ -471,7 +471,6 @@
     0 12px 30px #59654a18;
 }
 
-.help,
 .mapPanel {
   position: fixed;
   z-index: 600;
@@ -500,66 +499,6 @@
   color: #69745d;
   font-size: 11px;
   font-weight: 600;
-}
-
-.panelHeading button {
-  display: grid;
-  width: 20px;
-  height: 20px;
-  padding: 0;
-  place-items: center;
-  border: 0;
-  border-radius: 4px;
-  background: transparent;
-  color: #a3ac94;
-}
-
-.panelHeading button:hover {
-  background: #ebeee2;
-}
-
-.help > p {
-  display: flex;
-  align-items: flex-start;
-  gap: 13px;
-  margin: 17px 0;
-  color: #959e86;
-  font-size: 10px;
-  line-height: 1.6;
-}
-
-.help > p > svg {
-  flex-shrink: 0;
-  width: 17px;
-  height: 17px;
-  margin-top: 2px;
-  color: #939e82;
-}
-
-.help > p strong {
-  display: block;
-  margin-bottom: 2px;
-  color: #6d785f;
-  font-size: 11px;
-  font-weight: 500;
-}
-
-.help .helpFoot {
-  display: block;
-  margin: 18px 0 0;
-  padding-top: 14px;
-  border-top: 1px solid #e4e8d9;
-  color: #99a28a;
-  font-size: 10px;
-}
-
-.helpFoot kbd {
-  padding: 1px 5px 2px;
-  border: 1px solid #dce1d0;
-  border-radius: 4px;
-  background: #f4f6ed;
-  font-family: inherit;
-  font-size: 9px;
 }
 
 .mapFooter {
@@ -592,7 +531,6 @@
     padding-inline: 8px;
   }
 
-  .help,
   .mapPanel {
     bottom: 90px;
     left: 12px;

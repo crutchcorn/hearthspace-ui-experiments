@@ -10,13 +10,10 @@ import {
 import {
   ArrowDownRight,
   ArrowUpRight,
-  Expand,
   Flame,
   Hand,
   LayoutGrid,
   Maximize2,
-  MousePointer2,
-  MoveUpRight,
   PanelsTopLeft,
   RotateCcw,
   Scan,
@@ -33,8 +30,8 @@ import CanvasTools from './components/CanvasTools'
 import AppLauncher from './components/AppLauncher'
 import { APP_CATALOG, type LauncherApp } from './components/launcher-apps'
 import {
+  arrangeWindows,
   clamp,
-  createWorkspace,
   loadWorkspace,
   MIN_HEIGHT,
   MIN_WIDTH,
@@ -72,8 +69,6 @@ function App() {
   const [dragging, setDragging] = useState(false)
   const [spaceHeld, setSpaceHeld] = useState(false)
   const [showMap, setShowMap] = useState(false)
-  const [showHelp, setShowHelp] = useState(false)
-  const [showMore, setShowMore] = useState(false)
   const [notificationsOpen, setNotificationsOpen] = useState(false)
   const [systemPanel, setSystemPanel] = useState<SystemPanel>(null)
   const [tool, setTool] = useState<'pan' | 'lasso'>('pan')
@@ -91,6 +86,30 @@ function App() {
     setNotificationsOpen(false)
     setSystemPanel(null)
   }, [])
+
+  const arrangeAllWindows = useCallback(() => {
+    const canvas = viewport.current
+    if (!canvas) return
+    const origin = { x: canvas.scrollLeft, y: canvas.scrollTop }
+    canvas.scrollTo({ left: origin.x, top: origin.y, behavior: 'instant' })
+    const pointerId = gesture.current?.pointerId
+    gesture.current = null
+    if (
+      pointerId !== undefined &&
+      captureTarget.current?.hasPointerCapture(pointerId)
+    )
+      captureTarget.current.releasePointerCapture(pointerId)
+    captureTarget.current = null
+    setDragging(false)
+    setSpaceHeld(false)
+    setSelection(null)
+    setSelectedIds([])
+    setTool('pan')
+    setShowMap(false)
+    setLauncher(null)
+    closeTopPanels()
+    setWorkspace((current) => arrangeWindows(current, origin))
+  }, [closeTopPanels])
 
   useLayoutEffect(() => {
     viewport.current?.scrollTo(home.x, home.y)
@@ -121,15 +140,11 @@ function App() {
         if (launcher === 'apps')
           launcherTrigger.current?.focus({ preventScroll: true })
         setShowMap(false)
-        setShowHelp(false)
-        setShowMore(false)
         closeTopPanels()
         return
       }
       if (event.key === 'Escape') {
-        setShowHelp(false)
         setShowMap(false)
-        setShowMore(false)
         setLauncher(null)
         closeTopPanels()
         setTool('pan')
@@ -147,38 +162,34 @@ function App() {
       )
         return
       if (launcher || event.metaKey || event.ctrlKey || event.altKey) return
+      if (event.key.toLowerCase() === 'a') {
+        event.preventDefault()
+        if (!event.repeat) arrangeAllWindows()
+        return
+      }
       if (event.key.toLowerCase() === 'h') {
         closeTopPanels()
         setTool('pan')
         setSelectedIds([])
-        setShowMore(false)
       }
       if (event.key.toLowerCase() === 'l') {
         closeTopPanels()
         setTool('lasso')
         setShowMap(false)
-        setShowHelp(false)
-        setShowMore(false)
       }
       if (event.key.toLowerCase() === 'm') {
         closeTopPanels()
         setShowMap((current) => !current)
-        setShowHelp(false)
-        setShowMore(false)
       }
       if (event.key.toLowerCase() === 'g') {
         closeTopPanels()
         setLauncher('gestures')
         setShowMap(false)
-        setShowHelp(false)
-        setShowMore(false)
       }
       if (event.key.toLowerCase() === 'n') {
         setNotificationsOpen((current) => !current)
         setSystemPanel(null)
         setShowMap(false)
-        setShowHelp(false)
-        setShowMore(false)
         setSpaceHeld(false)
       }
       if (event.code === 'Space') {
@@ -211,7 +222,7 @@ function App() {
       window.removeEventListener('keyup', keyup)
       window.removeEventListener('blur', release)
     }
-  }, [home.x, home.y, launcher, closeTopPanels])
+  }, [home.x, home.y, launcher, closeTopPanels, arrangeAllWindows])
 
   useEffect(() => {
     if (!launcher) return
@@ -444,8 +455,6 @@ function App() {
     closeTopPanels()
     setLauncher((current) => (current === mode ? null : mode))
     setShowMap(false)
-    setShowHelp(false)
-    setShowMore(false)
     setSpaceHeld(false)
   }
 
@@ -465,8 +474,6 @@ function App() {
     closeTopPanels()
     setLauncher(null)
     setShowMap(false)
-    setShowHelp(false)
-    setShowMore(false)
     setTool('pan')
     setSelectedIds([])
     const item = workspace.windows.find(
@@ -499,17 +506,6 @@ function App() {
   function goHome() {
     viewport.current?.scrollTo(home.x, home.y)
   }
-  function reset() {
-    closeTopPanels()
-    setWorkspace((current) => ({ ...createWorkspace(), note: current.note }))
-    setActiveId('welcome')
-    setShowMap(false)
-    setShowMore(false)
-    setLauncher(null)
-    setSelectedIds([])
-    setTool('pan')
-    goHome()
-  }
 
   return (
     <main className={styles.desktop}>
@@ -521,23 +517,17 @@ function App() {
             setNotificationsOpen(false)
             setLauncher(null)
             setShowMap(false)
-            setShowHelp(false)
-            setShowMore(false)
           }
         }}
       />
       <NotificationInbox
         open={notificationsOpen}
-        previewVisible={
-          !systemPanel && !launcher && !showMap && !showHelp && !showMore
-        }
+        previewVisible={!systemPanel && !launcher && !showMap}
         onToggle={() => {
           setNotificationsOpen(!notificationsOpen)
           setSystemPanel(null)
           setLauncher(null)
           setShowMap(false)
-          setShowHelp(false)
-          setShowMore(false)
           setSpaceHeld(false)
         }}
         onClose={() => setNotificationsOpen(false)}
@@ -731,50 +721,22 @@ function App() {
       <div className={styles.docks}>
         <CanvasTools
           mode={tool}
-          moreOpen={showMore}
-          onToggleMore={() => {
-            closeTopPanels()
-            setShowMore(!showMore)
-            setShowMap(false)
-            setShowHelp(false)
-            setLauncher(null)
-          }}
-          onCloseMore={() => setShowMore(false)}
-          showHint={
-            !showMap &&
-            !showHelp &&
-            !launcher &&
-            !notificationsOpen &&
-            !systemPanel
-          }
+          showHint={!showMap && !launcher && !notificationsOpen && !systemPanel}
           onModeChange={(mode) => {
             closeTopPanels()
             setTool(mode)
             if (mode === 'pan') setSelectedIds([])
             setShowMap(false)
-            setShowHelp(false)
             setLauncher(null)
-            setShowMore(false)
           }}
           mapOpen={showMap}
           onToggleMap={() => {
             closeTopPanels()
             setShowMap(!showMap)
-            setShowHelp(false)
             setLauncher(null)
-            setShowMore(false)
           }}
-          onNewWindow={addWindow}
-          onHome={goHome}
-          onReset={reset}
+          onArrange={arrangeAllWindows}
           windowCount={workspace.windows.length}
-          onHelp={() => {
-            closeTopPanels()
-            setShowHelp(!showHelp)
-            setShowMap(false)
-            setLauncher(null)
-            setShowMore(false)
-          }}
           selectedCount={selectedIds.length}
         />
         <nav
@@ -811,46 +773,6 @@ function App() {
           onClose={closeLauncher}
           onLaunch={launchApp}
         />
-      )}
-      {showHelp && (
-        <aside className={styles.help}>
-          <div className={styles.panelHeading}>
-            <h2>Around your space</h2>
-            <button aria-label="Close help" onClick={() => setShowHelp(false)}>
-              <X size={15} />
-            </button>
-          </div>
-          <p>
-            <Hand size={17} />
-            <span>
-              <strong>Wander</strong>Drag the background or scroll in any
-              direction.
-            </span>
-          </p>
-          <p>
-            <MousePointer2 size={17} />
-            <span>
-              <strong>Move a window</strong>Grab its title bar. Drag to the
-              screen’s edge to keep going.
-            </span>
-          </p>
-          <p>
-            <Expand size={17} />
-            <span>
-              <strong>Make room</strong>Drag any edge or corner to resize.
-            </span>
-          </p>
-          <p>
-            <MoveUpRight size={17} />
-            <span>
-              <strong>Pan from anywhere</strong>Hold Space and drag, or use the
-              middle mouse button.
-            </span>
-          </p>
-          <div className={styles.helpFoot}>
-            <kbd>Home</kbd> Back to where you started
-          </div>
-        </aside>
       )}
       {showMap && (
         <aside className={styles.mapPanel}>
