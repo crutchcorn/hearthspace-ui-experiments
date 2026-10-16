@@ -36,42 +36,33 @@ export default function WindowContent({
   if (item.kind === 'welcome') {
     return (
       <div className={styles.overview}>
-        <header className={styles.fieldHeader}>
-          <h2>Field notes</h2>
-          <span>/ 01</span>
+        <header className={styles.spaceHeader}>
+          <span className={styles.eyebrow}>Workspace</span>
+          <h2>Your space</h2>
         </header>
-        <div className={styles.fieldSurvey}>
-          <div className={styles.windowCount}>
-            <strong>{String(workspace.windows.length).padStart(2, '0')}</strong>
-            <span>
-              Open
-              <br />
-              windows
-            </span>
+        <div className={styles.spaceSummary}>
+          <div className={styles.spaceOrbit}>
+            <span className={styles.orbitTrack} aria-hidden="true" />
+            <span className={styles.orbitTrack} aria-hidden="true" />
+            <span className={styles.orbitLight} aria-hidden="true" />
+            <strong>{workspace.windows.length}</strong>
+            <span className={styles.orbitCaption}>open windows</span>
           </div>
-          <div className={styles.blueprint} aria-hidden="true">
-            <span className={styles.blueprintAxis} />
-            <span className={styles.blueprintWindow} />
-            <span className={styles.blueprintWindow} />
-            <span className={styles.blueprintWindow} />
-            <span className={styles.blueprintOrigin}>0, 0</span>
-            <span className={styles.blueprintScale}>X + Y</span>
-          </div>
+          <dl className={styles.stats}>
+            <div>
+              <dt>Canvas</dt>
+              <dd>Continuous</dd>
+            </div>
+            <div>
+              <dt>Dimensions</dt>
+              <dd>
+                {Math.round(workspace.width).toLocaleString()} ×{' '}
+                {Math.round(workspace.height).toLocaleString()}
+                <span> px</span>
+              </dd>
+            </div>
+          </dl>
         </div>
-        <dl className={styles.stats}>
-          <div>
-            <dt>Surface</dt>
-            <dd>Continuous</dd>
-          </div>
-          <div>
-            <dt>Canvas dimensions</dt>
-            <dd>
-              {Math.round(workspace.width).toLocaleString()} ×{' '}
-              {Math.round(workspace.height).toLocaleString()}
-              <span> px</span>
-            </dd>
-          </div>
-        </dl>
       </div>
     )
   }
@@ -84,10 +75,9 @@ export default function WindowContent({
       <div className={styles.notes}>
         <header className={styles.documentHeader}>
           <div>
-            <span className={styles.eyebrow}>Local document / 01</span>
+            <span className={styles.eyebrow}>Untitled.txt</span>
             <h2>Scratchpad</h2>
           </div>
-          <span>.TXT</span>
         </header>
         <textarea
           aria-label="Note content"
@@ -108,46 +98,25 @@ export default function WindowContent({
   if (item.appId === 'files' || !item.appId) {
     return (
       <div className={styles.files}>
-        <aside className={styles.places} aria-label="Preview file locations">
-          <span className={styles.eyebrow}>Places</span>
-          <span className={styles.currentPlace}>Workspace</span>
-          <span>Recent</span>
-          <span>Documents</span>
-          <span>Downloads</span>
-          <small>
-            LOCAL
-            <br />
-            01 volume
-          </small>
-        </aside>
-        <div className={styles.fileListing}>
-          <div className={styles.breadcrumb}>
-            <span className={styles.eyebrow}>Workspace / Local</span>
+        <header className={styles.fileHeader}>
+          <div>
+            <span className={styles.eyebrow}>Workspace</span>
             <h2>Files</h2>
           </div>
-          <table className={styles.fileTable}>
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Kind</th>
-              </tr>
-            </thead>
-            <tbody>
-              {files.map(({ name, kind, icon: Icon }) => (
-                <tr key={name}>
-                  <td>
-                    <span className={styles.fileName}>
-                      <Icon size={15} strokeWidth={1.6} aria-hidden="true" />
-                      {name}
-                    </span>
-                  </td>
-                  <td>{kind}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          <footer className={styles.footer}>4 items · Preview</footer>
+          <span className={styles.fileCount}>Preview</span>
+        </header>
+        <div className={styles.fileGrid}>
+          {files.map(({ name, kind, icon: Icon }) => (
+            <div key={name} className={styles.fileTile}>
+              <Icon size={23} strokeWidth={1.4} aria-hidden="true" />
+              <div>
+                <strong>{name}</strong>
+                <span>{kind}</span>
+              </div>
+            </div>
+          ))}
         </div>
+        <footer className={styles.footer}>4 sample items</footer>
       </div>
     )
   }
@@ -155,9 +124,7 @@ export default function WindowContent({
   if (item.appId === 'terminal') {
     return (
       <div className={styles.terminal}>
-        <div className={styles.terminalSession}>
-          TERMINAL / LOCAL SESSION 01
-        </div>
+        <div className={styles.terminalSession}>Local terminal</div>
         <div className={styles.console}>
           <p>
             <span>workspace ~</span> $ pwd
@@ -189,11 +156,10 @@ export default function WindowContent({
           <span className={styles.previewLabel}>Preview</span>
         </div>
         <div className={styles.bookmarks}>
-          <span className={styles.eyebrow}>Browser / Index</span>
-          <h2>Elsewhere.</h2>
-          {bookmarks.map((bookmark, index) => (
+          <span className={styles.eyebrow}>Browser</span>
+          <h2>Bookmarks</h2>
+          {bookmarks.map((bookmark) => (
             <div key={bookmark.name} className={styles.bookmark}>
-              <span className={styles.bookmarkIndex}>0{index + 1}</span>
               <div>
                 <strong>{bookmark.name}</strong>
                 <span>{bookmark.detail}</span>

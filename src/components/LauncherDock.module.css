@@ -4,10 +4,7 @@
   height: 60px;
   flex-shrink: 0;
   align-items: stretch;
-  border: 1px solid var(--chrome-text);
-  border-radius: 2px;
-  background: var(--chrome);
-  box-shadow: 5px 5px 0 #151b1859;
+  gap: 12px;
   color: var(--chrome-text);
   user-select: none;
 }
@@ -15,6 +12,8 @@
 .appStrip {
   display: flex;
   max-width: min(560px, calc(100vw - 380px));
+  align-items: stretch;
+  gap: 8px;
   overflow-x: auto;
   overscroll-behavior-inline: contain;
   scrollbar-width: none;
@@ -27,113 +26,129 @@
 .appButton {
   position: relative;
   display: flex;
-  width: 112px;
-  min-height: 48px;
+  width: 66px;
+  min-height: 60px;
   flex-shrink: 0;
+  flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
-  gap: 8px;
-  padding: 8px 9px;
-  border: 0;
-  border-right: 1px solid var(--chrome-text);
-  border-radius: 0;
-  background: transparent;
+  justify-content: center;
+  gap: 4px;
+  padding: 5px 4px 9px;
+  border: 1px solid var(--chrome-border);
+  border-radius: 12px;
+  background: var(--chrome);
+  box-shadow: inset 0 1px 0 #fffaf0;
+  backdrop-filter: var(--glass-blur);
   color: var(--chrome-text);
   touch-action: manipulation;
-}
-
-.appButton:last-child {
-  border-right: 0;
+  transition:
+    background 150ms ease,
+    border-color 150ms ease;
 }
 
 .appButton:hover {
-  background: var(--chrome-hover);
+  background: var(--chrome-raised);
 }
 
 .appButton[aria-expanded='true'] {
-  background: var(--accent);
-  color: var(--accent-ink);
+  border-color: #e9845270;
+  background: #fff8ede6;
 }
 
 .appButton:focus-visible {
-  outline-offset: -4px;
+  outline-offset: -3px;
 }
 
 .appIcon {
   display: grid;
-  width: 20px;
+  width: 24px;
   height: 24px;
-  flex-shrink: 0;
   place-items: center;
 }
 
+.appButton[aria-expanded='true'] .appIcon,
+.appButton[data-active='true'] .appIcon {
+  color: var(--accent);
+}
+
 .appName {
+  width: 100%;
   overflow: hidden;
-  padding-bottom: 1px;
-  font-size: 11px;
-  font-weight: 600;
+  font-size: 9px;
+  font-weight: 500;
+  text-align: center;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .count {
   position: absolute;
-  top: 4px;
+  top: 5px;
   right: 5px;
+  display: grid;
+  min-width: 13px;
+  height: 13px;
+  padding-inline: 2px;
+  place-items: center;
+  border-radius: 5px;
+  background: #8c6b5520;
   color: var(--chrome-muted);
   font-family: var(--mono);
-  font-size: 9px;
+  font-size: 8px;
   line-height: 1;
 }
 
 .runningMark {
   position: absolute;
-  right: 9px;
-  bottom: 7px;
-  left: 9px;
-  height: 1px;
+  bottom: 4px;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
   background: var(--chrome-muted);
 }
 
 .appButton[data-active='true'] .runningMark {
-  height: 4px;
-  background: var(--accent-ink);
+  width: 12px;
+  background: var(--accent);
 }
 
 .appButton[data-active='true'] .count {
-  color: var(--chrome-text);
-  font-weight: 700;
+  background: var(--accent-soft);
+  color: var(--accent);
 }
 
 .launcher {
   display: flex;
-  width: 76px;
-  min-width: 76px;
-  min-height: 48px;
+  width: 66px;
+  min-width: 66px;
+  min-height: 60px;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  padding: 4px;
-  border: 0;
-  border-radius: 0;
-  background: var(--accent);
+  gap: 5px;
+  padding: 5px;
+  border: 1px solid #ffd2a9;
+  border-radius: 19px;
+  background: linear-gradient(145deg, #f89454, var(--accent) 72%);
+  box-shadow:
+    0 8px 24px #d66b3447,
+    inset 0 1px 0 #ffe6c78c;
   color: var(--accent-ink);
-  font-size: 12px;
-  font-weight: 700;
+  font-size: 11px;
+  font-weight: 600;
   touch-action: manipulation;
+  transition: box-shadow 160ms ease;
 }
 
 .launcher:hover,
 .launcher[aria-expanded='true'] {
-  background: var(--chrome-text);
-  color: var(--accent);
+  box-shadow:
+    0 8px 30px #d66b3470,
+    inset 0 1px 0 #fff1d7;
 }
 
 .divider {
-  width: 1px;
-  flex-shrink: 0;
-  background: var(--chrome-text);
+  display: none;
 }
 
 .windowPopover {
@@ -144,24 +159,26 @@
   max-width: calc(100vw - 24px);
   max-height: min(440px, calc(100dvh - 280px));
   overflow-y: auto;
-  border: 1px solid var(--chrome-text);
-  border-radius: 2px;
+  border: 1px solid var(--chrome-border);
+  border-radius: 18px;
   background: var(--chrome);
-  box-shadow: 6px 6px 0 #151b1866;
+  box-shadow:
+    var(--shadow-panel),
+    inset 0 1px 0 #fffaf0;
+  backdrop-filter: var(--glass-blur);
   color: var(--chrome-text);
-  scrollbar-color: var(--chrome-muted) transparent;
+  scrollbar-color: #bda89b transparent;
   scrollbar-width: thin;
-  animation: open-index 140ms ease-out;
+  animation: surface-in 180ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .popoverHeading {
   display: flex;
-  min-height: 104px;
+  min-height: 94px;
   align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
-  padding: 16px;
-  border-bottom: 1px solid var(--chrome-text);
+  padding: 18px 14px 16px 20px;
 }
 
 .popoverHeading > div {
@@ -171,24 +188,21 @@
 }
 
 .popoverHeading p {
-  margin: 0 0 5px;
-  font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: 1px;
-  text-transform: uppercase;
+  margin: 0 0 2px;
+  color: var(--chrome-muted);
+  font-size: 10px;
 }
 
 .popoverHeading h2 {
   margin: 0;
-  font-size: 30px;
+  font-size: 25px;
   font-weight: 500;
-  letter-spacing: -1px;
+  letter-spacing: -0.7px;
   line-height: 1;
 }
 
 .popoverHeading > div > span {
   color: var(--chrome-muted);
-  font-family: var(--mono);
   font-size: 10px;
 }
 
@@ -199,70 +213,65 @@
   flex-shrink: 0;
   padding: 0;
   place-items: center;
-  border: 1px solid var(--chrome-text);
-  border-radius: 0;
+  border: 0;
+  border-radius: 10px;
   background: transparent;
-  color: var(--chrome-text);
+  color: var(--chrome-muted);
 }
 
 .closeButton:hover {
-  background: var(--chrome-text);
-  color: var(--chrome);
+  background: var(--chrome-hover);
+  color: var(--chrome-text);
 }
 
 .windowList {
   display: flex;
   flex-direction: column;
-  padding-inline: 16px;
+  gap: 6px;
+  padding: 0 12px 12px;
 }
 
 .windowButton {
   position: relative;
   display: flex;
-  min-height: 84px;
+  min-height: 76px;
   align-items: center;
-  gap: 13px;
-  padding: 16px 0;
-  border: 0;
-  border-bottom: 1px solid var(--chrome-text);
-  border-radius: 0;
+  gap: 14px;
+  padding: 10px;
+  border: 1px solid transparent;
+  border-radius: 11px;
   background: transparent;
   color: var(--chrome-text);
   text-align: left;
   touch-action: manipulation;
 }
 
-.windowButton:last-child {
-  border-bottom: 0;
-}
-
 .windowButton:hover,
 .windowButton[data-active='true'] {
-  background: var(--accent);
-  color: var(--accent-ink);
-}
-
-.windowNumber {
-  align-self: flex-start;
-  padding-top: 3px;
-  font-family: var(--mono);
-  font-size: 11px;
+  border-color: #ffffffa6;
+  background: #fffaf06b;
 }
 
 .windowPreview {
   display: block;
-  width: 38px;
-  height: 31px;
+  width: 64px;
+  height: 44px;
   flex-shrink: 0;
-  border: 1px solid currentcolor;
-  background: var(--chrome-raised);
+  overflow: hidden;
+  border: 1px solid #ffffffc2;
+  border-radius: 6px;
+  background: #f9ede0b3;
+  box-shadow: 0 3px 8px #73523c14;
 }
 
 .windowPreview > span {
   display: block;
-  height: 6px;
-  border-bottom: 1px solid currentcolor;
-  background: var(--chrome-hover);
+  height: 9px;
+  background: #a78d7a26;
+}
+
+.windowButton[data-active='true'] .windowPreview > span {
+  background: #e9845280;
 }
 
 .windowCopy {
@@ -270,75 +279,56 @@
   min-width: 0;
   flex: 1;
   flex-direction: column;
-  gap: 8px;
+  gap: 7px;
 }
 
 .windowCopy strong {
   overflow: hidden;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 500;
-  letter-spacing: -0.3px;
+  letter-spacing: -0.2px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .windowCopy > span {
   color: var(--chrome-muted);
-  font-family: var(--mono);
-  font-size: 9px;
-}
-
-.activeLabel {
-  position: absolute;
-  right: 0;
-  bottom: 7px;
-  font-family: var(--mono);
-  font-size: 8px;
-  text-transform: uppercase;
+  font-size: 10px;
 }
 
 .popoverFooter {
-  padding: 0 16px;
-  border-top: 1px solid var(--chrome-text);
+  padding: 5px 16px;
+  border-top: 1px solid #a78d7a26;
 }
 
 .newWindow {
   display: flex;
   width: 100%;
-  min-height: 48px;
+  min-height: 44px;
   align-items: center;
   gap: 10px;
-  padding: 0;
+  padding: 0 4px;
   border: 0;
-  border-radius: 0;
+  border-radius: 8px;
   background: transparent;
-  color: var(--chrome-text);
+  color: var(--accent);
   font-size: 12px;
   text-align: left;
   touch-action: manipulation;
 }
 
 .newWindow:hover {
-  background: var(--accent);
-  color: var(--accent-ink);
+  background: var(--chrome-hover);
 }
 
 @media (width <= 760px) {
   .appStrip {
     position: absolute;
-    right: -1px;
+    right: 0;
     bottom: calc(100% + 28px);
     width: max-content;
     max-width: calc(100vw - 24px);
     height: 60px;
-    border: 1px solid var(--chrome-text);
-    border-radius: 2px;
-    background: var(--chrome);
-    box-shadow: 5px 5px 0 #151b1859;
-  }
-
-  .divider {
-    display: none;
   }
 
   .windowPopover {
@@ -347,15 +337,20 @@
   }
 }
 
-@keyframes open-index {
+@keyframes surface-in {
   from {
     opacity: 0;
-    transform: translateY(6px);
+    transform: translateY(8px) scale(0.985);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .windowPopover {
     animation: none;
+  }
+
+  .appButton,
+  .launcher {
+    transition: none;
   }
 }

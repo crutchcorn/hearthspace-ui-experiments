@@ -84,6 +84,10 @@ function App() {
   const captureTarget = useRef<Element | null>(null)
   const latestPointer = useRef({ x: 0, y: 0 })
   const home = workspace.home
+  const windowClearance =
+    view.width <= 760
+      ? { side: 12, top: 158, bottom: 176 }
+      : { side: 24, top: 176, bottom: 160 }
   const focusedWindowId = workspace.windows.some((item) => item.id === activeId)
     ? activeId
     : (workspace.windows.at(-1)?.id ?? null)
@@ -405,11 +409,7 @@ function App() {
 
   function maximize(item: DesktopWindow) {
     const canvas = viewport.current!
-    const compact = view.width <= 760
-    const left = compact ? 12 : 276
-    const top = compact ? 158 : 176
-    const right = compact ? 12 : 24
-    const bottom = compact ? 176 : 104
+    const { side, top, bottom } = windowClearance
     setWorkspace((current) => ({
       ...current,
       windows: current.windows.map((entry) => {
@@ -420,7 +420,7 @@ function App() {
         }
         const width = Math.min(
           current.width,
-          Math.max(MIN_WIDTH, view.width - left - right),
+          Math.max(MIN_WIDTH, view.width - side * 2),
         )
         const height = Math.min(
           current.height,
@@ -434,7 +434,7 @@ function App() {
             width: entry.width,
             height: entry.height,
           },
-          x: clamp(canvas.scrollLeft + left, 0, current.width - width),
+          x: clamp(canvas.scrollLeft + side, 0, current.width - width),
           y: clamp(canvas.scrollTop + top, 0, current.height - height),
           width,
           height,
@@ -502,19 +502,12 @@ function App() {
   function revealWindow(id: string) {
     const item = workspace.windows.find((entry) => entry.id === id)
     if (!item) return
-    const compact = view.width <= 760
     const top = item.restore
-      ? compact
-        ? 158
-        : 176
-      : Math.max(compact ? 158 : 176, (view.height - item.height) / 2)
-    let left = item.restore
-      ? compact
-        ? 12
-        : 276
-      : Math.max(12, (view.width - item.width) / 2)
-    if (!compact && left < 252 && top + item.height > view.height - 204)
-      left = 276
+      ? windowClearance.top
+      : Math.max(windowClearance.top, (view.height - item.height) / 2)
+    const left = item.restore
+      ? windowClearance.side
+      : Math.max(windowClearance.side, (view.width - item.width) / 2)
     closePopovers()
     setLauncher(null)
     setShowMap(false)
@@ -770,10 +763,8 @@ function App() {
       {showMap && (
         <aside className={styles.mapPanel}>
           <div className={styles.panelHeading}>
-            <h2>The whole field</h2>
-            <span>
-              {String(workspace.windows.length).padStart(2, '0')} / WINDOWS
-            </span>
+            <h2>Overview</h2>
+            <span>{workspace.windows.length} open windows</span>
           </div>
           <Minimap
             workspace={workspace}
@@ -781,7 +772,7 @@ function App() {
             onNavigate={(x, y) => viewport.current?.scrollTo(x, y)}
           />
           <div className={styles.mapFooter}>
-            <span>DRAG TO NAVIGATE</span>
+            <span>Drag to explore</span>
             <button onClick={goHome}>
               <RotateCcw size={12} /> Home
             </button>

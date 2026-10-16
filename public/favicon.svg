@@ -1,6 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none">
-  <rect width="48" height="48" rx="2" fill="#38443c" />
-  <path d="M10 10h28v28H10z" fill="#f2f1e8" />
-  <path d="M10 10h8v28h-8z" fill="#d5f267" />
-  <path d="M23 18h10M23 24h10M23 30h6" stroke="#38443c" stroke-width="2" />
+  <defs>
+    <linearGradient id="ember" x1="24" y1="8" x2="24" y2="40" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#f6a45b" />
+      <stop offset="1" stop-color="#df5425" />
+    </linearGradient>
+  </defs>
+  <rect x="1" y="1" width="46" height="46" rx="13" fill="#fff3e8" stroke="#ffffff" />
+  <path d="M26 8c2 9 11 12 11 21a13 13 0 0 1-26 0c0-5 3-10 7-13-1 5 0 7 2 8 5-4 7-9 6-16Z" fill="url(#ember)" />
+  <path d="M25 25c0 4 5 6 5 9a6 6 0 0 1-12 0c0-3 3-6 7-9Z" fill="#fff3db" />
 </svg>

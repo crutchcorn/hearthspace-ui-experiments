@@ -2,17 +2,32 @@
   display: grid;
   min-width: 0;
   grid-template-columns: minmax(0, 1fr) 174px;
-  gap: 12px 16px;
+  gap: 12px 18px;
   color: var(--chrome-text);
 }
 
 .heading {
   display: flex;
   min-height: 60px;
-  align-items: flex-start;
+  grid-column: 1 / -1;
+  align-items: center;
   justify-content: space-between;
   gap: 14px;
-  grid-column: 1 / -1;
+}
+
+.heading h2 {
+  margin: 0 0 7px;
+  font-size: 21px;
+  font-weight: 500;
+  letter-spacing: -0.5px;
+  line-height: 1.1;
+}
+
+.heading p {
+  margin: 0;
+  color: var(--chrome-muted);
+  font-size: 11px;
+  line-height: 1.5;
 }
 
 .controls {
@@ -23,21 +38,6 @@
   gap: 12px;
 }
 
-.heading h2 {
-  margin: 0 0 7px;
-  font-size: 28px;
-  font-weight: 500;
-  letter-spacing: -0.8px;
-  line-height: 1;
-}
-
-.heading p {
-  margin: 0;
-  color: var(--chrome-muted);
-  font-size: 11px;
-  line-height: 1.5;
-}
-
 .editButton,
 .retryButton {
   display: inline-flex;
@@ -46,21 +46,18 @@
   flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  padding: 0 10px;
-  border: 1px solid var(--chrome-text);
-  border-radius: 0;
-  background: transparent;
+  gap: 7px;
+  padding: 0 12px;
+  border: 1px solid var(--chrome-border);
+  border-radius: 10px;
+  background: #fffaf057;
   color: var(--chrome-text);
-  font-family: var(--mono);
   font-size: 11px;
   white-space: nowrap;
 }
 
-.editButton:hover,
-.retryButton:hover {
-  background: var(--chrome-text);
-  color: var(--chrome);
+.editButton:hover {
+  background: var(--chrome-raised);
 }
 
 .shortcuts,
@@ -74,19 +71,16 @@
 .sectionLabel,
 .assignment label {
   color: var(--chrome-muted);
-  font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
+  font-size: 10px;
 }
 
 .shortcutList {
   display: flex;
   flex-direction: column;
+  gap: 4px;
   overflow: auto hidden;
-  border: 1px solid var(--chrome-text);
   scrollbar-width: thin;
-  scrollbar-color: var(--chrome-muted) transparent;
+  scrollbar-color: #bda89b transparent;
 }
 
 .shortcut {
@@ -95,18 +89,13 @@
   flex: 0 0 auto;
   align-items: center;
   justify-content: flex-start;
-  gap: 9px;
-  padding: 0 13px;
-  border: 0;
-  border-bottom: 1px solid var(--chrome-text);
-  border-radius: 0;
+  gap: 10px;
+  padding: 0 12px;
+  border: 1px solid transparent;
+  border-radius: 9px;
   background: transparent;
-  color: var(--chrome-text);
-  font-size: 11px;
-}
-
-.shortcut:last-child {
-  border-bottom: 0;
+  color: var(--chrome-muted);
+  font-size: 12px;
 }
 
 .shortcut svg {
@@ -114,26 +103,29 @@
   height: 24px;
   fill: none;
   stroke: currentcolor;
-  stroke-linecap: square;
+  stroke-linecap: round;
   stroke-linejoin: round;
   stroke-width: 1.7;
 }
 
 .shortcut:hover {
   background: var(--chrome-hover);
+  color: var(--chrome-text);
 }
 
 .shortcut[aria-pressed='true'] {
-  background: var(--chrome-text);
+  border-color: #ffffffc2;
+  background: #fffaf08a;
   color: var(--accent);
+  box-shadow: 0 3px 9px #73523c0a;
 }
 
 .assignment select {
   width: 100%;
   min-height: 44px;
-  padding: 0 12px;
-  border: 1px solid var(--chrome-text);
-  border-radius: 0;
+  padding: 0 10px;
+  border: 1px solid var(--chrome-border);
+  border-radius: 9px;
   background: var(--chrome-raised);
   color: var(--chrome-text);
   font: inherit;
@@ -144,24 +136,19 @@
 .pad {
   position: relative;
   height: 236px;
-  flex-shrink: 0;
   overflow: hidden;
-  border: 1px solid var(--accent-ink);
-  border-radius: 0;
-  background: var(--accent);
-  color: var(--accent-ink);
-}
-
-.pad::after {
-  position: absolute;
-  inset: 38px 12px 12px;
-  border: 1px solid #252a2630;
-  content: '';
-  pointer-events: none;
+  border: 1px solid #ffffff5c;
+  border-radius: 14px;
+  background:
+    radial-gradient(ellipse at 24% 100%, #ae61372b, transparent 70%), #302622ed;
+  box-shadow:
+    inset 0 1px 0 #d3ab8933,
+    0 8px 20px #51372517;
+  color: #f1d9c2;
 }
 
 .pad[data-drawing='true'] {
-  box-shadow: inset 0 0 0 2px var(--accent-ink);
+  border-color: #e6a772b3;
 }
 
 .padMeta {
@@ -171,15 +158,13 @@
   right: 0;
   left: 0;
   display: flex;
-  height: 28px;
+  height: 34px;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding-inline: 10px;
-  border-bottom: 1px solid #252a2640;
-  font-family: var(--mono);
+  padding-inline: 14px;
+  color: #d7baa194;
   font-size: 9px;
-  text-transform: uppercase;
   pointer-events: none;
 }
 
@@ -196,7 +181,7 @@
 
 .stroke {
   fill: none;
-  stroke: var(--accent-ink);
+  stroke: #ffc184;
   stroke-linecap: round;
   stroke-linejoin: round;
   stroke-width: 2.5;
@@ -204,48 +189,58 @@
 
 .padPrompt {
   position: absolute;
-  inset: 28px 0 0;
+  inset: 24px 0 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 12px;
   padding: 22px;
   text-align: center;
   pointer-events: none;
 }
 
+.padPrompt > svg {
+  color: #e9ad77;
+}
+
 .padPrompt strong {
-  font-size: 21px;
-  font-weight: 500;
-  letter-spacing: -0.6px;
+  font-size: 20px;
+  font-weight: 400;
+  letter-spacing: -0.4px;
 }
 
 .padPrompt span {
-  font-family: var(--mono);
-  font-size: 9px;
+  max-width: 220px;
+  color: #d7baa1ad;
+  font-size: 10px;
   line-height: 1.5;
 }
 
 .padLabel {
   position: absolute;
-  bottom: 18px;
-  left: 18px;
+  bottom: 16px;
+  left: 16px;
   display: flex;
   align-items: center;
   gap: 5px;
-  font-family: var(--mono);
+  color: #e9c39d;
   font-size: 9px;
   pointer-events: none;
 }
 
 .retryButton {
   position: absolute;
-  top: 39px;
-  right: 12px;
+  top: 34px;
+  right: 10px;
   min-height: 44px;
-  border: 0;
-  background: var(--accent);
+  border-color: #b6957733;
+  background: #6c4a3224;
+  color: #f1d9c2;
+}
+
+.retryButton:hover {
+  background: #b6957726;
 }
 
 .footer {
@@ -264,7 +259,8 @@
   gap: 10px;
 }
 
-.appIcon {
+.appIcon,
+.target strong {
   display: none;
 }
 
@@ -276,15 +272,13 @@
 }
 
 .target strong {
-  display: none;
   font-size: 13px;
   font-weight: 500;
 }
 
 .target > div > span {
   color: var(--chrome-muted);
-  font-family: var(--mono);
-  font-size: 8px;
+  font-size: 9px;
   line-height: 1.5;
 }
 
@@ -296,29 +290,32 @@
   justify-content: center;
   gap: 8px;
   padding: 0 13px;
-  border: 1px solid var(--chrome-text);
-  border-radius: 0;
-  background: var(--chrome-text);
-  color: var(--accent);
+  border: 1px solid #ffd3ae;
+  border-radius: 10px;
+  background: var(--accent);
+  box-shadow:
+    0 4px 12px #bd602c21,
+    inset 0 1px 0 #ffe3c74d;
+  color: var(--accent-ink);
   font-size: 12px;
   font-weight: 500;
   white-space: nowrap;
 }
 
 .openButton:hover {
-  background: var(--accent);
-  color: var(--accent-ink);
+  background: var(--accent-hover);
 }
 
 .openButton:disabled {
-  border-color: var(--chrome-muted);
-  background: var(--chrome-hover);
+  border-color: #fff9;
+  background: #b6987d1a;
+  box-shadow: none;
   color: var(--chrome-muted);
 }
 
 .gesturePad button:focus-visible,
 .gesturePad select:focus-visible {
-  outline: 2px solid var(--accent-ink);
+  outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
 
@@ -334,7 +331,7 @@
   }
 
   .heading h2 {
-    font-size: 24px;
+    font-size: 20px;
   }
 
   .heading p {
@@ -342,8 +339,7 @@
   }
 
   .editButton {
-    padding-inline: 8px;
-    font-size: 10px;
+    padding-inline: 10px;
   }
 
   .pad {
@@ -354,21 +350,11 @@
     padding-inline: 12px;
   }
 
-  .padPrompt strong {
-    font-size: 19px;
-  }
-
   .shortcut {
     flex: 1 0 auto;
     justify-content: center;
     padding-inline: 10px;
-    border-right: 1px solid var(--chrome-text);
-    border-bottom: 0;
-    font-size: 10px;
-  }
-
-  .shortcut:last-child {
-    border-right: 0;
+    font-size: 11px;
   }
 
   .shortcutList {

@@ -5,20 +5,18 @@
   width: 100%;
   height: 168px;
   padding: 0;
-  border: 1px solid var(--chrome-border);
-  border-radius: 0;
-  background-color: #26352c;
+  border: 1px solid #ffffffb3;
+  border-radius: 10px;
+  background-color: #e8e5de;
   background-image:
-    linear-gradient(#e2e9d317 1px, transparent 1px),
-    linear-gradient(90deg, #e2e9d317 1px, transparent 1px),
-    linear-gradient(#e2e9d308 1px, transparent 1px),
-    linear-gradient(90deg, #e2e9d308 1px, transparent 1px);
+    radial-gradient(#8f83774a 0.65px, transparent 0.8px),
+    linear-gradient(#ffffff3d 1px, transparent 1px),
+    linear-gradient(90deg, #ffffff3d 1px, transparent 1px);
   background-size:
-    48px 48px,
-    48px 48px,
     12px 12px,
-    12px 12px;
-  box-shadow: inset 0 1px 8px #0003;
+    48px 48px,
+    48px 48px;
+  box-shadow: inset 0 1px 6px #5d4d3b0d;
   cursor: grab;
   touch-action: none;
   user-select: none;
@@ -35,17 +33,18 @@
 
 .window {
   position: absolute;
-  border: 1px solid #e1e5d6;
-  border-radius: 0;
-  background: #c7d0ba7a;
+  border: 1px solid #b7a89c;
+  border-radius: 2px;
+  background: #fffdf9b3;
+  box-shadow: 0 1px 2px #69584b14;
   pointer-events: none;
 }
 
 .viewport {
   position: absolute;
   border: 2px solid var(--accent);
-  border-radius: 0;
-  background: #d5f26726;
-  box-shadow: 0 0 0 1px #14221680;
+  border-radius: 3px;
+  background: #e9642a17;
+  box-shadow: 0 0 0 1px #ffffff80;
   pointer-events: none;
 }

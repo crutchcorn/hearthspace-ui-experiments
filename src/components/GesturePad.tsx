@@ -168,7 +168,7 @@ export default function GesturePad({ onLaunch }: GesturePadProps) {
     <section className={styles.gesturePad} aria-label="Gesture shortcuts">
       <div className={styles.heading}>
         <div>
-          <h2>Gesture pad</h2>
+          <h2>Gesture shortcuts</h2>
           <p>
             {editing
               ? 'Select an application and record one stroke.'
@@ -191,7 +191,7 @@ export default function GesturePad({ onLaunch }: GesturePadProps) {
 
       <div className={styles.pad} data-drawing={drawing}>
         <div className={styles.padMeta} aria-hidden="true">
-          <span>Drawing area</span>
+          <span>Draw here</span>
           <span>{selectedApp.name}</span>
         </div>
         <svg

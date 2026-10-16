@@ -35,10 +35,6 @@ export default function CanvasTools({
         </div>
       )}
       <div className={styles.dock} role="group" aria-label="Canvas tools">
-        <div className={styles.dockHeader}>
-          <span>Navigate</span>
-          <span>01 / XY</span>
-        </div>
         <div className={styles.toolGrid}>
           <button
             type="button"
@@ -61,7 +57,6 @@ export default function CanvasTools({
           >
             <LassoSelect size={18} aria-hidden="true" />
             <span>Select</span>
-            <kbd aria-hidden="true">L</kbd>
           </button>
           <button
             type="button"
@@ -72,7 +67,6 @@ export default function CanvasTools({
           >
             <Map size={18} aria-hidden="true" />
             <span>Map</span>
-            <kbd aria-hidden="true">M</kbd>
           </button>
           <button
             type="button"
@@ -83,7 +77,6 @@ export default function CanvasTools({
           >
             <LayoutGrid size={18} aria-hidden="true" />
             <span>Arrange</span>
-            <kbd aria-hidden="true">A</kbd>
           </button>
         </div>
       </div>

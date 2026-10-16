@@ -149,7 +149,7 @@ export default function SystemBar({
       {openPanel === 'wifi' && (
         <div className={`${styles.popover} ${styles.systemPopover}`}>
           <label className={styles.toggleRow}>
-            <strong>Network / Wi-Fi</strong>
+            <strong>Wi-Fi</strong>
             <input
               className={styles.toggle}
               type="checkbox"
@@ -175,7 +175,7 @@ export default function SystemBar({
       {openPanel === 'volume' && (
         <div className={`${styles.popover} ${styles.systemPopover}`}>
           <div className={styles.settingHeading}>
-            <label htmlFor="system-volume">Sound / Output</label>
+            <label htmlFor="system-volume">Sound</label>
             <span>
               {volume}
               <small>%</small>
@@ -201,7 +201,7 @@ export default function SystemBar({
       {openPanel === 'battery' && (
         <div className={`${styles.popover} ${styles.systemPopover}`}>
           <div className={styles.settingHeading}>
-            <strong>Power / Battery</strong>
+            <strong>Battery</strong>
             <span>
               87<small>%</small>
             </span>
@@ -217,19 +217,20 @@ export default function SystemBar({
       {openPanel === 'clock' && (
         <div className={`${styles.popover} ${styles.calendarPopover}`}>
           <div className={styles.calendarHeading}>
-            <span className={styles.calendarDay}>
-              {String(now.getDate()).padStart(2, '0')}
-            </span>
             <div>
-              <span>
-                {now.toLocaleDateString(undefined, { weekday: 'long' })}
-              </span>
               <strong>
                 {now.toLocaleDateString(undefined, {
                   month: 'long',
                   year: 'numeric',
                 })}
               </strong>
+              <span>
+                {now.toLocaleDateString(undefined, {
+                  weekday: 'long',
+                  month: 'long',
+                  day: 'numeric',
+                })}
+              </span>
             </div>
           </div>
           <div className={styles.calendar} aria-label="Current month">

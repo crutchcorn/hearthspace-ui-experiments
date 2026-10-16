@@ -1,21 +1,23 @@
 :root {
-  --chrome: #edece3;
-  --chrome-raised: #f7f6ef;
-  --chrome-hover: #dddeda;
-  --chrome-border: #bbbfb3;
-  --chrome-text: #252a26;
-  --chrome-muted: #60695f;
-  --accent: #d5f267;
-  --accent-hover: #e3ff80;
-  --accent-ink: #252a26;
-  --accent-soft: #eaf1d4;
-  --paper: #f2f1e8;
-  --ink: #252a26;
-  --muted: #697063;
-  --line: #d1d3c7;
-  --field: #38443c;
+  --chrome: #fff8f0ad;
+  --chrome-raised: #fffdf8e6;
+  --chrome-hover: #ffffffb3;
+  --chrome-border: #ffffffbc;
+  --chrome-text: #362a25;
+  --chrome-muted: #89776d;
+  --accent: #e9642a;
+  --accent-hover: #f37a3e;
+  --accent-ink: #fff8f0;
+  --accent-soft: #f9dfcd;
+  --paper: #fffbf5bd;
+  --ink: #362a25;
+  --muted: #88776c;
+  --line: #9c7d661f;
+  --field: #e8e2da;
+  --glass-blur: blur(24px) saturate(1.25);
+  --glass-edge: inset 0 1px 0 #fff, inset 0 -1px 0 #84674d0f;
   --mono: 'SFMono-Regular', consolas, 'Liberation Mono', monospace;
-  --shadow-panel: 6px 6px 0 #18251dc0, 0 12px 36px #101a1020;
+  --shadow-panel: 0 20px 60px #59351b1f, 0 3px 12px #59351b0d;
 
   font-family:
     'Helvetica Neue',

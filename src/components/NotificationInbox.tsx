@@ -170,14 +170,18 @@ export default function NotificationInbox({
           onToggle()
         }}
       >
-        <span className={styles.badge} data-unread={unreadCount > 0}>
-          {unreadCount > 99 ? '99+' : String(unreadCount).padStart(2, '0')}
-        </span>
+        <span className={styles.signal} aria-hidden="true" />
         <span className={styles.triggerLabel}>
           <span>Activity</span>
-          <span className={styles.triggerCaption}>Unread</span>
-          <ArrowUpRight size={18} aria-hidden="true" />
+          <span className={styles.triggerCaption}>
+            {unreadCount > 99 ? '99+' : unreadCount} unread
+          </span>
         </span>
+        <ArrowUpRight
+          className={styles.triggerArrow}
+          size={16}
+          aria-hidden="true"
+        />
       </button>
 
       {open && (
@@ -188,12 +192,11 @@ export default function NotificationInbox({
         >
           <header className={styles.heading}>
             <div>
-              <span className={styles.headingEyebrow}>Incoming / Feed</span>
               <h2 id="notification-heading">Activity</h2>
             </div>
             <span className={styles.headingCount}>
-              {String(unreadCount).padStart(2, '0')}
-              <small>Unread</small>
+              {unreadCount}
+              <small>unread</small>
             </span>
           </header>
           <div className={styles.feedToolbar}>
@@ -214,7 +217,7 @@ export default function NotificationInbox({
 
           <div className={styles.list}>
             {notifications.length ? (
-              notifications.map((item, index) => {
+              notifications.map((item) => {
                 const { name, Icon } = APPS[item.target]
                 return (
                   <article
@@ -224,7 +227,6 @@ export default function NotificationInbox({
                   >
                     <div className={styles.itemIcon}>
                       <Icon size={17} strokeWidth={1.6} />
-                      <span>{String(index + 1).padStart(2, '0')}</span>
                     </div>
                     <div className={styles.itemContent}>
                       <div className={styles.itemMeta}>

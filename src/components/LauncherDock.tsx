@@ -203,7 +203,7 @@ export default function LauncherDock({
         >
           <header className={styles.popoverHeading}>
             <div>
-              <p>Window index</p>
+              <p>Open windows</p>
               <h2 id={`${panelId}-heading`}>{selectedGroup.app.name}</h2>
               <span>
                 {selectedGroup.windows.length}{' '}
@@ -233,24 +233,16 @@ export default function LauncherDock({
                 data-active={item.id === activeWindowId}
                 onClick={() => onFocusWindow(item.id)}
               >
-                <span className={styles.windowNumber} aria-hidden="true">
-                  {String(index + 1).padStart(2, '0')}
+                <span className={styles.windowPreview} aria-hidden="true">
+                  <span />
                 </span>
                 <span className={styles.windowCopy}>
                   <strong>{item.title}</strong>
                   <span>
-                    {Math.round(item.width)} × {Math.round(item.height)} ·{' '}
+                    Window {index + 1} ·{' '}
                     {item.id === activeWindowId ? 'In focus' : 'On canvas'}
                   </span>
                 </span>
-                <span className={styles.windowPreview} aria-hidden="true">
-                  <span />
-                </span>
-                {item.id === activeWindowId && (
-                  <span className={styles.activeLabel} aria-hidden="true">
-                    Active
-                  </span>
-                )}
               </button>
             ))}
           </div>
