@@ -22,10 +22,19 @@ Open the local address printed in the terminal. The app fills the browser viewpo
 - **Move:** drag a window’s title bar. Hold it near a screen edge to keep traveling across the canvas.
 - **Resize:** drag any of a window’s four edges or four corners.
 - **Manage windows:** use the title-bar controls to maximize, restore, or close a window; choose **More → New window** to add another. **More** also contains navigation help and disabled placeholders for future canvas tools.
-- **Find your way:** choose **Map** or press M, then drag the map’s visible-area rectangle to pan continuously, or press elsewhere on the map and keep dragging to explore. Use the Home key, the map’s **Home** action, or **Return home** in the Personal space menu to return to the starting area.
-- **Start fresh:** choose **Reset layout** from the Personal space menu. It restores the starting windows while keeping your scratchpad text.
+- **Find your way:** choose **Map** or press M, then drag the map’s visible-area rectangle to pan continuously, or press elsewhere on the map and keep dragging to explore. Use the Home key, the map’s **Home** action, or **More → Return to starting area** to return to the starting area.
+- **Start fresh:** choose **More → Reset layout**. It restores the starting windows while keeping your scratchpad text.
 
-The canvas tools sit at the bottom left, with **Apps** and **Draw** in a separate launcher dock near the bottom center. On narrow screens, the two docks share a row. Visible labels and large targets keep the main tools usable with touch, a trackpad, or a mouse.
+Controls stay in the four corners, leaving the top edge and middle of the canvas open:
+
+| Corner       | Controls                                                             |
+| ------------ | -------------------------------------------------------------------- |
+| Top left     | Notifications.                                                       |
+| Top right    | A floating device-status pill with Wi-Fi, sound, battery, and clock. |
+| Bottom left  | Canvas tools: Pan, Select, Map, and More.                            |
+| Bottom right | Apps and Draw, with the launcher opening above them.                 |
+
+The docks keep their corners on narrow screens. Visible labels and large targets keep the main tools usable with touch, a trackpad, or a mouse. Escape closes open panels and clears the current selection.
 
 ## Try the launcher
 
@@ -34,6 +43,12 @@ Choose **Apps** or press Ctrl/⌘ K to browse an icon grid, switch to a list, or
 Choose **Draw** or press G to open the dedicated gesture pad. Select a shortcut and draw with touch, a stylus, or a pointer. To make your own, choose **Edit shortcuts**, select an app, draw one stroke, and save it. Saving replaces that app’s existing gesture. **Retry** clears the current drawing.
 
 Drawing records and previews the stroke; gesture recognition is not implemented. Use **Open [app]** to try the launch result. All launcher actions create labeled preview windows on the canvas, without opening applications in the host operating system.
+
+## Try notifications
+
+Open **Notifications** in the top-left corner or press N. The inbox starts with three sample notifications. **Return to Notes**, **Open Files**, and **Open Browser** bring the matching window into view, or create a preview window if it is missing. Opening a notification marks it read; **Mark all read** clears the unread count, and each notification’s close button removes it.
+
+Choose **Preview notification** to add a sample and show a toast below the notification button. The toast disappears after six seconds; dismissing the toast keeps the notification in the inbox. These notifications are simulated and reset when the page reloads. N is inactive while typing or using the launcher.
 
 Window positions, sizes, scratchpad text, and saved gesture shortcuts persist in this browser’s local storage. Resetting the layout keeps scratchpad text and gesture shortcuts. Wi-Fi, sound, and battery controls are simulated; the clock uses your device’s local time.
 

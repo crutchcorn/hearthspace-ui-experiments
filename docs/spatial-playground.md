@@ -6,7 +6,7 @@ This experiment explores a desktop as a place to arrange windows. It runs entire
 
 A native scroll container fills the viewport and hides its scrollbars. Its world is ten screens wide and ten screens tall. At creation, one screen is the browser’s initial viewport size, with a minimum of 960 × 720 pixels. The saved world keeps its dimensions across reloads.
 
-The home viewport starts at 4.5 screen widths and heights into that world. Windows use absolute world coordinates, so ordinary scroll movement also moves the dotted wallpaper. The menubar and navigation controls sit above the scrolling viewport.
+The home viewport starts at 4.5 screen widths and heights into that world. Windows use absolute world coordinates, so ordinary scroll movement also moves the dotted wallpaper. Fixed controls sit above the scrolling viewport in four corners: notifications at top left, device status at top right, canvas tools at bottom left, and the app launcher at bottom right. Device status uses a floating pill; there is no full-width menubar.
 
 The minimap translates pointer positions into world coordinates. Grabbing its visible-area rectangle preserves the pointer’s offset within the viewport; pressing elsewhere centers the viewport there. Pointer capture keeps navigation continuous outside the map until release, and the native scroll container clamps travel at the world edges.
 
@@ -16,24 +16,35 @@ Selection uses a rectangle in world coordinates. In Select mode, the viewport ca
 
 ## Canvas tools and launcher
 
-The fixed canvas dock at the bottom left contains Pan, Select, Map, and More. More exposes new-window creation and navigation help, with disabled rows for future framing and arrangement tools. A separate dock near the bottom center opens Apps or Draw. At narrow viewport widths the docks share a row, and launcher panels stay within the viewport. Canvas controls have visible labels and targets at least 44 × 48 pixels; launcher controls also expand for coarse pointers.
+The fixed canvas dock at the bottom left contains Pan, Select, Map, and More. More shows the window count and exposes new-window creation, navigation help, **Return to starting area**, and **Reset layout**, with disabled rows for future framing and arrangement tools. More scrolls when necessary to fit short viewports.
 
-`App` owns the active canvas mode, selection, and panel visibility. Opening a canvas panel or launcher closes the other canvas and launcher panels. The selection hint is hidden while a panel is open. Pointer input outside the launcher or More closes it; Escape closes these panels, clears selection, and returns to Pan.
+A separate dock at the bottom right opens Apps or Draw, with its panel aligned to the same right edge. The docks retain their corners at narrow viewport widths, and panels stay within the viewport. Canvas controls have visible labels and targets at least 44 × 48 pixels; launcher controls also expand for coarse pointers.
 
-| Shortcut     | Action                                                         |
-| ------------ | -------------------------------------------------------------- |
-| H            | Choose Pan and clear selection.                                |
-| L            | Choose Select.                                                 |
-| M            | Toggle the map.                                                |
-| G            | Open the dedicated gesture pad.                                |
-| Ctrl/⌘ K     | Open app search, or close it when already open.                |
-| Space + drag | Temporarily pan over windows.                                  |
-| Home         | Return to the starting viewport.                               |
-| Escape       | Close canvas/launcher panels, clear selection, and choose Pan. |
+`App` owns the active canvas mode, selection, and panel visibility, including notifications and device popovers. Opening a panel dismisses panels from the other control groups. The selection hint is hidden while a panel is open. Pointer input outside the launcher, More, or device popover closes it; Escape closes open panels, clears selection, and returns to Pan.
 
-Single-letter canvas shortcuts are suspended while the launcher is open or a text input is active. The launcher filters a local catalog by app name and description, supports icon-grid and list views, and presents search results as a list. Arrow keys navigate apps and Enter launches the selection. Fine-pointer devices focus search when the Apps view opens; touch devices avoid automatically opening the software keyboard.
+| Shortcut     | Action                                              |
+| ------------ | --------------------------------------------------- |
+| H            | Choose Pan and clear selection.                     |
+| L            | Choose Select.                                      |
+| M            | Toggle the map.                                     |
+| G            | Open the dedicated gesture pad.                     |
+| N            | Toggle notifications.                               |
+| Ctrl/⌘ K     | Open app search, or close it when already open.     |
+| Space + drag | Temporarily pan over windows.                       |
+| Home         | Return to the starting viewport.                    |
+| Escape       | Close open panels, clear selection, and choose Pan. |
+
+Single-letter shortcuts, including N, are suspended while the launcher is open or a text input is active. The launcher filters a local catalog by app name and description, supports icon-grid and list views, and presents search results as a list. Arrow keys navigate apps and Enter launches the selection. Fine-pointer devices focus search when the Apps view opens; coarse-pointer devices avoid automatically opening the software keyboard.
 
 Launching creates an ordinary movable, resizable preview window with the catalog app’s title, icon, and description. There is no operating-system launch integration.
+
+## Notifications
+
+Notifications open from the top-left corner or with N. An action identifies a target app and asks `App` to reveal its window. The parent first looks for a window with that app ID, including the original scratchpad for Notes. When found, it raises the window and scrolls toward its center, with clearance for the top controls and clamping at the world edges. This navigation uses smooth scrolling unless reduced motion is preferred. If no matching window exists, it creates an app preview near the current viewport.
+
+`NotificationInbox` owns three initial sample notifications, unread flags, dismissals, and an optional toast. Opening the inbox does not mark items read. Following an item’s action marks it read; **Mark all read** changes all unread flags, while a card’s dismiss button removes that item. Pointer input outside the inbox closes it. Escape closes the inbox and any active toast.
+
+**Preview notification** cycles through Notes, Files, and Browser examples, prepends a new unread item, closes the inbox, and shows a toast for six seconds. Toast actions use the same window navigation as inbox actions. Outside pointer input dismisses the toast, and opening another corner panel suppresses it so controls remain visible on narrow screens. Closing or timing out the toast leaves the item in the inbox. All notification content and relative timestamps are simulated, with no external event source.
 
 ## Gesture shortcuts
 
@@ -45,19 +56,20 @@ Gesture recognition is intentionally absent. Drawing previews the mark, and the 
 
 ## Source map
 
-| File                                                                            | Responsibility                                                                          |
-| ------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| [`src/desktop.ts`](../src/desktop.ts)                                           | Workspace types, initial layout, storage loading and validation, bounds calculations.   |
-| [`src/App.tsx`](../src/App.tsx)                                                 | Workspace rendering, pointer gestures, viewport navigation, window actions, and saving. |
-| [`src/components/SystemBar.tsx`](../src/components/SystemBar.tsx)               | Menubar, dropdowns, simulated system controls, and local clock.                         |
-| [`src/components/Minimap.tsx`](../src/components/Minimap.tsx)                   | Map rendering and pointer capture for dragging the visible canvas area.                 |
-| [`src/components/CanvasTools.tsx`](../src/components/CanvasTools.tsx)           | Canvas mode controls, More actions, and selection status.                               |
-| [`src/components/AppLauncher.tsx`](../src/components/AppLauncher.tsx)           | App grid/list, filtering, keyboard navigation, and launcher views.                      |
-| [`src/components/GesturePad.tsx`](../src/components/GesturePad.tsx)             | Pointer drawing, shortcut assignment, previews, and shortcut persistence.               |
-| [`src/components/launcher-apps.ts`](../src/components/launcher-apps.ts)         | Shared app catalog, icons, descriptions, and colors.                                    |
-| [`src/App.module.css`](../src/App.module.css)                                   | Canvas, windows, and navigation styling.                                                |
-| [`src/components/SystemBar.module.css`](../src/components/SystemBar.module.css) | Menubar and dropdown styling.                                                           |
-| [`src/index.css`](../src/index.css)                                             | Global viewport and element defaults.                                                   |
+| File                                                                              | Responsibility                                                                          |
+| --------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| [`src/desktop.ts`](../src/desktop.ts)                                             | Workspace types, initial layout, storage loading and validation, bounds calculations.   |
+| [`src/App.tsx`](../src/App.tsx)                                                   | Workspace rendering, pointer gestures, viewport navigation, window actions, and saving. |
+| [`src/components/SystemBar.tsx`](../src/components/SystemBar.tsx)                 | Floating device-status pill, popovers, simulated controls, and local clock.             |
+| [`src/components/NotificationInbox.tsx`](../src/components/NotificationInbox.tsx) | Notification trigger, inbox, unread/dismissal state, and sample toasts.                 |
+| [`src/components/Minimap.tsx`](../src/components/Minimap.tsx)                     | Map rendering and pointer capture for dragging the visible canvas area.                 |
+| [`src/components/CanvasTools.tsx`](../src/components/CanvasTools.tsx)             | Canvas mode controls, More actions, and selection status.                               |
+| [`src/components/AppLauncher.tsx`](../src/components/AppLauncher.tsx)             | App grid/list, filtering, keyboard navigation, and launcher views.                      |
+| [`src/components/GesturePad.tsx`](../src/components/GesturePad.tsx)               | Pointer drawing, shortcut assignment, previews, and shortcut persistence.               |
+| [`src/components/launcher-apps.ts`](../src/components/launcher-apps.ts)           | Shared app catalog, icons, descriptions, and colors.                                    |
+| [`src/App.module.css`](../src/App.module.css)                                     | Canvas, windows, and navigation styling.                                                |
+| [`src/components/SystemBar.module.css`](../src/components/SystemBar.module.css)   | Device-status pill and popover styling.                                                 |
+| [`src/index.css`](../src/index.css)                                               | Global viewport and element defaults.                                                   |
 
 ## Saved state
 
@@ -65,4 +77,4 @@ The workspace is stored in `localStorage` under `hearthspace-playground-v1`. It 
 
 Gesture shortcuts are stored separately under `hearthspace-gesture-shortcuts-v1`. Loading accepts known catalog app IDs, unique assignments, and finite points within the pad bounds. If no valid shortcuts remain, the default examples are used. A storage failure leaves a newly saved mark available in the currently open gesture pad, but it will not persist when that component is remounted.
 
-Viewport travel, selection, open panels, search text, list/grid choice, and simulated system settings remain temporary. Reset layout recreates the starting arrangement while preserving the scratchpad note and separately stored gesture shortcuts. If storage is unavailable, the current desktop session remains usable without persistence.
+Viewport travel, selection, open panels, search text, list/grid choice, notifications, and simulated system settings remain temporary. Notification read/dismissal state and preview items reset to the initial samples on reload. Reset layout recreates the starting arrangement while preserving the scratchpad note and separately stored gesture shortcuts. If storage is unavailable, the current desktop session remains usable without persistence.

@@ -36,9 +36,11 @@ There are currently no committed automated tests. Use browser interaction checks
 For the launcher and canvas tools, verify these flows at desktop and narrow touch-sized viewports:
 
 - Switch between Pan (H) and Select (L), drag a selection across windows, and clear it with Escape. Space-drag and middle-button dragging should still pan in selection mode.
-- Open Map (M), More, help, Apps (Ctrl/⌘ K), and Draw (G). Check that switching panels dismisses the previous canvas or launcher panel and keeps the selection hint from covering it.
+- Open Map (M), More, help, Apps (Ctrl/⌘ K), Draw (G), notifications (N), and device controls. Check that switching panels dismisses the previous panel and keeps the selection hint from covering it. Escape should close open panels and clear selection.
 - Browse the app grid and list, filter by name or description, try an empty search, navigate with arrow keys, and launch with Enter. A launch should add a labeled preview window near the current viewport.
 - Draw on the gesture pad, retry, save a custom shortcut for an app, reopen the launcher, and reload. Verify that the custom mark persists and replaces that app’s previous mark. Drawing alone should not launch an app or claim to recognize its shape.
-- Check pointer drawing, touch targets, panel scrolling on short screens, and keyboard focus when closing the launcher. Keep app and gesture entry points available without relying on hover.
+- Open notifications with N, mark all read, dismiss items, and reach the empty state. Preview a notification, check the toast’s six-second timeout, and confirm that closing the toast keeps the item in the inbox. Reload should restore the sample notifications. N should not interrupt typing or the launcher.
+- Use a notification action after panning away from its target window: the window should become active and come into view. If its window has been closed, the action should create an app preview. Check the same action from a toast, including reduced-motion scrolling.
+- Check the four-corner layout at desktop and narrow widths: notifications at top left, floating device controls at top right, canvas tools at bottom left, and Apps/Draw at bottom right. Launcher panels should align with the right dock. Check pointer drawing, touch targets, panel scrolling on short screens, and keyboard focus when closing the launcher. Keep app and gesture entry points available without relying on hover.
 
 Add focused regression coverage when behavior becomes difficult to verify manually or a bug warrants it.
