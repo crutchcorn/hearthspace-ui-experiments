@@ -411,46 +411,6 @@
   pointer-events: auto;
 }
 
-.launchDock {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 5px;
-  border: 1px solid #d6d9cd;
-  border-radius: 15px;
-  background: #fcfcf6f0;
-  box-shadow: 0 7px 20px #515b4210;
-  backdrop-filter: blur(22px);
-}
-
-.launchDock button {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  min-width: 66px;
-  height: 48px;
-  padding: 0 13px;
-  border: 0;
-  border-radius: 10px;
-  color: #69775c;
-  background: transparent;
-  font-size: 10px;
-}
-
-.launchDock button:hover,
-.launchDock button[aria-expanded='true'] {
-  background: #e9eddf;
-  color: #435436;
-}
-
-.dockDivider {
-  width: 1px;
-  height: 26px;
-  background: #e1e5d7;
-}
-
 .selecting,
 .selecting * {
   cursor: crosshair !important;
@@ -526,14 +486,15 @@
     justify-content: space-between;
   }
 
-  .launchDock button {
-    min-width: 46px;
-    padding-inline: 8px;
-  }
-
   .mapPanel {
     bottom: 90px;
     left: 12px;
+  }
+}
+
+@media (width <= 560px) {
+  .mapPanel {
+    bottom: 160px;
   }
 }
 
@@ -541,20 +502,6 @@
   .docks {
     inset-inline: 8px;
     gap: 6px;
-  }
-
-  .launchDock {
-    gap: 0;
-    padding: 4px;
-  }
-
-  .launchDock button {
-    min-width: 44px;
-    padding-inline: 4px;
-  }
-
-  .dockDivider {
-    display: none;
   }
 }
 

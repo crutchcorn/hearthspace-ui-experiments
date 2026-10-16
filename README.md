@@ -32,15 +32,17 @@ Controls stay in the four corners, leaving the top edge and middle of the canvas
 | Top left     | Notifications.                                                       |
 | Top right    | A floating device-status pill with Wi-Fi, sound, battery, and clock. |
 | Bottom left  | Canvas tools: Pan, Select, Map, and Arrange.                         |
-| Bottom right | Apps and Draw, with the launcher opening above them.                 |
+| Bottom right | Favorite apps and Apps, with the launcher opening above them.        |
 
-The docks keep their corners on narrow screens. Visible labels and large targets keep the main tools usable with touch, a trackpad, or a mouse. Escape closes open panels and clears the current selection.
+The docks keep their corners on narrow screens, with favorites moving into a row above Apps. Visible labels and large targets keep the main tools usable with touch, a trackpad, or a mouse. Escape closes open panels and clears the current selection.
 
 ## Try the launcher
 
 Choose **Apps** or press Ctrl/⌘ K to browse an icon grid, switch to a list, or search app names and descriptions. Search results use the list view. Use arrow keys to move through results and Enter to open the selected app. Escape closes the launcher.
 
-Choose **Draw** or press G to open the dedicated gesture pad. Select a shortcut and draw with touch, a stylus, or a pointer. To make your own, choose **Edit shortcuts**, select an app, draw one stroke, and save it. Saving replaces that app’s existing gesture. **Retry** clears the current drawing.
+**Browser**, **Files**, and **Notes** are preset favorites beside Apps. Choose one to add its preview window directly. Favorites are fixed for this experiment.
+
+Inside the launcher, switch from **Apps** to **Draw**, or press G from the canvas to open the dedicated gesture pad. Select a shortcut and draw with touch, a stylus, or a pointer. To make your own, choose **Edit shortcuts**, select an app, draw one stroke, and save it. Saving replaces that app’s existing gesture. **Retry** clears the current drawing.
 
 Drawing records and previews the stroke; gesture recognition is not implemented. Use **Open [app]** to try the launch result. All launcher actions create labeled preview windows on the canvas, without opening applications in the host operating system.
 

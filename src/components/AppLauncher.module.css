@@ -343,6 +343,13 @@
   }
 }
 
+@media (width <= 560px) {
+  .launcher {
+    bottom: 160px;
+    max-height: calc(100dvh - 244px);
+  }
+}
+
 @media (width <= 480px) {
   .header {
     gap: 6px;

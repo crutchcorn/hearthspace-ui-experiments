@@ -12,13 +12,11 @@ import {
   ArrowUpRight,
   Flame,
   Hand,
-  LayoutGrid,
   Maximize2,
   PanelsTopLeft,
   RotateCcw,
   Scan,
   StickyNote,
-  Spline,
   X,
 } from 'lucide-react'
 import SystemBar, { type SystemPanel } from './components/SystemBar'
@@ -28,6 +26,7 @@ import NotificationInbox, {
 import Minimap from './components/Minimap'
 import CanvasTools from './components/CanvasTools'
 import AppLauncher from './components/AppLauncher'
+import LauncherDock from './components/LauncherDock'
 import { APP_CATALOG, type LauncherApp } from './components/launcher-apps'
 import {
   arrangeWindows,
@@ -451,9 +450,9 @@ function App() {
     setActiveId(id)
   }
 
-  function openLauncher(mode: 'apps' | 'gestures') {
+  function toggleLauncher() {
     closeTopPanels()
-    setLauncher((current) => (current === mode ? null : mode))
+    setLauncher((current) => (current ? null : 'apps'))
     setShowMap(false)
     setSpaceHeld(false)
   }
@@ -466,6 +465,9 @@ function App() {
   function launchApp(app: LauncherApp) {
     addWindow(app)
     closeLauncher()
+    closeTopPanels()
+    setShowMap(false)
+    setSpaceHeld(false)
     setTool('pan')
     setSelectedIds([])
   }
@@ -739,32 +741,12 @@ function App() {
           windowCount={workspace.windows.length}
           selectedCount={selectedIds.length}
         />
-        <nav
-          className={styles.launchDock}
-          aria-label="App launcher"
-          data-launcher-trigger
-        >
-          <button
-            ref={launcherTrigger}
-            title="Browse and search apps (Ctrl / ⌘ K)"
-            aria-label="Open app launcher"
-            aria-expanded={launcher === 'apps'}
-            onClick={() => openLauncher('apps')}
-          >
-            <LayoutGrid size={19} />
-            <span>Apps</span>
-          </button>
-          <span className={styles.dockDivider} />
-          <button
-            title="Draw to launch (G)"
-            aria-label="Open gesture launcher"
-            aria-expanded={launcher === 'gestures'}
-            onClick={() => openLauncher('gestures')}
-          >
-            <Spline size={19} />
-            <span>Draw</span>
-          </button>
-        </nav>
+        <LauncherDock
+          open={launcher !== null}
+          triggerRef={launcherTrigger}
+          onToggle={toggleLauncher}
+          onLaunch={launchApp}
+        />
       </div>
       {launcher && (
         <AppLauncher

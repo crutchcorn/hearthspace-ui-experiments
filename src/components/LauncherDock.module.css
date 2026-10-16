@@ -1,0 +1,82 @@
+.dock {
+  position: relative;
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 4px;
+  padding: 5px;
+  border: 1px solid #d6d9cd;
+  border-radius: 15px;
+  background: #fcfcf6f0;
+  box-shadow: 0 7px 20px #515b4210;
+  backdrop-filter: blur(22px);
+  user-select: none;
+}
+
+.favorites {
+  display: flex;
+  gap: 3px;
+}
+
+.favorite,
+.launcher {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  height: 48px;
+  padding: 0;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  touch-action: manipulation;
+}
+
+.favorite:hover,
+.launcher:hover,
+.launcher[aria-expanded='true'] {
+  background: #e9eddf;
+  color: #435436;
+}
+
+.appIcon {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border: 1px solid #74845f12;
+  border-radius: 10px;
+}
+
+.launcher {
+  flex-direction: column;
+  gap: 4px;
+  min-width: 66px;
+  padding-inline: 13px;
+  color: #69775c;
+  font-size: 10px;
+}
+
+.divider {
+  width: 1px;
+  height: 26px;
+  background: #e1e5d7;
+}
+
+@media (width <= 560px) {
+  .favorites {
+    position: absolute;
+    right: 0;
+    bottom: calc(100% + 10px);
+    padding: 5px;
+    border: 1px solid #d6d9cd;
+    border-radius: 15px;
+    background: #fcfcf6f0;
+    box-shadow: 0 7px 20px #515b4210;
+    backdrop-filter: blur(22px);
+  }
+
+  .divider {
+    display: none;
+  }
+}

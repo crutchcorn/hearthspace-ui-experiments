@@ -78,3 +78,9 @@
   font-size: 8px;
   line-height: 1;
 }
+
+@media (width <= 560px) {
+  .selectionHint {
+    bottom: calc(100% + 82px);
+  }
+}

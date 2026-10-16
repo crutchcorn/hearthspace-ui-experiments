@@ -28,7 +28,9 @@ Running Arrange closes open panels, clears selection, and returns to Pan. The bu
 
 The fixed canvas dock at the bottom left contains Pan, Select, Map, and Arrange. Arrange runs immediately; it has no menu. Apps creates preview windows, and the Home key or the map’s Home action returns to the starting viewport.
 
-A separate dock at the bottom right opens Apps or Draw, with its panel aligned to the same right edge. The docks retain their corners at narrow viewport widths, and panels stay within the viewport. Canvas controls have visible labels and targets at least 44 × 48 pixels; launcher controls also expand for coarse pointers.
+A separate dock at the bottom right places preset Browser, Files, and Notes favorites to the left of Apps. Favorites launch their catalog app directly; there is no favorite-editing UI or separate favorites persistence. Apps opens the launcher, where an Apps/Draw toggle selects browsing or the gesture pad. The panel aligns with the dock’s right edge.
+
+The docks retain their corners at narrow viewport widths. At 560 pixels wide or less, favorites occupy a row above Apps so the bottom-left canvas tools remain available. The launcher panel sits above the entire dock and stays within the viewport. Canvas controls have visible labels and targets at least 44 × 48 pixels; launcher controls also expand for coarse pointers.
 
 `App` owns the active canvas mode, selection, and panel visibility, including notifications and device popovers. Opening a panel dismisses panels from the other control groups. The selection hint is hidden while a panel is open. Pointer input outside the launcher or device popover closes it; Escape closes open panels, clears selection, and returns to Pan.
 
@@ -47,7 +49,7 @@ A separate dock at the bottom right opens Apps or Draw, with its panel aligned t
 
 Single-letter shortcuts, including N, are suspended while the launcher is open or a text input is active. The launcher filters a local catalog by app name and description, supports icon-grid and list views, and presents search results as a list. Arrow keys navigate apps and Enter launches the selection. Fine-pointer devices focus search when the Apps view opens; coarse-pointer devices avoid automatically opening the software keyboard.
 
-Launching creates an ordinary movable, resizable preview window with the catalog app’s title, icon, and description. There is no operating-system launch integration.
+Launching from a favorite, an app result, or the gesture pad creates an ordinary movable, resizable preview window with the catalog app’s title, icon, and description. Each uses the same launch action in `App`. There is no operating-system launch integration.
 
 ## Notifications
 
@@ -75,6 +77,7 @@ Gesture recognition is intentionally absent. Drawing previews the mark, and the 
 | [`src/components/NotificationInbox.tsx`](../src/components/NotificationInbox.tsx) | Notification trigger, inbox, unread/dismissal state, and sample toasts.                     |
 | [`src/components/Minimap.tsx`](../src/components/Minimap.tsx)                     | Map rendering and pointer capture for dragging the visible canvas area.                     |
 | [`src/components/CanvasTools.tsx`](../src/components/CanvasTools.tsx)             | Canvas mode controls, arrangement action, and selection status.                             |
+| [`src/components/LauncherDock.tsx`](../src/components/LauncherDock.tsx)           | Preset favorite shortcuts and the Apps trigger.                                             |
 | [`src/components/AppLauncher.tsx`](../src/components/AppLauncher.tsx)             | App grid/list, filtering, keyboard navigation, and launcher views.                          |
 | [`src/components/GesturePad.tsx`](../src/components/GesturePad.tsx)               | Pointer drawing, shortcut assignment, previews, and shortcut persistence.                   |
 | [`src/components/launcher-apps.ts`](../src/components/launcher-apps.ts)           | Shared app catalog, icons, descriptions, and colors.                                        |
