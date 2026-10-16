@@ -54,10 +54,10 @@ export default function SystemBar({
       if (event.key === 'Escape') setOpenPanel(null)
     }
 
-    document.addEventListener('pointerdown', dismissOnPointer)
+    document.addEventListener('pointerdown', dismissOnPointer, true)
     document.addEventListener('keydown', dismissOnEscape)
     return () => {
-      document.removeEventListener('pointerdown', dismissOnPointer)
+      document.removeEventListener('pointerdown', dismissOnPointer, true)
       document.removeEventListener('keydown', dismissOnEscape)
     }
   }, [openPanel])

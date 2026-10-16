@@ -395,71 +395,93 @@
   pointer-events: none;
 }
 
-.toolbar {
+.docks {
   position: fixed;
-  z-index: 500;
-  bottom: 28px;
+  z-index: 700;
+  inset: auto 24px 24px;
+  display: flex;
+  align-items: flex-end;
+  height: 60px;
+  pointer-events: none;
+}
+
+.docks > * {
+  pointer-events: auto;
+}
+
+.launchDock {
+  position: absolute;
+  bottom: 0;
   left: 50%;
   display: flex;
   align-items: center;
   gap: 4px;
-  padding: 7px;
+  padding: 5px;
   transform: translateX(-50%);
   border: 1px solid #d6d9cd;
-  border-radius: 13px;
-  background: #fcfcf6e8;
-  box-shadow:
-    0 7px 20px #515b4210,
-    0 2px 4px #515b4205;
+  border-radius: 15px;
+  background: #fcfcf6f0;
+  box-shadow: 0 7px 20px #515b4210;
   backdrop-filter: blur(22px);
 }
 
-.toolbar button {
+.launchDock button {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 34px;
-  height: 34px;
-  padding: 0;
+  gap: 4px;
+  min-width: 66px;
+  height: 48px;
+  padding: 0 13px;
   border: 0;
-  border-radius: 7px;
+  border-radius: 10px;
+  color: #69775c;
   background: transparent;
-  color: #8b947d;
+  font-size: 10px;
 }
 
-.toolbar button:hover,
-.toolbar button[aria-pressed='true'],
-.toolbar button[aria-expanded='true'] {
-  background: #e9ecdf;
-  color: #667454;
+.launchDock button:hover,
+.launchDock button[aria-expanded='true'] {
+  background: #e9eddf;
+  color: #435436;
 }
 
-.toolbar .newWindow {
-  gap: 7px;
-  width: auto;
-  padding-inline: 12px;
-  color: #657254;
-  font-size: 11px;
-  white-space: nowrap;
-}
-
-.toolbarDivider {
+.dockDivider {
   width: 1px;
-  height: 18px;
-  margin-inline: 3px;
-  background: #e2e5d8;
+  height: 26px;
+  background: #e1e5d7;
+}
+
+.selecting,
+.selecting * {
+  cursor: crosshair !important;
+}
+
+.selection {
+  position: absolute;
+  border: 1px dashed #7d9467;
+  border-radius: 3px;
+  background: #a2b88c26;
+  pointer-events: none;
+}
+
+.window[data-selected='true'] {
+  border-color: #7e966b;
+  box-shadow:
+    0 0 0 2px #95ad7e66,
+    0 12px 30px #59654a18;
 }
 
 .help,
 .mapPanel {
   position: fixed;
   z-index: 600;
-  bottom: 91px;
-  left: 50%;
+  bottom: 104px;
+  left: 24px;
   width: 320px;
   max-width: calc(100vw - 28px);
   padding: 19px;
-  transform: translateX(-50%);
   border: 1px solid #d6d9cd;
   border-radius: 13px;
   background: #fcfcf6f5;
@@ -561,13 +583,26 @@
 }
 
 @media (width <= 760px) {
-  .toolbar {
-    bottom: 20px;
+  .docks {
+    inset: auto 12px 14px;
+    gap: 10px;
+    justify-content: space-between;
+  }
+
+  .launchDock {
+    position: static;
+    transform: none;
+  }
+
+  .launchDock button {
+    min-width: 46px;
+    padding-inline: 8px;
   }
 
   .help,
   .mapPanel {
-    bottom: 82px;
+    bottom: 90px;
+    left: 12px;
   }
 }
 

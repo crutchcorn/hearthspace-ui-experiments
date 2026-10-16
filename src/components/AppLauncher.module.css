@@ -1,0 +1,383 @@
+.launcher {
+  position: fixed;
+  z-index: 800;
+  bottom: 104px;
+  left: 50%;
+  overflow: auto;
+  width: 520px;
+  max-width: calc(100vw - 24px);
+  max-height: calc(100dvh - 168px);
+  transform: translateX(-50%);
+  border: 1px solid #d6d9cd;
+  border-radius: 18px;
+  background: #fbfbf7f5;
+  box-shadow:
+    0 18px 50px #4e594020,
+    0 3px 10px #4e594008;
+  backdrop-filter: blur(26px);
+  color: #5e6854;
+  scrollbar-color: #cbd1bf transparent;
+  scrollbar-width: thin;
+}
+
+.launcher button {
+  appearance: none;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  min-height: 70px;
+  padding: 10px 14px 10px 24px;
+  border-bottom: 1px solid #e6e8dd;
+}
+
+.header h2 {
+  flex: 1;
+  margin: 0;
+  color: #59644e;
+  font-size: 14px;
+  font-weight: 550;
+  letter-spacing: -0.2px;
+}
+
+.tabs {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 4px;
+  border: 1px solid #e1e5d8;
+  border-radius: 9px;
+  background: #f0f2e9;
+}
+
+.tabs button {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 33px;
+  padding: 0 12px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: #8d977e;
+  font-size: 11px;
+}
+
+.tabs button:hover {
+  color: #67745a;
+}
+
+.tabs .activeTab {
+  border-color: #dde1d3;
+  background: #fcfcf7;
+  box-shadow: 0 1px 3px #5f6c4810;
+  color: #657451;
+}
+
+.closeButton {
+  display: grid;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  place-items: center;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: #919b82;
+}
+
+.closeButton:hover {
+  background: #edf0e4;
+  color: #62724f;
+}
+
+.appsPanel {
+  padding: 21px 23px 0;
+}
+
+.searchField {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 46px;
+  padding: 0 13px;
+  border: 1px solid #dce2d1;
+  border-radius: 10px;
+  background: #f3f5ec;
+  color: #9aa58c;
+}
+
+.searchField:focus-within {
+  border-color: #aab899;
+  background: #f6f8f0;
+  box-shadow: 0 0 0 3px #aebd9920;
+}
+
+.searchField input {
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #5f6e50;
+  font-size: 12px;
+}
+
+.searchField input::placeholder {
+  color: #99a58a;
+}
+
+.searchField input::-webkit-search-cancel-button {
+  appearance: none;
+}
+
+.searchField button {
+  display: grid;
+  width: 26px;
+  height: 30px;
+  padding: 0;
+  place-items: center;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: #96a186;
+}
+
+.searchField button:hover {
+  background: #e7ecdd;
+}
+
+.collectionHeading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  height: 53px;
+  color: #9ba58b;
+  font-size: 10px;
+}
+
+.viewToggle {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.viewToggle button {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  place-items: center;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #a6af98;
+}
+
+.viewToggle button:hover,
+.viewToggle button[aria-pressed='true'] {
+  background: #edf0e4;
+  color: #788865;
+}
+
+.appGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px 6px;
+  margin: 0 -5px 18px;
+}
+
+.appButton {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  border: 1px solid transparent;
+  border-radius: 11px;
+  background: transparent;
+  text-align: left;
+}
+
+.appButton[data-selected='true'],
+.appButton:hover {
+  border-color: #e4e9d9;
+  background: #eff3e7;
+}
+
+.appGrid .appButton {
+  flex-direction: column;
+  justify-content: center;
+  gap: 11px;
+  min-height: 99px;
+  padding: 11px 5px 13px;
+}
+
+.appIcon {
+  display: grid;
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  border: 1px solid #74845f12;
+  border-radius: 13px;
+}
+
+.appCopy {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.appCopy strong {
+  overflow: hidden;
+  color: #778466;
+  font-size: 11px;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.appCopy > span {
+  color: #a0ab90;
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+.appList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0 -5px 17px;
+}
+
+.appList .appButton {
+  gap: 13px;
+  min-height: 64px;
+  padding: 10px 12px;
+}
+
+.appList .appIcon {
+  width: 39px;
+  height: 39px;
+  border-radius: 10px;
+}
+
+.appList .appIcon > svg {
+  width: 21px;
+  height: 21px;
+}
+
+.openIcon {
+  flex-shrink: 0;
+  margin-left: auto;
+  color: #b5bea7;
+}
+
+.appButton[data-selected='true'] .openIcon {
+  color: #82946c;
+}
+
+.emptyResults {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 190px;
+  color: #a9b49a;
+  text-align: center;
+}
+
+.emptyResults p {
+  margin: 4px 0 0;
+  color: #7e8e6c;
+  font-size: 12px;
+}
+
+.emptyResults > span {
+  font-size: 10px;
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  min-height: 46px;
+  border-top: 1px solid #e7ebdc;
+  color: #a7b095;
+  font-size: 9px;
+}
+
+.footer > span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.footer kbd {
+  padding: 2px 4px;
+  border: 1px solid #e1e7d5;
+  border-radius: 4px;
+  background: #f5f7ef;
+  color: #98a489;
+  font: inherit;
+}
+
+.gesturePanel {
+  padding: 20px 23px;
+}
+
+@media (width <= 480px) {
+  .launcher {
+    bottom: 90px;
+    max-height: calc(100dvh - 154px);
+  }
+
+  .header {
+    gap: 6px;
+    padding-left: 17px;
+  }
+
+  .appsPanel {
+    padding-inline: 16px;
+  }
+
+  .gesturePanel {
+    padding: 17px 16px;
+  }
+
+  .tabs button {
+    gap: 5px;
+    padding-inline: 9px;
+  }
+
+  .appGrid {
+    gap: 4px 1px;
+  }
+
+  .appIcon {
+    width: 43px;
+    height: 43px;
+  }
+
+  .footer {
+    font-size: 8px;
+  }
+}
+
+@media (pointer: coarse) {
+  .tabs button,
+  .viewToggle button {
+    min-width: 44px;
+    min-height: 44px;
+  }
+}

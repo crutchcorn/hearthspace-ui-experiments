@@ -1,5 +1,6 @@
 import {
   useEffect,
+  useEffectEvent,
   useLayoutEffect,
   useRef,
   useState,
@@ -8,23 +9,25 @@ import {
 import {
   ArrowDownRight,
   ArrowUpRight,
-  Compass,
   Expand,
   Flame,
   Hand,
-  Map,
+  LayoutGrid,
   Maximize2,
   MousePointer2,
   MoveUpRight,
   PanelsTopLeft,
-  Plus,
   RotateCcw,
   Scan,
   StickyNote,
+  Spline,
   X,
 } from 'lucide-react'
 import SystemBar from './components/SystemBar'
 import Minimap from './components/Minimap'
+import CanvasTools from './components/CanvasTools'
+import AppLauncher from './components/AppLauncher'
+import { APP_CATALOG, type LauncherApp } from './components/launcher-apps'
 import {
   clamp,
   createWorkspace,
@@ -40,7 +43,7 @@ import styles from './App.module.css'
 
 type Gesture = {
   pointerId: number
-  type: 'pan' | 'move' | 'resize'
+  type: 'pan' | 'move' | 'resize' | 'lasso'
   startX: number
   startY: number
   scrollX: number
@@ -66,6 +69,12 @@ function App() {
   const [spaceHeld, setSpaceHeld] = useState(false)
   const [showMap, setShowMap] = useState(false)
   const [showHelp, setShowHelp] = useState(false)
+  const [showMore, setShowMore] = useState(false)
+  const [tool, setTool] = useState<'pan' | 'lasso'>('pan')
+  const [selectedIds, setSelectedIds] = useState<string[]>([])
+  const [selection, setSelection] = useState<Bounds | null>(null)
+  const [launcher, setLauncher] = useState<'apps' | 'gestures' | null>(null)
+  const launcherTrigger = useRef<HTMLButtonElement>(null)
   const viewport = useRef<HTMLDivElement>(null)
   const gesture = useRef<Gesture | null>(null)
   const captureTarget = useRef<Element | null>(null)
@@ -95,15 +104,58 @@ function App() {
         height: window.innerHeight,
       }))
     const keydown = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault()
+        setLauncher(launcher === 'apps' ? null : 'apps')
+        if (launcher === 'apps')
+          launcherTrigger.current?.focus({ preventScroll: true })
+        setShowMap(false)
+        setShowHelp(false)
+        setShowMore(false)
+        return
+      }
       if (event.key === 'Escape') {
         setShowHelp(false)
         setShowMap(false)
+        setShowMore(false)
+        setLauncher(null)
+        setTool('pan')
+        setSelectedIds([])
+        setSelection(null)
+        if (gesture.current?.type === 'lasso') {
+          gesture.current = null
+          setDragging(false)
+        }
+        if (launcher) launcherTrigger.current?.focus({ preventScroll: true })
       }
       if (
         event.target instanceof HTMLElement &&
         event.target.closest('input, textarea, [contenteditable="true"]')
       )
         return
+      if (launcher || event.metaKey || event.ctrlKey || event.altKey) return
+      if (event.key.toLowerCase() === 'h') {
+        setTool('pan')
+        setSelectedIds([])
+        setShowMore(false)
+      }
+      if (event.key.toLowerCase() === 'l') {
+        setTool('lasso')
+        setShowMap(false)
+        setShowHelp(false)
+        setShowMore(false)
+      }
+      if (event.key.toLowerCase() === 'm') {
+        setShowMap((current) => !current)
+        setShowHelp(false)
+        setShowMore(false)
+      }
+      if (event.key.toLowerCase() === 'g') {
+        setLauncher('gestures')
+        setShowMap(false)
+        setShowHelp(false)
+        setShowMore(false)
+      }
       if (event.code === 'Space') {
         if (event.target instanceof Element && event.target.closest('button'))
           return
@@ -119,6 +171,7 @@ function App() {
       setSpaceHeld(false)
       setDragging(false)
       gesture.current = null
+      setSelection(null)
     }
     const keyup = (event: KeyboardEvent) => {
       if (event.code === 'Space') setSpaceHeld(false)
@@ -133,7 +186,20 @@ function App() {
       window.removeEventListener('keyup', keyup)
       window.removeEventListener('blur', release)
     }
-  }, [home.x, home.y])
+  }, [home.x, home.y, launcher])
+
+  useEffect(() => {
+    if (!launcher) return
+    const dismiss = (event: PointerEvent) => {
+      if (
+        event.target instanceof Element &&
+        !event.target.closest('[data-launcher-root], [data-launcher-trigger]')
+      )
+        setLauncher(null)
+    }
+    document.addEventListener('pointerdown', dismiss, true)
+    return () => document.removeEventListener('pointerdown', dismiss, true)
+  }, [launcher])
 
   function focusWindow(id: string) {
     setActiveId(id)
@@ -158,6 +224,31 @@ function App() {
       )
       return
     }
+    if (current.type === 'lasso') {
+      const startX = current.startX + current.scrollX
+      const startY = current.startY + current.scrollY
+      const x = clamp(clientX + canvas.scrollLeft, 0, workspace.width)
+      const y = clamp(clientY + canvas.scrollTop, 0, workspace.height)
+      const area = {
+        x: Math.min(startX, x),
+        y: Math.min(startY, y),
+        width: Math.abs(x - startX),
+        height: Math.abs(y - startY),
+      }
+      setSelection(area)
+      setSelectedIds(
+        workspace.windows
+          .filter(
+            (item) =>
+              item.x < area.x + area.width &&
+              item.x + item.width > area.x &&
+              item.y < area.y + area.height &&
+              item.y + item.height > area.y,
+          )
+          .map((item) => item.id),
+      )
+      return
+    }
     const bounds = current.bounds!
     const dx = clientX - current.startX + canvas.scrollLeft - current.scrollX
     const dy = clientY - current.startY + canvas.scrollTop - current.scrollY
@@ -179,22 +270,25 @@ function App() {
     }))
   }
 
+  const panAtEdge = useEffectEvent(() => {
+    const canvas = viewport.current
+    if (canvas && gesture.current?.type === 'move') {
+      const { x, y } = latestPointer.current
+      const speedX = x < 36 ? -12 : x > window.innerWidth - 36 ? 12 : 0
+      const speedY = y < 76 ? -12 : y > window.innerHeight - 36 ? 12 : 0
+      if (speedX || speedY) {
+        canvas.scrollBy(speedX, speedY)
+        applyGesture(x, y)
+      }
+    }
+  })
+
   // Keep carrying a window when its pointer reaches the edge of the screen.
   useEffect(() => {
     if (!dragging) return
     let frame: number
     const tick = () => {
-      const canvas = viewport.current
-      const current = gesture.current
-      if (canvas && current && current.type === 'move') {
-        const { x, y } = latestPointer.current
-        const speedX = x < 36 ? -12 : x > window.innerWidth - 36 ? 12 : 0
-        const speedY = y < 76 ? -12 : y > window.innerHeight - 36 ? 12 : 0
-        if (speedX || speedY) {
-          canvas.scrollBy(speedX, speedY)
-          applyGesture(x, y)
-        }
-      }
+      panAtEdge()
       frame = requestAnimationFrame(tick)
     }
     frame = requestAnimationFrame(tick)
@@ -230,6 +324,15 @@ function App() {
       edge,
     }
     setDragging(true)
+    if (type === 'lasso') {
+      setSelectedIds([])
+      setSelection({
+        x: canvas.scrollLeft + event.clientX,
+        y: canvas.scrollTop + event.clientY,
+        width: 0,
+        height: 0,
+      })
+    }
     if (item) focusWindow(item.id)
   }
 
@@ -237,6 +340,7 @@ function App() {
     if (gesture.current?.pointerId !== event.pointerId) return
     gesture.current = null
     setDragging(false)
+    setSelection(null)
     if (captureTarget.current?.hasPointerCapture(event.pointerId))
       captureTarget.current.releasePointerCapture(event.pointerId)
     captureTarget.current = null
@@ -278,7 +382,7 @@ function App() {
     focusWindow(item.id)
   }
 
-  function addWindow() {
+  function addWindow(app?: LauncherApp) {
     const canvas = viewport.current!
     const id = crypto.randomUUID()
     const offset = (workspace.windows.length % 5) * 24
@@ -288,8 +392,11 @@ function App() {
         ...current.windows,
         {
           id,
-          title: `Untitled window ${current.windows.filter((item) => item.kind === 'empty').length + 1}`,
+          title:
+            app?.name ??
+            `Untitled window ${current.windows.filter((item) => item.kind === 'empty').length + 1}`,
           kind: 'empty',
+          appId: app?.id,
           x: clamp(
             canvas.scrollLeft + Math.max(20, (view.width - 360) / 2) + offset,
             0,
@@ -308,6 +415,26 @@ function App() {
     setActiveId(id)
   }
 
+  function openLauncher(mode: 'apps' | 'gestures') {
+    setLauncher((current) => (current === mode ? null : mode))
+    setShowMap(false)
+    setShowHelp(false)
+    setShowMore(false)
+    setSpaceHeld(false)
+  }
+
+  function closeLauncher() {
+    setLauncher(null)
+    launcherTrigger.current?.focus({ preventScroll: true })
+  }
+
+  function launchApp(app: LauncherApp) {
+    addWindow(app)
+    closeLauncher()
+    setTool('pan')
+    setSelectedIds([])
+  }
+
   function goHome() {
     viewport.current?.scrollTo(home.x, home.y)
   }
@@ -315,6 +442,10 @@ function App() {
     setWorkspace((current) => ({ ...createWorkspace(), note: current.note }))
     setActiveId('welcome')
     setShowMap(false)
+    setShowMore(false)
+    setLauncher(null)
+    setSelectedIds([])
+    setTool('pan')
     goHome()
   }
 
@@ -328,7 +459,7 @@ function App() {
       />
       <div
         ref={viewport}
-        className={`${styles.viewport} ${spaceHeld ? styles.panReady : ''} ${dragging ? styles.dragging : ''}`}
+        className={`${styles.viewport} ${spaceHeld ? styles.panReady : ''} ${dragging ? styles.dragging : ''} ${tool === 'lasso' && !spaceHeld ? styles.selecting : ''}`}
         data-canvas-viewport
         onScroll={(event) => {
           const { scrollLeft: x, scrollTop: y } = event.currentTarget
@@ -336,6 +467,7 @@ function App() {
         }}
         onPointerDownCapture={(event) => {
           if (event.button === 1 || spaceHeld) startGesture(event, 'pan')
+          else if (tool === 'lasso') startGesture(event, 'lasso')
         }}
         onPointerDown={(event) => {
           if (!(event.target as HTMLElement).closest('[data-window-id]'))
@@ -356,17 +488,20 @@ function App() {
           style={{ width: workspace.width, height: workspace.height }}
         >
           {workspace.windows.map((item, index) => {
+            const app = APP_CATALOG.find((entry) => entry.id === item.appId)
             const Icon =
-              item.kind === 'welcome'
+              app?.icon ??
+              (item.kind === 'welcome'
                 ? Flame
                 : item.kind === 'notes'
                   ? StickyNote
-                  : PanelsTopLeft
+                  : PanelsTopLeft)
             return (
               <section
                 key={item.id}
                 data-window-id={item.id}
                 data-active={activeId === item.id}
+                data-selected={selectedIds.includes(item.id)}
                 className={`${styles.window} ${styles[item.kind]}`}
                 style={{
                   left: item.x,
@@ -461,12 +596,14 @@ function App() {
                   ) : (
                     <div className={styles.emptyContent}>
                       <div className={styles.emptyMark}>
-                        <PanelsTopLeft size={29} strokeWidth={1.1} />
+                        <Icon size={29} strokeWidth={1.1} />
                       </div>
-                      <h2>A little possibility.</h2>
-                      <p>Anything could live here.</p>
+                      <h2>{app?.name ?? 'A little possibility.'}</h2>
+                      <p>
+                        {app ? app.description : 'Anything could live here.'}
+                      </p>
                       <span className={styles.emptyCaption}>
-                        MOVE ME. RESIZE ME. MAKE ROOM.
+                        {app ? 'APP PREVIEW' : 'MOVE ME. RESIZE ME. MAKE ROOM.'}
                       </span>
                     </div>
                   )}
@@ -488,37 +625,91 @@ function App() {
               </section>
             )
           })}
+          {selection && (
+            <div
+              className={styles.selection}
+              style={{
+                left: selection.x,
+                top: selection.y,
+                width: selection.width,
+                height: selection.height,
+                zIndex: workspace.windows.length + 1,
+              }}
+            />
+          )}
         </div>
       </div>
-      <div className={styles.toolbar}>
-        <button className={styles.newWindow} onClick={addWindow}>
-          <Plus size={17} />
-          <span>New window</span>
-        </button>
-        <span className={styles.toolbarDivider} />
-        <button
-          title="Space overview"
-          aria-label="Toggle space overview"
-          aria-pressed={showMap}
-          onClick={() => {
+      <div className={styles.docks}>
+        <CanvasTools
+          mode={tool}
+          moreOpen={showMore}
+          onToggleMore={() => {
+            setShowMore(!showMore)
+            setShowMap(false)
+            setShowHelp(false)
+            setLauncher(null)
+          }}
+          onCloseMore={() => setShowMore(false)}
+          showHint={!showMap && !showHelp && !launcher}
+          onModeChange={(mode) => {
+            setTool(mode)
+            if (mode === 'pan') setSelectedIds([])
+            setShowMap(false)
+            setShowHelp(false)
+            setLauncher(null)
+            setShowMore(false)
+          }}
+          mapOpen={showMap}
+          onToggleMap={() => {
             setShowMap(!showMap)
             setShowHelp(false)
+            setLauncher(null)
+            setShowMore(false)
           }}
-        >
-          <Map size={17} />
-        </button>
-        <button
-          title="How to explore"
-          aria-label="How to explore"
-          aria-pressed={showHelp}
-          onClick={() => {
+          onNewWindow={addWindow}
+          onHelp={() => {
             setShowHelp(!showHelp)
             setShowMap(false)
+            setLauncher(null)
+            setShowMore(false)
           }}
+          selectedCount={selectedIds.length}
+        />
+        <nav
+          className={styles.launchDock}
+          aria-label="App launcher"
+          data-launcher-trigger
         >
-          <Compass size={17} />
-        </button>
+          <button
+            ref={launcherTrigger}
+            title="Browse and search apps (Ctrl / ⌘ K)"
+            aria-label="Open app launcher"
+            aria-expanded={launcher === 'apps'}
+            onClick={() => openLauncher('apps')}
+          >
+            <LayoutGrid size={19} />
+            <span>Apps</span>
+          </button>
+          <span className={styles.dockDivider} />
+          <button
+            title="Draw to launch (G)"
+            aria-label="Open gesture launcher"
+            aria-expanded={launcher === 'gestures'}
+            onClick={() => openLauncher('gestures')}
+          >
+            <Spline size={19} />
+            <span>Draw</span>
+          </button>
+        </nav>
       </div>
+      {launcher && (
+        <AppLauncher
+          mode={launcher}
+          onModeChange={setLauncher}
+          onClose={closeLauncher}
+          onLaunch={launchApp}
+        />
+      )}
       {showHelp && (
         <aside className={styles.help}>
           <div className={styles.panelHeading}>

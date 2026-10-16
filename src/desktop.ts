@@ -3,6 +3,7 @@ export type DesktopWindow = Bounds & {
   id: string
   title: string
   kind: 'welcome' | 'notes' | 'empty'
+  appId?: string
   restore?: Bounds
 }
 export type Workspace = {
