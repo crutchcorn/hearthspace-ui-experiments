@@ -4,7 +4,7 @@ This experiment explores a desktop as a place to arrange windows. It runs entire
 
 ## Canvas and coordinates
 
-A native scroll container fills the viewport and hides its scrollbars. Its world is ten screens wide and ten screens tall. At creation, one screen is the browser’s initial viewport size, with a minimum of 960 × 720 pixels. The saved world keeps its dimensions across reloads.
+A native scroll container fills the viewport and hides its scrollbars. Its world starts ten screens wide and ten screens tall. At creation, one screen is the browser’s initial viewport size, with a minimum of 960 × 720 pixels. Arranging windows can expand the world to fit the result. The saved world keeps its dimensions across reloads.
 
 The home viewport starts at 4.5 screen widths and heights into that world. Windows use absolute world coordinates, so ordinary scroll movement also moves the dotted wallpaper. Fixed controls sit above the scrolling viewport in four corners: notifications at top left, device status at top right, canvas tools at bottom left, and the app launcher at bottom right. Device status uses a floating pill; there is no full-width menubar.
 
@@ -12,21 +12,32 @@ The minimap translates pointer positions into world coordinates. Grabbing its vi
 
 Window dragging combines pointer movement with changes in scroll position. This keeps a grabbed window under the pointer while edge scrolling carries it farther across the world. Eight resize handles constrain windows to the world bounds and a minimum size of 280 × 200 pixels. Maximizing fits a window within the current viewport while retaining its previous bounds for restore.
 
-Selection uses a rectangle in world coordinates. In Select mode, the viewport captures pointer input before window controls, then highlights each window whose bounds intersect the rectangle. The selected IDs remain after release until cleared; group movement and arrangement are future work. Space-drag and middle-button dragging temporarily pan even in Select mode.
+Selection uses a rectangle in world coordinates. In Select mode, the viewport captures pointer input before window controls, then highlights each window whose bounds intersect the rectangle. The selected IDs remain after release until cleared; group movement is not implemented. Arrangement operates on every window independently of this selection. Space-drag and middle-button dragging temporarily pan even in Select mode.
+
+## Arranging windows
+
+Arrange gathers all open windows near the current viewport, including offscreen and unselected windows. It first restores the bounds of maximized windows and removes their maximize state. Each window then keeps its width and height.
+
+The grid uses `ceil(sqrt(windowCount))` columns. Each cell uses the largest window width and height, with 24 pixels between cells, so windows of different sizes do not overlap. Placement begins 24 pixels to the right and 96 pixels below the current viewport’s world origin. World bounds grow when necessary to contain the grid.
+
+Placement order follows the windows’ previous vertical positions, then horizontal positions, with the window ID breaking ties; maximized windows use their restored positions for this ordering. The workspace’s window array retains its stacking order. Arranged geometry and any expanded world bounds use the existing workspace persistence.
+
+Running Arrange closes open panels, clears selection, and returns to Pan. The button is disabled when there are no windows, and the arrangement calculation leaves an empty workspace unchanged.
 
 ## Canvas tools and launcher
 
-The fixed canvas dock at the bottom left contains Pan, Select, Map, and More. More shows the window count and exposes new-window creation, navigation help, **Return to starting area**, and **Reset layout**, with disabled rows for future framing and arrangement tools. More scrolls when necessary to fit short viewports.
+The fixed canvas dock at the bottom left contains Pan, Select, Map, and Arrange. Arrange runs immediately; it has no menu. Apps creates preview windows, and the Home key or the map’s Home action returns to the starting viewport.
 
 A separate dock at the bottom right opens Apps or Draw, with its panel aligned to the same right edge. The docks retain their corners at narrow viewport widths, and panels stay within the viewport. Canvas controls have visible labels and targets at least 44 × 48 pixels; launcher controls also expand for coarse pointers.
 
-`App` owns the active canvas mode, selection, and panel visibility, including notifications and device popovers. Opening a panel dismisses panels from the other control groups. The selection hint is hidden while a panel is open. Pointer input outside the launcher, More, or device popover closes it; Escape closes open panels, clears selection, and returns to Pan.
+`App` owns the active canvas mode, selection, and panel visibility, including notifications and device popovers. Opening a panel dismisses panels from the other control groups. The selection hint is hidden while a panel is open. Pointer input outside the launcher or device popover closes it; Escape closes open panels, clears selection, and returns to Pan.
 
 | Shortcut     | Action                                              |
 | ------------ | --------------------------------------------------- |
 | H            | Choose Pan and clear selection.                     |
 | L            | Choose Select.                                      |
 | M            | Toggle the map.                                     |
+| A            | Arrange all windows near the current viewport.      |
 | G            | Open the dedicated gesture pad.                     |
 | N            | Toggle notifications.                               |
 | Ctrl/⌘ K     | Open app search, or close it when already open.     |
@@ -56,20 +67,20 @@ Gesture recognition is intentionally absent. Drawing previews the mark, and the 
 
 ## Source map
 
-| File                                                                              | Responsibility                                                                          |
-| --------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| [`src/desktop.ts`](../src/desktop.ts)                                             | Workspace types, initial layout, storage loading and validation, bounds calculations.   |
-| [`src/App.tsx`](../src/App.tsx)                                                   | Workspace rendering, pointer gestures, viewport navigation, window actions, and saving. |
-| [`src/components/SystemBar.tsx`](../src/components/SystemBar.tsx)                 | Floating device-status pill, popovers, simulated controls, and local clock.             |
-| [`src/components/NotificationInbox.tsx`](../src/components/NotificationInbox.tsx) | Notification trigger, inbox, unread/dismissal state, and sample toasts.                 |
-| [`src/components/Minimap.tsx`](../src/components/Minimap.tsx)                     | Map rendering and pointer capture for dragging the visible canvas area.                 |
-| [`src/components/CanvasTools.tsx`](../src/components/CanvasTools.tsx)             | Canvas mode controls, More actions, and selection status.                               |
-| [`src/components/AppLauncher.tsx`](../src/components/AppLauncher.tsx)             | App grid/list, filtering, keyboard navigation, and launcher views.                      |
-| [`src/components/GesturePad.tsx`](../src/components/GesturePad.tsx)               | Pointer drawing, shortcut assignment, previews, and shortcut persistence.               |
-| [`src/components/launcher-apps.ts`](../src/components/launcher-apps.ts)           | Shared app catalog, icons, descriptions, and colors.                                    |
-| [`src/App.module.css`](../src/App.module.css)                                     | Canvas, windows, and navigation styling.                                                |
-| [`src/components/SystemBar.module.css`](../src/components/SystemBar.module.css)   | Device-status pill and popover styling.                                                 |
-| [`src/index.css`](../src/index.css)                                               | Global viewport and element defaults.                                                   |
+| File                                                                              | Responsibility                                                                              |
+| --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| [`src/desktop.ts`](../src/desktop.ts)                                             | Workspace types, initial layout, storage loading and validation, resizing, and arrangement. |
+| [`src/App.tsx`](../src/App.tsx)                                                   | Workspace rendering, pointer gestures, viewport navigation, window actions, and saving.     |
+| [`src/components/SystemBar.tsx`](../src/components/SystemBar.tsx)                 | Floating device-status pill, popovers, simulated controls, and local clock.                 |
+| [`src/components/NotificationInbox.tsx`](../src/components/NotificationInbox.tsx) | Notification trigger, inbox, unread/dismissal state, and sample toasts.                     |
+| [`src/components/Minimap.tsx`](../src/components/Minimap.tsx)                     | Map rendering and pointer capture for dragging the visible canvas area.                     |
+| [`src/components/CanvasTools.tsx`](../src/components/CanvasTools.tsx)             | Canvas mode controls, arrangement action, and selection status.                             |
+| [`src/components/AppLauncher.tsx`](../src/components/AppLauncher.tsx)             | App grid/list, filtering, keyboard navigation, and launcher views.                          |
+| [`src/components/GesturePad.tsx`](../src/components/GesturePad.tsx)               | Pointer drawing, shortcut assignment, previews, and shortcut persistence.                   |
+| [`src/components/launcher-apps.ts`](../src/components/launcher-apps.ts)           | Shared app catalog, icons, descriptions, and colors.                                        |
+| [`src/App.module.css`](../src/App.module.css)                                     | Canvas, windows, and navigation styling.                                                    |
+| [`src/components/SystemBar.module.css`](../src/components/SystemBar.module.css)   | Device-status pill and popover styling.                                                     |
+| [`src/index.css`](../src/index.css)                                               | Global viewport and element defaults.                                                       |
 
 ## Saved state
 
@@ -77,4 +88,4 @@ The workspace is stored in `localStorage` under `hearthspace-playground-v1`. It 
 
 Gesture shortcuts are stored separately under `hearthspace-gesture-shortcuts-v1`. Loading accepts known catalog app IDs, unique assignments, and finite points within the pad bounds. If no valid shortcuts remain, the default examples are used. A storage failure leaves a newly saved mark available in the currently open gesture pad, but it will not persist when that component is remounted.
 
-Viewport travel, selection, open panels, search text, list/grid choice, notifications, and simulated system settings remain temporary. Notification read/dismissal state and preview items reset to the initial samples on reload. Reset layout recreates the starting arrangement while preserving the scratchpad note and separately stored gesture shortcuts. If storage is unavailable, the current desktop session remains usable without persistence.
+Viewport travel, selection, open panels, search text, list/grid choice, notifications, and simulated system settings remain temporary. Notification read/dismissal state and preview items reset to the initial samples on reload. If storage is unavailable, the current desktop session remains usable without persistence.

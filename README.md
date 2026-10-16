@@ -18,12 +18,12 @@ Open the local address printed in the terminal. The app fills the browser viewpo
 ## Explore your space
 
 - **Pan:** drag the background, scroll with a trackpad, or drag with the middle mouse button. Hold Space and drag to pan over a window. Choose **Pan** or press H to leave selection mode.
-- **Select:** choose **Select** or press L, then drag a rectangle across windows. Intersecting windows are highlighted and counted. Press Escape to clear the selection and return to panning; group actions are not implemented yet.
+- **Select:** choose **Select** or press L, then drag a rectangle across windows. Intersecting windows are highlighted and counted. Press Escape to clear the selection and return to panning; moving a selected group is not implemented yet.
 - **Move:** drag a window’s title bar. Hold it near a screen edge to keep traveling across the canvas.
 - **Resize:** drag any of a window’s four edges or four corners.
-- **Manage windows:** use the title-bar controls to maximize, restore, or close a window; choose **More → New window** to add another. **More** also contains navigation help and disabled placeholders for future canvas tools.
-- **Find your way:** choose **Map** or press M, then drag the map’s visible-area rectangle to pan continuously, or press elsewhere on the map and keep dragging to explore. Use the Home key, the map’s **Home** action, or **More → Return to starting area** to return to the starting area.
-- **Start fresh:** choose **More → Reset layout**. It restores the starting windows while keeping your scratchpad text.
+- **Manage windows:** use the title-bar controls to maximize, restore, or close a window. Open **Apps** to add an app preview window.
+- **Arrange:** choose **Arrange** or press A to gather every open window into a grid near your current view, including windows outside the view or selection. Windows keep their sizes; maximized windows return to their previous size. The arrangement is saved with your workspace.
+- **Find your way:** choose **Map** or press M, then drag the map’s visible-area rectangle to pan continuously, or press elsewhere on the map and keep dragging to explore. Use the Home key or the map’s **Home** action to return to the starting area.
 
 Controls stay in the four corners, leaving the top edge and middle of the canvas open:
 
@@ -31,7 +31,7 @@ Controls stay in the four corners, leaving the top edge and middle of the canvas
 | ------------ | -------------------------------------------------------------------- |
 | Top left     | Notifications.                                                       |
 | Top right    | A floating device-status pill with Wi-Fi, sound, battery, and clock. |
-| Bottom left  | Canvas tools: Pan, Select, Map, and More.                            |
+| Bottom left  | Canvas tools: Pan, Select, Map, and Arrange.                         |
 | Bottom right | Apps and Draw, with the launcher opening above them.                 |
 
 The docks keep their corners on narrow screens. Visible labels and large targets keep the main tools usable with touch, a trackpad, or a mouse. Escape closes open panels and clears the current selection.
@@ -50,6 +50,6 @@ Open **Notifications** in the top-left corner or press N. The inbox starts with 
 
 Choose **Preview notification** to add a sample and show a toast below the notification button. The toast disappears after six seconds; dismissing the toast keeps the notification in the inbox. These notifications are simulated and reset when the page reloads. N is inactive while typing or using the launcher.
 
-Window positions, sizes, scratchpad text, and saved gesture shortcuts persist in this browser’s local storage. Resetting the layout keeps scratchpad text and gesture shortcuts. Wi-Fi, sound, and battery controls are simulated; the clock uses your device’s local time.
+Window positions, sizes, scratchpad text, and saved gesture shortcuts persist in this browser’s local storage. Wi-Fi, sound, and battery controls are simulated; the clock uses your device’s local time.
 
 For development commands, see [CONTRIBUTING.md](CONTRIBUTING.md). The [technical documentation](docs/README.md) describes the experiment’s structure.
