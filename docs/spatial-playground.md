@@ -6,11 +6,13 @@ This experiment explores a desktop as a place to arrange windows. It runs entire
 
 A native scroll container fills the viewport and hides its scrollbars. Its world starts ten screens wide and ten screens tall. At creation, one screen is the browser’s initial viewport size, with a minimum of 960 × 720 pixels. Arranging windows can expand the world to fit the result. The saved world keeps its dimensions across reloads.
 
-The home viewport starts at 4.5 screen widths and heights into that world. Windows use absolute world coordinates, so ordinary scroll movement also moves the gridded wallpaper. Fixed controls sit above the scrolling viewport in four corners: notifications at top left, device status at top right, canvas tools at bottom left, and the app launcher at bottom right. Device status uses a clock and segmented instrument cluster; there is no full-width menubar.
+The home viewport starts at 4.5 screen widths and heights into that world. Windows use absolute world coordinates, so ordinary scroll movement also moves the dotted wallpaper. Fixed controls sit above the scrolling viewport in four corners: notifications at top left, device status at top right, canvas tools at bottom left, and the app launcher at bottom right. Device status uses a floating clock above separate glass status modules; there is no full-width menubar.
 
 The minimap translates pointer positions into world coordinates. Grabbing its visible-area rectangle preserves the pointer’s offset within the viewport; pressing elsewhere centers the viewport there. Pointer capture keeps navigation continuous outside the map until release, and the native scroll container clamps travel at the world edges.
 
-Dragging a window’s vertical spine combines pointer movement with changes in scroll position. This keeps a grabbed window under the pointer while edge scrolling carries it farther across the world. Eight resize handles constrain windows to the world bounds and a minimum size of 280 × 200 pixels. Maximizing uses the current viewport with clearance for the navigator, clock, and app strip, while retaining previous bounds for restore. The same minimum window dimensions still apply on small viewports.
+Dragging a window’s title bar combines pointer movement with changes in scroll position. This keeps a grabbed window under the pointer while edge scrolling carries it farther across the world. The floating title rail is 44 pixels high, increasing to 50 pixels for coarse pointers. Eight resize handles constrain windows to the world bounds and a minimum size of 280 × 200 pixels.
+
+Maximizing uses the current viewport with clearance for the corner controls, while retaining previous bounds for restore. The shared `windowClearance` uses 24-pixel side margins, 176 pixels above, and 160 below at desktop widths; at 760 pixels or less, these become 12, 158, and 176 pixels. Revealing a maximized window uses the same offsets; ordinary windows are centered with the top and side clearances as minimums. The same minimum window dimensions still apply on small viewports.
 
 Selection uses a rectangle in world coordinates. In Select mode, the viewport captures pointer input before window controls, then highlights each window whose bounds intersect the rectangle. The selected IDs remain after release until cleared; group movement is not implemented. Arrangement operates on every window independently of this selection. Space-drag and middle-button dragging temporarily pan even in Select mode.
 
@@ -28,7 +30,9 @@ Running Arrange closes open panels, clears selection, and returns to Move (pan m
 
 The fixed canvas dock at the bottom left contains Move (pan mode), Select, Map, and Arrange. Arrange runs immediately; it has no menu. Apps creates preview windows, and the Home key or the map’s Home action returns to the starting viewport.
 
-A separate dock at the bottom right places preset Browser, Files, and Notes favorites to the left of Apps, followed by other apps with open windows. Running favorites reuse their existing named tab. Each running app shows its window count, and the app containing the active window is marked. Apps opens the launcher, where an Apps/Draw side rail selects browsing or the gesture pad. The panel aligns with the dock’s right edge.
+The navigator occupies 228 × 120 pixels on desktop and 198 × 77 pixels at widths of 760 pixels or less. The map sits 160 pixels above the viewport bottom on desktop and 176 pixels above it on narrow screens, keeping the controls reachable.
+
+A separate dock at the bottom right places preset Browser, Files, and Notes favorites to the left of Apps, followed by other apps with open windows. Running favorites reuse their existing named tile. Each running app shows its window count, and the app containing the active window is marked. Apps opens the launcher, where an Apps/Draw toggle in the command bar selects browsing or the gesture pad. The panel aligns with the dock’s right edge.
 
 The app strip scrolls horizontally when crowded. At 760 pixels wide or less, it occupies a row above Apps so the bottom-left canvas tools remain available. Panels and the selection hint reserve space for that row. The launcher panel sits above the entire dock and stays within the viewport. Canvas controls have visible labels and targets at least 44 × 44 pixels; launcher controls retain targets at least 44 pixels high across input types.
 
@@ -47,15 +51,15 @@ The app strip scrolls horizontally when crowded. At 760 pixels wide or less, it 
 | Home         | Return to the starting viewport.                   |
 | Escape       | Close a panel, or clear selection and choose Move. |
 
-Single-letter shortcuts, including N, are suspended while the launcher is open or a text input is active. The launcher filters a local catalog by app name and description, supports a two-column app index and a single-column list, and presents search results as a list. Arrow keys navigate apps and Enter launches the selection. Up and Down move two entries in the two-column index and one entry in list and search views. Fine-pointer devices focus search when the Apps view opens; coarse-pointer devices avoid automatically opening the software keyboard.
+Single-letter shortcuts, including N, are suspended while the launcher is open or a text input is active. The launcher filters a local catalog by app name and description, supports a four-column app gallery and a single-column list, and presents search results as a list. Arrow keys navigate apps and Enter launches the selection. Up and Down move four entries in the gallery and one entry in list and search views. Fine-pointer devices focus search when the Apps view opens; coarse-pointer devices avoid automatically opening the software keyboard.
 
-Selecting a running app opens a popover listing its window instances, even when only one exists. Selecting an instance raises and focuses that window, then scrolls toward its center with clearance for top controls and clamping at the world edges. The list groups the original scratchpad with Notes and includes Workspace and generic Windows groups so every workspace window remains reachable. Catalog apps offer **New window** to create another instance; a favorite with no windows launches directly. Arrow Down on a running app’s tab opens the picker and focuses its first window. Escape closes the picker and returns focus to that tab.
+Selecting a running app opens a popover listing its window instances, even when only one exists. Selecting an instance raises and focuses that window, then scrolls it into view using the shared window clearance and clamping at the world edges. The list groups the original scratchpad with Notes and includes Workspace and generic Windows groups so every workspace window remains reachable. Catalog apps offer **New window** to create another instance; a favorite with no windows launches directly. Arrow Down on a running app’s tile opens the picker and focuses its first window. Escape closes the picker and returns focus to that tile.
 
 Launching from a non-running favorite, **New window**, an app result, or the gesture pad creates an ordinary movable, resizable preview window with the catalog app’s title, icon, and description. Each uses the same launch action in `App`. There is no operating-system launch integration, favorite-editing UI, or separate running-app persistence; the dock derives its groups from workspace windows.
 
 ## Notifications
 
-Notifications open from **Activity** in the top-left corner or with N. An action identifies a target app and asks `App` to reveal its window. The parent first looks for a window with that app ID, including the original scratchpad for Notes. When found, it raises the window and scrolls toward its center, with clearance for the top controls and clamping at the world edges. This navigation uses smooth scrolling unless reduced motion is preferred. If no matching window exists, it creates an app preview near the current viewport.
+Notifications open from **Activity** in the top-left corner or with N. An action identifies a target app and asks `App` to reveal its window. The parent first looks for a window with that app ID, including the original scratchpad for Notes. When found, it raises the window and uses the same reveal action as the running-window picker. This navigation uses smooth scrolling unless reduced motion is preferred. If no matching window exists, it creates an app preview near the current viewport.
 
 `NotificationInbox` owns three initial sample notifications, unread flags, dismissals, and an optional toast. Opening the inbox does not mark items read. Following an item’s action marks it read; **Mark all read** changes all unread flags, while a row’s dismiss button removes that item. Pointer input outside the inbox closes it. Escape closes the inbox and any active toast.
 
@@ -75,18 +79,18 @@ Gesture recognition is intentionally absent. Drawing previews the mark, and the 
 | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
 | [`src/desktop.ts`](../src/desktop.ts)                                                   | Workspace types, initial layout, storage loading and validation, resizing, and arrangement. |
 | [`src/App.tsx`](../src/App.tsx)                                                         | Workspace rendering, pointer gestures, viewport navigation, window actions, and saving.     |
-| [`src/components/SystemBar.tsx`](../src/components/SystemBar.tsx)                       | Local 24-hour clock, device instruments, popovers, and simulated controls.                  |
+| [`src/components/SystemBar.tsx`](../src/components/SystemBar.tsx)                       | Local 24-hour clock, status modules, popovers, and simulated controls.                      |
 | [`src/components/NotificationInbox.tsx`](../src/components/NotificationInbox.tsx)       | Notification trigger, inbox, unread/dismissal state, and sample toasts.                     |
 | [`src/components/Minimap.tsx`](../src/components/Minimap.tsx)                           | Map rendering and pointer capture for dragging the visible canvas area.                     |
 | [`src/components/CanvasTools.tsx`](../src/components/CanvasTools.tsx)                   | Canvas mode controls, arrangement action, and selection status.                             |
 | [`src/components/WindowContent.tsx`](../src/components/WindowContent.tsx)               | Workspace overview, editable scratchpad, and simulated app interiors.                       |
 | [`src/components/LauncherDock.tsx`](../src/components/LauncherDock.tsx)                 | Favorites, running-app groups, window instance picker, and the Apps trigger.                |
-| [`src/components/AppLauncher.tsx`](../src/components/AppLauncher.tsx)                   | App index/list, filtering, keyboard navigation, and launcher views.                         |
+| [`src/components/AppLauncher.tsx`](../src/components/AppLauncher.tsx)                   | App gallery/list, filtering, keyboard navigation, and launcher views.                       |
 | [`src/components/GesturePad.tsx`](../src/components/GesturePad.tsx)                     | Pointer drawing, shortcut assignment, previews, and shortcut persistence.                   |
 | [`src/components/launcher-apps.ts`](../src/components/launcher-apps.ts)                 | Shared app catalog, icons, and descriptions.                                                |
 | [`src/App.module.css`](../src/App.module.css)                                           | Canvas, windows, and navigation styling.                                                    |
 | [`src/components/WindowContent.module.css`](../src/components/WindowContent.module.css) | Document surfaces and simulated app interior styling.                                       |
-| [`src/components/SystemBar.module.css`](../src/components/SystemBar.module.css)         | Device-instrument and popover styling.                                                      |
+| [`src/components/SystemBar.module.css`](../src/components/SystemBar.module.css)         | Floating clock, glass status modules, and popover styling.                                  |
 | [`src/index.css`](../src/index.css)                                                     | Shared visual tokens, typography, viewport, and element defaults.                           |
 
 ## Saved state
