@@ -1,0 +1,444 @@
+.bar {
+  position: fixed;
+  z-index: 1000;
+  inset: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 52px;
+  padding: 0 22px;
+  border-bottom: 1px solid #deded5;
+  background: #f9f8f4e6;
+  backdrop-filter: blur(24px);
+  color: #363a34;
+  font-size: 12px;
+  line-height: 1;
+  user-select: none;
+}
+
+.leftGroup,
+.rightGroup {
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+.leftGroup {
+  gap: 20px;
+}
+
+.rightGroup {
+  gap: 5px;
+}
+
+.bar button {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  transition: background 120ms ease;
+}
+
+.bar button:hover,
+.bar button.active {
+  background: #e8e8e180;
+}
+
+.bar button:focus-visible,
+.bar input:focus-visible {
+  outline: 2px solid #9e6754;
+  outline-offset: 3px;
+}
+
+.bar .brand {
+  gap: 9px;
+  padding: 0;
+  font-size: 13px;
+  font-weight: 650;
+  letter-spacing: -0.25px;
+}
+
+.bar .brand:hover {
+  background: transparent;
+}
+
+.brandMark {
+  display: grid;
+  width: 26px;
+  height: 26px;
+  place-items: center;
+  border: 1px solid #c67f5f33;
+  border-radius: 7px;
+  background: #e7ba9e;
+  color: #965039;
+}
+
+.divider {
+  width: 1px;
+  height: 14px;
+  flex-shrink: 0;
+  background: #d7d9d1;
+}
+
+.rightGroup > .divider {
+  margin: 0 11px 0 8px;
+}
+
+.anchor {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.bar .workspaceButton {
+  gap: 9px;
+  min-height: 31px;
+  padding: 0 8px;
+  margin-left: -8px;
+  color: #72776e;
+}
+
+.bar .iconButton {
+  width: 31px;
+  height: 31px;
+  padding: 0;
+}
+
+.bar .clockButton {
+  gap: 10px;
+  height: 31px;
+  padding: 0 7px;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.date {
+  margin-right: 1px;
+}
+
+.popover {
+  position: absolute;
+  top: 42px;
+  right: 0;
+  overflow: hidden;
+  width: 260px;
+  box-sizing: border-box;
+  border: 1px solid #d8d9cf;
+  border-radius: 11px;
+  background: #fcfbf7f5;
+  box-shadow:
+    0 10px 34px #3d44351a,
+    0 2px 5px #3d443508;
+  text-align: left;
+  line-height: 1.4;
+  backdrop-filter: blur(26px);
+}
+
+.workspacePopover {
+  right: auto;
+  left: -8px;
+  width: 246px;
+}
+
+.panelHeading {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 17px 17px 14px;
+  border-bottom: 1px solid #e7e8e0;
+}
+
+.panelHeading strong {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.panelHeading > span {
+  color: #8b8f84;
+  font-size: 10px;
+}
+
+.menuItems {
+  padding: 6px;
+}
+
+.bar .menuItems button {
+  display: flex;
+  justify-content: start;
+  gap: 11px;
+  width: 100%;
+  padding: 11px 10px;
+  font-size: 11px;
+  text-align: left;
+}
+
+.menuItems svg {
+  color: #7a8271;
+}
+
+.menuEndIcon {
+  margin-left: auto;
+}
+
+.systemPopover {
+  padding: 17px;
+}
+
+.toggleRow,
+.settingHeading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  font-size: 12px;
+}
+
+.toggleRow strong,
+.settingHeading strong,
+.settingHeading label {
+  font-weight: 600;
+}
+
+.settingHeading > span {
+  color: #868c7c;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.toggle {
+  appearance: none;
+  position: relative;
+  width: 29px;
+  height: 17px;
+  margin: 0;
+  border: 0;
+  border-radius: 12px;
+  background: #ced1c7;
+  cursor: pointer;
+}
+
+.toggle::before {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 120ms ease;
+}
+
+.toggle:checked {
+  background: #77866d;
+}
+
+.toggle:checked::before {
+  transform: translateX(12px);
+}
+
+.networkRow {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 21px 0 17px;
+  color: #74816a;
+}
+
+.networkRow > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.networkRow strong {
+  font-size: 11px;
+  font-weight: 500;
+  color: #4d5547;
+}
+
+.networkRow span {
+  font-size: 9px;
+  color: #94998b;
+}
+
+.networkCheck {
+  margin-left: auto;
+}
+
+.previewNote {
+  margin: 0;
+  color: #969b8d;
+  font-size: 9px;
+}
+
+.volumeRow {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin: 21px 0;
+  color: #858e7d;
+}
+
+.volumeSlider {
+  flex: 1;
+  min-width: 0;
+  height: 4px;
+  margin: 0;
+  accent-color: #78856c;
+  cursor: pointer;
+}
+
+.batteryMeter {
+  height: 6px;
+  overflow: hidden;
+  margin: 20px 0 15px;
+  border-radius: 6px;
+  background: #e6e8df;
+}
+
+.batteryMeter > span {
+  display: block;
+  width: 87%;
+  height: 100%;
+  border-radius: inherit;
+  background: #849376;
+}
+
+.batteryDescription {
+  margin: 0 0 5px;
+  color: #69745e;
+  font-size: 11px;
+}
+
+.calendarPopover {
+  width: 268px;
+  padding: 19px 15px 14px;
+}
+
+.calendarHeading {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0 7px 15px;
+}
+
+.calendarHeading strong {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.calendarHeading > span {
+  font-size: 10px;
+  color: #92998a;
+}
+
+.calendar {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 3px 0;
+  font-size: 11px;
+}
+
+.calendar > span {
+  display: grid;
+  width: 29px;
+  height: 29px;
+  place-items: center;
+  justify-self: center;
+}
+
+.calendar .weekday {
+  height: 25px;
+  color: #9ca292;
+  font-size: 9px;
+}
+
+.today {
+  border-radius: 50%;
+  background: #7b866c;
+  color: #fff;
+}
+
+.calendarFooter {
+  margin: 15px 7px 0;
+  padding-top: 13px;
+  border-top: 1px solid #e7e8e0;
+  color: #969b8d;
+  font-size: 9px;
+}
+
+@media (width <= 700px) {
+  .bar {
+    padding-inline: 14px;
+  }
+
+  .leftGroup {
+    gap: 13px;
+  }
+
+  .workspaceLabel,
+  .date {
+    display: none;
+  }
+
+  .bar .workspaceButton {
+    margin-left: -5px;
+    padding: 0 4px;
+  }
+
+  .rightGroup {
+    gap: 1px;
+  }
+
+  .rightGroup > .divider {
+    margin-inline: 6px;
+  }
+
+  .systemPopover {
+    position: fixed;
+    top: 56px;
+    right: 14px;
+  }
+
+  .workspacePopover {
+    left: -130px;
+  }
+}
+
+@media (width <= 390px) {
+  .bar {
+    padding-inline: 10px;
+  }
+
+  .bar .brand {
+    gap: 6px;
+    font-size: 11px;
+  }
+
+  .leftGroup {
+    gap: 8px;
+  }
+
+  .bar .iconButton {
+    width: 27px;
+  }
+
+  .bar .clockButton {
+    gap: 5px;
+    padding-inline: 3px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bar button,
+  .toggle::before {
+    transition: none;
+  }
+}
