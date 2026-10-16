@@ -33,4 +33,12 @@ See [the spatial playground architecture](docs/spatial-playground.md) for file o
 
 There are currently no committed automated tests. Use browser interaction checks for this prototype: pan in both axes, move and resize windows at all edges and corners, maximize and restore, add and close windows, navigate with the Home key and map dragging, and open the system dropdowns. Check that dragging the map’s visible-area rectangle does not jump on grab, continues outside the map until release, and stops on release. Check that window geometry and edited scratchpad text survive reload, and that resetting the layout preserves the text.
 
+For the launcher and canvas tools, verify these flows at desktop and narrow touch-sized viewports:
+
+- Switch between Pan (H) and Select (L), drag a selection across windows, and clear it with Escape. Space-drag and middle-button dragging should still pan in selection mode.
+- Open Map (M), More, help, Apps (Ctrl/⌘ K), and Draw (G). Check that switching panels dismisses the previous canvas or launcher panel and keeps the selection hint from covering it.
+- Browse the app grid and list, filter by name or description, try an empty search, navigate with arrow keys, and launch with Enter. A launch should add a labeled preview window near the current viewport.
+- Draw on the gesture pad, retry, save a custom shortcut for an app, reopen the launcher, and reload. Verify that the custom mark persists and replaces that app’s previous mark. Drawing alone should not launch an app or claim to recognize its shape.
+- Check pointer drawing, touch targets, panel scrolling on short screens, and keyboard focus when closing the launcher. Keep app and gesture entry points available without relying on hover.
+
 Add focused regression coverage when behavior becomes difficult to verify manually or a bug warrants it.
