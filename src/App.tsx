@@ -355,19 +355,6 @@ function App() {
           className={styles.world}
           style={{ width: workspace.width, height: workspace.height }}
         >
-          <div
-            className={styles.spaceLabel}
-            style={{
-              left: home.x + workspace.width * 0.01,
-              top: home.y + 100,
-            }}
-          >
-            <span className={styles.eyebrow}>
-              <span /> YOUR PERSONAL SPACE
-            </span>
-            <h1>A little room to think.</h1>
-            <p>Spread out. Settle in. Make it yours.</p>
-          </div>
           {workspace.windows.map((item, index) => {
             const Icon =
               item.kind === 'welcome'
@@ -503,13 +490,6 @@ function App() {
           })}
         </div>
       </div>
-      <div className={styles.location}>
-        <span className={styles.locationDot} /> PERSONAL SPACE{' '}
-        <span className={styles.locationSeparator}>/</span>
-        <span className={styles.coordinates}>
-          {Math.round(view.x - home.x)}, {Math.round(view.y - home.y)}
-        </span>
-      </div>
       <div className={styles.toolbar}>
         <button className={styles.newWindow} onClick={addWindow}>
           <Plus size={17} />
@@ -538,10 +518,6 @@ function App() {
         >
           <Compass size={17} />
         </button>
-      </div>
-      <div className={styles.experiment}>
-        <span>EXPERIMENT 001</span>
-        <span>Space to play.</span>
       </div>
       {showHelp && (
         <aside className={styles.help}>
