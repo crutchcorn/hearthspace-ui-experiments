@@ -23,10 +23,6 @@
   height: 100%;
 }
 
-.leftGroup {
-  gap: 20px;
-}
-
 .rightGroup {
   gap: 5px;
 }
@@ -54,29 +50,6 @@
 .bar input:focus-visible {
   outline: 2px solid #9e6754;
   outline-offset: 3px;
-}
-
-.bar .brand {
-  gap: 9px;
-  padding: 0;
-  font-size: 13px;
-  font-weight: 650;
-  letter-spacing: -0.25px;
-}
-
-.bar .brand:hover {
-  background: transparent;
-}
-
-.brandMark {
-  display: grid;
-  width: 26px;
-  height: 26px;
-  place-items: center;
-  border: 1px solid #c67f5f33;
-  border-radius: 7px;
-  background: #e7ba9e;
-  color: #965039;
 }
 
 .divider {
@@ -176,6 +149,10 @@
   padding: 11px 10px;
   font-size: 11px;
   text-align: left;
+}
+
+.bar .menuItems .textOnlyAction {
+  padding-left: 37px;
 }
 
 .menuItems svg {
@@ -379,11 +356,6 @@
     padding-inline: 14px;
   }
 
-  .leftGroup {
-    gap: 13px;
-  }
-
-  .workspaceLabel,
   .date {
     display: none;
   }
@@ -408,22 +380,13 @@
   }
 
   .workspacePopover {
-    left: -130px;
+    left: -5px;
   }
 }
 
 @media (width <= 390px) {
   .bar {
     padding-inline: 10px;
-  }
-
-  .bar .brand {
-    gap: 6px;
-    font-size: 11px;
-  }
-
-  .leftGroup {
-    gap: 8px;
   }
 
   .bar .iconButton {

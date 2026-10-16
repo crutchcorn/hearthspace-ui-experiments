@@ -4,8 +4,6 @@ import {
   BatteryFull,
   Check,
   ChevronDown,
-  Flame,
-  House,
   Plus,
   RotateCcw,
   Volume2,
@@ -83,18 +81,6 @@ export default function SystemBar({
   return (
     <header className={styles.bar}>
       <div className={styles.leftGroup}>
-        <button
-          type="button"
-          className={styles.brand}
-          onClick={() => runAction(onHome)}
-          title="Return to the center of your space"
-        >
-          <span className={styles.brandMark}>
-            <Flame size={16} strokeWidth={1.7} />
-          </span>
-          <span>Hearthspace</span>
-        </button>
-        <span className={styles.divider} />
         <div className={styles.anchor} data-system-popover-root>
           <button
             type="button"
@@ -103,7 +89,7 @@ export default function SystemBar({
             aria-label="Personal space menu"
             aria-expanded={openPanel === 'workspace'}
           >
-            <span className={styles.workspaceLabel}>Personal space</span>
+            <span>Personal space</span>
             <ChevronDown size={12} />
           </button>
           {openPanel === 'workspace' && (
@@ -118,8 +104,11 @@ export default function SystemBar({
                   <span>Add a window</span>
                   <ArrowUpRight size={12} className={styles.menuEndIcon} />
                 </button>
-                <button type="button" onClick={() => runAction(onHome)}>
-                  <House size={16} />
+                <button
+                  type="button"
+                  className={styles.textOnlyAction}
+                  onClick={() => runAction(onHome)}
+                >
                   <span>Return home</span>
                 </button>
                 <button type="button" onClick={() => runAction(onReset)}>

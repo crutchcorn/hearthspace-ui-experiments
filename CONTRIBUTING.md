@@ -31,6 +31,6 @@ See [the spatial playground architecture](docs/spatial-playground.md) for file o
 
 ## Verify interactions
 
-There are currently no committed automated tests. Use browser interaction checks for this prototype: pan in both axes, move and resize windows at all edges and corners, maximize and restore, add and close windows, navigate with Home and the map, and open the system dropdowns. Check that window geometry and edited scratchpad text survive reload, and that resetting the layout preserves the text.
+There are currently no committed automated tests. Use browser interaction checks for this prototype: pan in both axes, move and resize windows at all edges and corners, maximize and restore, add and close windows, navigate with the Home key and map dragging, and open the system dropdowns. Check that dragging the map’s visible-area rectangle does not jump on grab, continues outside the map until release, and stops on release. Check that window geometry and edited scratchpad text survive reload, and that resetting the layout preserves the text.
 
 Add focused regression coverage when behavior becomes difficult to verify manually or a bug warrants it.

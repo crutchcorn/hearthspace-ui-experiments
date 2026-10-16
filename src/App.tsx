@@ -12,7 +12,6 @@ import {
   Expand,
   Flame,
   Hand,
-  House,
   Map,
   Maximize2,
   MousePointer2,
@@ -25,6 +24,7 @@ import {
   X,
 } from 'lucide-react'
 import SystemBar from './components/SystemBar'
+import Minimap from './components/Minimap'
 import {
   clamp,
   createWorkspace,
@@ -517,13 +517,6 @@ function App() {
         </button>
         <span className={styles.toolbarDivider} />
         <button
-          title="Return home (Home)"
-          aria-label="Return home"
-          onClick={goHome}
-        >
-          <House size={17} />
-        </button>
-        <button
           title="Space overview"
           aria-label="Toggle space overview"
           aria-pressed={showMap}
@@ -598,43 +591,13 @@ function App() {
             </h2>
             <span>{workspace.windows.length} windows</span>
           </div>
-          <button
-            className={styles.minimap}
-            aria-label="Navigate the workspace map"
-            onClick={(event) => {
-              const rect = event.currentTarget.getBoundingClientRect()
-              viewport.current?.scrollTo(
-                ((event.clientX - rect.left) / rect.width) * workspace.width -
-                  view.width / 2,
-                ((event.clientY - rect.top) / rect.height) * workspace.height -
-                  view.height / 2,
-              )
-            }}
-          >
-            {workspace.windows.map((item) => (
-              <span
-                key={item.id}
-                className={styles.mapWindow}
-                style={{
-                  left: `${(item.x / workspace.width) * 100}%`,
-                  top: `${(item.y / workspace.height) * 100}%`,
-                  width: `${(item.width / workspace.width) * 100}%`,
-                  height: `${(item.height / workspace.height) * 100}%`,
-                }}
-              />
-            ))}
-            <span
-              className={styles.mapViewport}
-              style={{
-                left: `${(view.x / workspace.width) * 100}%`,
-                top: `${(view.y / workspace.height) * 100}%`,
-                width: `${(view.width / workspace.width) * 100}%`,
-                height: `${(view.height / workspace.height) * 100}%`,
-              }}
-            />
-          </button>
+          <Minimap
+            workspace={workspace}
+            view={view}
+            onNavigate={(x, y) => viewport.current?.scrollTo(x, y)}
+          />
           <div className={styles.mapFooter}>
-            <span>Click anywhere to travel</span>
+            <span>Drag the map to explore</span>
             <button onClick={goHome}>
               <RotateCcw size={12} /> Home
             </button>
