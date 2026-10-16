@@ -74,16 +74,27 @@ function App() {
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [selection, setSelection] = useState<Bounds | null>(null)
   const [launcher, setLauncher] = useState<'apps' | 'gestures' | null>(null)
+  const [dockAppId, setDockAppId] = useState<string | null>(null)
+  const [revealRequest, setRevealRequest] = useState<{
+    id: string
+    left: number
+    top: number
+  } | null>(null)
   const launcherTrigger = useRef<HTMLButtonElement>(null)
+  const windowElements = useRef(new Map<string, HTMLElement>())
   const viewport = useRef<HTMLDivElement>(null)
   const gesture = useRef<Gesture | null>(null)
   const captureTarget = useRef<Element | null>(null)
   const latestPointer = useRef({ x: 0, y: 0 })
   const home = workspace.home
+  const focusedWindowId = workspace.windows.some((item) => item.id === activeId)
+    ? activeId
+    : (workspace.windows.at(-1)?.id ?? null)
 
-  const closeTopPanels = useCallback(() => {
+  const closePopovers = useCallback(() => {
     setNotificationsOpen(false)
     setSystemPanel(null)
+    setDockAppId(null)
   }, [])
 
   const arrangeAllWindows = useCallback(() => {
@@ -106,13 +117,26 @@ function App() {
     setTool('pan')
     setShowMap(false)
     setLauncher(null)
-    closeTopPanels()
+    closePopovers()
     setWorkspace((current) => arrangeWindows(current, origin))
-  }, [closeTopPanels])
+  }, [closePopovers])
 
   useLayoutEffect(() => {
     viewport.current?.scrollTo(home.x, home.y)
   }, [home.x, home.y])
+
+  useLayoutEffect(() => {
+    if (!revealRequest) return
+    // Focus after restacking so React's focus restoration cannot cancel the pan.
+    windowElements.current.get(revealRequest.id)?.focus({ preventScroll: true })
+    viewport.current?.scrollTo({
+      left: revealRequest.left,
+      top: revealRequest.top,
+      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches
+        ? 'instant'
+        : 'smooth',
+    })
+  }, [revealRequest])
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -139,13 +163,13 @@ function App() {
         if (launcher === 'apps')
           launcherTrigger.current?.focus({ preventScroll: true })
         setShowMap(false)
-        closeTopPanels()
+        closePopovers()
         return
       }
       if (event.key === 'Escape') {
         setShowMap(false)
         setLauncher(null)
-        closeTopPanels()
+        closePopovers()
         setTool('pan')
         setSelectedIds([])
         setSelection(null)
@@ -167,25 +191,26 @@ function App() {
         return
       }
       if (event.key.toLowerCase() === 'h') {
-        closeTopPanels()
+        closePopovers()
         setTool('pan')
         setSelectedIds([])
       }
       if (event.key.toLowerCase() === 'l') {
-        closeTopPanels()
+        closePopovers()
         setTool('lasso')
         setShowMap(false)
       }
       if (event.key.toLowerCase() === 'm') {
-        closeTopPanels()
+        closePopovers()
         setShowMap((current) => !current)
       }
       if (event.key.toLowerCase() === 'g') {
-        closeTopPanels()
+        closePopovers()
         setLauncher('gestures')
         setShowMap(false)
       }
       if (event.key.toLowerCase() === 'n') {
+        setDockAppId(null)
         setNotificationsOpen((current) => !current)
         setSystemPanel(null)
         setShowMap(false)
@@ -221,7 +246,7 @@ function App() {
       window.removeEventListener('keyup', keyup)
       window.removeEventListener('blur', release)
     }
-  }, [home.x, home.y, launcher, closeTopPanels, arrangeAllWindows])
+  }, [home.x, home.y, launcher, closePopovers, arrangeAllWindows])
 
   useEffect(() => {
     if (!launcher) return
@@ -451,7 +476,7 @@ function App() {
   }
 
   function toggleLauncher() {
-    closeTopPanels()
+    closePopovers()
     setLauncher((current) => (current ? null : 'apps'))
     setShowMap(false)
     setSpaceHeld(false)
@@ -465,30 +490,25 @@ function App() {
   function launchApp(app: LauncherApp) {
     addWindow(app)
     closeLauncher()
-    closeTopPanels()
+    closePopovers()
     setShowMap(false)
     setSpaceHeld(false)
     setTool('pan')
     setSelectedIds([])
   }
 
-  function openNotificationTarget(target: NotificationTarget) {
-    closeTopPanels()
+  function revealWindow(id: string) {
+    const item = workspace.windows.find((entry) => entry.id === id)
+    if (!item) return
+    closePopovers()
     setLauncher(null)
     setShowMap(false)
     setTool('pan')
     setSelectedIds([])
-    const item = workspace.windows.find(
-      (entry) =>
-        entry.appId === target ||
-        (target === 'notes' && entry.kind === 'notes'),
-    )
-    if (!item) {
-      addWindow(APP_CATALOG.find((app) => app.id === target))
-      return
-    }
+    setSpaceHeld(false)
     focusWindow(item.id)
-    viewport.current?.scrollTo({
+    setRevealRequest({
+      id: item.id,
       left: clamp(
         item.x - Math.max(12, (view.width - item.width) / 2),
         0,
@@ -499,10 +519,20 @@ function App() {
         0,
         Math.max(0, workspace.height - view.height),
       ),
-      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches
-        ? 'instant'
-        : 'smooth',
     })
+  }
+
+  function openNotificationTarget(target: NotificationTarget) {
+    const item = workspace.windows.find(
+      (entry) =>
+        entry.appId === target ||
+        (target === 'notes' && entry.kind === 'notes'),
+    )
+    if (item) revealWindow(item.id)
+    else {
+      const app = APP_CATALOG.find((entry) => entry.id === target)
+      if (app) launchApp(app)
+    }
   }
 
   function goHome() {
@@ -516,6 +546,7 @@ function App() {
         onPanelChange={(panel) => {
           setSystemPanel(panel)
           if (panel) {
+            setDockAppId(null)
             setNotificationsOpen(false)
             setLauncher(null)
             setShowMap(false)
@@ -524,9 +555,10 @@ function App() {
       />
       <NotificationInbox
         open={notificationsOpen}
-        previewVisible={!systemPanel && !launcher && !showMap}
+        previewVisible={!systemPanel && !launcher && !showMap && !dockAppId}
         onToggle={() => {
           setNotificationsOpen(!notificationsOpen)
+          setDockAppId(null)
           setSystemPanel(null)
           setLauncher(null)
           setShowMap(false)
@@ -577,8 +609,14 @@ function App() {
             return (
               <section
                 key={item.id}
+                ref={(element) => {
+                  if (element) windowElements.current.set(item.id, element)
+                  else windowElements.current.delete(item.id)
+                }}
+                tabIndex={-1}
+                aria-label={item.title}
                 data-window-id={item.id}
-                data-active={activeId === item.id}
+                data-active={focusedWindowId === item.id}
                 data-selected={selectedIds.includes(item.id)}
                 className={`${styles.window} ${styles[item.kind]}`}
                 style={{
@@ -723,9 +761,15 @@ function App() {
       <div className={styles.docks}>
         <CanvasTools
           mode={tool}
-          showHint={!showMap && !launcher && !notificationsOpen && !systemPanel}
+          showHint={
+            !showMap &&
+            !launcher &&
+            !notificationsOpen &&
+            !systemPanel &&
+            !dockAppId
+          }
           onModeChange={(mode) => {
-            closeTopPanels()
+            closePopovers()
             setTool(mode)
             if (mode === 'pan') setSelectedIds([])
             setShowMap(false)
@@ -733,7 +777,7 @@ function App() {
           }}
           mapOpen={showMap}
           onToggleMap={() => {
-            closeTopPanels()
+            closePopovers()
             setShowMap(!showMap)
             setLauncher(null)
           }}
@@ -746,6 +790,17 @@ function App() {
           triggerRef={launcherTrigger}
           onToggle={toggleLauncher}
           onLaunch={launchApp}
+          windows={workspace.windows}
+          activeWindowId={focusedWindowId}
+          selectedAppId={dockAppId}
+          onSelectApp={(id) => {
+            closePopovers()
+            setDockAppId(id)
+            setLauncher(null)
+            setShowMap(false)
+            setSpaceHeld(false)
+          }}
+          onFocusWindow={revealWindow}
         />
       </div>
       {launcher && (

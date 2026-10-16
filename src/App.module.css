@@ -487,14 +487,8 @@
   }
 
   .mapPanel {
-    bottom: 90px;
-    left: 12px;
-  }
-}
-
-@media (width <= 560px) {
-  .mapPanel {
     bottom: 160px;
+    left: 12px;
   }
 }
 

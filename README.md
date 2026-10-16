@@ -32,19 +32,19 @@ Controls stay in the four corners, leaving the top edge and middle of the canvas
 | Top left     | Notifications.                                                       |
 | Top right    | A floating device-status pill with Wi-Fi, sound, battery, and clock. |
 | Bottom left  | Canvas tools: Pan, Select, Map, and Arrange.                         |
-| Bottom right | Favorite apps and Apps, with the launcher opening above them.        |
+| Bottom right | Favorite and running apps, plus the Apps launcher.                   |
 
-The docks keep their corners on narrow screens, with favorites moving into a row above Apps. Visible labels and large targets keep the main tools usable with touch, a trackpad, or a mouse. Escape closes open panels and clears the current selection.
+The docks keep their corners on narrow screens, with favorite and running apps moving into a row above Apps. Scroll the app row horizontally when it fills up. Visible labels and large targets keep the main tools usable with touch, a trackpad, or a mouse. Escape closes open panels; on the canvas, it clears the current selection.
 
 ## Try the launcher
 
 Choose **Apps** or press Ctrl/⌘ K to browse an icon grid, switch to a list, or search app names and descriptions. Search results use the list view. Use arrow keys to move through results and Enter to open the selected app. Escape closes the launcher.
 
-**Browser**, **Files**, and **Notes** are preset favorites beside Apps. Choose one to add its preview window directly. Favorites are fixed for this experiment.
+**Browser**, **Files**, and **Notes** are preset favorites beside Apps. Other apps appear there while their windows are open. Running apps show a window count, and the active app is marked. Choose a running app to see its windows, then choose a window to bring it into view. **New window** adds another preview for that app. A favorite with no open windows launches directly. Favorites are fixed for this experiment.
 
 Inside the launcher, switch from **Apps** to **Draw**, or press G from the canvas to open the dedicated gesture pad. Select a shortcut and draw with touch, a stylus, or a pointer. To make your own, choose **Edit shortcuts**, select an app, draw one stroke, and save it. Saving replaces that app’s existing gesture. **Retry** clears the current drawing.
 
-Drawing records and previews the stroke; gesture recognition is not implemented. Use **Open [app]** to try the launch result. All launcher actions create labeled preview windows on the canvas, without opening applications in the host operating system.
+Drawing records and previews the stroke; gesture recognition is not implemented. Use **Open [app]** to try the launch result. Launching creates labeled preview windows on the canvas, without opening applications in the host operating system.
 
 ## Try notifications
 

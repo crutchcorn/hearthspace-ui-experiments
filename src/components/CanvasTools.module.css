@@ -79,7 +79,7 @@
   line-height: 1;
 }
 
-@media (width <= 560px) {
+@media (width <= 760px) {
   .selectionHint {
     bottom: calc(100% + 82px);
   }
