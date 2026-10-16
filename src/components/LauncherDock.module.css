@@ -1,22 +1,20 @@
 .dock {
   position: relative;
   display: flex;
+  height: 60px;
   flex-shrink: 0;
-  align-items: center;
-  gap: 4px;
-  padding: 5px;
-  border: 1px solid #d6d9cd;
-  border-radius: 15px;
-  background: #fcfcf6f0;
-  box-shadow: 0 7px 20px #515b4210;
-  backdrop-filter: blur(22px);
+  align-items: stretch;
+  border: 1px solid var(--chrome-text);
+  border-radius: 2px;
+  background: var(--chrome);
+  box-shadow: 5px 5px 0 #151b1859;
+  color: var(--chrome-text);
   user-select: none;
 }
 
 .appStrip {
   display: flex;
-  max-width: min(520px, calc(100vw - 350px));
-  gap: 3px;
+  max-width: min(560px, calc(100vw - 380px));
   overflow-x: auto;
   overscroll-behavior-inline: contain;
   scrollbar-width: none;
@@ -26,123 +24,144 @@
   display: none;
 }
 
-.appButton,
-.launcher {
+.appButton {
   position: relative;
   display: flex;
+  width: 112px;
+  min-height: 48px;
   flex-shrink: 0;
   align-items: center;
-  justify-content: center;
-  min-width: 44px;
-  height: 48px;
-  padding: 0;
+  justify-content: flex-start;
+  gap: 8px;
+  padding: 8px 9px;
   border: 0;
-  border-radius: 10px;
+  border-right: 1px solid var(--chrome-text);
+  border-radius: 0;
   background: transparent;
+  color: var(--chrome-text);
   touch-action: manipulation;
 }
 
-.appButton:hover,
-.appButton[aria-expanded='true'],
-.launcher:hover,
-.launcher[aria-expanded='true'] {
-  background: #e9eddf;
-  color: #435436;
+.appButton:last-child {
+  border-right: 0;
+}
+
+.appButton:hover {
+  background: var(--chrome-hover);
+}
+
+.appButton[aria-expanded='true'] {
+  background: var(--accent);
+  color: var(--accent-ink);
 }
 
 .appButton:focus-visible {
-  outline-offset: -2px;
+  outline-offset: -4px;
 }
 
 .appIcon {
   display: grid;
-  width: 36px;
-  height: 36px;
+  width: 20px;
+  height: 24px;
+  flex-shrink: 0;
   place-items: center;
-  border: 1px solid #74845f12;
-  border-radius: 10px;
+}
+
+.appName {
+  overflow: hidden;
+  padding-bottom: 1px;
+  font-size: 11px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .count {
   position: absolute;
-  top: 0;
-  right: 0;
-  display: grid;
-  min-width: 15px;
-  height: 15px;
-  padding-inline: 3px;
-  place-items: center;
-  border: 1px solid #fcfcf6;
-  border-radius: 6px;
-  background: #e0e6d6;
-  color: #647450;
-  font-size: 8px;
+  top: 4px;
+  right: 5px;
+  color: var(--chrome-muted);
+  font-family: var(--mono);
+  font-size: 9px;
   line-height: 1;
 }
 
 .runningMark {
   position: absolute;
-  bottom: 0;
-  width: 4px;
-  height: 3px;
-  border-radius: 2px;
-  background: #b0baa0;
+  right: 9px;
+  bottom: 7px;
+  left: 9px;
+  height: 1px;
+  background: var(--chrome-muted);
 }
 
 .appButton[data-active='true'] .runningMark {
-  width: 15px;
-  background: #738b5b;
+  height: 4px;
+  background: var(--accent-ink);
 }
 
 .appButton[data-active='true'] .count {
-  background: #74895f;
-  color: #fcfcf6;
+  color: var(--chrome-text);
+  font-weight: 700;
 }
 
 .launcher {
+  display: flex;
+  width: 76px;
+  min-width: 76px;
+  min-height: 48px;
   flex-direction: column;
+  align-items: center;
+  justify-content: center;
   gap: 4px;
-  min-width: 66px;
-  padding-inline: 13px;
-  color: #69775c;
-  font-size: 10px;
+  padding: 4px;
+  border: 0;
+  border-radius: 0;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-size: 12px;
+  font-weight: 700;
+  touch-action: manipulation;
+}
+
+.launcher:hover,
+.launcher[aria-expanded='true'] {
+  background: var(--chrome-text);
+  color: var(--accent);
 }
 
 .divider {
-  flex-shrink: 0;
   width: 1px;
-  height: 26px;
-  background: #e1e5d7;
+  flex-shrink: 0;
+  background: var(--chrome-text);
 }
 
 .windowPopover {
   position: absolute;
   right: 0;
   bottom: calc(100% + 20px);
-  width: 320px;
+  width: 370px;
   max-width: calc(100vw - 24px);
-  max-height: min(420px, calc(100dvh - 200px));
+  max-height: min(440px, calc(100dvh - 280px));
   overflow-y: auto;
-  border: 1px solid #d6d9cd;
-  border-radius: 15px;
-  background: #fbfbf7f5;
-  box-shadow:
-    0 18px 50px #4e594020,
-    0 3px 10px #4e594008;
-  backdrop-filter: blur(26px);
-  color: #5e6854;
-  scrollbar-color: #cbd1bf transparent;
+  border: 1px solid var(--chrome-text);
+  border-radius: 2px;
+  background: var(--chrome);
+  box-shadow: 6px 6px 0 #151b1866;
+  color: var(--chrome-text);
+  scrollbar-color: var(--chrome-muted) transparent;
   scrollbar-width: thin;
+  animation: open-index 140ms ease-out;
 }
 
 .popoverHeading {
   display: flex;
-  align-items: center;
+  min-height: 104px;
+  align-items: flex-start;
   justify-content: space-between;
-  min-height: 67px;
   gap: 12px;
-  padding: 10px 10px 10px 18px;
-  border-bottom: 1px solid #e6e8dd;
+  padding: 16px;
+  border-bottom: 1px solid var(--chrome-text);
 }
 
 .popoverHeading > div {
@@ -151,15 +170,25 @@
   gap: 5px;
 }
 
+.popoverHeading p {
+  margin: 0 0 5px;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
 .popoverHeading h2 {
   margin: 0;
-  color: #59644e;
-  font-size: 13px;
-  font-weight: 550;
+  font-size: 30px;
+  font-weight: 500;
+  letter-spacing: -1px;
+  line-height: 1;
 }
 
 .popoverHeading > div > span {
-  color: #98a28a;
+  color: var(--chrome-muted);
+  font-family: var(--mono);
   font-size: 10px;
 }
 
@@ -170,53 +199,70 @@
   flex-shrink: 0;
   padding: 0;
   place-items: center;
-  border: 0;
-  border-radius: 9px;
+  border: 1px solid var(--chrome-text);
+  border-radius: 0;
   background: transparent;
-  color: #919b82;
+  color: var(--chrome-text);
 }
 
 .closeButton:hover {
-  background: #edf0e4;
-  color: #62724f;
+  background: var(--chrome-text);
+  color: var(--chrome);
 }
 
 .windowList {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  padding: 9px;
+  padding-inline: 16px;
 }
 
 .windowButton {
+  position: relative;
   display: flex;
-  min-height: 62px;
+  min-height: 84px;
   align-items: center;
-  gap: 11px;
-  padding: 9px;
-  border: 1px solid transparent;
-  border-radius: 10px;
+  gap: 13px;
+  padding: 16px 0;
+  border: 0;
+  border-bottom: 1px solid var(--chrome-text);
+  border-radius: 0;
   background: transparent;
+  color: var(--chrome-text);
   text-align: left;
   touch-action: manipulation;
 }
 
+.windowButton:last-child {
+  border-bottom: 0;
+}
+
 .windowButton:hover,
 .windowButton[data-active='true'] {
-  border-color: #e4e9d9;
-  background: #eff3e7;
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.windowNumber {
+  align-self: flex-start;
+  padding-top: 3px;
+  font-family: var(--mono);
+  font-size: 11px;
 }
 
 .windowPreview {
-  display: grid;
-  width: 36px;
-  height: 36px;
+  display: block;
+  width: 38px;
+  height: 31px;
   flex-shrink: 0;
-  place-items: center;
-  border: 1px solid #dce2d1;
-  border-radius: 8px;
-  background: #f6f8f0;
-  color: #8c9b79;
+  border: 1px solid currentcolor;
+  background: var(--chrome-raised);
+}
+
+.windowPreview > span {
+  display: block;
+  height: 6px;
+  border-bottom: 1px solid currentcolor;
+  background: var(--chrome-hover);
 }
 
 .windowCopy {
@@ -224,68 +270,71 @@
   min-width: 0;
   flex: 1;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
 
 .windowCopy strong {
   overflow: hidden;
-  color: #6e7c5e;
-  font-size: 11px;
+  font-size: 16px;
   font-weight: 500;
+  letter-spacing: -0.3px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .windowCopy > span {
-  color: #9ba58e;
+  color: var(--chrome-muted);
+  font-family: var(--mono);
   font-size: 9px;
 }
 
 .activeLabel {
-  flex-shrink: 0;
-  color: #7a8d66;
-  font-size: 9px;
+  position: absolute;
+  right: 0;
+  bottom: 7px;
+  font-family: var(--mono);
+  font-size: 8px;
+  text-transform: uppercase;
 }
 
 .popoverFooter {
-  padding: 6px 9px;
-  border-top: 1px solid #e6e8dd;
+  padding: 0 16px;
+  border-top: 1px solid var(--chrome-text);
 }
 
 .newWindow {
   display: flex;
   width: 100%;
-  min-height: 44px;
+  min-height: 48px;
   align-items: center;
   gap: 10px;
-  padding: 0 10px;
+  padding: 0;
   border: 0;
-  border-radius: 9px;
+  border-radius: 0;
   background: transparent;
-  color: #7a8a67;
-  font-size: 11px;
+  color: var(--chrome-text);
+  font-size: 12px;
   text-align: left;
   touch-action: manipulation;
 }
 
 .newWindow:hover {
-  background: #edf0e4;
-  color: #62724f;
+  background: var(--accent);
+  color: var(--accent-ink);
 }
 
 @media (width <= 760px) {
   .appStrip {
     position: absolute;
-    right: 0;
-    bottom: calc(100% + 10px);
+    right: -1px;
+    bottom: calc(100% + 28px);
     width: max-content;
     max-width: calc(100vw - 24px);
-    padding: 5px;
-    border: 1px solid #d6d9cd;
-    border-radius: 15px;
-    background: #fcfcf6f0;
-    box-shadow: 0 7px 20px #515b4210;
-    backdrop-filter: blur(22px);
+    height: 60px;
+    border: 1px solid var(--chrome-text);
+    border-radius: 2px;
+    background: var(--chrome);
+    box-shadow: 5px 5px 0 #151b1859;
   }
 
   .divider {
@@ -293,7 +342,20 @@
   }
 
   .windowPopover {
-    bottom: calc(100% + 90px);
-    max-height: min(420px, calc(100dvh - 244px));
+    bottom: calc(100% + 106px);
+    max-height: min(440px, calc(100dvh - 338px));
+  }
+}
+
+@keyframes open-index {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .windowPopover {
+    animation: none;
   }
 }

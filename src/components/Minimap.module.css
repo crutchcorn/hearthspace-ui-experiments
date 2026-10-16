@@ -5,14 +5,28 @@
   width: 100%;
   height: 168px;
   padding: 0;
-  border: 1px solid #dfe4d5;
-  border-radius: 7px;
-  background-color: #f1f3e9;
-  background-image: radial-gradient(#cbd1bc 0.7px, transparent 0.7px);
-  background-size: 10px 10px;
+  border: 1px solid var(--chrome-border);
+  border-radius: 0;
+  background-color: #26352c;
+  background-image:
+    linear-gradient(#e2e9d317 1px, transparent 1px),
+    linear-gradient(90deg, #e2e9d317 1px, transparent 1px),
+    linear-gradient(#e2e9d308 1px, transparent 1px),
+    linear-gradient(90deg, #e2e9d308 1px, transparent 1px);
+  background-size:
+    48px 48px,
+    48px 48px,
+    12px 12px,
+    12px 12px;
+  box-shadow: inset 0 1px 8px #0003;
   cursor: grab;
   touch-action: none;
   user-select: none;
+}
+
+.map:focus-visible {
+  outline: 2px solid var(--chrome-text);
+  outline-offset: 3px;
 }
 
 .map[data-dragging='true'] {
@@ -21,16 +35,17 @@
 
 .window {
   position: absolute;
-  border: 1px solid #abb79a;
-  border-radius: 1px;
-  background: #ccd6ba;
+  border: 1px solid #e1e5d6;
+  border-radius: 0;
+  background: #c7d0ba7a;
   pointer-events: none;
 }
 
 .viewport {
   position: absolute;
-  border: 1px solid #82966b;
-  border-radius: 2px;
-  background: #94a97921;
+  border: 2px solid var(--accent);
+  border-radius: 0;
+  background: #d5f26726;
+  box-shadow: 0 0 0 1px #14221680;
   pointer-events: none;
 }

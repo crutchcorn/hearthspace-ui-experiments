@@ -17,6 +17,17 @@ export type Workspace = {
 export const STORAGE_KEY = 'hearthspace-playground-v1'
 export const MIN_WIDTH = 280
 export const MIN_HEIGHT = 200
+
+const INITIAL_NOTE =
+  'Interface notes\n\nUse the corners for controls.\nKeep the canvas for work.\n\nTo explore\n- Compare grid and freeform layouts\n- Open a second browser window\n- Record a launch gesture\n\nOne accent color. Clear states.'
+const LEGACY_NOTE =
+  'What if a desktop felt a little more like a place?\n\nA place to leave a thought.\nTo spread things out.\nTo pick up right where you left off.\n\nLess switching. More space.'
+const DEMO_TITLES = new Map([
+  ['welcome', { previous: 'Welcome home', current: 'Workspace' }],
+  ['notes', { previous: 'A few thoughts', current: 'Scratchpad' }],
+  ['canvas', { previous: 'Room for something new', current: 'Files' }],
+])
+
 export const clamp = (value: number, min: number, max: number) =>
   Math.max(min, Math.min(value, max))
 
@@ -28,34 +39,35 @@ function createWorkspace(): Workspace {
     width: width * 10,
     height: height * 10,
     home,
-    note: 'What if a desktop felt a little more like a place?\n\nA place to leave a thought.\nTo spread things out.\nTo pick up right where you left off.\n\nLess switching. More space.',
+    note: INITIAL_NOTE,
     windows: [
       {
         id: 'welcome',
-        title: 'Welcome home',
+        title: 'Workspace',
         kind: 'welcome',
         x: home.x + width * 0.1,
-        y: home.y + height * 0.28,
+        y: home.y + height * 0.19,
         width: 460,
-        height: 340,
+        height: 350,
       },
       {
         id: 'notes',
-        title: 'A few thoughts',
+        title: 'Scratchpad',
         kind: 'notes',
-        x: home.x + width * 0.59,
-        y: home.y + height * 0.17,
+        x: home.x + width * 0.66,
+        y: home.y + height * 0.3,
         width: 350,
-        height: 330,
+        height: 360,
       },
       {
         id: 'canvas',
-        title: 'Room for something new',
+        title: 'Files',
         kind: 'empty',
-        x: home.x + width * 0.52,
-        y: home.y + height * 0.62,
-        width: 360,
-        height: 230,
+        appId: 'files',
+        x: home.x + width * 0.3,
+        y: home.y + height * 0.46,
+        width: 480,
+        height: 280,
       },
     ],
   }
@@ -103,8 +115,17 @@ export function loadWorkspace(): Workspace {
             : item
         const width = clamp(bounds.width, MIN_WIDTH, value.width)
         const height = clamp(bounds.height, MIN_HEIGHT, value.height)
+        const demoTitle = DEMO_TITLES.get(item.id)
+        const legacyFiles =
+          item.id === 'canvas' &&
+          item.kind === 'empty' &&
+          item.title === 'Room for something new' &&
+          !item.appId
         return {
           ...item,
+          title:
+            demoTitle?.previous === item.title ? demoTitle.current : item.title,
+          appId: legacyFiles ? 'files' : item.appId,
           width,
           height,
           x: clamp(bounds.x, 0, value.width - width),
@@ -113,6 +134,7 @@ export function loadWorkspace(): Workspace {
       })
     return {
       ...value,
+      note: value.note === LEGACY_NOTE ? INITIAL_NOTE : value.note,
       home: {
         x: clamp(value.home.x, 0, value.width - window.innerWidth),
         y: clamp(value.home.y, 0, value.height - window.innerHeight),
@@ -140,7 +162,7 @@ export function arrangeWindows(
   const cellHeight = Math.max(...windows.map((item) => item.height))
   const gap = 24
   const x = origin.x + 24
-  const y = origin.y + 96
+  const y = origin.y + 176
   const arranged = new Map(
     windows
       .toSorted((a, b) => a.y - b.y || a.x - b.x || a.id.localeCompare(b.id))

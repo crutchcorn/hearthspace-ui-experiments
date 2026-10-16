@@ -3,144 +3,193 @@
   z-index: 1000;
   top: 24px;
   right: 24px;
-  display: flex;
-  align-items: center;
-  padding: 5px;
-  border: 1px solid #d6d9cd;
-  border-radius: 16px;
-  background: #f9f8f4e6;
-  box-shadow:
-    0 5px 18px #3d44350b,
-    0 1px 3px #3d443506;
-  backdrop-filter: blur(24px);
-  color: #363a34;
-  font-size: 12px;
+  width: 300px;
+  border: 1px solid var(--chrome-text);
+  border-radius: 1px;
+  background: var(--chrome);
+  box-shadow: 4px 4px 0 #10201899;
+  color: var(--chrome-text);
   line-height: 1;
   user-select: none;
 }
 
-.rightGroup {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-}
-
 .bar button {
   appearance: none;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
   border: 0;
-  border-radius: 10px;
+  border-radius: 0;
   background: transparent;
   color: inherit;
-  font: inherit;
   cursor: pointer;
-  transition: background 120ms ease;
+  transition: background 100ms ease;
 }
 
-.bar button:hover,
+.bar button:hover {
+  background: var(--chrome-hover);
+}
+
 .bar button.active {
-  background: #e8e8e180;
+  background: var(--accent);
+  color: var(--accent-ink);
 }
 
 .bar button:focus-visible,
 .bar input:focus-visible {
-  outline: 2px solid #9e6754;
-  outline-offset: 3px;
+  outline: 2px solid var(--chrome-text);
+  outline-offset: -4px;
 }
 
-.divider {
-  width: 1px;
-  height: 14px;
-  flex-shrink: 0;
-  background: #d7d9d1;
-}
-
-.rightGroup > .divider {
-  margin: 0 7px;
-}
-
-.anchor {
+.clockButton {
   display: flex;
+  width: 100%;
+  min-height: 78px;
   align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px;
+  text-align: left;
 }
 
-.bar .iconButton {
-  width: 44px;
-  height: 44px;
-  padding: 0;
-}
-
-.bar .clockButton {
-  gap: 10px;
-  min-width: 44px;
-  height: 44px;
-  padding: 0 10px;
-  font-size: 11px;
+.clockReadout {
+  font-size: 42px;
+  font-weight: 500;
   font-variant-numeric: tabular-nums;
+  letter-spacing: -2.5px;
+}
+
+.clockMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
 }
 
 .date {
-  margin-right: 1px;
+  font-family: var(--mono);
+  font-size: 10px;
+  line-height: 1.3;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.clockLabel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  color: var(--chrome-muted);
+  font-family: var(--mono);
+  font-size: 9px;
+  text-transform: uppercase;
+}
+
+.statusGroup {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border-top: 1px solid var(--chrome-text);
+}
+
+.statusButton {
+  display: flex;
+  min-height: 52px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 4px;
+  text-align: left;
+}
+
+.statusGroup .statusButton + .statusButton {
+  border-left: 1px solid var(--chrome-text);
+}
+
+.statusButton > span {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.statusLabel {
+  color: var(--chrome-muted);
+  font-family: var(--mono);
+  font-size: 8px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.statusValue {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
 }
 
 .popover {
   position: absolute;
   top: calc(100% + 12px);
-  right: 0;
+  right: -1px;
   overflow: auto;
-  width: 260px;
-  max-width: calc(100vw - 48px);
-  max-height: calc(100dvh - 116px);
+  width: 320px;
+  max-width: calc(100vw - 24px);
+  max-height: calc(100dvh - 272px);
   box-sizing: border-box;
-  border: 1px solid #d8d9cf;
-  border-radius: 14px;
-  background: #fcfbf7f5;
-  box-shadow:
-    0 10px 34px #3d44351a,
-    0 2px 5px #3d443508;
+  border: 1px solid var(--chrome-text);
+  border-radius: 1px;
+  background: var(--chrome);
+  box-shadow: 5px 5px 0 #10201899;
+  color: var(--chrome-text);
   text-align: left;
   line-height: 1.4;
-  backdrop-filter: blur(26px);
-  scrollbar-color: #cbd1bf transparent;
+  scrollbar-color: var(--chrome-muted) transparent;
   scrollbar-width: thin;
+  color-scheme: light;
+  animation: panel-in 120ms ease-out;
 }
 
 .systemPopover {
-  padding: 17px;
+  padding: 18px;
 }
 
 .toggleRow,
 .settingHeading {
   display: flex;
+  min-height: 44px;
   align-items: center;
   justify-content: space-between;
-  gap: 20px;
-  font-size: 12px;
+  gap: 16px;
 }
 
 .toggleRow strong,
 .settingHeading strong,
 .settingHeading label {
-  font-weight: 600;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 400;
+  text-transform: uppercase;
 }
 
 .settingHeading > span {
-  color: #868c7c;
-  font-size: 11px;
+  font-size: 42px;
+  font-weight: 500;
   font-variant-numeric: tabular-nums;
+  letter-spacing: -2px;
+  line-height: 1;
+}
+
+.settingHeading small {
+  margin-left: 2px;
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: 0;
 }
 
 .toggle {
   appearance: none;
   position: relative;
-  width: 29px;
-  height: 17px;
+  width: 38px;
+  height: 24px;
   margin: 0;
-  border: 0;
-  border-radius: 12px;
-  background: #ced1c7;
+  border: 1px solid var(--chrome-text);
+  border-radius: 1px;
+  background: var(--chrome-hover);
   cursor: pointer;
 }
 
@@ -149,188 +198,256 @@
   position: absolute;
   top: 3px;
   left: 3px;
-  width: 11px;
-  height: 11px;
-  border-radius: 50%;
-  background: #fff;
-  transition: transform 120ms ease;
+  width: 16px;
+  height: 16px;
+  background: var(--chrome-text);
+  transition: transform 100ms ease;
 }
 
 .toggle:checked {
-  background: #77866d;
+  background: var(--accent);
 }
 
 .toggle:checked::before {
-  transform: translateX(12px);
+  transform: translateX(14px);
 }
 
 .networkRow {
   display: flex;
   align-items: center;
-  gap: 11px;
-  padding: 21px 0 17px;
-  color: #74816a;
+  gap: 16px;
+  padding: 18px 0 24px;
+  color: var(--chrome-text);
 }
 
 .networkRow > div {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 7px;
 }
 
 .networkRow strong {
-  font-size: 11px;
+  font-size: 23px;
   font-weight: 500;
-  color: #4d5547;
+  letter-spacing: -0.7px;
 }
 
 .networkRow span {
-  font-size: 9px;
-  color: #94998b;
+  font-size: 12px;
+  color: var(--chrome-muted);
 }
 
 .networkCheck {
+  flex-shrink: 0;
   margin-left: auto;
+  padding: 4px;
+  box-sizing: content-box;
+  border: 1px solid var(--chrome-text);
+  background: var(--accent);
+  color: var(--accent-ink);
 }
 
 .previewNote {
   margin: 0;
-  color: #969b8d;
-  font-size: 9px;
+  padding-top: 12px;
+  border-top: 1px solid var(--chrome-border);
+  color: var(--chrome-muted);
+  font-family: var(--mono);
+  font-size: 10px;
 }
 
 .volumeRow {
   display: flex;
   align-items: center;
-  gap: 11px;
-  margin: 21px 0;
-  color: #858e7d;
+  gap: 12px;
+  margin: 24px 0;
+  color: var(--chrome-text);
 }
 
 .volumeSlider {
   flex: 1;
   min-width: 0;
-  height: 4px;
+  height: 28px;
   margin: 0;
-  accent-color: #78856c;
+  accent-color: var(--chrome-text);
   cursor: pointer;
 }
 
 .batteryMeter {
-  height: 6px;
+  height: 16px;
   overflow: hidden;
-  margin: 20px 0 15px;
-  border-radius: 6px;
-  background: #e6e8df;
+  margin: 24px 0 20px;
+  border: 1px solid var(--chrome-text);
+  background: var(--chrome-hover);
 }
 
 .batteryMeter > span {
   display: block;
   width: 87%;
   height: 100%;
-  border-radius: inherit;
-  background: #849376;
+  border-right: 1px solid var(--chrome-text);
+  background: repeating-linear-gradient(
+    90deg,
+    var(--accent) 0,
+    var(--accent) 13px,
+    var(--chrome-text) 13px,
+    var(--chrome-text) 14px
+  );
 }
 
 .batteryDescription {
-  margin: 0 0 5px;
-  color: #69745e;
-  font-size: 11px;
+  margin: 0 0 18px;
+  font-size: 13px;
 }
 
 .calendarPopover {
-  width: 268px;
-  padding: 19px 15px 14px;
+  padding: 18px;
 }
 
 .calendarHeading {
   display: flex;
+  align-items: center;
+  gap: 18px;
+  padding-bottom: 20px;
+}
+
+.calendarDay {
+  font-size: 68px;
+  font-weight: 500;
+  line-height: 0.9;
+  letter-spacing: -5px;
+}
+
+.calendarHeading > div {
+  display: flex;
   flex-direction: column;
-  gap: 4px;
-  padding: 0 7px 15px;
+  gap: 8px;
 }
 
 .calendarHeading strong {
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 14px;
+  font-weight: 500;
 }
 
-.calendarHeading > span {
+.calendarHeading > div > span {
+  font-family: var(--mono);
   font-size: 10px;
-  color: #92998a;
+  text-transform: uppercase;
 }
 
 .calendar {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 3px 0;
-  font-size: 11px;
+  border-top: 1px solid var(--chrome-text);
+  font-family: var(--mono);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
 }
 
 .calendar > span {
   display: grid;
-  width: 29px;
-  height: 29px;
+  min-height: 34px;
   place-items: center;
-  justify-self: center;
+  border-bottom: 1px solid var(--chrome-border);
 }
 
 .calendar .weekday {
-  height: 25px;
-  color: #9ca292;
-  font-size: 9px;
+  min-height: 28px;
+  color: var(--chrome-muted);
+  font-size: 10px;
 }
 
 .today {
-  border-radius: 50%;
-  background: #7b866c;
-  color: #fff;
+  background: var(--accent);
+  color: var(--accent-ink);
+  box-shadow: inset 0 0 0 1px var(--chrome-text);
 }
 
 .calendarFooter {
-  margin: 15px 7px 0;
-  padding-top: 13px;
-  border-top: 1px solid #e7e8e0;
-  color: #969b8d;
-  font-size: 9px;
+  margin: 14px 0 0;
+  color: var(--chrome-muted);
+  font-family: var(--mono);
+  font-size: 10px;
+}
+
+@keyframes panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @media (width <= 760px) {
   .bar {
     top: 12px;
     right: 12px;
+    width: 250px;
+  }
+
+  .clockButton {
+    min-height: 72px;
+    gap: 12px;
+    padding: 12px;
+  }
+
+  .clockReadout {
+    font-size: 36px;
+    letter-spacing: -2px;
   }
 
   .date {
-    display: none;
+    font-size: 9px;
   }
 
-  .popover {
-    max-width: calc(100vw - 24px);
-    max-height: calc(100dvh - 92px);
-  }
-}
-
-@media (width <= 390px) {
-  .bar {
-    padding-inline: 3px;
+  .clockLabel {
+    font-size: 8px;
   }
 
-  .rightGroup {
-    gap: 0;
+  .statusButton {
+    gap: 6px;
   }
 
-  .rightGroup > .divider {
-    margin-inline: 3px;
+  .statusLabel {
+    font-size: 7px;
   }
 
-  .bar .clockButton {
-    padding-inline: 4px;
+  .statusValue {
     font-size: 10px;
   }
 
-  .clockChevron {
-    display: none;
+  .popover {
+    max-height: calc(100dvh - 326px);
+  }
+}
+
+@media (width <= 360px) {
+  .bar {
+    width: 218px;
+  }
+
+  .clockButton {
+    padding-inline: 9px;
+  }
+
+  .clockReadout {
+    font-size: 32px;
+  }
+
+  .clockLabel {
+    gap: 3px;
+  }
+
+  .statusButton {
+    gap: 4px;
+  }
+
+  .statusButton > svg {
+    width: 13px;
   }
 }
 
@@ -338,5 +455,9 @@
   .bar button,
   .toggle::before {
     transition: none;
+  }
+
+  .popover {
+    animation: none;
   }
 }

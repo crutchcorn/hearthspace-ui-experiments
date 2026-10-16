@@ -69,8 +69,8 @@ export default function AppLauncher({
     }
 
     const steps: Record<string, number> = {
-      ArrowDown: showList ? 1 : 4,
-      ArrowUp: showList ? -1 : -4,
+      ArrowDown: showList ? 1 : 2,
+      ArrowUp: showList ? -1 : -2,
       ArrowRight: 1,
       ArrowLeft: -1,
     }
@@ -94,26 +94,15 @@ export default function AppLauncher({
       data-launcher-root
     >
       <header className={styles.header}>
-        <h2>Apps</h2>
-        <div className={styles.tabs} aria-label="Launcher views">
-          <button
-            type="button"
-            className={mode === 'apps' ? styles.activeTab : undefined}
-            aria-pressed={mode === 'apps'}
-            onClick={() => onModeChange('apps')}
-          >
-            <LayoutGrid size={14} />
-            Apps
-          </button>
-          <button
-            type="button"
-            className={mode === 'gestures' ? styles.activeTab : undefined}
-            aria-pressed={mode === 'gestures'}
-            onClick={() => onModeChange('gestures')}
-          >
-            <PenLine size={14} />
-            Draw
-          </button>
+        <div className={styles.headingCopy}>
+          <p className={styles.kicker}>
+            Application index{' '}
+            <span>{String(APP_CATALOG.length).padStart(2, '0')} entries</span>
+          </p>
+          <h2>
+            Applications
+            <ArrowUpRight size={34} aria-hidden="true" />
+          </h2>
         </div>
         <button
           type="button"
@@ -121,129 +110,159 @@ export default function AppLauncher({
           aria-label="Close app launcher"
           onClick={onClose}
         >
-          <X size={17} />
+          <X size={20} />
         </button>
       </header>
-
-      {mode === 'apps' ? (
-        <div className={styles.appsPanel} onKeyDown={handleNavigation}>
-          <div className={styles.searchField}>
-            <Search size={17} />
-            <input
-              ref={searchRef}
-              type="search"
-              value={query}
-              onChange={(event) => {
-                setQuery(event.target.value)
-                setSelectedId(null)
-              }}
-              placeholder="Search apps"
-              aria-label="Search apps"
-              autoComplete="off"
-              spellCheck={false}
-            />
-            {query && (
-              <button
-                type="button"
-                aria-label="Clear search"
-                onClick={() => {
-                  setQuery('')
+      <div className={styles.workspace}>
+        <div className={styles.modeRail} aria-label="Launcher views">
+          <button
+            type="button"
+            className={mode === 'apps' ? styles.activeTab : undefined}
+            aria-pressed={mode === 'apps'}
+            onClick={() => onModeChange('apps')}
+          >
+            <LayoutGrid size={20} />
+            <span>Apps</span>
+          </button>
+          <button
+            type="button"
+            className={mode === 'gestures' ? styles.activeTab : undefined}
+            aria-pressed={mode === 'gestures'}
+            onClick={() => onModeChange('gestures')}
+          >
+            <PenLine size={20} />
+            <span>Draw</span>
+          </button>
+          <span className={styles.railLabel} aria-hidden="true">
+            LAUNCH
+          </span>
+        </div>
+        {mode === 'apps' ? (
+          <div className={styles.appsPanel} onKeyDown={handleNavigation}>
+            <div className={styles.searchField}>
+              <Search size={19} />
+              <input
+                ref={searchRef}
+                type="search"
+                value={query}
+                onChange={(event) => {
+                  setQuery(event.target.value)
                   setSelectedId(null)
-                  searchRef.current?.focus()
                 }}
-              >
-                <X size={14} />
-              </button>
-            )}
-          </div>
-
-          <div className={styles.collectionHeading}>
-            <span>
-              {normalizedQuery ? `${apps.length} results` : 'All apps'}
-            </span>
-            {!normalizedQuery && (
-              <div className={styles.viewToggle} aria-label="App layout">
+                placeholder="Find an application"
+                aria-label="Search apps"
+                autoComplete="off"
+                spellCheck={false}
+              />
+              {query && (
                 <button
                   type="button"
-                  aria-label="Show app grid"
-                  aria-pressed={view === 'grid'}
-                  onClick={() => setView('grid')}
+                  aria-label="Clear search"
+                  onClick={() => {
+                    setQuery('')
+                    setSelectedId(null)
+                    searchRef.current?.focus()
+                  }}
                 >
-                  <LayoutGrid size={14} />
+                  <X size={16} />
                 </button>
-                <button
-                  type="button"
-                  aria-label="Show app list"
-                  aria-pressed={view === 'list'}
-                  onClick={() => setView('list')}
-                >
-                  <List size={16} />
-                </button>
+              )}
+            </div>
+            <div className={styles.collectionHeading}>
+              <span>
+                {normalizedQuery
+                  ? `${apps.length} results`
+                  : 'Choose an application'}
+              </span>
+              {!normalizedQuery && (
+                <div className={styles.viewToggle} aria-label="App layout">
+                  <button
+                    type="button"
+                    aria-label="Show app grid"
+                    aria-pressed={view === 'grid'}
+                    onClick={() => setView('grid')}
+                  >
+                    <LayoutGrid size={16} />
+                  </button>
+                  <button
+                    type="button"
+                    aria-label="Show app list"
+                    aria-pressed={view === 'list'}
+                    onClick={() => setView('list')}
+                  >
+                    <List size={18} />
+                  </button>
+                </div>
+              )}
+            </div>
+            <div className={showList ? styles.appList : styles.appGrid}>
+              {apps.map((app, index) => {
+                const Icon = app.icon
+                const ordinal = String(APP_CATALOG.indexOf(app) + 1).padStart(
+                  2,
+                  '0',
+                )
+                return (
+                  <button
+                    key={app.id}
+                    ref={(element) => {
+                      if (element) appRefs.current.set(app.id, element)
+                      else appRefs.current.delete(app.id)
+                    }}
+                    type="button"
+                    data-app-id={app.id}
+                    data-selected={index === selectedIndex}
+                    className={styles.appButton}
+                    aria-label={app.name}
+                    title={app.description}
+                    onPointerEnter={() => setSelectedId(app.id)}
+                    onFocus={() => setSelectedId(app.id)}
+                    onClick={() => onLaunch(app)}
+                  >
+                    <span className={styles.ordinal} aria-hidden="true">
+                      {ordinal}
+                    </span>
+                    <span className={styles.appCopy}>
+                      <strong>{app.name}</strong>
+                      {showList && <span>{app.description}</span>}
+                    </span>
+                    <Icon
+                      size={24}
+                      strokeWidth={1.5}
+                      className={styles.appIcon}
+                      aria-hidden="true"
+                    />
+                    {showList && (
+                      <ArrowUpRight
+                        size={18}
+                        className={styles.openIcon}
+                        aria-hidden="true"
+                      />
+                    )}
+                  </button>
+                )
+              })}
+            </div>
+            {apps.length === 0 && (
+              <div className={styles.emptyResults}>
+                <Search size={28} strokeWidth={1.5} />
+                <p>No applications found</p>
+                <span>Search by name or function.</span>
               </div>
             )}
+            <footer className={styles.footer}>
+              <span>
+                <CornerDownLeft size={14} /> Enter to open
+              </span>
+              <kbd>Ctrl / ⌘ K</kbd>
+            </footer>
           </div>
-
-          <div className={showList ? styles.appList : styles.appGrid}>
-            {apps.map((app, index) => {
-              const Icon = app.icon
-              return (
-                <button
-                  key={app.id}
-                  ref={(element) => {
-                    if (element) appRefs.current.set(app.id, element)
-                    else appRefs.current.delete(app.id)
-                  }}
-                  type="button"
-                  data-app-id={app.id}
-                  data-selected={index === selectedIndex}
-                  className={styles.appButton}
-                  title={app.description}
-                  onPointerEnter={() => setSelectedId(app.id)}
-                  onFocus={() => setSelectedId(app.id)}
-                  onClick={() => onLaunch(app)}
-                >
-                  <span
-                    className={styles.appIcon}
-                    style={{
-                      color: app.color,
-                      backgroundColor: `${app.color}16`,
-                    }}
-                  >
-                    <Icon size={25} strokeWidth={1.5} />
-                  </span>
-                  <span className={styles.appCopy}>
-                    <strong>{app.name}</strong>
-                    {showList && <span>{app.description}</span>}
-                  </span>
-                  {showList && (
-                    <ArrowUpRight size={14} className={styles.openIcon} />
-                  )}
-                </button>
-              )
-            })}
+        ) : (
+          <div className={styles.gesturePanel}>
+            <GesturePad onLaunch={onLaunch} />
           </div>
-          {apps.length === 0 && (
-            <div className={styles.emptyResults}>
-              <Search size={22} strokeWidth={1.5} />
-              <p>No apps found</p>
-              <span>Try a different name.</span>
-            </div>
-          )}
-
-          <footer className={styles.footer}>
-            <span>
-              <CornerDownLeft size={12} /> Enter to open
-            </span>
-            <span>
-              <kbd>Ctrl / ⌘ K</kbd> to search
-            </span>
-          </footer>
-        </div>
-      ) : (
-        <div className={styles.gesturePanel}>
-          <GesturePad onLaunch={onLaunch} />
-        </div>
-      )}
+        )}
+      </div>
     </section>
   )
 }

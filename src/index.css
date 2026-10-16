@@ -1,12 +1,31 @@
 :root {
+  --chrome: #edece3;
+  --chrome-raised: #f7f6ef;
+  --chrome-hover: #dddeda;
+  --chrome-border: #bbbfb3;
+  --chrome-text: #252a26;
+  --chrome-muted: #60695f;
+  --accent: #d5f267;
+  --accent-hover: #e3ff80;
+  --accent-ink: #252a26;
+  --accent-soft: #eaf1d4;
+  --paper: #f2f1e8;
+  --ink: #252a26;
+  --muted: #697063;
+  --line: #d1d3c7;
+  --field: #38443c;
+  --mono: 'SFMono-Regular', consolas, 'Liberation Mono', monospace;
+  --shadow-panel: 6px 6px 0 #18251dc0, 0 12px 36px #101a1020;
+
   font-family:
-    Inter,
+    'Helvetica Neue',
     -apple-system,
     BlinkMacSystemFont,
     'Segoe UI',
     sans-serif;
-  color: #383b35;
-  background: #f0f0e9;
+  font-size: 13px;
+  color: var(--ink);
+  background: var(--field);
   font-synthesis: none;
   text-rendering: optimizelegibility;
   -webkit-font-smoothing: antialiased;
@@ -32,7 +51,8 @@ body,
 
 button,
 input,
-textarea {
+textarea,
+select {
   font: inherit;
 }
 
@@ -42,7 +62,7 @@ button {
 }
 
 button:focus-visible {
-  outline: 2px solid #ac694e;
+  outline: 2px solid var(--ink);
   outline-offset: 3px;
 }
 
@@ -55,5 +75,6 @@ button svg {
 }
 
 ::selection {
-  background: #e6cfb9;
+  background: var(--accent);
+  color: var(--accent-ink);
 }

@@ -168,83 +168,32 @@ export default function GesturePad({ onLaunch }: GesturePadProps) {
     <section className={styles.gesturePad} aria-label="Gesture shortcuts">
       <div className={styles.heading}>
         <div>
-          <h2>Draw to open</h2>
+          <h2>Gesture pad</h2>
           <p>
             {editing
-              ? 'Make a little mark of your own.'
-              : 'A little shorthand for your everyday.'}
+              ? 'Select an application and record one stroke.'
+              : 'Select a shortcut, then draw in the pad.'}
           </p>
         </div>
         <button
           type="button"
           className={styles.editButton}
+          aria-label={editing ? 'Cancel shortcut edit' : 'Edit shortcuts'}
           onClick={() => {
             setEditing(!editing)
             clearStroke()
           }}
         >
           {editing ? <X size={14} /> : <Pencil size={13} />}
-          {editing ? 'Cancel' : 'Edit shortcuts'}
+          {editing ? 'Cancel' : 'Edit'}
         </button>
       </div>
 
-      {editing ? (
-        <div className={styles.assignment}>
-          <label htmlFor="gesture-app">Open this app</label>
-          <select
-            id="gesture-app"
-            value={selectedId}
-            onChange={(event) => {
-              setSelectedId(event.target.value)
-              clearStroke()
-            }}
-          >
-            {APP_CATALOG.map((app) => (
-              <option key={app.id} value={app.id}>
-                {app.name}
-              </option>
-            ))}
-          </select>
-        </div>
-      ) : (
-        <div className={styles.shortcuts}>
-          <span className={styles.sectionLabel}>Your shortcuts</span>
-          <div className={styles.shortcutList}>
-            {shortcuts.map((shortcut) => {
-              const app = APP_CATALOG.find(
-                (entry) => entry.id === shortcut.appId,
-              )!
-              return (
-                <button
-                  type="button"
-                  key={shortcut.appId}
-                  className={styles.shortcut}
-                  aria-pressed={selectedId === shortcut.appId}
-                  onClick={() => {
-                    setSelectedId(shortcut.appId)
-                    clearStroke()
-                  }}
-                >
-                  <svg viewBox={previewBox(shortcut.points)} aria-hidden="true">
-                    <path
-                      d={shortcut.points
-                        .map(
-                          (point, index) =>
-                            `${index ? 'L' : 'M'}${point.x} ${point.y}`,
-                        )
-                        .join(' ')}
-                      vectorEffect="non-scaling-stroke"
-                    />
-                  </svg>
-                  {app.name}
-                </button>
-              )
-            })}
-          </div>
-        </div>
-      )}
-
       <div className={styles.pad} data-drawing={drawing}>
+        <div className={styles.padMeta} aria-hidden="true">
+          <span>Drawing area</span>
+          <span>{selectedApp.name}</span>
+        </div>
         <svg
           className={styles.drawSurface}
           viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
@@ -283,14 +232,12 @@ export default function GesturePad({ onLaunch }: GesturePadProps) {
         </svg>
         {!stroke.length && (
           <div className={styles.padPrompt}>
-            <Pencil size={20} strokeWidth={1.3} />
-            <strong>
-              {editing ? 'Draw your shortcut here' : 'Give your shortcut a try'}
-            </strong>
+            <Pencil size={30} strokeWidth={1.3} />
+            <strong>{editing ? 'Record a gesture' : 'Draw a gesture'}</strong>
             <span>
               {editing
-                ? `One stroke to open ${selectedApp.name}.`
-                : `Try the mark for ${selectedApp.name}, or open it below.`}
+                ? `One continuous stroke for ${selectedApp.name}.`
+                : `${selectedApp.name} selected. Drag to draw.`}
             </span>
           </div>
         )}
@@ -302,7 +249,7 @@ export default function GesturePad({ onLaunch }: GesturePadProps) {
                   <Check size={12} /> Shortcut saved
                 </>
               ) : editing ? (
-                'Your shortcut'
+                'Recorded stroke'
               ) : (
                 'Gesture preview'
               )}
@@ -319,38 +266,101 @@ export default function GesturePad({ onLaunch }: GesturePadProps) {
         )}
       </div>
 
-      <div className={styles.footer}>
-        <div className={styles.target}>
-          <span className={styles.appIcon} style={{ color: selectedApp.color }}>
-            <SelectedIcon size={19} strokeWidth={1.7} />
-          </span>
-          <div>
-            <strong>{selectedApp.name}</strong>
-            <span>
-              {editing
-                ? 'Assign a gesture to this app'
-                : 'Recognition is a preview'}
-            </span>
-          </div>
-        </div>
+      <div className={styles.controls}>
         {editing ? (
-          <button
-            type="button"
-            className={styles.openButton}
-            disabled={!hasStroke || drawing}
-            onClick={saveShortcut}
-          >
-            <Check size={15} /> Save shortcut
-          </button>
-        ) : (
-          <button
-            type="button"
-            className={styles.openButton}
-            onClick={() => onLaunch(selectedApp)}
-          >
-            Open {selectedApp.name} <ArrowUpRight size={15} />
-          </button>
+          <div className={styles.assignment}>
+            <label htmlFor="gesture-app">Open this app</label>
+            <select
+              id="gesture-app"
+              value={selectedId}
+              onChange={(event) => {
+                setSelectedId(event.target.value)
+                clearStroke()
+              }}
+            >
+              {APP_CATALOG.map((app) => (
+                <option key={app.id} value={app.id}>
+                  {app.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        ) : null}
+
+        {!editing && (
+          <div className={styles.shortcuts}>
+            <span className={styles.sectionLabel}>Saved shortcuts</span>
+            <div className={styles.shortcutList}>
+              {shortcuts.map((shortcut) => {
+                const app = APP_CATALOG.find(
+                  (entry) => entry.id === shortcut.appId,
+                )!
+                return (
+                  <button
+                    type="button"
+                    key={shortcut.appId}
+                    className={styles.shortcut}
+                    aria-pressed={selectedId === shortcut.appId}
+                    onClick={() => {
+                      setSelectedId(shortcut.appId)
+                      clearStroke()
+                    }}
+                  >
+                    <svg
+                      viewBox={previewBox(shortcut.points)}
+                      aria-hidden="true"
+                    >
+                      <path
+                        d={shortcut.points
+                          .map(
+                            (point, index) =>
+                              `${index ? 'L' : 'M'}${point.x} ${point.y}`,
+                          )
+                          .join(' ')}
+                        vectorEffect="non-scaling-stroke"
+                      />
+                    </svg>
+                    {app.name}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
         )}
+
+        <div className={styles.footer}>
+          <div className={styles.target}>
+            <span className={styles.appIcon}>
+              <SelectedIcon size={19} strokeWidth={1.7} />
+            </span>
+            <div>
+              <strong>{selectedApp.name}</strong>
+              <span>
+                {editing
+                  ? 'Gesture assignment'
+                  : 'Manual launch · recognition preview'}
+              </span>
+            </div>
+          </div>
+          {editing ? (
+            <button
+              type="button"
+              className={styles.openButton}
+              disabled={!hasStroke || drawing}
+              onClick={saveShortcut}
+            >
+              <Check size={15} /> Save shortcut
+            </button>
+          ) : (
+            <button
+              type="button"
+              className={styles.openButton}
+              onClick={() => onLaunch(selectedApp)}
+            >
+              Open {selectedApp.name} <ArrowUpRight size={15} />
+            </button>
+          )}
+        </div>
       </div>
     </section>
   )

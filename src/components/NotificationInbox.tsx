@@ -39,10 +39,10 @@ const APPS = {
 
 const INITIAL_NOTIFICATIONS: Notification[] = [
   {
-    id: 'notes-thought',
+    id: 'notes-updated',
     target: 'notes',
-    title: 'A thought worth returning to',
-    body: 'Your scratchpad is right where you left it.',
+    title: 'Document updated',
+    body: 'Workspace notes · Local copy saved.',
     time: '2 min ago',
     unread: true,
   },
@@ -50,15 +50,15 @@ const INITIAL_NOTIFICATIONS: Notification[] = [
     id: 'files-download',
     target: 'files',
     title: 'Download complete',
-    body: 'hearthspace-wallpaper.png is ready in Downloads.',
+    body: 'reference-board.png is ready in Downloads.',
     time: '8 min ago',
     unread: true,
   },
   {
     id: 'browser-reading',
     target: 'browser',
-    title: 'Saved for a quieter moment',
-    body: 'A page in your reading list is waiting for you.',
+    title: 'Bookmark saved',
+    body: 'Spatial interfaces was added to Bookmarks.',
     time: '12 min ago',
     unread: true,
   },
@@ -164,15 +164,19 @@ export default function NotificationInbox({
         aria-label={`Notifications, ${unreadCount} unread`}
         aria-expanded={open}
         aria-controls="notification-inbox"
+        data-unread={unreadCount > 0}
         onClick={() => {
           setToast(null)
           onToggle()
         }}
       >
-        <Bell size={17} strokeWidth={1.7} />
-        <span className={styles.triggerLabel}>Notifications</span>
         <span className={styles.badge} data-unread={unreadCount > 0}>
-          {unreadCount > 99 ? '99+' : unreadCount}
+          {unreadCount > 99 ? '99+' : String(unreadCount).padStart(2, '0')}
+        </span>
+        <span className={styles.triggerLabel}>
+          <span>Activity</span>
+          <span className={styles.triggerCaption}>Unread</span>
+          <ArrowUpRight size={18} aria-hidden="true" />
         </span>
       </button>
 
@@ -184,11 +188,16 @@ export default function NotificationInbox({
         >
           <header className={styles.heading}>
             <div>
-              <h2 id="notification-heading">Notifications</h2>
-              <span>
-                {unreadCount ? `${unreadCount} unread` : 'You’re all caught up'}
-              </span>
+              <span className={styles.headingEyebrow}>Incoming / Feed</span>
+              <h2 id="notification-heading">Activity</h2>
             </div>
+            <span className={styles.headingCount}>
+              {String(unreadCount).padStart(2, '0')}
+              <small>Unread</small>
+            </span>
+          </header>
+          <div className={styles.feedToolbar}>
+            <span>{notifications.length} events</span>
             <button
               type="button"
               className={styles.markRead}
@@ -201,11 +210,11 @@ export default function NotificationInbox({
             >
               <CheckCheck size={15} /> Mark all read
             </button>
-          </header>
+          </div>
 
           <div className={styles.list}>
             {notifications.length ? (
-              notifications.map((item) => {
+              notifications.map((item, index) => {
                 const { name, Icon } = APPS[item.target]
                 return (
                   <article
@@ -215,6 +224,7 @@ export default function NotificationInbox({
                   >
                     <div className={styles.itemIcon}>
                       <Icon size={17} strokeWidth={1.6} />
+                      <span>{String(index + 1).padStart(2, '0')}</span>
                     </div>
                     <div className={styles.itemContent}>
                       <div className={styles.itemMeta}>
@@ -234,9 +244,7 @@ export default function NotificationInbox({
                         className={styles.openButton}
                         onClick={() => openNotification(item)}
                       >
-                        {item.target === 'notes'
-                          ? 'Return to Notes'
-                          : `Open ${name}`}
+                        Open {name}
                         <ArrowUpRight size={13} />
                       </button>
                     </div>
@@ -256,8 +264,8 @@ export default function NotificationInbox({
                 <span>
                   <Bell size={23} strokeWidth={1.3} />
                 </span>
-                <h3>All clear.</h3>
-                <p>A little quiet for your corner of the world.</p>
+                <h3>No notifications</h3>
+                <p>New activity will appear here.</p>
               </div>
             )}
           </div>

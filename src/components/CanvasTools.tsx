@@ -35,46 +35,57 @@ export default function CanvasTools({
         </div>
       )}
       <div className={styles.dock} role="group" aria-label="Canvas tools">
-        <button
-          type="button"
-          className={styles.tool}
-          aria-pressed={mode === 'pan'}
-          title="Pan the canvas (H)"
-          onClick={() => onModeChange('pan')}
-        >
-          <Hand size={18} aria-hidden="true" />
-          <span>Pan</span>
-        </button>
-        <button
-          type="button"
-          className={styles.tool}
-          aria-pressed={mode === 'lasso'}
-          title="Select windows (L)"
-          onClick={() => onModeChange('lasso')}
-        >
-          <LassoSelect size={18} aria-hidden="true" />
-          <span>Select</span>
-        </button>
-        <button
-          type="button"
-          className={styles.tool}
-          aria-pressed={mapOpen}
-          title="Toggle canvas map (M)"
-          onClick={onToggleMap}
-        >
-          <Map size={18} aria-hidden="true" />
-          <span>Map</span>
-        </button>
-        <button
-          type="button"
-          className={styles.tool}
-          title="Arrange all windows (A)"
-          onClick={onArrange}
-          disabled={windowCount === 0}
-        >
-          <LayoutGrid size={18} aria-hidden="true" />
-          <span>Arrange</span>
-        </button>
+        <div className={styles.dockHeader}>
+          <span>Navigate</span>
+          <span>01 / XY</span>
+        </div>
+        <div className={styles.toolGrid}>
+          <button
+            type="button"
+            className={`${styles.tool} ${styles.move}`}
+            aria-pressed={mode === 'pan'}
+            aria-label="Pan the canvas"
+            title="Pan the canvas (H)"
+            onClick={() => onModeChange('pan')}
+          >
+            <Hand size={24} strokeWidth={1.5} aria-hidden="true" />
+            <span>Move</span>
+            <kbd aria-hidden="true">H</kbd>
+          </button>
+          <button
+            type="button"
+            className={styles.tool}
+            aria-pressed={mode === 'lasso'}
+            title="Select windows (L)"
+            onClick={() => onModeChange('lasso')}
+          >
+            <LassoSelect size={18} aria-hidden="true" />
+            <span>Select</span>
+            <kbd aria-hidden="true">L</kbd>
+          </button>
+          <button
+            type="button"
+            className={styles.tool}
+            aria-pressed={mapOpen}
+            title="Toggle canvas map (M)"
+            onClick={onToggleMap}
+          >
+            <Map size={18} aria-hidden="true" />
+            <span>Map</span>
+            <kbd aria-hidden="true">M</kbd>
+          </button>
+          <button
+            type="button"
+            className={styles.tool}
+            title="Arrange all windows (A)"
+            onClick={onArrange}
+            disabled={windowCount === 0}
+          >
+            <LayoutGrid size={18} aria-hidden="true" />
+            <span>Arrange</span>
+            <kbd aria-hidden="true">A</kbd>
+          </button>
+        </div>
       </div>
     </div>
   )

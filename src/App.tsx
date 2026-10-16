@@ -9,13 +9,9 @@ import {
 } from 'react'
 import {
   ArrowDownRight,
-  ArrowUpRight,
-  Flame,
-  Hand,
   Maximize2,
   PanelsTopLeft,
   RotateCcw,
-  Scan,
   StickyNote,
   X,
 } from 'lucide-react'
@@ -27,6 +23,7 @@ import Minimap from './components/Minimap'
 import CanvasTools from './components/CanvasTools'
 import AppLauncher from './components/AppLauncher'
 import LauncherDock from './components/LauncherDock'
+import WindowContent from './components/WindowContent'
 import { APP_CATALOG, type LauncherApp } from './components/launcher-apps'
 import {
   arrangeWindows,
@@ -408,6 +405,11 @@ function App() {
 
   function maximize(item: DesktopWindow) {
     const canvas = viewport.current!
+    const compact = view.width <= 760
+    const left = compact ? 12 : 276
+    const top = compact ? 158 : 176
+    const right = compact ? 12 : 24
+    const bottom = compact ? 176 : 104
     setWorkspace((current) => ({
       ...current,
       windows: current.windows.map((entry) => {
@@ -418,11 +420,11 @@ function App() {
         }
         const width = Math.min(
           current.width,
-          Math.max(MIN_WIDTH, view.width - 48),
+          Math.max(MIN_WIDTH, view.width - left - right),
         )
         const height = Math.min(
           current.height,
-          Math.max(MIN_HEIGHT, view.height - 200),
+          Math.max(MIN_HEIGHT, view.height - top - bottom),
         )
         return {
           ...entry,
@@ -432,8 +434,8 @@ function App() {
             width: entry.width,
             height: entry.height,
           },
-          x: clamp(canvas.scrollLeft + 24, 0, current.width - width),
-          y: clamp(canvas.scrollTop + 96, 0, current.height - height),
+          x: clamp(canvas.scrollLeft + left, 0, current.width - width),
+          y: clamp(canvas.scrollTop + top, 0, current.height - height),
           width,
           height,
         }
@@ -500,6 +502,19 @@ function App() {
   function revealWindow(id: string) {
     const item = workspace.windows.find((entry) => entry.id === id)
     if (!item) return
+    const compact = view.width <= 760
+    const top = item.restore
+      ? compact
+        ? 158
+        : 176
+      : Math.max(compact ? 158 : 176, (view.height - item.height) / 2)
+    let left = item.restore
+      ? compact
+        ? 12
+        : 276
+      : Math.max(12, (view.width - item.width) / 2)
+    if (!compact && left < 252 && top + item.height > view.height - 204)
+      left = 276
     closePopovers()
     setLauncher(null)
     setShowMap(false)
@@ -509,16 +524,8 @@ function App() {
     focusWindow(item.id)
     setRevealRequest({
       id: item.id,
-      left: clamp(
-        item.x - Math.max(12, (view.width - item.width) / 2),
-        0,
-        Math.max(0, workspace.width - view.width),
-      ),
-      top: clamp(
-        item.y - Math.max(96, (view.height - item.height) / 2),
-        0,
-        Math.max(0, workspace.height - view.height),
-      ),
+      left: clamp(item.x - left, 0, Math.max(0, workspace.width - view.width)),
+      top: clamp(item.y - top, 0, Math.max(0, workspace.height - view.height)),
     })
   }
 
@@ -600,12 +607,7 @@ function App() {
           {workspace.windows.map((item, index) => {
             const app = APP_CATALOG.find((entry) => entry.id === item.appId)
             const Icon =
-              app?.icon ??
-              (item.kind === 'welcome'
-                ? Flame
-                : item.kind === 'notes'
-                  ? StickyNote
-                  : PanelsTopLeft)
+              app?.icon ?? (item.kind === 'notes' ? StickyNote : PanelsTopLeft)
             return (
               <section
                 key={item.id}
@@ -618,7 +620,7 @@ function App() {
                 data-window-id={item.id}
                 data-active={focusedWindowId === item.id}
                 data-selected={selectedIds.includes(item.id)}
-                className={`${styles.window} ${styles[item.kind]}`}
+                className={styles.window}
                 style={{
                   left: item.x,
                   top: item.y,
@@ -673,59 +675,13 @@ function App() {
                   </div>
                 </header>
                 <div className={styles.windowBody}>
-                  {item.kind === 'welcome' ? (
-                    <div className={styles.welcomeContent}>
-                      <div className={styles.welcomeMark}>
-                        <Flame size={25} strokeWidth={1.4} />
-                      </div>
-                      <span className={styles.smallLabel}>
-                        A DIFFERENT KIND OF DESKTOP
-                      </span>
-                      <h2>Make yourself at home.</h2>
-                      <p>
-                        Your ideas don’t have to fit in one screen.
-                        <br />
-                        There’s a whole space to explore.
-                      </p>
-                      <div className={styles.welcomeFooter}>
-                        <span>
-                          <Hand size={14} /> Drag the background to wander
-                        </span>
-                        <ArrowUpRight size={17} />
-                      </div>
-                    </div>
-                  ) : item.kind === 'notes' ? (
-                    <div className={styles.noteContent}>
-                      <span className={styles.smallLabel}>
-                        A WORK IN PROGRESS
-                      </span>
-                      <textarea
-                        aria-label="Your thoughts"
-                        spellCheck={false}
-                        value={workspace.note}
-                        onChange={(event) => {
-                          const note = event.target.value
-                          setWorkspace((current) => ({ ...current, note }))
-                        }}
-                      />
-                      <span className={styles.noteFooter}>
-                        <span /> Just for you. Saved on this device.
-                      </span>
-                    </div>
-                  ) : (
-                    <div className={styles.emptyContent}>
-                      <div className={styles.emptyMark}>
-                        <Icon size={29} strokeWidth={1.1} />
-                      </div>
-                      <h2>{app?.name ?? 'A little possibility.'}</h2>
-                      <p>
-                        {app ? app.description : 'Anything could live here.'}
-                      </p>
-                      <span className={styles.emptyCaption}>
-                        {app ? 'APP PREVIEW' : 'MOVE ME. RESIZE ME. MAKE ROOM.'}
-                      </span>
-                    </div>
-                  )}
+                  <WindowContent
+                    item={item}
+                    workspace={workspace}
+                    onNoteChange={(note) =>
+                      setWorkspace((current) => ({ ...current, note }))
+                    }
+                  />
                 </div>
                 {!item.restore &&
                   edges.map((edge) => (
@@ -814,10 +770,10 @@ function App() {
       {showMap && (
         <aside className={styles.mapPanel}>
           <div className={styles.panelHeading}>
-            <h2>
-              <Scan size={14} /> Your space
-            </h2>
-            <span>{workspace.windows.length} windows</span>
+            <h2>The whole field</h2>
+            <span>
+              {String(workspace.windows.length).padStart(2, '0')} / WINDOWS
+            </span>
           </div>
           <Minimap
             workspace={workspace}
@@ -825,7 +781,7 @@ function App() {
             onNavigate={(x, y) => viewport.current?.scrollTo(x, y)}
           />
           <div className={styles.mapFooter}>
-            <span>Drag the map to explore</span>
+            <span>DRAG TO NAVIGATE</span>
             <button onClick={goHome}>
               <RotateCcw size={12} /> Home
             </button>

@@ -1,4 +1,4 @@
-import { Flame, LayoutGrid, PanelsTopLeft, Plus, X } from 'lucide-react'
+import { LayoutGrid, PanelsTopLeft, Plus, X } from 'lucide-react'
 import { useEffect, useId, useRef, type Ref } from 'react'
 import type { DesktopWindow } from '../desktop'
 import { APP_CATALOG, type LauncherApp } from './launcher-apps'
@@ -8,17 +8,15 @@ const FAVORITE_IDS = ['browser', 'files', 'notes']
 const WORKSPACE_APPS: LauncherApp[] = [
   {
     id: 'workspace-welcome',
-    name: 'Welcome',
-    description: 'Your welcome windows',
-    icon: Flame,
-    color: '#a77565',
+    name: 'Workspace',
+    description: 'Workspace overview',
+    icon: PanelsTopLeft,
   },
   {
     id: 'workspace-windows',
     name: 'Windows',
-    description: 'Other windows in your space',
+    description: 'Other open windows',
     icon: PanelsTopLeft,
-    color: '#7e8f67',
   },
 ]
 const DOCK_APPS = [
@@ -166,11 +164,11 @@ export default function LauncherDock({
                 }
               }}
             >
-              <span
-                className={styles.appIcon}
-                style={{ color: app.color, backgroundColor: `${app.color}16` }}
-              >
+              <span className={styles.appIcon}>
                 <Icon size={20} aria-hidden="true" />
+              </span>
+              <span className={styles.appName} aria-hidden="true">
+                {app.name}
               </span>
               {running && (
                 <>
@@ -194,7 +192,7 @@ export default function LauncherDock({
         title="Open app launcher (⌘/Ctrl K)"
         onClick={onToggle}
       >
-        <LayoutGrid size={18} aria-hidden="true" />
+        <LayoutGrid size={22} aria-hidden="true" />
         <span>Apps</span>
       </button>
       {selectedGroup && (
@@ -205,6 +203,7 @@ export default function LauncherDock({
         >
           <header className={styles.popoverHeading}>
             <div>
+              <p>Window index</p>
               <h2 id={`${panelId}-heading`}>{selectedGroup.app.name}</h2>
               <span>
                 {selectedGroup.windows.length}{' '}
@@ -234,12 +233,18 @@ export default function LauncherDock({
                 data-active={item.id === activeWindowId}
                 onClick={() => onFocusWindow(item.id)}
               >
-                <span className={styles.windowPreview} aria-hidden="true">
-                  <PanelsTopLeft size={18} />
+                <span className={styles.windowNumber} aria-hidden="true">
+                  {String(index + 1).padStart(2, '0')}
                 </span>
                 <span className={styles.windowCopy}>
                   <strong>{item.title}</strong>
-                  <span>Window {index + 1}</span>
+                  <span>
+                    {Math.round(item.width)} × {Math.round(item.height)} ·{' '}
+                    {item.id === activeWindowId ? 'In focus' : 'On canvas'}
+                  </span>
+                </span>
+                <span className={styles.windowPreview} aria-hidden="true">
+                  <span />
                 </span>
                 {item.id === activeWindowId && (
                   <span className={styles.activeLabel} aria-hidden="true">
