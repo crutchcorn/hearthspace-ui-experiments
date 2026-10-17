@@ -1,21 +1,26 @@
 import {
   Check,
   Image,
+  Moon,
   Palette,
   PanelLeft,
   SlidersHorizontal,
+  Sun,
 } from 'lucide-react'
 import { useId, useRef, useState, type CSSProperties } from 'react'
 import {
   ACCENT_THEMES,
   type AccentThemeId,
   type AppPresentation,
+  type ColorMode,
 } from '../theme'
 import type { BackgroundFit, BackgroundPhoto } from '../useBackground'
 import BackgroundSettings from './BackgroundSettings'
 import styles from './Settings.module.css'
 
 interface SettingsProps {
+  colorMode: ColorMode
+  onColorModeChange: (mode: ColorMode) => void
   accentTheme: AccentThemeId
   onAccentThemeChange: (theme: AccentThemeId) => void
   appPresentation: AppPresentation
@@ -29,6 +34,11 @@ interface SettingsProps {
   onBackgroundFitChange: (fit: BackgroundFit) => void
   onBackgroundReset: () => void
 }
+
+const COLOR_MODES = [
+  { id: 'light', name: 'Light', icon: Sun },
+  { id: 'dark', name: 'Dark', icon: Moon },
+] as const
 
 const APP_PRESENTATIONS = [
   { id: 'ideal', name: 'Ideal', detail: 'Uniform icons and window frames.' },
@@ -61,6 +71,8 @@ const CATEGORIES = [
 ] as const
 
 export default function Settings({
+  colorMode,
+  onColorModeChange,
   accentTheme,
   onAccentThemeChange,
   appPresentation,
@@ -80,6 +92,7 @@ export default function Settings({
   const navigationToggle = useRef<HTMLButtonElement>(null)
   const content = useRef<HTMLDivElement>(null)
   const navigationId = useId()
+  const colorModeGroupName = useId()
   const groupName = useId()
   const presentationGroupName = useId()
   const batterySettingId = useId()
@@ -156,6 +169,41 @@ export default function Settings({
             )}
             {category === 'appearance' && (
               <>
+                <fieldset className={styles.palette}>
+                  <legend>Color mode</legend>
+                  <div className={styles.presentationOptions}>
+                    {COLOR_MODES.map(({ id, name, icon: Icon }) => (
+                      <label key={id} className={styles.option}>
+                        <input
+                          type="radio"
+                          name={colorModeGroupName}
+                          value={id}
+                          aria-label={name}
+                          checked={colorMode === id}
+                          onChange={() => onColorModeChange(id)}
+                        />
+                        <span className={`${styles.card} ${styles.modeCard}`}>
+                          <span className={styles.modeLabel}>
+                            <Icon
+                              size={18}
+                              strokeWidth={1.6}
+                              aria-hidden="true"
+                            />
+                            <strong>{name}</strong>
+                          </span>
+                          <span
+                            className={styles.selectionMark}
+                            aria-hidden="true"
+                          >
+                            {colorMode === id && (
+                              <Check size={11} strokeWidth={2.5} />
+                            )}
+                          </span>
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                </fieldset>
                 <fieldset className={styles.palette}>
                   <legend>App appearance</legend>
                   <div className={styles.presentationOptions}>

@@ -6,7 +6,7 @@ import {
   LockKeyhole,
 } from 'lucide-react'
 import type { DesktopWindow, Workspace } from '../desktop'
-import type { AccentThemeId, AppPresentation } from '../theme'
+import type { AccentThemeId, AppPresentation, ColorMode } from '../theme'
 import type { BackgroundFit, BackgroundPhoto } from '../useBackground'
 import Settings from './Settings'
 import AppIcon from './AppIcon'
@@ -17,6 +17,8 @@ interface WindowContentProps {
   item: DesktopWindow
   workspace: Workspace
   onNoteChange: (note: string) => void
+  colorMode: ColorMode
+  onColorModeChange: (mode: ColorMode) => void
   accentTheme: AccentThemeId
   onAccentThemeChange: (theme: AccentThemeId) => void
   appPresentation: AppPresentation
@@ -48,6 +50,8 @@ export default function WindowContent({
   item,
   workspace,
   onNoteChange,
+  colorMode,
+  onColorModeChange,
   accentTheme,
   onAccentThemeChange,
   appPresentation,
@@ -203,6 +207,8 @@ export default function WindowContent({
   if (item.appId === 'settings') {
     return (
       <Settings
+        colorMode={colorMode}
+        onColorModeChange={onColorModeChange}
         accentTheme={accentTheme}
         onAccentThemeChange={onAccentThemeChange}
         appPresentation={appPresentation}

@@ -9,10 +9,33 @@ export const ACCENT_THEMES = [
 
 export type AccentThemeId = (typeof ACCENT_THEMES)[number]['id']
 export type AppPresentation = 'ideal' | 'realistic'
+export type ColorMode = 'light' | 'dark'
 
 const ACCENT_STORAGE_KEY = 'hearthspace-accent-v1'
 const APP_PRESENTATION_STORAGE_KEY = 'hearthspace-app-presentation-v1'
 const BATTERY_PERCENTAGE_STORAGE_KEY = 'hearthspace-battery-percentage-v1'
+const COLOR_MODE_STORAGE_KEY = 'hearthspace-color-mode-v1'
+
+export function loadColorMode(): ColorMode {
+  try {
+    const saved = localStorage.getItem(COLOR_MODE_STORAGE_KEY)
+    if (saved === 'light' || saved === 'dark') return saved
+  } catch {
+    // Use the system preference if storage is unavailable.
+  }
+
+  return window.matchMedia('(prefers-color-scheme: dark)').matches
+    ? 'dark'
+    : 'light'
+}
+
+export function saveColorMode(mode: ColorMode) {
+  try {
+    localStorage.setItem(COLOR_MODE_STORAGE_KEY, mode)
+  } catch {
+    // Keep the selected color mode for this session if storage is unavailable.
+  }
+}
 
 export function loadAccentTheme(): AccentThemeId {
   try {

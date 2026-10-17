@@ -64,14 +64,11 @@
   min-width: 0;
   min-height: 0;
   cursor: default;
-  border: 1px solid #ffffffd9;
+  border: 1px solid var(--chrome-border);
   border-radius: var(--window-radius, var(--radius-panel));
   background: var(--paper);
   backdrop-filter: var(--glass-blur);
-  box-shadow:
-    var(--glass-edge),
-    0 14px 34px #6c4d2d14,
-    0 2px 5px #6c4d2d0a;
+  box-shadow: var(--glass-edge), var(--window-shadow);
   transition:
     box-shadow 180ms ease,
     border-color 180ms ease;
@@ -94,7 +91,7 @@
   border-radius: calc(var(--window-radius, var(--radius-panel)) - 1px)
     calc(var(--window-radius, var(--radius-panel)) - 1px) 0 0;
   background: var(--chrome-raised);
-  color: #67564b;
+  color: var(--muted);
   cursor: grab;
   user-select: none;
   touch-action: none;
@@ -107,7 +104,7 @@
   width: 28px;
   height: 4px;
   border-radius: var(--radius-round);
-  background: #86716438;
+  background: color-mix(in srgb, var(--muted) 26%, transparent);
   transform: translateX(-50%);
   content: '';
   pointer-events: none;
@@ -172,7 +169,7 @@
 }
 
 .windowActions button:hover {
-  background: #ffffffb3;
+  background: var(--chrome-hover);
   opacity: 1;
 }
 
@@ -188,7 +185,7 @@
   overflow: auto;
   border-radius: 0 0 calc(var(--window-radius, var(--radius-panel)) - 1px)
     calc(var(--window-radius, var(--radius-panel)) - 1px);
-  scrollbar-color: #ad8c734d transparent;
+  scrollbar-color: var(--scrollbar) transparent;
   scrollbar-width: thin;
 }
 
@@ -275,7 +272,7 @@
   position: absolute;
   right: 8px;
   bottom: 8px;
-  color: #a68d795e;
+  color: color-mix(in srgb, var(--muted) 38%, transparent);
   pointer-events: none;
 }
 
@@ -342,7 +339,7 @@
   flex-shrink: 0;
   gap: 14px;
   padding-left: 8px;
-  color: #6b6d72;
+  color: var(--muted);
 }
 
 .nativeMenu {
@@ -362,6 +359,10 @@
   --ink: #292b30;
   --muted: #72767e;
   --line: #00000018;
+  --chrome-border: #ffffffbc;
+  --surface-control: #ffffff40;
+  --surface-subtle: #ffffff2b;
+  --scrollbar: #ad8c734d;
 
   border-color: #9b9da3;
   background: #fff;
@@ -369,6 +370,7 @@
   backdrop-filter: none;
   box-shadow: 0 10px 25px #1b1e2730;
   font-family: Arial, sans-serif;
+  color-scheme: light;
 }
 
 .desktop[data-presentation='realistic']
@@ -561,6 +563,113 @@
 }
 
 .desktop[data-presentation='realistic']
+  .window[data-external='true']
+  .windowActions
+  button:last-child:hover {
+  background: #c54646;
+  color: #fff;
+}
+
+.desktop[data-presentation='realistic'][data-color-mode='dark']
+  .window[data-external='true'] {
+  --ink: #e5e7eb;
+  --muted: #a6aab2;
+  --line: #ffffff1c;
+  --chrome-border: #ffffff24;
+  --surface-control: #ffffff08;
+  --surface-subtle: #ffffff03;
+  --scrollbar: #a6aab257;
+
+  border-color: #555860;
+  background: #25272c;
+  color-scheme: dark;
+}
+
+.desktop[data-presentation='realistic'][data-color-mode='dark']
+  .window[data-external='true']
+  .titlebar {
+  background: #34363c;
+  color: #e5e7eb;
+}
+
+.desktop[data-presentation='realistic'][data-color-mode='dark']
+  .window[data-app-id='browser']
+  .titlebar {
+  background: #282730;
+}
+
+.desktop[data-presentation='realistic'][data-color-mode='dark']
+  .window[data-app-id='files']
+  .titlebar {
+  background: #303236;
+}
+
+.desktop[data-presentation='realistic'][data-color-mode='dark']
+  .window[data-app-id='files']
+  .windowActions
+  button {
+  background: #45474c;
+}
+
+.desktop[data-presentation='realistic'][data-color-mode='dark']
+  .window[data-app-id='notes']
+  .titlebar {
+  background: linear-gradient(#41444a, #34363b);
+}
+
+.desktop[data-presentation='realistic'][data-color-mode='dark']
+  .window[data-app-id='notes']
+  .windowActions
+  button {
+  border-color: #60636b;
+  background: #45474c;
+}
+
+.desktop[data-presentation='realistic'][data-color-mode='dark'] .nativeMenu {
+  border-color: #45463f;
+  background: #30322d;
+  color: #e0e2d8;
+}
+
+.desktop[data-presentation='realistic'][data-color-mode='dark']
+  .window[data-app-id='terminal'] {
+  border-color: #383b40;
+  background: #17191d;
+}
+
+.desktop[data-presentation='realistic'][data-color-mode='dark']
+  .window[data-app-id='terminal']
+  .titlebar {
+  background: #303338;
+}
+
+.desktop[data-presentation='realistic'][data-color-mode='dark']
+  .window:is([data-app-id='music'], [data-app-id='photos']) {
+  border-color: #383944;
+  background: #22232b;
+}
+
+.desktop[data-presentation='realistic'][data-color-mode='dark']
+  .window:is([data-app-id='music'], [data-app-id='photos'])
+  .titlebar {
+  background: #17181d;
+}
+
+.desktop[data-presentation='realistic'][data-color-mode='dark']
+  .window[data-app-id='calendar']
+  .titlebar {
+  background: #27384d;
+  color: #c7dcf3;
+}
+
+.desktop[data-presentation='realistic'][data-color-mode='dark']
+  .window[data-external='true']
+  .windowActions
+  button:hover {
+  background: #8b8d944d;
+}
+
+.desktop[data-presentation='realistic'][data-color-mode='dark']
   .window[data-external='true']
   .windowActions
   button:last-child:hover {

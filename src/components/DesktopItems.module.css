@@ -47,7 +47,9 @@
   flex-shrink: 0;
   place-items: center;
   color: var(--accent-strong);
-  filter: drop-shadow(0 2px 1px #67452b14);
+  filter: drop-shadow(
+    0 2px 1px color-mix(in srgb, var(--chrome-text) 8%, transparent)
+  );
 }
 
 .item[data-item-kind='folder'] .icon > svg {

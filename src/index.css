@@ -20,6 +20,13 @@
   --line: #9c7d661f;
   --field: #eee8e1;
   --field-dot: #ad836b73;
+  --surface-subtle: #ffffff2b;
+  --surface-control: #ffffff40;
+  --scrollbar: #ad8c734d;
+  --control-track: #b9a89d70;
+  --control-thumb: #fffaf5;
+  --panel-wash: linear-gradient(135deg, #ffffff6b, #fff6e62e);
+  --window-shadow: 0 14px 34px #6c4d2d14, 0 2px 5px #6c4d2d0a;
   --radius-detail: 4px;
   --radius-control: 8px;
   --radius-tile: 12px;
@@ -47,6 +54,7 @@
 }
 
 [data-accent] {
+  --accent: var(--accent-base);
   --accent-hover: color-mix(in srgb, var(--accent) 86%, white);
   --accent-strong: color-mix(in srgb, var(--accent) 88%, #231f1c);
   --accent-bright: color-mix(in srgb, var(--accent) 66%, white);
@@ -68,6 +76,45 @@
   --accent-wash: #fff3e4;
   --field: #eee8e1;
   --field-dot: #ad836b73;
+}
+
+[data-color-mode='light'] {
+  color-scheme: light;
+}
+
+[data-color-mode='dark'] {
+  --chrome: #29231fe0;
+  --chrome-raised: #302923f5;
+  --chrome-hover: #ffffff0f;
+  --chrome-border: #e5cbb526;
+  --chrome-text: #f1e8df;
+  --chrome-muted: #b5a79a;
+  --paper: #27221edb;
+  --ink: #f1e8df;
+  --muted: #b5a79a;
+  --line: #e5cbb51c;
+  --surface-subtle: #ffffff03;
+  --surface-control: #ffffff06;
+  --scrollbar: #c1a78e57;
+  --control-track: #e5cbb533;
+  --control-thumb: #f1e8df;
+  --panel-wash: linear-gradient(135deg, #ffffff05, #fff0);
+  --glass-edge: inset 0 1px 0 #ffe8d512, inset 0 -1px 0 #0000001f;
+  --shadow-panel: 0 20px 60px #00000040, 0 3px 12px #00000026;
+  --window-shadow: 0 14px 34px #00000038, 0 2px 5px #00000026;
+  --accent: color-mix(in srgb, var(--accent-base) 70%, #fff1df);
+  --accent-hover: color-mix(in srgb, var(--accent) 85%, white);
+  --accent-ink: #231b17;
+  --accent-strong: var(--accent);
+  --accent-bright: color-mix(in srgb, var(--accent) 82%, #fff1df);
+  --accent-light: color-mix(in srgb, var(--accent) 65%, #fff1df);
+  --accent-border: color-mix(in srgb, var(--accent) 46%, #302923);
+  --accent-soft: color-mix(in srgb, var(--accent-base) 22%, #302923);
+  --accent-wash: color-mix(in srgb, var(--accent-base) 10%, #27221e);
+  --field: color-mix(in srgb, var(--accent-base) 3%, #191816);
+  --field-dot: color-mix(in srgb, var(--accent-base) 20%, #94877c73);
+
+  color-scheme: dark;
 }
 
 * {

@@ -63,13 +63,12 @@
   overflow: auto;
   border: 1px solid var(--chrome-border);
   border-radius: var(--radius-panel);
-  background: linear-gradient(135deg, #ffffff6b, #fff6e62e), var(--chrome);
+  background: var(--panel-wash), var(--chrome);
   box-shadow: var(--shadow-panel), var(--glass-edge);
   backdrop-filter: var(--glass-blur);
   overscroll-behavior: contain;
-  scrollbar-color: #aa8b775c transparent;
+  scrollbar-color: var(--scrollbar) transparent;
   scrollbar-width: thin;
-  color-scheme: light;
   animation: panel-in 160ms ease-out;
 }
 
@@ -101,7 +100,7 @@
   align-items: center;
   gap: 5px;
   padding: 6px 9px;
-  border: 1px solid #ffffffa6;
+  border: 1px solid var(--chrome-border);
   border-radius: var(--radius-detail);
   background: var(--accent-soft);
   color: var(--chrome-text);
@@ -121,7 +120,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 0 14px 8px 22px;
-  border-bottom: 1px solid #ba9b8326;
+  border-bottom: 1px solid var(--line);
   color: var(--chrome-muted);
   font-size: 11px;
 }
@@ -154,7 +153,7 @@
   min-height: 0;
   overflow: auto;
   overscroll-behavior: contain;
-  scrollbar-color: #aa8b775c transparent;
+  scrollbar-color: var(--scrollbar) transparent;
   scrollbar-width: thin;
 }
 
@@ -199,11 +198,11 @@
   width: 29px;
   height: 29px;
   place-items: center;
-  border: 1px solid #ffffffbd;
+  border: 1px solid var(--chrome-border);
   border-radius: var(--radius-control);
   background: var(--chrome-raised);
   color: var(--chrome-muted);
-  box-shadow: 0 2px 5px #7047280a;
+  box-shadow: 0 2px 5px color-mix(in srgb, var(--chrome-text) 4%, transparent);
 }
 
 .notification[data-unread='true'] .itemIcon {
@@ -336,8 +335,8 @@
   justify-content: space-between;
   gap: 12px;
   padding: 12px 14px;
-  border-top: 1px solid #ba9b8326;
-  background: #fff9f12e;
+  border-top: 1px solid var(--line);
+  background: var(--surface-subtle);
 }
 
 .footer > span {
@@ -354,7 +353,7 @@
   justify-content: center;
   gap: 6px;
   padding: 0 10px;
-  border: 1px solid #ffffffa6;
+  border: 1px solid var(--chrome-border);
   border-radius: var(--radius-control);
   background: linear-gradient(135deg, var(--accent-bright), var(--accent));
   box-shadow: 0 3px 10px color-mix(in srgb, var(--accent) 13%, transparent);
@@ -430,7 +429,7 @@
   justify-content: space-between;
   gap: 12px;
   padding-top: 12px;
-  border-top: 1px solid #ba9b8326;
+  border-top: 1px solid var(--line);
 }
 
 .toastFooter > span {
@@ -448,7 +447,7 @@
   justify-content: center;
   gap: 7px;
   padding: 0 12px;
-  border: 1px solid #ffffffa6;
+  border: 1px solid var(--chrome-border);
   border-radius: var(--radius-control);
   background: linear-gradient(135deg, var(--accent-bright), var(--accent));
   box-shadow: 0 3px 10px color-mix(in srgb, var(--accent) 13%, transparent);

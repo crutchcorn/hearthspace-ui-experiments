@@ -1,6 +1,6 @@
 # Visual language
 
-Hearthspace pairs glass with one shared accent palette, using warm orange by default. The four corners keep distinct roles: notifications at top left, device status at top right, navigation at bottom left, and applications at bottom right. The canvas leaves the center available for work.
+Hearthspace pairs glass with one shared accent palette, using warm orange by default. Light and Dark modes change the environment's surfaces and contrast while keeping the chosen accent's identity. The four corners keep distinct roles: notifications at top left, device status at top right, navigation at bottom left, and applications at bottom right. The canvas leaves the center available for work.
 
 ## Light and layers
 
@@ -8,7 +8,9 @@ The canvas is a flat surface with subtly tinted dots spaced 28 pixels apart in b
 
 A photo background replaces the dots without changing the desktop’s layers. **Repeat with canvas** anchors native-size image tiles to the world; **Stretch**, **Contain**, and **Cover** anchor the image to the viewport instead. Contain keeps the theme’s field color visible around the photo. The image retains its own colors while shell controls, selections, and glass surfaces retain the shared accent palette. Settings can restore the default dots at any time.
 
-Shell controls and Ideal windows share translucent surfaces, bright edges, backdrop blur, and soft shadows. Clear glass holds most controls and documents; smoked glass gives the Ideal terminal a darker reading surface. Keep enough surface color behind text for it to remain readable as windows overlap.
+Shell controls and Ideal windows share translucent surfaces, bright edges, backdrop blur, and soft shadows. Light mode uses pale glass and dark text; Dark mode uses smoked glass and light text, with subtle canvas dots and surfaces tuned for the selected accent. The Ideal terminal keeps a dark reading surface in both modes. Keep enough surface color behind text for it to remain readable as windows overlap.
+
+Settings exposes **Light** and **Dark** under Appearance. With no saved choice, the initial mode follows the operating system's `prefers-color-scheme` preference. An explicit choice applies immediately throughout the shell and both Ideal and Realistic windows and persists independently of the accent. Realistic windows use app-specific light and dark palettes while preserving their different chrome designs; their icons keep their own artwork colors. Workspace and Settings continue to follow the shell. Photo backgrounds are never recolored.
 
 Each Ideal window joins its title bar and content in one glass frame, with a fine divider and no gap between them. The outer frame carries the border, shadow, and active or selected edge light. The header retains its drag handle and controls while the body keeps its own content hierarchy and scrolling area. Realistic frames use the same window bounds and interactions with app-specific surfaces.
 
@@ -18,7 +20,7 @@ Settings offers **Ideal** and **Realistic** app appearance modes. Ideal is the d
 
 The shared app bar provides a stable surface and consistent targets around either kind of artwork. Keep icons contained within their allotted space instead of forcing every icon onto a new matching bubble. The same app identity should carry into the launcher, window picker, and notifications. Running dots, selected controls, and active-window cues remain shell-owned, so app artwork does not have to communicate desktop state.
 
-Realistic previews use distinct visual conventions, such as a dark tabbed browser, a light file manager, classic menus for Notes, and an angular dark terminal. These are illustrative treatments rather than copies of particular apps or toolkits. Workspace and Settings retain the shell’s visual language. Switching the mode changes presentation without replacing content or rearranging the workspace.
+Realistic previews use distinct visual conventions, such as a tabbed browser, a file manager with rounded controls, classic menus for Notes, and an angular dark terminal. Their light and dark variants retain those structures and app-specific colors. Terminal, Music, and Photos already use dark surfaces and remain dark in either mode. These are illustrative treatments rather than copies of particular apps or toolkits. Workspace and Settings retain the shell’s visual language. Switching app appearance or color mode changes presentation without replacing content or rearranging the workspace.
 
 ## Compact corners
 
@@ -38,11 +40,11 @@ Settings uses a sidebar to separate Appearance, Background, and System. The sele
 
 ## One accent carries state
 
-Settings offers six coordinated accent palettes: Orange, Rose, Violet, Blue, Teal, and Olive. Orange is the default. One selection applies across the desktop, including canvas tints, active controls, launch actions, focus, and selected windows. Realistic app artwork and interiors retain their own colors while these shared state cues follow the accent. There are no per-component overrides or arbitrary color inputs.
+Settings offers six coordinated accent palettes: Orange, Rose, Violet, Blue, Teal, and Olive. Orange is the default. One selection applies across the desktop, including canvas tints, active controls, launch actions, focus, and selected windows. Realistic app artwork and interior palettes keep their own identities while their surfaces respond to Light/Dark mode and shared state cues follow the accent. There are no per-component overrides or arbitrary color inputs.
 
-Strong accent gradients use the light `--accent-ink` foreground; quieter states use accent text on `--accent-soft`. Counts, labels, and borders accompany state markers. Destructive hover states retain their red meaning across palettes.
+Strong accent gradients use the contrasting `--accent-ink` foreground; quieter states use accent text on `--accent-soft`. Dark mode uses lighter versions of the six accents for contrast against smoked glass. Counts, labels, and borders accompany state markers. Destructive hover states retain their red meaning across palettes.
 
-Allowed accent names and base colors live in `src/theme.ts`. The root app sets `--accent` and `data-accent`; `src/index.css` derives the shared palette from that color, with explicit values preserving the original Orange appearance. `--paper`, `--ink`, `--muted`, and `--line` describe content. `--chrome` and related properties describe controls. `--field` and `--field-dot` describe the canvas; `--accent` and `--accent-ink` describe the main signal colors. Reuse `--glass-blur`, `--glass-edge`, and `--shadow-panel` for the shared depth treatment.
+Allowed accent names, base colors, and color-mode persistence live in `src/theme.ts`. The root app sets `--accent-base`, `data-accent`, and `data-color-mode`; `src/index.css` derives the displayed accent and shared palette from that color and mode, with explicit values preserving the original Orange appearance in Light mode. The native `color-scheme` follows the selected mode. `--paper`, `--ink`, `--muted`, and `--line` describe content. `--chrome` and related properties describe controls. `--field` and `--field-dot` describe the canvas; `--accent` and `--accent-ink` describe the main signal colors. Reuse `--glass-blur`, `--glass-edge`, and `--shadow-panel` for the shared depth treatment.
 
 ## Type, shape, and space
 

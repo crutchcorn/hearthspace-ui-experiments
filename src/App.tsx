@@ -54,12 +54,15 @@ import {
   ACCENT_THEMES,
   loadAccentTheme,
   loadAppPresentation,
+  loadColorMode,
   loadShowBatteryPercentage,
   saveAccentTheme,
   saveAppPresentation,
+  saveColorMode,
   saveShowBatteryPercentage,
   type AccentThemeId,
   type AppPresentation,
+  type ColorMode,
 } from './theme'
 
 type Gesture = {
@@ -86,6 +89,7 @@ const edges = ['n', 'e', 's', 'w', 'ne', 'se', 'sw', 'nw']
 function App() {
   const background = useBackground()
   const [accentTheme, setAccentTheme] = useState(loadAccentTheme)
+  const [colorMode, setColorMode] = useState(loadColorMode)
   const [appPresentation, setAppPresentation] = useState(loadAppPresentation)
   const [showBatteryPercentage, setShowBatteryPercentage] = useState(
     loadShowBatteryPercentage,
@@ -847,6 +851,11 @@ function App() {
     saveAppPresentation(mode)
   }
 
+  function changeColorMode(mode: ColorMode) {
+    setColorMode(mode)
+    saveColorMode(mode)
+  }
+
   function changeShowBatteryPercentage(show: boolean) {
     setShowBatteryPercentage(show)
     saveShowBatteryPercentage(show)
@@ -856,8 +865,9 @@ function App() {
     <main
       className={styles.desktop}
       data-accent={accentTheme}
+      data-color-mode={colorMode}
       data-presentation={appPresentation}
-      style={{ '--accent': accent.color } as CSSProperties}
+      style={{ '--accent-base': accent.color } as CSSProperties}
     >
       {background.photo && background.photo.fit !== 'repeat' && (
         <div
@@ -1074,6 +1084,8 @@ function App() {
                     item={item}
                     workspace={workspace}
                     accentTheme={accentTheme}
+                    colorMode={colorMode}
+                    onColorModeChange={changeColorMode}
                     onAccentThemeChange={changeAccentTheme}
                     appPresentation={appPresentation}
                     onAppPresentationChange={changeAppPresentation}

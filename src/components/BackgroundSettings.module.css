@@ -61,7 +61,7 @@
   padding: 7px 10px;
   border: 1px solid var(--line);
   border-radius: var(--radius-control);
-  background: #ffffff60;
+  background: var(--surface-control);
   color: var(--ink);
   font-size: 11px;
   cursor: pointer;
@@ -82,7 +82,7 @@
 
 .upload:hover,
 .reset:hover {
-  background: #ffffffa0;
+  background: var(--chrome-hover);
 }
 
 .upload:has(input:focus-visible),
@@ -114,7 +114,7 @@
   padding: 6px 8px;
   border: 1px solid var(--line);
   border-radius: var(--radius-control);
-  background: #ffffff60;
+  background: var(--surface-control);
   color: var(--ink);
   font: inherit;
   font-size: 11px;

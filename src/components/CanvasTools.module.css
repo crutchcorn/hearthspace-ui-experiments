@@ -17,7 +17,7 @@
 .divider {
   height: 24px;
   align-self: center;
-  background: #a78d7a40;
+  background: var(--line);
 }
 
 .picker {
