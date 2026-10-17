@@ -33,6 +33,7 @@ import LauncherDock from './components/LauncherDock'
 import AppIcon from './components/AppIcon'
 import WindowContent from './components/WindowContent'
 import GatherWindows from './components/GatherWindows'
+import WindowSwitcher from './components/WindowSwitcher'
 import { APP_CATALOG, type LauncherApp } from './components/launcher-apps'
 import {
   arrangeWindows,
@@ -54,6 +55,7 @@ import { polygonIntersectsBounds, type SelectionPoint } from './selection'
 import useBackground from './useBackground'
 import useAI from './useAI'
 import useShellPeek from './useShellPeek'
+import useWindowSwitcher from './useWindowSwitcher'
 import { getMaximizedBounds, getWindowClearance } from './window-layout'
 import {
   loadGestureShortcuts,
@@ -163,6 +165,30 @@ function App() {
   const focusedWindowId = workspace.windows.some((item) => item.id === activeId)
     ? activeId
     : (workspace.windows.at(-1)?.id ?? null)
+  const windowSwitcher = useWindowSwitcher({
+    windows: workspace.windows,
+    activeWindowId: focusedWindowId,
+    onCommit: (id) => revealWindow(id, { center: true }),
+    onOpen: () => {
+      const canvas = viewport.current
+      canvas?.scrollTo({
+        left: canvas.scrollLeft,
+        top: canvas.scrollTop,
+        behavior: 'instant',
+      })
+      const pointerId = gesture.current?.pointerId
+      gesture.current = null
+      if (
+        pointerId !== undefined &&
+        captureTarget.current?.hasPointerCapture(pointerId)
+      )
+        captureTarget.current.releasePointerCapture(pointerId)
+      captureTarget.current = null
+      setDragging(false)
+      setSpaceHeld(false)
+      setSelection(null)
+    },
+  })
 
   const closePopovers = useCallback(() => {
     setNotificationsOpen(false)
@@ -905,15 +931,19 @@ function App() {
     setSelectedItemIds([])
   }
 
-  function revealWindow(id: string) {
+  function revealWindow(id: string, options?: { center: boolean }) {
     const item = workspace.windows.find((entry) => entry.id === id)
     if (!item) return
-    const top = item.restore
-      ? windowClearance.top
-      : Math.max(windowClearance.top, (view.height - item.height) / 2)
-    const left = item.restore
-      ? windowClearance.side
-      : Math.max(windowClearance.side, (view.width - item.width) / 2)
+    const top = options?.center
+      ? (view.height - item.height) / 2
+      : item.restore
+        ? windowClearance.top
+        : Math.max(windowClearance.top, (view.height - item.height) / 2)
+    const left = options?.center
+      ? (view.width - item.width) / 2
+      : item.restore
+        ? windowClearance.side
+        : Math.max(windowClearance.side, (view.width - item.width) / 2)
     closePopovers()
     setLauncher(null)
     setShowMap(false)
@@ -1465,6 +1495,14 @@ function App() {
             }}
           />
         </aside>
+      )}
+      {windowSwitcher.open && windowSwitcher.selectedId && (
+        <WindowSwitcher
+          windows={windowSwitcher.windows}
+          selectedId={windowSwitcher.selectedId}
+          onSelect={windowSwitcher.select}
+          onCancel={windowSwitcher.cancel}
+        />
       )}
     </main>
   )

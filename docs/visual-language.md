@@ -40,6 +40,8 @@ The application gallery opens with search and an Apps/Draw toggle in one command
 
 Expanded panels provide detail while the resting controls keep a small footprint. Keyboard shortcuts and direct touch targets remain available without hover.
 
+The keyboard window switcher temporarily appears above the desktop while Ctrl is held. A centered glass panel sizes itself to a compact grid of miniature window previews with app icons, including separate instances of one app. Tiles fit their previews without stretching and wrap into fewer columns on narrow screens. The grid scrolls to keep the highlighted candidate visible, and only that window’s title appears in a centered caption beneath the previews. The canvas stays still while cycling; releasing Ctrl focuses and centers the chosen window. No shortcut hints or additional window names appear. Shared glass, app identities, and the Light/Dark palette keep navigation consistent with the dock picker.
+
 The notification inbox keeps its heading and **Mark all read** action free of duplicate event or unread totals. Its **Preview notification** control is a muted, transparent button in a separate footer, leaving the notification stream visually primary and the prototype-only control easy to remove.
 
 Settings uses a sidebar to separate Appearance, Displays, Background, Gestures, AI, and System. Navigation starts directly with the categories, leaving the app name in the window title bar. The selected category controls the opaque content pane while saved preferences remain consistent across Settings windows. The sidebar collapses behind a category toggle when the window is narrow, leaving room for the controls rather than squeezing both columns into the same space.

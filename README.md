@@ -23,6 +23,7 @@ Open the local address printed in the terminal. The app fills the browser viewpo
 - **Move:** drag a window’s title bar. Hold it near a screen edge to keep traveling across the canvas.
 - **Resize:** drag any of a window’s four edges or four corners.
 - **Manage windows:** use the title-bar controls to maximize, restore, or close a window. Open **Apps** to add an app preview window.
+- **Switch windows:** hold Ctrl and press 1 to cycle through all open windows, including offscreen windows and separate instances of the same app. Ctrl+Shift+1 cycles backward. Release Ctrl to focus the highlighted window and center it on the canvas. Escape cancels without moving your view. The shortcut works when the browser delivers it to the page.
 - **Arrange:** choose the grid icon (**Arrange**) or press A to gather every open window into a grid near your current view, including windows outside the view or selection. Windows keep their sizes; maximized windows return to their previous size. Desktop items stay where they are. The arrangement is saved with your workspace.
 - **Find your way:** choose the map icon (**Map**) or press M, then drag the map’s visible-area rectangle to pan continuously, or press elsewhere on the map and keep dragging to explore. Use the Home key to return to the starting area.
 

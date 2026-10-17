@@ -69,6 +69,8 @@ The app strip scrolls horizontally when crowded, including within the shared mob
 | G            | Open the dedicated gesture pad.                   |
 | N            | Toggle notifications.                             |
 | Ctrl/⌘ K     | Open app search, or close it when already open.   |
+| Ctrl+1       | Cycle open windows; release Ctrl to switch.       |
+| Ctrl+Shift+1 | Cycle open windows backward.                      |
 | Space + drag | Temporarily pan over desktop items or windows.    |
 | Home         | Return to the starting viewport.                  |
 | Escape       | Close a panel, or clear selection; keep the tool. |
@@ -80,6 +82,12 @@ Selecting a running app opens a popover listing its window instances, even when 
 Drag a row’s handle with a pointer or touch to preview a different order; release saves the change, while cancellation restores the previous order. Up and Down on a focused handle move its window one place. Reordering changes only the picker order, leaving canvas positions, stacking, and the active window unchanged. Each window’s optional `dockOrder` stores this order in the existing workspace state. New instances follow the ordered windows; closing an instance removes its row normally.
 
 Launching from a non-running favorite, **New window**, an app result, or the gesture pad creates an ordinary movable, resizable preview window with the catalog app’s title, icon, and description. Each uses the same launch action in `App`. There is no operating-system launch integration, favorite-editing UI, or separate running-app persistence; the dock derives its groups from workspace windows.
+
+## Keyboard window switcher
+
+Hold Ctrl and press 1 to open a temporary switcher across every open window, including offscreen windows and multiple instances of the same app. Ctrl+1 advances and Ctrl+Shift+1 moves backward, wrapping at either end. Opening captures the current window order from front to back, with the active window first, so cycling starts from the most recently focused windows and remains stable during the interaction.
+
+Previewing a candidate changes only the switcher highlight and selected title. It does not focus, restack, resize, or pan to that window. Releasing Ctrl commits the highlighted candidate, raises and focuses it, and centers it in the canvas viewport with world-edge clamping. Enter or clicking a window preview also commits. Switching to another window leaves focused view using the existing ordinary maximization behavior. Escape, clicking outside the panel, or losing browser focus cancels the switcher without committing its preview. Canvas navigation uses immediate movement when reduced motion is preferred. The browser or operating system can reserve keyboard combinations; this prototype handles Ctrl+1 only when those key events reach the page.
 
 ## Notifications
 
@@ -144,6 +152,7 @@ Each Settings window owns its mock layout and per-monitor values, retaining them
 | [`src/desktop.ts`](../src/desktop.ts)                                                   | Workspace types, starter desktop items, storage validation, window resizing, and arrangement.         |
 | [`src/window-layout.ts`](../src/window-layout.ts)                                       | Responsive shell clearances and ordinary maximized window bounds.                                     |
 | [`src/useShellPeek.ts`](../src/useShellPeek.ts)                                         | Temporary shell reveal near corners, over controls, and during keyboard interaction in focused view.  |
+| [`src/useWindowSwitcher.ts`](../src/useWindowSwitcher.ts)                               | Stable window-order snapshots, keyboard cycling, commit on Ctrl release, and cancellation.            |
 | [`src/useAI.ts`](../src/useAI.ts)                                                       | Shared AI opt-in preference, simulated model download progress, cancellation, and persistence.        |
 | [`src/selection.ts`](../src/selection.ts)                                               | Freeform polygon intersection with window bounds.                                                     |
 | [`src/theme.ts`](../src/theme.ts)                                                       | Accent, Light/Dark mode, and battery-label preferences, defaults, and storage validation.             |
@@ -165,6 +174,7 @@ Each Settings window owns its mock layout and per-monitor values, retaining them
 | [`src/components/BackgroundSettings.tsx`](../src/components/BackgroundSettings.tsx)     | Photo preview, upload, fit, reset, and storage feedback in Settings.                                  |
 | [`src/components/AppIcon.tsx`](../src/components/AppIcon.tsx)                           | Consistent icon sizing and app-specific artwork.                                                      |
 | [`src/components/LauncherDock.tsx`](../src/components/LauncherDock.tsx)                 | Favorites, running-app groups, window instance picker, and the Apps trigger.                          |
+| [`src/components/WindowSwitcher.tsx`](../src/components/WindowSwitcher.tsx)             | Temporary all-window switcher overlay and highlighted candidate.                                      |
 | [`src/components/AppLauncher.tsx`](../src/components/AppLauncher.tsx)                   | App gallery/list, filtering, keyboard navigation, and launcher views.                                 |
 | [`src/components/GesturePad.tsx`](../src/components/GesturePad.tsx)                     | Shared pointer drawing and assignment editor, with placeholder launching only in launcher mode.       |
 | [`src/components/AppPicker.tsx`](../src/components/AppPicker.tsx)                       | React Aria app combobox with catalog choices, shared icons, and custom styling.                       |
@@ -196,4 +206,4 @@ Battery-percentage visibility is stored under `hearthspace-battery-percentage-v1
 
 AI opt-in is stored under `hearthspace-ai-enabled-v1`. Only the literal string `true` enables it; missing, invalid, or unavailable storage defaults to off. Confirming opt-out or canceling an active download saves `false` immediately. Opting in saves `true` only after the simulated download completes, so an interrupted download does not enable the feature on reload. Download progress is temporary and no model file is stored. The shared session remains usable when preference storage fails.
 
-Viewport travel, selection, open panels, search text, list/grid choice, notifications, and simulated device-control values remain temporary. Notification read/dismissal state and preview items reset to the initial samples on reload. If storage is unavailable, the current desktop session remains usable without persistence.
+Viewport travel, selection, open panels, window-switcher previews, search text, list/grid choice, notifications, and simulated device-control values remain temporary. Notification read/dismissal state and preview items reset to the initial samples on reload. If storage is unavailable, the current desktop session remains usable without persistence.
