@@ -49,6 +49,11 @@ import {
 } from './desktop'
 import { polygonIntersectsBounds, type SelectionPoint } from './selection'
 import useBackground from './useBackground'
+import {
+  loadGestureShortcuts,
+  saveGestureShortcuts,
+  type GestureShortcut,
+} from './gestures'
 import styles from './App.module.css'
 import {
   ACCENT_THEMES,
@@ -90,6 +95,7 @@ function App() {
   const background = useBackground()
   const [accentTheme, setAccentTheme] = useState(loadAccentTheme)
   const [colorMode, setColorMode] = useState(loadColorMode)
+  const [gestureShortcuts, setGestureShortcuts] = useState(loadGestureShortcuts)
   const [appPresentation, setAppPresentation] = useState(loadAppPresentation)
   const [showBatteryPercentage, setShowBatteryPercentage] = useState(
     loadShowBatteryPercentage,
@@ -846,6 +852,26 @@ function App() {
     saveAccentTheme(theme)
   }
 
+  function saveGestureShortcut(
+    shortcut: GestureShortcut,
+    originalAppId?: string,
+  ) {
+    const next = [
+      shortcut,
+      ...gestureShortcuts.filter(
+        (item) => item.appId !== shortcut.appId && item.appId !== originalAppId,
+      ),
+    ]
+    setGestureShortcuts(next)
+    saveGestureShortcuts(next)
+  }
+
+  function removeGestureShortcut(appId: string) {
+    const next = gestureShortcuts.filter((item) => item.appId !== appId)
+    setGestureShortcuts(next)
+    saveGestureShortcuts(next)
+  }
+
   function changeAppPresentation(mode: AppPresentation) {
     setAppPresentation(mode)
     saveAppPresentation(mode)
@@ -1086,6 +1112,9 @@ function App() {
                     accentTheme={accentTheme}
                     colorMode={colorMode}
                     onColorModeChange={changeColorMode}
+                    gestureShortcuts={gestureShortcuts}
+                    onSaveGestureShortcut={saveGestureShortcut}
+                    onRemoveGestureShortcut={removeGestureShortcut}
                     onAccentThemeChange={changeAccentTheme}
                     appPresentation={appPresentation}
                     onAppPresentationChange={changeAppPresentation}
@@ -1240,6 +1269,7 @@ function App() {
         <AppLauncher
           mode={launcher}
           editingGestures={editingGestures}
+          onSaveGestureShortcut={saveGestureShortcut}
           onModeChange={(mode) => {
             setEditingGestures(false)
             setLauncher(mode)

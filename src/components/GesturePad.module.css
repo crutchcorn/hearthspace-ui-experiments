@@ -1,34 +1,10 @@
 .gesturePad {
+  container-type: inline-size;
   display: flex;
   min-width: 0;
   flex-direction: column;
   gap: 12px;
   color: var(--chrome-text);
-}
-
-.assignment {
-  display: flex;
-  min-width: 140px;
-  flex: 1;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.assignment label {
-  color: var(--chrome-muted);
-  font-size: 11px;
-}
-
-.assignment select {
-  width: 100%;
-  min-height: 44px;
-  padding: 0 10px;
-  border: 1px solid var(--chrome-border);
-  border-radius: var(--radius-control);
-  background: var(--chrome-raised);
-  color: var(--chrome-text);
-  font: inherit;
-  font-size: 12px;
 }
 
 .pad {
@@ -182,7 +158,7 @@
 .footer {
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-end;
+  justify-content: flex-end;
   gap: 10px;
 }
 
@@ -223,13 +199,12 @@
   color: var(--chrome-muted);
 }
 
-.gesturePad button:focus-visible,
-.gesturePad select:focus-visible {
+.gesturePad button:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
 
-@media (width <= 480px) {
+@container (width <= 480px) {
   .pad {
     height: 205px;
   }
@@ -238,15 +213,12 @@
     padding-inline: 12px;
   }
 
-  .assignment {
-    flex-basis: 100%;
-  }
-
   .actions {
     width: 100%;
+    flex-wrap: wrap;
   }
 
   .actions > button {
-    flex: 1;
+    flex: 1 1 120px;
   }
 }

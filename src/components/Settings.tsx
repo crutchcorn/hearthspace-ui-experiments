@@ -5,6 +5,7 @@ import {
   Palette,
   PanelLeft,
   SlidersHorizontal,
+  Spline,
   Sun,
 } from 'lucide-react'
 import { useId, useRef, useState, type CSSProperties } from 'react'
@@ -15,7 +16,9 @@ import {
   type ColorMode,
 } from '../theme'
 import type { BackgroundFit, BackgroundPhoto } from '../useBackground'
+import type { GestureShortcut } from '../gestures'
 import BackgroundSettings from './BackgroundSettings'
+import GestureSettings from './GestureSettings'
 import styles from './Settings.module.css'
 
 interface SettingsProps {
@@ -33,6 +36,12 @@ interface SettingsProps {
   onBackgroundUpload: (file: File) => void
   onBackgroundFitChange: (fit: BackgroundFit) => void
   onBackgroundReset: () => void
+  gestureShortcuts: GestureShortcut[]
+  onSaveGestureShortcut: (
+    shortcut: GestureShortcut,
+    originalAppId?: string,
+  ) => void
+  onRemoveGestureShortcut: (appId: string) => void
 }
 
 const COLOR_MODES = [
@@ -63,6 +72,12 @@ const CATEGORIES = [
     icon: Image,
   },
   {
+    id: 'gestures',
+    label: 'Gestures',
+    description: 'Draw shortcuts for your apps.',
+    icon: Spline,
+  },
+  {
     id: 'system',
     label: 'System',
     description: 'What appears in your system tray.',
@@ -85,6 +100,9 @@ export default function Settings({
   onBackgroundUpload,
   onBackgroundFitChange,
   onBackgroundReset,
+  gestureShortcuts,
+  onSaveGestureShortcut,
+  onRemoveGestureShortcut,
 }: SettingsProps) {
   const [category, setCategory] =
     useState<(typeof CATEGORIES)[number]['id']>('appearance')
@@ -152,10 +170,12 @@ export default function Settings({
         </nav>
         <div ref={content} className={styles.content}>
           <div className={styles.page}>
-            <header className={styles.heading}>
-              <h2>{activeCategory.label}</h2>
-              <p>{activeCategory.description}</p>
-            </header>
+            {category !== 'gestures' && (
+              <header className={styles.heading}>
+                <h2>{activeCategory.label}</h2>
+                <p>{activeCategory.description}</p>
+              </header>
+            )}
             {category === 'background' && (
               <BackgroundSettings
                 background={background}
@@ -164,6 +184,14 @@ export default function Settings({
                 onBackgroundUpload={onBackgroundUpload}
                 onBackgroundFitChange={onBackgroundFitChange}
                 onBackgroundReset={onBackgroundReset}
+              />
+            )}
+            {category === 'gestures' && (
+              <GestureSettings
+                gestureShortcuts={gestureShortcuts}
+                onSaveGestureShortcut={onSaveGestureShortcut}
+                onRemoveGestureShortcut={onRemoveGestureShortcut}
+                onScreenChange={() => content.current?.scrollTo({ top: 0 })}
               />
             )}
             {category === 'appearance' && (

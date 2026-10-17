@@ -1,129 +1,68 @@
-import { useEffect, useRef, useState, type PointerEvent } from 'react'
+import { useRef, useState, type PointerEvent } from 'react'
 import { Check, Pencil, RotateCcw, Settings, X } from 'lucide-react'
 import { APP_CATALOG, type LauncherApp } from './launcher-apps'
+import {
+  GESTURE_WIDTH,
+  GESTURE_HEIGHT,
+  type GesturePoint,
+  type GestureShortcut,
+} from '../gestures'
+import AppPicker from './AppPicker'
 import styles from './GesturePad.module.css'
 
-interface GesturePadProps {
-  onLaunch: (app: LauncherApp) => void
-  onCustomizeGestures: () => void
-  initialEditing?: boolean
-}
+type GesturePadProps = {
+  onSaveShortcut: (shortcut: GestureShortcut) => void
+} & (
+  | {
+      mode: 'launcher'
+      onLaunch: (app: LauncherApp) => void
+      onCustomizeGestures: () => void
+      initialEditing?: boolean
+    }
+  | {
+      mode: 'editor'
+      initialShortcut?: GestureShortcut
+    }
+)
 
-type Point = { x: number; y: number }
-type Shortcut = { appId: string; points: Point[] }
-
-const STORAGE_KEY = 'hearthspace-gesture-shortcuts-v1'
-const WIDTH = 440
-const HEIGHT = 190
-const DEFAULT_SHORTCUTS: Shortcut[] = [
-  {
-    appId: 'browser',
-    points: [
-      { x: 178, y: 150 },
-      { x: 178, y: 40 },
-      { x: 215, y: 40 },
-      { x: 240, y: 48 },
-      { x: 246, y: 64 },
-      { x: 238, y: 82 },
-      { x: 211, y: 94 },
-      { x: 178, y: 94 },
-      { x: 218, y: 94 },
-      { x: 246, y: 104 },
-      { x: 254, y: 122 },
-      { x: 245, y: 140 },
-      { x: 218, y: 150 },
-      { x: 178, y: 150 },
-    ],
-  },
-  {
-    appId: 'terminal',
-    points: [
-      { x: 172, y: 58 },
-      { x: 254, y: 58 },
-      { x: 180, y: 130 },
-      { x: 263, y: 130 },
-    ],
-  },
-  {
-    appId: 'notes',
-    points: [
-      { x: 179, y: 143 },
-      { x: 179, y: 46 },
-      { x: 256, y: 143 },
-      { x: 256, y: 46 },
-    ],
-  },
-]
-
-function loadShortcuts(): Shortcut[] {
-  try {
-    const stored: unknown = JSON.parse(
-      localStorage.getItem(STORAGE_KEY) ?? 'null',
-    )
-    if (!Array.isArray(stored)) return DEFAULT_SHORTCUTS
-    const ids = new Set<string>()
-    const valid = stored.filter((item): item is Shortcut => {
-      if (
-        !item ||
-        typeof item !== 'object' ||
-        !APP_CATALOG.some((app) => app.id === item.appId) ||
-        ids.has(item.appId) ||
-        !Array.isArray(item.points) ||
-        item.points.length < 2 ||
-        item.points.length > 2048 ||
-        !item.points.every(
-          (point: Point) =>
-            point &&
-            Number.isFinite(point.x) &&
-            Number.isFinite(point.y) &&
-            point.x >= 0 &&
-            point.x <= WIDTH &&
-            point.y >= 0 &&
-            point.y <= HEIGHT,
-        )
-      )
-        return false
-      ids.add(item.appId)
-      return true
-    })
-    return valid.length ? valid : DEFAULT_SHORTCUTS
-  } catch {
-    return DEFAULT_SHORTCUTS
-  }
-}
-
-export default function GesturePad({
-  onLaunch,
-  onCustomizeGestures,
-  initialEditing = false,
-}: GesturePadProps) {
-  const [shortcuts, setShortcuts] = useState(loadShortcuts)
-  const [selectedId, setSelectedId] = useState('browser')
-  const [editing, setEditing] = useState(initialEditing)
-  const [stroke, setStroke] = useState<Point[]>([])
+export default function GesturePad(props: GesturePadProps) {
+  const initialShortcut =
+    props.mode === 'editor' ? props.initialShortcut : undefined
+  const initialEditing = props.mode === 'editor' || !!props.initialEditing
+  const [selectedId, setSelectedId] = useState(
+    initialShortcut?.appId ?? 'browser',
+  )
+  const [launcherEditing, setLauncherEditing] = useState(initialEditing)
+  const editing = props.mode === 'editor' || launcherEditing
+  const [stroke, setStroke] = useState<GesturePoint[]>(
+    initialShortcut?.points ?? [],
+  )
   const [drawing, setDrawing] = useState(false)
   const [saved, setSaved] = useState(false)
-  const appSelect = useRef<HTMLSelectElement>(null)
   const settingsButton = useRef<HTMLButtonElement>(null)
-  const gesture = useRef<{ pointerId: number; points: Point[] } | null>(null)
+  const gesture = useRef<{ pointerId: number; points: GesturePoint[] } | null>(
+    null,
+  )
   const selectedApp =
     APP_CATALOG.find((app) => app.id === selectedId) ?? APP_CATALOG[0]
   const hasStroke = stroke.length > 1
 
-  useEffect(() => {
-    if (initialEditing) appSelect.current?.focus({ preventScroll: true })
-  }, [initialEditing])
-
-  function pointFromEvent(event: PointerEvent<SVGSVGElement>): Point {
+  function pointFromEvent(event: PointerEvent<SVGSVGElement>): GesturePoint {
     const rect = event.currentTarget.getBoundingClientRect()
     return {
       x: Math.max(
         0,
-        Math.min(WIDTH, ((event.clientX - rect.left) / rect.width) * WIDTH),
+        Math.min(
+          GESTURE_WIDTH,
+          ((event.clientX - rect.left) / rect.width) * GESTURE_WIDTH,
+        ),
       ),
       y: Math.max(
         0,
-        Math.min(HEIGHT, ((event.clientY - rect.top) / rect.height) * HEIGHT),
+        Math.min(
+          GESTURE_HEIGHT,
+          ((event.clientY - rect.top) / rect.height) * GESTURE_HEIGHT,
+        ),
       ),
     }
   }
@@ -145,10 +84,15 @@ export default function GesturePad({
     setDrawing(false)
     if (event.currentTarget.hasPointerCapture(event.pointerId))
       event.currentTarget.releasePointerCapture(event.pointerId)
-    if (completed && !editing && current.points.length > 1) {
+    if (
+      completed &&
+      props.mode === 'launcher' &&
+      !editing &&
+      current.points.length > 1
+    ) {
       // Until gesture matching exists, every completed stroke opens Browser.
       const app = APP_CATALOG.find((item) => item.id === 'browser')
-      if (app) onLaunch(app)
+      if (app) props.onLaunch(app)
     }
   }
 
@@ -159,30 +103,26 @@ export default function GesturePad({
 
   function saveShortcut() {
     if (!hasStroke) return
-    const next = [
-      { appId: selectedId, points: stroke },
-      ...shortcuts.filter((shortcut) => shortcut.appId !== selectedId),
-    ]
-    setShortcuts(next)
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
-    } catch {
-      // The shortcut remains available in this open launcher without storage.
+    props.onSaveShortcut({ appId: selectedId, points: stroke })
+    if (props.mode === 'launcher') {
+      setLauncherEditing(false)
+      setSaved(true)
+      settingsButton.current?.focus({ preventScroll: true })
     }
-    setEditing(false)
-    setSaved(true)
-    settingsButton.current?.focus({ preventScroll: true })
   }
 
   return (
     <section className={styles.gesturePad} aria-label="Gesture shortcuts">
+      {editing && (
+        <AppPicker selectedId={selectedId} onChange={setSelectedId} />
+      )}
       <div className={styles.pad} data-drawing={drawing}>
         <div className={styles.padMeta} aria-hidden="true">
           <span>Draw here</span>
         </div>
         <svg
           className={styles.drawSurface}
-          viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
+          viewBox={`0 0 ${GESTURE_WIDTH} ${GESTURE_HEIGHT}`}
           preserveAspectRatio="none"
           role="img"
           aria-label={
@@ -216,16 +156,18 @@ export default function GesturePad({
             />
           )}
         </svg>
-        <button
-          ref={settingsButton}
-          type="button"
-          className={styles.settingsButton}
-          aria-label="Customize gestures"
-          title="Customize gestures"
-          onClick={onCustomizeGestures}
-        >
-          <Settings size={18} aria-hidden="true" />
-        </button>
+        {props.mode === 'launcher' && (
+          <button
+            ref={settingsButton}
+            type="button"
+            className={styles.settingsButton}
+            aria-label="Customize gestures"
+            title="Customize gestures"
+            onClick={props.onCustomizeGestures}
+          >
+            <Settings size={18} aria-hidden="true" />
+          </button>
+        )}
         {!stroke.length && (
           <div className={styles.padPrompt}>
             <Pencil size={30} strokeWidth={1.3} />
@@ -239,17 +181,17 @@ export default function GesturePad({
         )}
         {!!stroke.length && (
           <>
-            <span className={styles.padLabel} aria-live="polite">
-              {saved ? (
-                <>
-                  <Check size={12} /> Shortcut saved
-                </>
-              ) : editing ? (
-                'Recorded stroke'
-              ) : (
-                'Draw a gesture'
-              )}
-            </span>
+            {!editing && (
+              <span className={styles.padLabel} aria-live="polite">
+                {saved ? (
+                  <>
+                    <Check size={12} /> Shortcut saved
+                  </>
+                ) : (
+                  'Draw a gesture'
+                )}
+              </span>
+            )}
             <button
               type="button"
               className={styles.retryButton}
@@ -264,37 +206,21 @@ export default function GesturePad({
 
       {editing && (
         <div className={styles.footer}>
-          <div className={styles.assignment}>
-            <label htmlFor="gesture-app">Open this app</label>
-            <select
-              ref={appSelect}
-              id="gesture-app"
-              value={selectedId}
-              onChange={(event) => {
-                setSelectedId(event.target.value)
-                clearStroke()
-              }}
-            >
-              {APP_CATALOG.map((app) => (
-                <option key={app.id} value={app.id}>
-                  {app.name}
-                </option>
-              ))}
-            </select>
-          </div>
           <div className={styles.actions}>
-            <button
-              type="button"
-              className={styles.cancelButton}
-              aria-label="Cancel shortcut edit"
-              onClick={() => {
-                setEditing(false)
-                clearStroke()
-                settingsButton.current?.focus({ preventScroll: true })
-              }}
-            >
-              <X size={15} aria-hidden="true" /> Cancel
-            </button>
+            {props.mode === 'launcher' && (
+              <button
+                type="button"
+                className={styles.cancelButton}
+                aria-label="Cancel shortcut edit"
+                onClick={() => {
+                  setLauncherEditing(false)
+                  clearStroke()
+                  settingsButton.current?.focus({ preventScroll: true })
+                }}
+              >
+                <X size={15} aria-hidden="true" /> Cancel
+              </button>
+            )}
             <button
               type="button"
               className={styles.saveButton}

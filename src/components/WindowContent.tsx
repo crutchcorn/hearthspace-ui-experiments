@@ -8,6 +8,7 @@ import {
 import type { DesktopWindow, Workspace } from '../desktop'
 import type { AccentThemeId, AppPresentation, ColorMode } from '../theme'
 import type { BackgroundFit, BackgroundPhoto } from '../useBackground'
+import type { GestureShortcut } from '../gestures'
 import Settings from './Settings'
 import AppIcon from './AppIcon'
 import { APP_CATALOG } from './launcher-apps'
@@ -31,6 +32,12 @@ interface WindowContentProps {
   onBackgroundUpload: (file: File) => void
   onBackgroundFitChange: (fit: BackgroundFit) => void
   onBackgroundReset: () => void
+  gestureShortcuts: GestureShortcut[]
+  onSaveGestureShortcut: (
+    shortcut: GestureShortcut,
+    originalAppId?: string,
+  ) => void
+  onRemoveGestureShortcut: (appId: string) => void
 }
 
 const files = [
@@ -64,6 +71,9 @@ export default function WindowContent({
   onBackgroundUpload,
   onBackgroundFitChange,
   onBackgroundReset,
+  gestureShortcuts,
+  onSaveGestureShortcut,
+  onRemoveGestureShortcut,
 }: WindowContentProps) {
   if (item.kind === 'welcome') {
     return (
@@ -221,6 +231,9 @@ export default function WindowContent({
         onBackgroundUpload={onBackgroundUpload}
         onBackgroundFitChange={onBackgroundFitChange}
         onBackgroundReset={onBackgroundReset}
+        gestureShortcuts={gestureShortcuts}
+        onSaveGestureShortcut={onSaveGestureShortcut}
+        onRemoveGestureShortcut={onRemoveGestureShortcut}
       />
     )
   }

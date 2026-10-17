@@ -9,6 +9,7 @@ import {
   X,
 } from 'lucide-react'
 import GesturePad from './GesturePad'
+import type { GestureShortcut } from '../gestures'
 import AppIcon from './AppIcon'
 import { APP_CATALOG, type LauncherApp } from './launcher-apps'
 import styles from './AppLauncher.module.css'
@@ -19,6 +20,7 @@ interface AppLauncherProps {
   onClose: () => void
   onLaunch: (app: LauncherApp) => void
   onCustomizeGestures: () => void
+  onSaveGestureShortcut: (shortcut: GestureShortcut) => void
   editingGestures?: boolean
 }
 
@@ -28,6 +30,7 @@ export default function AppLauncher({
   onClose,
   onLaunch,
   onCustomizeGestures,
+  onSaveGestureShortcut,
   editingGestures = false,
 }: AppLauncherProps) {
   const [query, setQuery] = useState('')
@@ -251,6 +254,8 @@ export default function AppLauncher({
       ) : (
         <div className={styles.gesturePanel}>
           <GesturePad
+            mode="launcher"
+            onSaveShortcut={onSaveGestureShortcut}
             onLaunch={onLaunch}
             onCustomizeGestures={onCustomizeGestures}
             initialEditing={editingGestures}
