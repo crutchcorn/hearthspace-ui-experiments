@@ -34,7 +34,7 @@ Controls stay in the four corners, leaving the top edge and middle of the canvas
 | Bottom left  | Canvas tools: Pan, Select, Map, and Arrange.          |
 | Bottom right | Favorite and running apps, plus the Apps launcher.    |
 
-Canvas tools and dock apps use compact icon buttons. Hover to see their names and shortcuts; buttons also retain accessible names and 44-pixel touch targets. The clock and three device icons share one row. The docks keep their corners on narrow screens, with favorite and running apps moving into a row above Apps. Scroll the app row horizontally when it fills up. Escape closes open panels; on the canvas, it clears the current selection.
+Canvas tools and dock apps use compact icon buttons. Hover to see their names and available shortcuts; buttons also retain accessible names and 44-pixel touch targets. The clock and three device icons share one row. The docks keep their corners on narrow screens, with favorite and running apps moving into a row above Apps. Scroll the app row horizontally when it fills up. Escape closes open panels; on the canvas, it clears the current selection.
 
 ## Try the launcher
 
