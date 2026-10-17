@@ -1,6 +1,7 @@
 import {
   Check,
   Image,
+  Monitor,
   Moon,
   Palette,
   PanelLeft,
@@ -17,7 +18,9 @@ import {
 } from '../theme'
 import type { BackgroundFit, BackgroundPhoto } from '../useBackground'
 import type { GestureShortcut } from '../gestures'
+import { INITIAL_DISPLAY_LAYOUT } from '../display-layout'
 import BackgroundSettings from './BackgroundSettings'
+import DisplaySettings, { type DisplayPreferences } from './DisplaySettings'
 import GestureSettings from './GestureSettings'
 import styles from './Settings.module.css'
 
@@ -66,6 +69,12 @@ const CATEGORIES = [
     icon: Palette,
   },
   {
+    id: 'displays',
+    label: 'Displays',
+    description: 'Arrange your screens and adjust each display.',
+    icon: Monitor,
+  },
+  {
     id: 'background',
     label: 'Background',
     description: 'A backdrop for your workspace.',
@@ -107,6 +116,13 @@ export default function Settings({
   const [category, setCategory] =
     useState<(typeof CATEGORIES)[number]['id']>('appearance')
   const [navigationOpen, setNavigationOpen] = useState(false)
+  const [displayLayout, setDisplayLayout] = useState(INITIAL_DISPLAY_LAYOUT)
+  const [displayPreferences, setDisplayPreferences] = useState<
+    [DisplayPreferences, DisplayPreferences]
+  >([
+    { resolution: '1920 × 1200', scale: '125%', refreshRate: '60 Hz' },
+    { resolution: '2560 × 1440', scale: '100%', refreshRate: '144 Hz' },
+  ])
   const navigationToggle = useRef<HTMLButtonElement>(null)
   const content = useRef<HTMLDivElement>(null)
   const navigationId = useId()
@@ -184,6 +200,14 @@ export default function Settings({
                 onBackgroundUpload={onBackgroundUpload}
                 onBackgroundFitChange={onBackgroundFitChange}
                 onBackgroundReset={onBackgroundReset}
+              />
+            )}
+            {category === 'displays' && (
+              <DisplaySettings
+                layout={displayLayout}
+                onLayoutChange={setDisplayLayout}
+                preferences={displayPreferences}
+                onPreferencesChange={setDisplayPreferences}
               />
             )}
             {category === 'gestures' && (

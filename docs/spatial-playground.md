@@ -101,7 +101,7 @@ Gesture recognition is intentionally absent: the normal pad launches Browser reg
 
 ## Settings
 
-The Settings app has sidebar navigation for **Appearance**, **Background**, **Gestures**, and **System**, opening on Appearance. Its 160-pixel sidebar collapses behind a category toggle when the Settings content container is narrower than 560 pixels. Choosing a category closes the compact navigation and returns the content pane to its top. Navigation belongs to each Settings window; preference values are shared across them. New Settings windows open up to 680 pixels wide, constrained by the viewport and ordinary minimum window size; existing saved window sizes remain intact.
+The Settings app has sidebar navigation for **Appearance**, **Displays**, **Background**, **Gestures**, and **System**, opening on Appearance. Its 160-pixel sidebar collapses behind a category toggle when the Settings content container is narrower than 560 pixels. Choosing a category closes the compact navigation and returns the content pane to its top. Navigation belongs to each Settings window; saved appearance preferences and gesture assignments are shared across them. New Settings windows open up to 680 pixels wide, constrained by the viewport and ordinary minimum window size; existing saved window sizes remain intact.
 
 **Background** accepts a local photo and applies it beneath desktop items and windows. **Repeat with canvas** tiles the image at its native size on the scrolling world. **Stretch**, **Contain**, and **Cover** instead use a centered, viewport-sized background layer that stays still while the canvas moves. Stretch scales both axes independently, Contain preserves the whole image with the current theme’s field color around it, and Cover preserves proportions while cropping to fill the viewport. Cover is the initial fit; replacing a photo retains the existing fit. **Use default background** restores the accent-colored dot pattern without changing the other appearance preferences.
 
@@ -115,6 +115,12 @@ Presentation changes apply immediately to existing windows and their entries in 
 
 **Gestures** presents the saved app assignments and the add, edit, and remove flow described above. These controls edit the prototype’s local configuration; they do not enable gesture recognition or change the launcher’s hardcoded Browser action.
 
+**Displays** previews a two-monitor setup. Drag either numbered monitor to arrange it around the other; releasing snaps it to the nearest shared edge so the pair stays connected without overlap. Selecting a monitor reveals its own mock resolution, scale, and refresh-rate controls. These controls change only the preview’s state, with no connection to the host’s monitor configuration or the desktop canvas.
+
+The arrangement uses an 800 × 450 coordinate space in a responsive preview capped at 400 × 225 CSS pixels. During a drag, the other monitor stays fixed and the dragged tile stays within the board. On release, snapping considers all four sides and preserves at least 24 logical pixels of shared edge. Nearby starts, centers, and ends align within a 12-pixel threshold. The pair then recenters as a group, keeping its relative arrangement while leaving equal margins around its combined bounds. Pointer capture supports mouse, pen, and touch dragging beyond a tile; cancellation restores the original layout. Arrow keys place the focused monitor on another side and recenter the pair in the same way.
+
+Each Settings window owns its mock layout and per-monitor values, retaining them across category changes until that window closes or the page reloads. They are not shared with other Settings windows or persisted. Resolution and scale are form values only; they do not resize the monitor tiles or the desktop. The selected monitor and active drag belong to the Displays view.
+
 **System** contains the **System tray** section and its **Show battery percentage** toggle, off by default. `App` shares the preference across Settings windows and passes it to the system row, where it displays **87%** beside the battery icon. The battery value remains simulated, and its popover shows the percentage regardless of this preference.
 
 ## Source map
@@ -125,6 +131,7 @@ Presentation changes apply immediately to existing windows and their entries in 
 | [`src/selection.ts`](../src/selection.ts)                                               | Freeform polygon intersection with window bounds.                                                         |
 | [`src/theme.ts`](../src/theme.ts)                                                       | Accent, Light/Dark mode, app appearance, and battery-label preferences, defaults, and storage validation. |
 | [`src/gestures.ts`](../src/gestures.ts)                                                 | Gesture assignment types, examples, pad coordinates, storage validation, and persistence.                 |
+| [`src/display-layout.ts`](../src/display-layout.ts)                                     | Monitor layout coordinates, nearest-edge snapping, and group centering for the two-display preview.       |
 | [`src/useBackground.ts`](../src/useBackground.ts)                                       | Photo decoding, shared background state, object URL lifetime, and IndexedDB persistence.                  |
 | [`src/App.tsx`](../src/App.tsx)                                                         | Workspace rendering, pointer gestures, viewport navigation, window actions, appearance state, and saving. |
 | [`src/components/SystemBar.tsx`](../src/components/SystemBar.tsx)                       | Compact 24-hour clock and status row, popovers, and simulated controls.                                   |
@@ -133,7 +140,8 @@ Presentation changes apply immediately to existing windows and their entries in 
 | [`src/components/CanvasTools.tsx`](../src/components/CanvasTools.tsx)                   | Background and window-selection dropdowns, plus map and arrangement actions.                              |
 | [`src/components/DesktopItems.tsx`](../src/components/DesktopItems.tsx)                 | Desktop-item layer, item artwork, and selection/opening input.                                            |
 | [`src/components/WindowContent.tsx`](../src/components/WindowContent.tsx)               | Workspace overview, editable scratchpad, appearance settings, and simulated app interiors.                |
-| [`src/components/Settings.tsx`](../src/components/Settings.tsx)                         | Responsive category navigation and shared appearance, background, gesture, and system settings.           |
+| [`src/components/Settings.tsx`](../src/components/Settings.tsx)                         | Responsive category navigation, shared preferences, and simulated display settings.                       |
+| [`src/components/DisplaySettings.tsx`](../src/components/DisplaySettings.tsx)           | Two draggable monitor previews, monitor selection, and simulated per-monitor controls.                    |
 | [`src/components/GestureSettings.tsx`](../src/components/GestureSettings.tsx)           | Saved gesture previews, assignment management, and the Settings editor.                                   |
 | [`src/components/BackgroundSettings.tsx`](../src/components/BackgroundSettings.tsx)     | Photo preview, upload, fit, reset, and storage feedback in Settings.                                      |
 | [`src/components/AppIcon.tsx`](../src/components/AppIcon.tsx)                           | Consistent icon sizing with Ideal glyphs and Realistic app artwork.                                       |
