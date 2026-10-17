@@ -36,15 +36,19 @@ import {
   CANVAS_TOOL_STORAGE_KEY,
   clamp,
   loadCanvasTool,
+  loadWindowSelectionShape,
   loadWorkspace,
   MIN_HEIGHT,
   MIN_WIDTH,
   resizeBounds,
   STORAGE_KEY,
+  WINDOW_SELECTION_STORAGE_KEY,
   type Bounds,
   type DesktopWindow,
   type DesktopItem,
+  type WindowSelectionShape,
 } from './desktop'
+import { polygonIntersectsBounds, type SelectionPoint } from './selection'
 import styles from './App.module.css'
 import {
   ACCENT_THEMES,
@@ -60,7 +64,8 @@ import {
 
 type Gesture = {
   pointerId: number
-  type: 'pan' | 'move' | 'resize' | 'lasso' | 'item-select' | 'item-move'
+  type:
+    'pan' | 'move' | 'resize' | 'window-select' | 'item-select' | 'item-move'
   startX: number
   startY: number
   scrollX: number
@@ -71,6 +76,8 @@ type Gesture = {
   items?: DesktopItem[]
   selectedItemIds?: string[]
   moved?: boolean
+  selectionShape?: WindowSelectionShape
+  points?: SelectionPoint[]
 }
 
 const edges = ['n', 'e', 's', 'w', 'ne', 'se', 'sw', 'nw']
@@ -98,10 +105,11 @@ function App() {
   const [notificationsOpen, setNotificationsOpen] = useState(false)
   const [systemPanel, setSystemPanel] = useState<SystemPanel>(null)
   const [tool, setTool] = useState(loadCanvasTool)
+  const [selectionShape, setSelectionShape] = useState(loadWindowSelectionShape)
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [selectedItemIds, setSelectedItemIds] = useState<string[]>([])
   const [selection, setSelection] = useState<
-    (Bounds & { target: 'windows' | 'items' }) | null
+    (Bounds & { target: 'windows' | 'items'; points?: SelectionPoint[] }) | null
   >(null)
   const [launcher, setLauncher] = useState<'apps' | 'gestures' | null>(null)
   const [editingGestures, setEditingGestures] = useState(false)
@@ -183,6 +191,14 @@ function App() {
   }, [tool])
 
   useEffect(() => {
+    try {
+      localStorage.setItem(WINDOW_SELECTION_STORAGE_KEY, selectionShape)
+    } catch {
+      /* Keep the selected shape usable when storage is unavailable. */
+    }
+  }, [selectionShape])
+
+  useEffect(() => {
     const timer = window.setTimeout(() => {
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(workspace))
@@ -219,7 +235,7 @@ function App() {
         setSelectedItemIds([])
         setSelection(null)
         if (
-          gesture.current?.type === 'lasso' ||
+          gesture.current?.type === 'window-select' ||
           gesture.current?.type === 'item-select'
         ) {
           const pointerId = gesture.current.pointerId
@@ -254,9 +270,12 @@ function App() {
         setSelectedIds([])
         setShowMap(false)
       }
-      if (event.key.toLowerCase() === 'l') {
+      if (event.key.toLowerCase() === 'l' || event.key.toLowerCase() === 'r') {
         closePopovers()
-        setTool('lasso')
+        setTool('select')
+        setSelectionShape(
+          event.key.toLowerCase() === 'l' ? 'freeform' : 'rectangle',
+        )
         setSelectedItemIds([])
         setShowMap(false)
       }
@@ -291,6 +310,7 @@ function App() {
     const release = () => {
       setSpaceHeld(false)
       setDragging(false)
+      if (gesture.current?.selectionShape === 'freeform') setSelectedIds([])
       gesture.current = null
       setSelection(null)
     }
@@ -345,7 +365,40 @@ function App() {
       )
       return
     }
-    if (current.type === 'lasso' || current.type === 'item-select') {
+    if (
+      current.type === 'window-select' &&
+      current.selectionShape === 'freeform'
+    ) {
+      const point = {
+        x: clamp(clientX + canvas.scrollLeft, 0, workspace.width),
+        y: clamp(clientY + canvas.scrollTop, 0, workspace.height),
+      }
+      const previousPoint = current.points!.at(-1)!
+      if (Math.hypot(point.x - previousPoint.x, point.y - previousPoint.y) < 2)
+        return
+      current.points!.push(point)
+      // Bound the live stroke while preserving its overall shape on long drags.
+      if (current.points!.length > 4096)
+        current.points = current.points!.filter((_, index) => index % 2 === 0)
+      const points = [...current.points!]
+      const x = Math.min(...points.map((entry) => entry.x))
+      const y = Math.min(...points.map((entry) => entry.y))
+      setSelection({
+        target: 'windows',
+        x,
+        y,
+        width: Math.max(...points.map((entry) => entry.x)) - x,
+        height: Math.max(...points.map((entry) => entry.y)) - y,
+        points,
+      })
+      setSelectedIds(
+        workspace.windows
+          .filter((item) => polygonIntersectsBounds(points, item))
+          .map((item) => item.id),
+      )
+      return
+    }
+    if (current.type === 'window-select' || current.type === 'item-select') {
       const startX = current.startX + current.scrollX
       const startY = current.startY + current.scrollY
       const x = clamp(clientX + canvas.scrollLeft, 0, workspace.width)
@@ -481,21 +534,32 @@ function App() {
       id: item?.id,
       bounds: item,
       edge,
+      selectionShape: type === 'window-select' ? selectionShape : undefined,
+      points:
+        type === 'window-select' && selectionShape === 'freeform'
+          ? [
+              {
+                x: canvas.scrollLeft + event.clientX,
+                y: canvas.scrollTop + event.clientY,
+              },
+            ]
+          : undefined,
       selectedItemIds:
         type === 'item-select' &&
         (event.shiftKey || event.metaKey || event.ctrlKey)
           ? selectedItemIds
           : [],
     }
-    setDragging(type !== 'lasso' && type !== 'item-select')
-    if (type === 'lasso' || type === 'item-select') {
-      if (type === 'lasso') setSelectedIds([])
+    setDragging(type !== 'window-select' && type !== 'item-select')
+    if (type === 'window-select' || type === 'item-select') {
+      if (type === 'window-select') setSelectedIds([])
       else {
         setSelectedIds([])
         setSelectedItemIds(gesture.current.selectedItemIds!)
       }
       setSelection({
-        target: type === 'lasso' ? 'windows' : 'items',
+        target: type === 'window-select' ? 'windows' : 'items',
+        points: gesture.current.points,
         x: canvas.scrollLeft + event.clientX,
         y: canvas.scrollTop + event.clientY,
         width: 0,
@@ -550,6 +614,13 @@ function App() {
 
   function endGesture(event: ReactPointerEvent) {
     if (gesture.current?.pointerId !== event.pointerId) return
+    if (
+      gesture.current.type === 'window-select' &&
+      gesture.current.selectionShape === 'freeform'
+    ) {
+      if (event.type === 'pointerup') applyGesture(event.clientX, event.clientY)
+      else setSelectedIds([])
+    }
     gesture.current = null
     setDragging(false)
     setSelection(null)
@@ -756,7 +827,7 @@ function App() {
       />
       <div
         ref={viewport}
-        className={`${styles.viewport} ${tool === 'cursor' ? styles.cursorReady : ''} ${spaceHeld ? styles.panReady : ''} ${dragging ? styles.dragging : ''} ${tool === 'lasso' && !spaceHeld ? styles.selecting : ''}`}
+        className={`${styles.viewport} ${tool === 'cursor' ? styles.cursorReady : ''} ${spaceHeld ? styles.panReady : ''} ${dragging ? styles.dragging : ''} ${tool === 'select' && !spaceHeld ? styles.selecting : ''}`}
         data-canvas-viewport
         onScroll={(event) => {
           const { scrollLeft: x, scrollTop: y } = event.currentTarget
@@ -764,7 +835,7 @@ function App() {
         }}
         onPointerDownCapture={(event) => {
           if (event.button === 1 || spaceHeld) startGesture(event, 'pan')
-          else if (tool === 'lasso') startGesture(event, 'lasso')
+          else if (tool === 'select') startGesture(event, 'window-select')
         }}
         onPointerDown={(event) => {
           if (
@@ -937,27 +1008,67 @@ function App() {
               </section>
             )
           })}
-          {selection && (
-            <div
-              className={styles.selection}
+          {selection?.points ? (
+            <svg
+              className={styles.freeformSelection}
+              aria-hidden="true"
+              viewBox={`${selection.x - 2} ${selection.y - 2} ${selection.width + 4} ${selection.height + 4}`}
               style={{
-                left: selection.x,
-                top: selection.y,
-                width: selection.width,
-                height: selection.height,
-                zIndex:
-                  selection.target === 'items'
-                    ? 0
-                    : workspace.windows.length + 1,
+                left: selection.x - 2,
+                top: selection.y - 2,
+                width: selection.width + 4,
+                height: selection.height + 4,
+                zIndex: workspace.windows.length + 1,
               }}
-            />
+            >
+              <polygon
+                points={selection.points
+                  .map(({ x, y }) => `${x},${y}`)
+                  .join(' ')}
+              />
+              <polyline
+                points={selection.points
+                  .map(({ x, y }) => `${x},${y}`)
+                  .join(' ')}
+              />
+              <path
+                d={`M${selection.points.at(-1)!.x},${selection.points.at(-1)!.y} L${selection.points[0].x},${selection.points[0].y}`}
+                strokeDasharray="3 4"
+              />
+            </svg>
+          ) : (
+            selection && (
+              <div
+                className={styles.selection}
+                style={{
+                  left: selection.x,
+                  top: selection.y,
+                  width: selection.width,
+                  height: selection.height,
+                  zIndex:
+                    selection.target === 'items'
+                      ? 0
+                      : workspace.windows.length + 1,
+                }}
+              />
+            )
           )}
         </div>
       </div>
       <div className={styles.docks}>
         <CanvasTools
           mode={tool}
-          showHint={
+          selectionShape={selectionShape}
+          onSelectionShapeChange={(shape) => {
+            closePopovers()
+            setSelectionShape(shape)
+            setTool('select')
+            setSelectedIds([])
+            setSelectedItemIds([])
+            setShowMap(false)
+            setLauncher(null)
+          }}
+          menusAllowed={
             !showMap &&
             !launcher &&
             !notificationsOpen &&
@@ -967,7 +1078,7 @@ function App() {
           onModeChange={(mode) => {
             closePopovers()
             setTool(mode)
-            if (mode !== 'lasso') setSelectedIds([])
+            if (mode !== 'select') setSelectedIds([])
             if (mode !== 'cursor') setSelectedItemIds([])
             setShowMap(false)
             setLauncher(null)
@@ -985,7 +1096,6 @@ function App() {
           }}
           onArrange={arrangeAllWindows}
           windowCount={workspace.windows.length}
-          selectedCount={selectedIds.length}
         />
         <LauncherDock
           open={launcher !== null}

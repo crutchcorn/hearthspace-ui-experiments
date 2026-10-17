@@ -14,7 +14,7 @@ Dragging a window’s title bar combines pointer movement with changes in scroll
 
 Maximizing uses the current viewport with clearance for the corner controls, while retaining previous bounds for restore. The shared `windowClearance` uses 24-pixel side margins, 96 pixels above, and 96 below at desktop widths; at 760 pixels or less, these become 12, 84, and 142 pixels. Revealing a maximized window uses the same offsets; ordinary windows are centered with the top and side clearances as minimums. The same minimum window dimensions still apply on small viewports.
 
-Window selection uses a rectangle in world coordinates. In window lasso mode, the viewport captures pointer input before window controls, then highlights each window whose bounds intersect the rectangle. The selected IDs remain after release until cleared; group movement for windows is not implemented. Arrangement operates on every window independently of either selection. Space-drag and middle-button dragging temporarily pan in any canvas mode.
+Window selection supports a rectangle or freeform lasso in world coordinates. The viewport captures pointer input before window controls, then highlights windows intersecting the selected area. Rectangle select uses the bounds between the start and current pointer positions. Freeform lasso follows the drawn path and closes it by connecting the last point to the first; windows intersecting that polygon are selected. Taps and straight strokes do not enclose a selectable area. The selected IDs remain after release until cleared; group movement for windows is not implemented. Arrangement operates on every window independently of either selection. Space-drag and middle-button dragging temporarily pan in any canvas mode.
 
 ## Desktop items
 
@@ -36,7 +36,7 @@ Running Arrange closes open panels and clears selection while preserving the cho
 
 ## Canvas tools and launcher
 
-The fixed canvas dock at the bottom left contains a hand/cursor tool dropdown and a separate window lasso, followed by a divider and Map and Arrange. The dropdown’s top-right indicator exposes **Pan canvas** (H) and **Select desktop items** (V); its icon reflects the current background tool. Arrange runs immediately; it has no menu, and its tooltip identifies the action and A shortcut. Apps creates preview windows, and the Home key or the map’s Home action returns to the starting viewport.
+The fixed canvas dock at the bottom left contains separate dropdowns for background tools and window selection, followed by a divider and Map and Arrange. The first dropdown’s top-right indicator exposes **Pan canvas** (H) and **Select desktop items** (V); its icon reflects the current background tool. The second dropdown chooses **Rectangle select** (R) or **Freeform lasso** (L), with a square or lasso icon and its own top-right indicator. Desktop-item selection always uses a rectangle, independent of the chosen window-selection shape. Arrange runs immediately; it has no menu, and its tooltip identifies the action and A shortcut. Apps creates preview windows, and the Home key or the map’s Home action returns to the starting viewport.
 
 The navigator remains a compact 54-pixel-high row at every width, with icon-only controls. Both bottom docks sit 24 pixels from the viewport edge on desktop. At widths of 760 pixels or less, canvas tools sit 14 pixels above the bottom, while the entire 54-pixel app bar sits 76 pixels above it. Map, launcher, and window picker panels sit 90 pixels above the viewport bottom on desktop and 142 pixels above it on narrow screens, keeping the controls reachable.
 
@@ -44,15 +44,16 @@ The top controls sit 24 pixels from the top and side edges on desktop, or 12 pix
 
 One continuous glass dock at the bottom right contains preset Browser, Files, and Notes favorites, other apps with open windows, and Apps. Individual icon buttons have no separate resting bubbles. Running favorites reuse their existing icon button. Each running app shows one dot per window below its icon, capped at three dots; its hover title and accessible name retain the exact count. The app containing the active window is marked. Apps opens the launcher, where an Apps/Draw toggle in the command bar selects browsing or the gesture pad.
 
-The app strip scrolls horizontally when crowded. At 760 pixels wide or less, the entire bar moves above the canvas tools and stays aligned to the right. The app icons keep their 44-pixel targets inside the shared 54-pixel surface, and Apps remains beside them. Panels and the window-selection hint reserve space for that bar. The launcher panel sits above the entire dock and stays within the viewport. Canvas tools and dock apps use icon-only buttons with hover titles and accessible names; their targets remain at least 44 × 44 pixels across input types. Names remain visible in the app gallery and window picker.
+The app strip scrolls horizontally when crowded. At 760 pixels wide or less, the entire bar moves above the canvas tools and stays aligned to the right. The app icons keep their 44-pixel targets inside the shared 54-pixel surface, and Apps remains beside them. Panels reserve space for that bar. The launcher panel sits above the entire dock and stays within the viewport. Canvas tools and dock apps use icon-only buttons with hover titles and accessible names; their targets remain at least 44 × 44 pixels across input types. Names remain visible in the app gallery and window picker.
 
-`App` owns the active canvas mode, selection, and panel visibility, including notifications, device popovers, and the window picker. Opening a panel dismisses panels from the other control groups. The window lasso shows a drag hint or selected-window count while no panel is open. Desktop-item selection has no status hint. Pointer input outside the launcher or device popover closes it. Escape closes open panels; on the canvas, it clears selection and cancels an active selection rectangle without changing tools. Arranging windows, launching apps, and revealing existing windows also preserve the chosen tool.
+`App` owns the active canvas mode, selection, and panel visibility, including notifications, device popovers, and the window picker. Opening a panel dismisses panels from the other control groups. Window and desktop-item selection use drawn outlines and highlights for feedback, without floating hints or counts. Pointer input outside the launcher or device popover closes it. Escape closes open panels; on the canvas, it clears selection and cancels an active selection gesture without changing tools. Arranging windows, launching apps, and revealing existing windows also preserve the chosen tool.
 
 | Shortcut     | Action                                            |
 | ------------ | ------------------------------------------------- |
 | H            | Choose Pan mode and clear selection.              |
 | V            | Choose desktop-item selection.                    |
-| L            | Choose window lasso selection.                    |
+| R            | Choose rectangular window selection.              |
+| L            | Choose freeform window lasso.                     |
 | M            | Toggle the map.                                   |
 | A            | Arrange all windows near the current viewport.    |
 | G            | Open the dedicated gesture pad.                   |
@@ -105,12 +106,13 @@ The **System tray** section has a **Show battery percentage** toggle, off by def
 | File                                                                                    | Responsibility                                                                                            |
 | --------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
 | [`src/desktop.ts`](../src/desktop.ts)                                                   | Workspace types, starter desktop items, storage validation, window resizing, and arrangement.             |
+| [`src/selection.ts`](../src/selection.ts)                                               | Freeform polygon intersection with window bounds.                                                         |
 | [`src/theme.ts`](../src/theme.ts)                                                       | Accent, app appearance, and battery-label preferences, defaults, and storage validation.                  |
 | [`src/App.tsx`](../src/App.tsx)                                                         | Workspace rendering, pointer gestures, viewport navigation, window actions, appearance state, and saving. |
 | [`src/components/SystemBar.tsx`](../src/components/SystemBar.tsx)                       | Compact 24-hour clock and status row, popovers, and simulated controls.                                   |
 | [`src/components/NotificationInbox.tsx`](../src/components/NotificationInbox.tsx)       | Notification trigger, inbox, unread/dismissal state, and sample toasts.                                   |
 | [`src/components/Minimap.tsx`](../src/components/Minimap.tsx)                           | Map rendering and pointer capture for dragging the visible canvas area.                                   |
-| [`src/components/CanvasTools.tsx`](../src/components/CanvasTools.tsx)                   | Background-tool dropdown, window lasso, arrangement action, and selected-window count.                    |
+| [`src/components/CanvasTools.tsx`](../src/components/CanvasTools.tsx)                   | Background and window-selection dropdowns, plus map and arrangement actions.                              |
 | [`src/components/DesktopItems.tsx`](../src/components/DesktopItems.tsx)                 | Desktop-item layer, item artwork, and selection/opening input.                                            |
 | [`src/components/WindowContent.tsx`](../src/components/WindowContent.tsx)               | Workspace overview, editable scratchpad, appearance settings, and simulated app interiors.                |
 | [`src/components/AppearanceSettings.tsx`](../src/components/AppearanceSettings.tsx)     | Shared desktop accent, app appearance, and battery-percentage visibility in Settings.                     |
@@ -134,7 +136,9 @@ The accent is stored separately under `hearthspace-accent-v1` as an allowed them
 
 The app appearance choice is stored under `hearthspace-app-presentation-v1`. Only `ideal` and `realistic` are accepted; missing, invalid, or unavailable storage falls back to Ideal. Switching remains usable in the current session if saving fails. Presentation storage is independent of the accent, workspace, and gesture assignments.
 
-The selected canvas tool is stored under `hearthspace-canvas-tool-v1`. Loading accepts `cursor`, `pan`, or `lasso`; missing, invalid, or unavailable storage defaults to the cursor. Explicit tool changes remain active through Escape, arrangement, app launches, and window navigation. Temporary panning does not change the saved tool.
+The selected canvas tool is stored under `hearthspace-canvas-tool-v1`. Loading accepts `cursor`, `pan`, or `select`; the earlier `lasso` value migrates to `select`. Missing, invalid, or unavailable storage defaults to the cursor. Explicit tool changes remain active through Escape, arrangement, app launches, and window navigation. Temporary panning does not change the saved tool.
+
+The window-selection shape is stored separately under `hearthspace-window-selection-v1` as `rectangle` or `freeform`. Missing, invalid, or unavailable storage defaults to rectangle. Changing the shape activates window selection; choosing another tool leaves the shape remembered for later use and reloads.
 
 Battery-percentage visibility is stored under `hearthspace-battery-percentage-v1`. Only the literal string `true` enables it; missing, invalid, or unavailable storage defaults to off. The preference applies immediately and remains usable in the current session if saving fails.
 

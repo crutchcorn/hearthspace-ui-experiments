@@ -294,6 +294,28 @@
   pointer-events: none;
 }
 
+.freeformSelection {
+  position: absolute;
+  overflow: visible;
+  color: var(--accent);
+  pointer-events: none;
+}
+
+.freeformSelection polygon {
+  fill: color-mix(in srgb, var(--accent) 7%, transparent);
+  fill-rule: evenodd;
+}
+
+.freeformSelection polyline,
+.freeformSelection path {
+  fill: none;
+  stroke: currentcolor;
+  stroke-width: 1;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
 .window[data-selected='true'] {
   border-color: var(--accent);
   box-shadow:

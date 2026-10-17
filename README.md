@@ -19,7 +19,7 @@ Open the local address printed in the terminal. The app fills the browser viewpo
 
 - **Pan:** use the hand/cursor dropdown to choose **Pan canvas**, or press H, then drag the background or an item to move around. Scrolling with a trackpad, middle-button dragging, and holding Space while dragging also pan without changing the selected tool.
 - **Select desktop items:** the cursor is selected by default. To return to it, expand the hand/cursor tool and choose **Select desktop items**, or press V. Drag the background to select icons and folders in a rectangle. Click an item to select it; Shift, Ctrl, or ⌘ adds to or toggles the selection. Drag a selected item to move the group. Double-click an item or press Enter while it is focused to open a simulated app preview. Desktop items stay underneath every window, and their positions are saved.
-- **Select windows:** choose the lasso icon or press L, then drag a rectangle across windows. Intersecting windows are highlighted and counted; moving a selected window group is not implemented yet. Escape clears selection without changing tools.
+- **Select windows:** expand the second canvas tool to choose **Rectangle select** (R) or **Freeform lasso** (L). Drag a rectangle or draw a loop around windows; the lasso joins its end to its start. Intersecting windows are highlighted. Rectangle is the default, and your chosen shape is remembered. Moving a selected window group is not implemented yet. Escape clears selection without changing tools.
 - **Move:** drag a window’s title bar. Hold it near a screen edge to keep traveling across the canvas.
 - **Resize:** drag any of a window’s four edges or four corners.
 - **Manage windows:** use the title-bar controls to maximize, restore, or close a window. Open **Apps** to add an app preview window.
@@ -28,14 +28,14 @@ Open the local address printed in the terminal. The app fills the browser viewpo
 
 Controls stay in the four corners, leaving the top edge and middle of the canvas open:
 
-| Corner       | Controls                                                        |
-| ------------ | --------------------------------------------------------------- |
-| Top left     | Notifications and unread status.                                |
-| Top right    | Device controls for Wi-Fi, sound, battery, and clock.           |
-| Bottom left  | Canvas tools: Pan/Select items, window lasso, Map, and Arrange. |
-| Bottom right | Favorite and running apps, plus the Apps launcher.              |
+| Corner       | Controls                                                            |
+| ------------ | ------------------------------------------------------------------- |
+| Top left     | Notifications and unread status.                                    |
+| Top right    | Device controls for Wi-Fi, sound, battery, and clock.               |
+| Bottom left  | Canvas tools: Pan/Select items, window selection, Map, and Arrange. |
+| Bottom right | Favorite and running apps, plus the Apps launcher.                  |
 
-Canvas tools and dock apps use compact icon buttons. Expand the hand/cursor tool using its top-right indicator to switch background tools. Hover to see control names and available shortcuts; buttons also retain accessible names and 44-pixel touch targets. The clock and three device icons share one row. Favorite and running apps share one continuous bar with Apps. On narrow screens, that whole bar moves above the canvas tools and stays aligned to the right. Scroll the app row horizontally when it fills up. Escape closes open panels; on the canvas, it clears the current selection. Your chosen tool stays active through these actions, arranging windows, and opening apps, and is remembered after reload.
+Canvas tools and dock apps use compact icon buttons. Top-right expansion indicators on the first two tools open background-tool and window-selection menus. Hover to see control names and available shortcuts; buttons also retain accessible names and 44-pixel touch targets. The clock and three device icons share one row. Favorite and running apps share one continuous bar with Apps. On narrow screens, that whole bar moves above the canvas tools and stays aligned to the right. Scroll the app row horizontally when it fills up. Escape closes open panels; on the canvas, it clears the current selection. Your chosen tool stays active through these actions, arranging windows, and opening apps, and is remembered after reload.
 
 ## Try the launcher
 

@@ -1,7 +1,8 @@
 import { APP_CATALOG } from './components/launcher-apps'
 
 export type Bounds = { x: number; y: number; width: number; height: number }
-export type CanvasTool = 'cursor' | 'pan' | 'lasso'
+export type CanvasTool = 'cursor' | 'pan' | 'select'
+export type WindowSelectionShape = 'rectangle' | 'freeform'
 export type DesktopItem = Bounds & {
   id: string
   title: string
@@ -27,17 +28,29 @@ export type Workspace = {
 
 export const STORAGE_KEY = 'hearthspace-playground-v1'
 export const CANVAS_TOOL_STORAGE_KEY = 'hearthspace-canvas-tool-v1'
+export const WINDOW_SELECTION_STORAGE_KEY = 'hearthspace-window-selection-v1'
 export const MIN_WIDTH = 280
 export const MIN_HEIGHT = 200
 
 export function loadCanvasTool(): CanvasTool {
   try {
     const saved = localStorage.getItem(CANVAS_TOOL_STORAGE_KEY)
-    if (saved === 'pan' || saved === 'lasso') return saved
+    if (saved === 'pan' || saved === 'select') return saved
+    if (saved === 'lasso') return 'select'
   } catch {
     /* Use the desktop cursor when preferences are unavailable. */
   }
   return 'cursor'
+}
+
+export function loadWindowSelectionShape(): WindowSelectionShape {
+  try {
+    return localStorage.getItem(WINDOW_SELECTION_STORAGE_KEY) === 'freeform'
+      ? 'freeform'
+      : 'rectangle'
+  } catch {
+    return 'rectangle'
+  }
 }
 
 const INITIAL_NOTE =

@@ -2,24 +2,26 @@ import {
   Check,
   ChevronUp,
   Hand,
-  LassoSelect,
+  Lasso,
   Map,
   MousePointer2,
+  SquareDashedMousePointer,
 } from 'lucide-react'
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from 'react'
-import type { CanvasTool } from '../desktop'
+import type { CanvasTool, WindowSelectionShape } from '../desktop'
 import styles from './CanvasTools.module.css'
 
 interface CanvasToolsProps {
   mode: CanvasTool
   onModeChange: (mode: CanvasTool) => void
+  selectionShape: WindowSelectionShape
+  onSelectionShapeChange: (shape: WindowSelectionShape) => void
   onOpenToolMenu: () => void
   mapOpen: boolean
   onToggleMap: () => void
   onArrange: () => void
   windowCount: number
-  selectedCount: number
-  showHint: boolean
+  menusAllowed: boolean
 }
 
 const primaryTools = [
@@ -32,52 +34,80 @@ const primaryTools = [
   },
 ] as const
 
+const selectionTools = [
+  {
+    shape: 'rectangle',
+    label: 'Rectangle select',
+    shortcut: 'R',
+    Icon: SquareDashedMousePointer,
+  },
+  { shape: 'freeform', label: 'Freeform lasso', shortcut: 'L', Icon: Lasso },
+] as const
+
+type ToolMenu = 'primary' | 'selection'
+
 export default function CanvasTools({
   mode,
   onModeChange,
+  selectionShape,
+  onSelectionShapeChange,
   onOpenToolMenu,
   mapOpen,
   onToggleMap,
   onArrange,
   windowCount,
-  selectedCount,
-  showHint,
+  menusAllowed,
 }: CanvasToolsProps) {
   const arrangeHintId = useId()
   const toolMenuId = useId()
+  const selectionMenuId = useId()
   const pickerRef = useRef<HTMLDivElement>(null)
   const triggerRef = useRef<HTMLButtonElement>(null)
   const menuRef = useRef<HTMLDivElement>(null)
-  const [menuOpen, setMenuOpen] = useState(false)
+  const selectionPickerRef = useRef<HTMLDivElement>(null)
+  const selectionTriggerRef = useRef<HTMLButtonElement>(null)
+  const selectionMenuRef = useRef<HTMLDivElement>(null)
+  const [openToolMenu, setOpenToolMenu] = useState<ToolMenu | null>(null)
   const [primaryMode, setPrimaryMode] = useState<'pan' | 'cursor'>('cursor')
 
-  if (mode !== 'lasso' && mode !== primaryMode) setPrimaryMode(mode)
-  if (!showHint && menuOpen) setMenuOpen(false)
+  if (mode !== 'select' && mode !== primaryMode) setPrimaryMode(mode)
+  if (!menusAllowed && openToolMenu) setOpenToolMenu(null)
 
-  const menuVisible = menuOpen && showHint
+  const visibleMenu = menusAllowed ? openToolMenu : null
   const primaryTool = primaryTools.find((tool) => tool.mode === primaryMode)!
   const PrimaryIcon = primaryTool.Icon
+  const selectionTool = selectionTools.find(
+    (tool) => tool.shape === selectionShape,
+  )!
+  const SelectionIcon = selectionTool.Icon
 
   useEffect(() => {
-    if (!menuVisible) return
-    menuRef.current
-      ?.querySelector<HTMLButtonElement>(`[data-mode="${primaryMode}"]`)
+    if (!visibleMenu) return
+    const activePickerRef =
+      visibleMenu === 'primary' ? pickerRef : selectionPickerRef
+    const activeTriggerRef =
+      visibleMenu === 'primary' ? triggerRef : selectionTriggerRef
+    const activeMenuRef = visibleMenu === 'primary' ? menuRef : selectionMenuRef
+    const selectedValue =
+      visibleMenu === 'primary' ? primaryMode : selectionShape
+    activeMenuRef.current
+      ?.querySelector<HTMLButtonElement>(`[data-value="${selectedValue}"]`)
       ?.focus({ preventScroll: true })
 
     function dismissOutside(event: PointerEvent) {
       if (
         event.target instanceof Node &&
-        !pickerRef.current?.contains(event.target)
+        !activePickerRef.current?.contains(event.target)
       )
-        setMenuOpen(false)
+        setOpenToolMenu(null)
     }
 
     function dismissOnEscape(event: globalThis.KeyboardEvent) {
       if (event.key !== 'Escape') return
       event.preventDefault()
       event.stopPropagation()
-      setMenuOpen(false)
-      triggerRef.current?.focus({ preventScroll: true })
+      setOpenToolMenu(null)
+      activeTriggerRef.current?.focus({ preventScroll: true })
     }
 
     document.addEventListener('pointerdown', dismissOutside, true)
@@ -86,33 +116,53 @@ export default function CanvasTools({
       document.removeEventListener('pointerdown', dismissOutside, true)
       document.removeEventListener('keydown', dismissOnEscape, true)
     }
-  }, [menuVisible, primaryMode])
+  }, [visibleMenu, primaryMode, selectionShape])
 
-  function openMenu() {
+  function openMenu(menu: ToolMenu) {
     onOpenToolMenu()
-    setMenuOpen(true)
+    setOpenToolMenu(menu)
   }
 
   function selectTool(nextMode: 'pan' | 'cursor') {
     onModeChange(nextMode)
-    setMenuOpen(false)
+    setOpenToolMenu(null)
     triggerRef.current?.focus({ preventScroll: true })
   }
 
-  function navigateMenu(event: KeyboardEvent<HTMLDivElement>) {
+  function selectShape(shape: WindowSelectionShape) {
+    onSelectionShapeChange(shape)
+    setOpenToolMenu(null)
+    selectionTriggerRef.current?.focus({ preventScroll: true })
+  }
+
+  function navigateMenu(event: KeyboardEvent<HTMLDivElement>, menu: ToolMenu) {
     if (event.metaKey || event.ctrlKey || event.altKey) return
     event.stopPropagation()
-    const shortcutTool = primaryTools.find(
-      (tool) => tool.shortcut.toLowerCase() === event.key.toLowerCase(),
-    )
-    if (shortcutTool) {
-      event.preventDefault()
-      selectTool(shortcutTool.mode)
-      return
+    const shortcut = event.key.toLowerCase()
+    if (menu === 'primary') {
+      const tool = primaryTools.find(
+        (option) => option.shortcut.toLowerCase() === shortcut,
+      )
+      if (tool) {
+        event.preventDefault()
+        selectTool(tool.mode)
+        return
+      }
+    } else {
+      const tool = selectionTools.find(
+        (option) => option.shortcut.toLowerCase() === shortcut,
+      )
+      if (tool) {
+        event.preventDefault()
+        selectShape(tool.shape)
+        return
+      }
     }
     if (event.key === 'Tab') {
-      setMenuOpen(false)
-      triggerRef.current?.focus({ preventScroll: true })
+      setOpenToolMenu(null)
+      const activeTriggerRef =
+        menu === 'primary' ? triggerRef : selectionTriggerRef
+      activeTriggerRef.current?.focus({ preventScroll: true })
       return
     }
     if (!['ArrowUp', 'ArrowDown', 'Home', 'End'].includes(event.key)) return
@@ -135,15 +185,6 @@ export default function CanvasTools({
 
   return (
     <div className={styles.container}>
-      {showHint && !menuVisible && mode === 'lasso' && (
-        <div className={styles.selectionHint} role="status">
-          <span>
-            {selectedCount > 0
-              ? `${selectedCount} ${selectedCount === 1 ? 'window' : 'windows'} selected`
-              : 'Drag around windows'}
-          </span>
-        </div>
-      )}
       <div className={styles.dock} role="group" aria-label="Canvas tools">
         <div className={styles.toolGrid}>
           <div
@@ -151,27 +192,27 @@ export default function CanvasTools({
             className={styles.picker}
             onBlur={(event) => {
               if (!event.currentTarget.contains(event.relatedTarget))
-                setMenuOpen(false)
+                setOpenToolMenu(null)
             }}
           >
             <button
               ref={triggerRef}
               type="button"
-              className={`${styles.tool} ${styles.move}`}
-              aria-pressed={mode !== 'lasso'}
+              className={`${styles.tool} ${styles.move} ${styles.expandable}`}
+              aria-pressed={mode !== 'select'}
               aria-label={`${primaryTool.label}, choose canvas tool`}
               aria-haspopup="menu"
-              aria-expanded={menuVisible}
-              aria-controls={menuVisible ? toolMenuId : undefined}
+              aria-expanded={visibleMenu === 'primary'}
+              aria-controls={visibleMenu === 'primary' ? toolMenuId : undefined}
               title={`${primaryTool.label} (${primaryTool.shortcut}) · Choose tool`}
               onClick={() => {
-                if (menuVisible) setMenuOpen(false)
-                else openMenu()
+                if (visibleMenu === 'primary') setOpenToolMenu(null)
+                else openMenu('primary')
               }}
               onKeyDown={(event) => {
                 if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') return
                 event.preventDefault()
-                openMenu()
+                openMenu('primary')
               }}
             >
               <PrimaryIcon size={20} strokeWidth={1.5} aria-hidden="true" />
@@ -182,14 +223,14 @@ export default function CanvasTools({
                 aria-hidden="true"
               />
             </button>
-            {menuVisible && (
+            {visibleMenu === 'primary' && (
               <div
                 ref={menuRef}
                 id={toolMenuId}
                 className={styles.toolMenu}
                 role="menu"
                 aria-label="Canvas interaction tool"
-                onKeyDown={navigateMenu}
+                onKeyDown={(event) => navigateMenu(event, 'primary')}
               >
                 {primaryTools.map(
                   ({ mode: optionMode, label, shortcut, Icon }) => (
@@ -198,7 +239,7 @@ export default function CanvasTools({
                       type="button"
                       role="menuitemradio"
                       aria-checked={mode === optionMode}
-                      data-mode={optionMode}
+                      data-value={optionMode}
                       className={styles.menuOption}
                       tabIndex={-1}
                       onClick={() => selectTool(optionMode)}
@@ -219,16 +260,79 @@ export default function CanvasTools({
               </div>
             )}
           </div>
-          <button
-            type="button"
-            className={styles.tool}
-            aria-pressed={mode === 'lasso'}
-            aria-label="Select windows"
-            title="Select windows (L)"
-            onClick={() => onModeChange('lasso')}
+          <div
+            ref={selectionPickerRef}
+            className={styles.picker}
+            onBlur={(event) => {
+              if (!event.currentTarget.contains(event.relatedTarget))
+                setOpenToolMenu(null)
+            }}
           >
-            <LassoSelect size={18} aria-hidden="true" />
-          </button>
+            <button
+              ref={selectionTriggerRef}
+              type="button"
+              className={`${styles.tool} ${styles.expandable}`}
+              aria-pressed={mode === 'select'}
+              aria-label={`${selectionTool.label}, choose window selection tool`}
+              aria-haspopup="menu"
+              aria-expanded={visibleMenu === 'selection'}
+              aria-controls={
+                visibleMenu === 'selection' ? selectionMenuId : undefined
+              }
+              title={`${selectionTool.label} (${selectionTool.shortcut}) · Choose tool`}
+              onClick={() => {
+                if (visibleMenu === 'selection') setOpenToolMenu(null)
+                else openMenu('selection')
+              }}
+              onKeyDown={(event) => {
+                if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') return
+                event.preventDefault()
+                openMenu('selection')
+              }}
+            >
+              <SelectionIcon size={20} strokeWidth={1.5} aria-hidden="true" />
+              <ChevronUp
+                className={styles.expandIndicator}
+                size={9}
+                strokeWidth={2}
+                aria-hidden="true"
+              />
+            </button>
+            {visibleMenu === 'selection' && (
+              <div
+                ref={selectionMenuRef}
+                id={selectionMenuId}
+                className={styles.toolMenu}
+                role="menu"
+                aria-label="Window selection tool"
+                onKeyDown={(event) => navigateMenu(event, 'selection')}
+              >
+                {selectionTools.map(({ shape, label, shortcut, Icon }) => (
+                  <button
+                    key={shape}
+                    type="button"
+                    role="menuitemradio"
+                    aria-checked={mode === 'select' && selectionShape === shape}
+                    data-value={shape}
+                    className={styles.menuOption}
+                    tabIndex={-1}
+                    onClick={() => selectShape(shape)}
+                  >
+                    <Icon size={18} strokeWidth={1.5} aria-hidden="true" />
+                    <span>{label}</span>
+                    <kbd>{shortcut}</kbd>
+                    {mode === 'select' && selectionShape === shape && (
+                      <Check
+                        size={14}
+                        className={styles.check}
+                        aria-hidden="true"
+                      />
+                    )}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
           <span className={styles.divider} aria-hidden="true" />
           <button
             type="button"
