@@ -21,6 +21,10 @@
   display: none;
 }
 
+.cursorReady {
+  cursor: default;
+}
+
 .panReady,
 .panReady * {
   cursor: grab !important;

@@ -25,6 +25,7 @@ import NotificationInbox, {
 } from './components/NotificationInbox'
 import Minimap from './components/Minimap'
 import CanvasTools from './components/CanvasTools'
+import DesktopItems from './components/DesktopItems'
 import AppLauncher from './components/AppLauncher'
 import LauncherDock from './components/LauncherDock'
 import AppIcon from './components/AppIcon'
@@ -32,7 +33,9 @@ import WindowContent from './components/WindowContent'
 import { APP_CATALOG, type LauncherApp } from './components/launcher-apps'
 import {
   arrangeWindows,
+  CANVAS_TOOL_STORAGE_KEY,
   clamp,
+  loadCanvasTool,
   loadWorkspace,
   MIN_HEIGHT,
   MIN_WIDTH,
@@ -40,6 +43,7 @@ import {
   STORAGE_KEY,
   type Bounds,
   type DesktopWindow,
+  type DesktopItem,
 } from './desktop'
 import styles from './App.module.css'
 import {
@@ -54,7 +58,7 @@ import {
 
 type Gesture = {
   pointerId: number
-  type: 'pan' | 'move' | 'resize' | 'lasso'
+  type: 'pan' | 'move' | 'resize' | 'lasso' | 'item-select' | 'item-move'
   startX: number
   startY: number
   scrollX: number
@@ -62,6 +66,9 @@ type Gesture = {
   id?: string
   bounds?: Bounds
   edge?: string
+  items?: DesktopItem[]
+  selectedItemIds?: string[]
+  moved?: boolean
 }
 
 const edges = ['n', 'e', 's', 'w', 'ne', 'se', 'sw', 'nw']
@@ -85,9 +92,12 @@ function App() {
   const [showMap, setShowMap] = useState(false)
   const [notificationsOpen, setNotificationsOpen] = useState(false)
   const [systemPanel, setSystemPanel] = useState<SystemPanel>(null)
-  const [tool, setTool] = useState<'pan' | 'lasso'>('pan')
+  const [tool, setTool] = useState(loadCanvasTool)
   const [selectedIds, setSelectedIds] = useState<string[]>([])
-  const [selection, setSelection] = useState<Bounds | null>(null)
+  const [selectedItemIds, setSelectedItemIds] = useState<string[]>([])
+  const [selection, setSelection] = useState<
+    (Bounds & { target: 'windows' | 'items' }) | null
+  >(null)
   const [launcher, setLauncher] = useState<'apps' | 'gestures' | null>(null)
   const [editingGestures, setEditingGestures] = useState(false)
   const [dockAppId, setDockAppId] = useState<string | null>(null)
@@ -135,7 +145,7 @@ function App() {
     setSpaceHeld(false)
     setSelection(null)
     setSelectedIds([])
-    setTool('pan')
+    setSelectedItemIds([])
     setShowMap(false)
     setLauncher(null)
     closePopovers()
@@ -158,6 +168,14 @@ function App() {
         : 'smooth',
     })
   }, [revealRequest])
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(CANVAS_TOOL_STORAGE_KEY, tool)
+    } catch {
+      /* Keep the selected tool usable when storage is unavailable. */
+    }
+  }, [tool])
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -192,11 +210,18 @@ function App() {
         setShowMap(false)
         setLauncher(null)
         closePopovers()
-        setTool('pan')
         setSelectedIds([])
+        setSelectedItemIds([])
         setSelection(null)
-        if (gesture.current?.type === 'lasso') {
+        if (
+          gesture.current?.type === 'lasso' ||
+          gesture.current?.type === 'item-select'
+        ) {
+          const pointerId = gesture.current.pointerId
           gesture.current = null
+          if (captureTarget.current?.hasPointerCapture(pointerId))
+            captureTarget.current.releasePointerCapture(pointerId)
+          captureTarget.current = null
           setDragging(false)
         }
         if (launcher) launcherTrigger.current?.focus({ preventScroll: true })
@@ -216,10 +241,18 @@ function App() {
         closePopovers()
         setTool('pan')
         setSelectedIds([])
+        setSelectedItemIds([])
+      }
+      if (event.key.toLowerCase() === 'v') {
+        closePopovers()
+        setTool('cursor')
+        setSelectedIds([])
+        setShowMap(false)
       }
       if (event.key.toLowerCase() === 'l') {
         closePopovers()
         setTool('lasso')
+        setSelectedItemIds([])
         setShowMap(false)
       }
       if (event.key.toLowerCase() === 'm') {
@@ -307,7 +340,7 @@ function App() {
       )
       return
     }
-    if (current.type === 'lasso') {
+    if (current.type === 'lasso' || current.type === 'item-select') {
       const startX = current.startX + current.scrollX
       const startY = current.startY + current.scrollY
       const x = clamp(clientX + canvas.scrollLeft, 0, workspace.width)
@@ -318,23 +351,56 @@ function App() {
         width: Math.abs(x - startX),
         height: Math.abs(y - startY),
       }
-      setSelection(area)
-      setSelectedIds(
-        workspace.windows
-          .filter(
-            (item) =>
-              item.x < area.x + area.width &&
-              item.x + item.width > area.x &&
-              item.y < area.y + area.height &&
-              item.y + item.height > area.y,
-          )
-          .map((item) => item.id),
+      const isDesktopSelection = current.type === 'item-select'
+      setSelection({
+        ...area,
+        target: isDesktopSelection ? 'items' : 'windows',
+      })
+      const ids = (isDesktopSelection ? workspace.items : workspace.windows)
+        .filter(
+          (item) =>
+            item.x < area.x + area.width &&
+            item.x + item.width > area.x &&
+            item.y < area.y + area.height &&
+            item.y + item.height > area.y,
+        )
+        .map((item) => item.id)
+      if (isDesktopSelection)
+        setSelectedItemIds([...new Set([...current.selectedItemIds!, ...ids])])
+      else setSelectedIds(ids)
+      return
+    }
+    const dx = clientX - current.startX + canvas.scrollLeft - current.scrollX
+    const dy = clientY - current.startY + canvas.scrollTop - current.scrollY
+    if (current.type === 'item-move') {
+      // Move the whole selection by one bounded delta, preserving its spacing.
+      if (!current.moved && Math.hypot(dx, dy) < 4) return
+      current.moved = true
+      const items = current.items!
+      const moveX = clamp(
+        dx,
+        -Math.min(...items.map((item) => item.x)),
+        workspace.width - Math.max(...items.map((item) => item.x + item.width)),
       )
+      const moveY = clamp(
+        dy,
+        -Math.min(...items.map((item) => item.y)),
+        workspace.height -
+          Math.max(...items.map((item) => item.y + item.height)),
+      )
+      const origins = new Map(items.map((item) => [item.id, item]))
+      setWorkspace((previous) => ({
+        ...previous,
+        items: previous.items.map((item) => {
+          const origin = origins.get(item.id)
+          return origin
+            ? { ...item, x: origin.x + moveX, y: origin.y + moveY }
+            : item
+        }),
+      }))
       return
     }
     const bounds = current.bounds!
-    const dx = clientX - current.startX + canvas.scrollLeft - current.scrollX
-    const dy = clientY - current.startY + canvas.scrollTop - current.scrollY
     setWorkspace((previous) => ({
       ...previous,
       windows: previous.windows.map((item) =>
@@ -355,7 +421,11 @@ function App() {
 
   const panAtEdge = useEffectEvent(() => {
     const canvas = viewport.current
-    if (canvas && gesture.current?.type === 'move') {
+    if (
+      canvas &&
+      (gesture.current?.type === 'move' ||
+        (gesture.current?.type === 'item-move' && gesture.current.moved))
+    ) {
       const { x, y } = latestPointer.current
       const speedX = x < 36 ? -12 : x > window.innerWidth - 36 ? 12 : 0
       const speedY = y < 76 ? -12 : y > window.innerHeight - 36 ? 12 : 0
@@ -366,7 +436,7 @@ function App() {
     }
   })
 
-  // Keep carrying a window when its pointer reaches the edge of the screen.
+  // Keep carrying windows or desktop items when the pointer reaches an edge.
   useEffect(() => {
     if (!dragging) return
     let frame: number
@@ -385,6 +455,7 @@ function App() {
     edge?: string,
   ) {
     if (
+      gesture.current ||
       (event.button !== 0 && event.button !== 1) ||
       (item?.restore && type !== 'pan')
     )
@@ -405,11 +476,21 @@ function App() {
       id: item?.id,
       bounds: item,
       edge,
+      selectedItemIds:
+        type === 'item-select' &&
+        (event.shiftKey || event.metaKey || event.ctrlKey)
+          ? selectedItemIds
+          : [],
     }
-    setDragging(true)
-    if (type === 'lasso') {
-      setSelectedIds([])
+    setDragging(type !== 'lasso' && type !== 'item-select')
+    if (type === 'lasso' || type === 'item-select') {
+      if (type === 'lasso') setSelectedIds([])
+      else {
+        setSelectedIds([])
+        setSelectedItemIds(gesture.current.selectedItemIds!)
+      }
       setSelection({
+        target: type === 'lasso' ? 'windows' : 'items',
         x: canvas.scrollLeft + event.clientX,
         y: canvas.scrollTop + event.clientY,
         width: 0,
@@ -417,6 +498,49 @@ function App() {
       })
     }
     if (item) focusWindow(item.id)
+  }
+
+  function selectDesktopItem(item: DesktopItem, additive: boolean) {
+    setSelectedIds([])
+    setSelectedItemIds((current) =>
+      additive
+        ? current.includes(item.id)
+          ? current.filter((id) => id !== item.id)
+          : [...current, item.id]
+        : [item.id],
+    )
+  }
+
+  function startItemGesture(
+    event: ReactPointerEvent<HTMLButtonElement>,
+    item: DesktopItem,
+  ) {
+    if (event.button !== 0 || gesture.current) return
+    if (tool === 'pan') {
+      startGesture(event, 'pan')
+      return
+    }
+    const additive = event.shiftKey || event.metaKey || event.ctrlKey
+    const selected = selectedItemIds.includes(item.id)
+    const ids = additive
+      ? selected
+        ? selectedItemIds.filter((id) => id !== item.id)
+        : [...selectedItemIds, item.id]
+      : selected
+        ? selectedItemIds
+        : [item.id]
+    setSelectedIds([])
+    setSelectedItemIds(ids)
+    event.currentTarget.focus({ preventScroll: true })
+    if (!ids.includes(item.id)) {
+      event.preventDefault()
+      event.stopPropagation()
+      return
+    }
+    startGesture(event, 'item-move')
+    gesture.current!.items = workspace.items.filter((entry) =>
+      ids.includes(entry.id),
+    )
   }
 
   function endGesture(event: ReactPointerEvent) {
@@ -523,8 +647,8 @@ function App() {
     closePopovers()
     setShowMap(false)
     setSpaceHeld(false)
-    setTool('pan')
     setSelectedIds([])
+    setSelectedItemIds([])
   }
 
   function revealWindow(id: string) {
@@ -539,8 +663,8 @@ function App() {
     closePopovers()
     setLauncher(null)
     setShowMap(false)
-    setTool('pan')
     setSelectedIds([])
+    setSelectedItemIds([])
     setSpaceHeld(false)
     focusWindow(item.id)
     setRevealRequest({
@@ -621,7 +745,7 @@ function App() {
       />
       <div
         ref={viewport}
-        className={`${styles.viewport} ${spaceHeld ? styles.panReady : ''} ${dragging ? styles.dragging : ''} ${tool === 'lasso' && !spaceHeld ? styles.selecting : ''}`}
+        className={`${styles.viewport} ${tool === 'cursor' ? styles.cursorReady : ''} ${spaceHeld ? styles.panReady : ''} ${dragging ? styles.dragging : ''} ${tool === 'lasso' && !spaceHeld ? styles.selecting : ''}`}
         data-canvas-viewport
         onScroll={(event) => {
           const { scrollLeft: x, scrollTop: y } = event.currentTarget
@@ -632,8 +756,14 @@ function App() {
           else if (tool === 'lasso') startGesture(event, 'lasso')
         }}
         onPointerDown={(event) => {
-          if (!(event.target as HTMLElement).closest('[data-window-id]'))
-            startGesture(event, 'pan')
+          if (
+            !(event.target as HTMLElement).closest(
+              '[data-window-id], [data-desktop-item-id]',
+            )
+          ) {
+            closePopovers()
+            startGesture(event, tool === 'cursor' ? 'item-select' : 'pan')
+          }
         }}
         onPointerMove={(event) => {
           if (gesture.current?.pointerId !== event.pointerId) return
@@ -649,6 +779,16 @@ function App() {
           className={styles.world}
           style={{ width: workspace.width, height: workspace.height }}
         >
+          <DesktopItems
+            items={workspace.items}
+            selectedIds={selectedItemIds}
+            onPointerDown={startItemGesture}
+            onSelect={selectDesktopItem}
+            onOpen={(item) => {
+              const app = APP_CATALOG.find((entry) => entry.id === item.appId)
+              if (app) launchApp(app)
+            }}
+          />
           {workspace.windows.map((item, index) => {
             const app = APP_CATALOG.find((entry) => entry.id === item.appId)
             const appId =
@@ -792,7 +932,10 @@ function App() {
                 top: selection.y,
                 width: selection.width,
                 height: selection.height,
-                zIndex: workspace.windows.length + 1,
+                zIndex:
+                  selection.target === 'items'
+                    ? 0
+                    : workspace.windows.length + 1,
               }}
             />
           )}
@@ -811,7 +954,13 @@ function App() {
           onModeChange={(mode) => {
             closePopovers()
             setTool(mode)
-            if (mode === 'pan') setSelectedIds([])
+            if (mode !== 'lasso') setSelectedIds([])
+            if (mode !== 'cursor') setSelectedItemIds([])
+            setShowMap(false)
+            setLauncher(null)
+          }}
+          onOpenToolMenu={() => {
+            closePopovers()
             setShowMap(false)
             setLauncher(null)
           }}
