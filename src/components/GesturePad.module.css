@@ -1,123 +1,22 @@
 .gesturePad {
-  display: grid;
-  min-width: 0;
-  grid-template-columns: minmax(0, 1fr) 174px;
-  gap: 12px 18px;
-  color: var(--chrome-text);
-}
-
-.heading {
-  display: flex;
-  min-height: 60px;
-  grid-column: 1 / -1;
-  align-items: center;
-  justify-content: space-between;
-  gap: 14px;
-}
-
-.heading h2 {
-  margin: 0 0 7px;
-  font-size: 21px;
-  font-weight: 500;
-  letter-spacing: -0.5px;
-  line-height: 1.1;
-}
-
-.heading p {
-  margin: 0;
-  color: var(--chrome-muted);
-  font-size: 11px;
-  line-height: 1.5;
-}
-
-.controls {
   display: flex;
   min-width: 0;
   flex-direction: column;
-  justify-content: space-between;
   gap: 12px;
-}
-
-.editButton,
-.retryButton {
-  display: inline-flex;
-  min-width: 44px;
-  min-height: 44px;
-  flex-shrink: 0;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  padding: 0 12px;
-  border: 1px solid var(--chrome-border);
-  border-radius: var(--radius-control);
-  background: #fffaf057;
   color: var(--chrome-text);
-  font-size: 11px;
-  white-space: nowrap;
 }
 
-.editButton:hover {
-  background: var(--chrome-raised);
-}
-
-.shortcuts,
 .assignment {
   display: flex;
-  min-width: 0;
+  min-width: 140px;
+  flex: 1;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
-.sectionLabel,
 .assignment label {
   color: var(--chrome-muted);
-  font-size: 10px;
-}
-
-.shortcutList {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  overflow: auto hidden;
-  scrollbar-width: thin;
-  scrollbar-color: #bda89b transparent;
-}
-
-.shortcut {
-  display: flex;
-  min-height: 44px;
-  flex: 0 0 auto;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 10px;
-  padding: 0 12px;
-  border: 1px solid transparent;
-  border-radius: var(--radius-control);
-  background: transparent;
-  color: var(--chrome-muted);
-  font-size: 12px;
-}
-
-.shortcut svg {
-  width: 19px;
-  height: 24px;
-  fill: none;
-  stroke: currentcolor;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-width: 1.7;
-}
-
-.shortcut:hover {
-  background: var(--chrome-hover);
-  color: var(--chrome-text);
-}
-
-.shortcut[aria-pressed='true'] {
-  border-color: #ffffffc2;
-  background: #fffaf08a;
-  color: var(--accent);
-  box-shadow: 0 3px 9px #73523c0a;
+  font-size: 11px;
 }
 
 .assignment select {
@@ -136,6 +35,7 @@
 .pad {
   position: relative;
   height: 236px;
+  flex-shrink: 0;
   overflow: hidden;
   border: 1px solid #ffffff5c;
   border-radius: var(--radius-tile);
@@ -155,13 +55,10 @@
   position: absolute;
   z-index: 1;
   top: 0;
-  right: 0;
   left: 0;
   display: flex;
-  height: 34px;
+  height: 44px;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
   padding-inline: 14px;
   color: #d7baa194;
   font-size: 9px;
@@ -222,6 +119,7 @@
   bottom: 16px;
   left: 16px;
   display: flex;
+  max-width: calc(100% - 120px);
   align-items: center;
   gap: 5px;
   color: #e9c39d;
@@ -229,57 +127,65 @@
   pointer-events: none;
 }
 
+.settingsButton,
+.retryButton,
+.cancelButton {
+  display: inline-flex;
+  min-width: 44px;
+  min-height: 44px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 0 12px;
+  border: 1px solid var(--chrome-border);
+  border-radius: var(--radius-control);
+  background: #fffaf057;
+  color: var(--chrome-text);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.cancelButton:hover {
+  background: var(--chrome-raised);
+}
+
+.settingsButton,
 .retryButton {
   position: absolute;
-  top: 34px;
-  right: 10px;
-  min-height: 44px;
+  right: 8px;
   border-color: #b6957733;
   background: #6c4a3224;
   color: #f1d9c2;
 }
 
+.settingsButton {
+  top: 8px;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+}
+
+.retryButton {
+  bottom: 8px;
+}
+
+.settingsButton:hover,
 .retryButton:hover {
   background: #b6957726;
 }
 
 .footer {
   display: flex;
-  min-height: 48px;
-  flex-direction: column;
-  align-items: stretch;
-  gap: 6px;
-  margin-top: auto;
-}
-
-.target {
-  display: flex;
-  min-width: 0;
-  align-items: center;
+  flex-wrap: wrap;
+  align-items: flex-end;
   gap: 10px;
 }
 
-.appIcon,
-.target strong {
-  display: none;
-}
-
-.target > div {
+.actions {
   display: flex;
-  min-width: 0;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.target strong {
-  font-size: 13px;
-  font-weight: 500;
-}
-
-.target > div > span {
-  color: var(--chrome-muted);
-  font-size: 9px;
-  line-height: 1.5;
+  align-items: center;
+  gap: 8px;
 }
 
 .openButton {
@@ -320,28 +226,6 @@
 }
 
 @media (width <= 480px) {
-  .gesturePad {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
-
-  .heading {
-    gap: 8px;
-  }
-
-  .heading h2 {
-    font-size: 20px;
-  }
-
-  .heading p {
-    font-size: 10px;
-  }
-
-  .editButton {
-    padding-inline: 10px;
-  }
-
   .pad {
     height: 205px;
   }
@@ -350,29 +234,15 @@
     padding-inline: 12px;
   }
 
-  .shortcut {
-    flex: 1 0 auto;
-    justify-content: center;
-    padding-inline: 10px;
-    font-size: 11px;
+  .assignment {
+    flex-basis: 100%;
   }
 
-  .shortcutList {
-    flex-direction: row;
+  .actions {
+    width: 100%;
   }
 
-  .footer {
-    flex-flow: row wrap;
-    align-items: center;
-    gap: 12px;
-    order: -1;
-  }
-
-  .target strong {
-    display: block;
-  }
-
-  .footer .openButton {
+  .actions > button {
     flex: 1;
   }
 }

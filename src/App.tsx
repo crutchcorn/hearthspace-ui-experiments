@@ -17,6 +17,7 @@ import {
 } from 'lucide-react'
 import SystemBar, { type SystemPanel } from './components/SystemBar'
 import NotificationInbox, {
+  type NotificationInboxHandle,
   type NotificationTarget,
 } from './components/NotificationInbox'
 import Minimap from './components/Minimap'
@@ -71,6 +72,7 @@ function App() {
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [selection, setSelection] = useState<Bounds | null>(null)
   const [launcher, setLauncher] = useState<'apps' | 'gestures' | null>(null)
+  const [editingGestures, setEditingGestures] = useState(false)
   const [dockAppId, setDockAppId] = useState<string | null>(null)
   const [revealRequest, setRevealRequest] = useState<{
     id: string
@@ -78,6 +80,7 @@ function App() {
     top: number
   } | null>(null)
   const launcherTrigger = useRef<HTMLButtonElement>(null)
+  const notificationInbox = useRef<NotificationInboxHandle>(null)
   const windowElements = useRef(new Map<string, HTMLElement>())
   const viewport = useRef<HTMLDivElement>(null)
   const gesture = useRef<Gesture | null>(null)
@@ -161,6 +164,7 @@ function App() {
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
         event.preventDefault()
         setLauncher(launcher === 'apps' ? null : 'apps')
+        setEditingGestures(false)
         if (launcher === 'apps')
           launcherTrigger.current?.focus({ preventScroll: true })
         setShowMap(false)
@@ -207,6 +211,7 @@ function App() {
       }
       if (event.key.toLowerCase() === 'g') {
         closePopovers()
+        setEditingGestures(false)
         setLauncher('gestures')
         setShowMap(false)
       }
@@ -479,12 +484,14 @@ function App() {
 
   function toggleLauncher() {
     closePopovers()
+    setEditingGestures(false)
     setLauncher((current) => (current ? null : 'apps'))
     setShowMap(false)
     setSpaceHeld(false)
   }
 
   function closeLauncher() {
+    setEditingGestures(false)
     setLauncher(null)
     launcherTrigger.current?.focus({ preventScroll: true })
   }
@@ -523,6 +530,14 @@ function App() {
   }
 
   function openNotificationTarget(target: NotificationTarget) {
+    if (target === 'gestures') {
+      closePopovers()
+      setShowMap(false)
+      setSpaceHeld(false)
+      setEditingGestures(true)
+      setLauncher('gestures')
+      return
+    }
     const item = workspace.windows.find(
       (entry) =>
         entry.appId === target ||
@@ -554,6 +569,7 @@ function App() {
         }}
       />
       <NotificationInbox
+        ref={notificationInbox}
         open={notificationsOpen}
         previewVisible={!systemPanel && !launcher && !showMap && !dockAppId}
         onToggle={() => {
@@ -755,7 +771,20 @@ function App() {
       {launcher && (
         <AppLauncher
           mode={launcher}
-          onModeChange={setLauncher}
+          editingGestures={editingGestures}
+          onModeChange={(mode) => {
+            setEditingGestures(false)
+            setLauncher(mode)
+          }}
+          onCustomizeGestures={() => {
+            closePopovers()
+            setLauncher(null)
+            setEditingGestures(false)
+            setShowMap(false)
+            setSpaceHeld(false)
+            notificationInbox.current?.showGestureSettings()
+            setNotificationsOpen(true)
+          }}
           onClose={closeLauncher}
           onLaunch={launchApp}
         />

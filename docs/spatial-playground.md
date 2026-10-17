@@ -10,7 +10,7 @@ The home viewport starts at 4.5 screen widths and heights into that world. Windo
 
 The minimap translates pointer positions into world coordinates. Grabbing its visible-area rectangle preserves the pointer’s offset within the viewport; pressing elsewhere centers the viewport there. Pointer capture keeps navigation continuous outside the map until release, and the native scroll container clamps travel at the world edges.
 
-Dragging a window’s title bar combines pointer movement with changes in scroll position. This keeps a grabbed window under the pointer while edge scrolling carries it farther across the world. The floating title rail is 44 pixels high, increasing to 50 pixels for coarse pointers. Eight resize handles constrain windows to the world bounds and a minimum size of 280 × 200 pixels.
+Dragging a window’s title bar combines pointer movement with changes in scroll position. This keeps a grabbed window under the pointer while edge scrolling carries it farther across the world. Title and content share one glass frame, with a 44-pixel header increasing to 50 pixels for coarse pointers. The body scrolls in the remaining space. Eight resize handles constrain windows to the world bounds and a minimum size of 280 × 200 pixels.
 
 Maximizing uses the current viewport with clearance for the corner controls, while retaining previous bounds for restore. The shared `windowClearance` uses 24-pixel side margins, 96 pixels above, and 96 below at desktop widths; at 760 pixels or less, these become 12, 84, and 132 pixels. Revealing a maximized window uses the same offsets; ordinary windows are centered with the top and side clearances as minimums. The same minimum window dimensions still apply on small viewports.
 
@@ -28,11 +28,11 @@ Running Arrange closes open panels, clears selection, and returns to Pan mode. T
 
 ## Canvas tools and launcher
 
-The fixed canvas dock at the bottom left contains Pan, Select, Map, and Arrange. Arrange runs immediately; it has no menu. Apps creates preview windows, and the Home key or the map’s Home action returns to the starting viewport.
+The fixed canvas dock at the bottom left contains Pan and Select, followed by a divider and Map and Arrange. Arrange runs immediately; it has no menu, and its tooltip identifies the action and A shortcut. Apps creates preview windows, and the Home key or the map’s Home action returns to the starting viewport.
 
-The navigator is a 198 × 54-pixel row at every width, with four icon-only buttons. Bottom docks sit 24 pixels from the viewport edge on desktop and 14 pixels above the bottom on narrow screens. Map, launcher, and window picker panels sit 90 pixels above the viewport bottom on desktop and 132 pixels above it at widths of 760 pixels or less, keeping the controls reachable.
+The navigator is a 203 × 54-pixel row at every width, with four icon-only buttons. Bottom docks sit 24 pixels from the viewport edge on desktop and 14 pixels above the bottom on narrow screens. Map, launcher, and window picker panels sit 90 pixels above the viewport bottom on desktop and 132 pixels above it at widths of 760 pixels or less, keeping the controls reachable.
 
-The top controls sit 24 pixels from the top and side edges on desktop, or 12 pixels on narrow screens. Activity occupies 164 × 54 pixels, narrowing to 64 × 54 pixels while retaining its labels. The system row occupies 224 × 54 pixels: a 70 × 44-pixel clock button and three 44 × 44-pixel device buttons. The full date and simulated device values appear in hover titles and expanded panels. Top panels open 12 pixels below their triggers. Panel heights are capped and their contents scroll to preserve the bottom controls.
+The top controls sit 24 pixels from the top and side edges on desktop, or 12 pixels on narrow screens. The notification trigger pairs a bell with a single-line unread status; narrow screens use a 64 × 54-pixel bell-and-count button. The system row occupies 224 × 54 pixels: a 70 × 44-pixel clock button and three 44 × 44-pixel device buttons. The full date and simulated device values appear in hover titles and expanded panels. Top panels open 12 pixels below their triggers. Panel heights are capped and their contents scroll to preserve the bottom controls.
 
 A separate dock at the bottom right places preset Browser, Files, and Notes favorites to the left of Apps, followed by other apps with open windows. Running favorites reuse their existing icon button. Each running app shows its window count, and the app containing the active window is marked. Apps opens the launcher, where an Apps/Draw toggle in the command bar selects browsing or the gesture pad.
 
@@ -53,7 +53,7 @@ The app strip scrolls horizontally when crowded. At 760 pixels wide or less, its
 | Home         | Return to the starting viewport.                  |
 | Escape       | Close a panel, or clear selection and choose Pan. |
 
-Single-letter shortcuts, including N, are suspended while the launcher is open or a text input is active. The launcher filters a local catalog by app name and description, supports a four-column app gallery and a single-column list, and presents search results as a list. Arrow keys navigate apps and Enter launches the selection. Up and Down move four entries in the gallery and one entry in list and search views. Fine-pointer devices focus search when the Apps view opens; coarse-pointer devices avoid automatically opening the software keyboard.
+Single-letter shortcuts, including N, are suspended while the launcher is open or a text input is active. The launcher filters a local catalog by app name and description, supports a four-column app gallery and a single-column list, and presents search results as a list. Only search results show a count. Arrow keys navigate apps and Enter launches the selection. Up and Down move four entries in the gallery and one entry in list and search views. Fine-pointer devices focus search when the Apps view opens; coarse-pointer devices avoid automatically opening the software keyboard.
 
 Selecting a running app opens a popover listing its window instances, even when only one exists. Selecting an instance raises and focuses that window, then scrolls it into view using the shared window clearance and clamping at the world edges. The list groups the original scratchpad with Notes and includes Workspace and generic Windows groups so every workspace window remains reachable. Catalog apps offer **New window** to create another instance; a favorite with no windows launches directly. Arrow Down on a running app’s dock button opens the picker and focuses its first window. Escape closes the picker and returns focus to that button.
 
@@ -61,15 +61,19 @@ Launching from a non-running favorite, **New window**, an app result, or the ges
 
 ## Notifications
 
-Notifications open from **Activity** in the top-left corner or with N. An action identifies a target app and asks `App` to reveal its window. The parent first looks for a window with that app ID, including the original scratchpad for Notes. When found, it raises the window and uses the same reveal action as the running-window picker. This navigation uses smooth scrolling unless reduced motion is preferred. If no matching window exists, it creates an app preview near the current viewport.
+Notifications open from the top-left bell or with N. The trigger shows an orange ringing bell and an unread count, such as **3 new**, while items are unread, or a subdued bell and **All clear** otherwise. Narrow screens show only the bell and count, with the full state retained in the tooltip and accessible name. App actions ask `App` to reveal a matching window, including the original scratchpad for Notes. This uses the same raise, focus, and scroll action as the running-window picker, with immediate scrolling when reduced motion is preferred. If no matching window exists, it creates an app preview near the current viewport.
 
 `NotificationInbox` owns three initial sample notifications, unread flags, dismissals, and an optional toast. Opening the inbox does not mark items read. Following an item’s action marks it read; **Mark all read** changes all unread flags, while a row’s dismiss button removes that item. Pointer input outside the inbox closes it. Escape closes the inbox and any active toast.
+
+The gesture pad’s cog asks `App` to close the launcher and open notifications. The `NotificationInbox` ref exposes `showGestureSettings()`, which moves a single **Customize gestures** item to the top, marks it unread, and clears any toast. Its `gestures` target reopens Draw in editing mode through `App`. Repeating the request does not create duplicate items.
 
 **Preview notification** cycles through Notes, Files, and Browser examples, prepends a new unread item, closes the inbox, and shows a toast for six seconds. Toast actions use the same window navigation as inbox actions. Outside pointer input dismisses the toast, and opening another corner panel suppresses it so controls remain visible on narrow screens. Closing or timing out the toast leaves the item in the inbox. All notification content and relative timestamps are simulated, with no external event source.
 
 ## Gesture shortcuts
 
-The Draw view contains a dedicated pad so drawing does not compete with desktop panning or window selection. It starts with example Browser, Terminal, and Notes gestures. Selecting a shortcut chooses the preview target; **Edit shortcuts** allows choosing any catalog app and recording a replacement mark.
+The Draw view contains a dedicated pad so drawing does not compete with desktop panning or window selection. Its default view offers a **Preview app** selector and a manual **Open [app]** action. The saved-shortcut list is absent; saved marks and the example Browser, Terminal, and Notes assignments remain in the storage model.
+
+The pad’s cog opens the notification flow described above. Following **Customize gestures** opens the editor, where **Open this app** selects an assignment target. **Save shortcut** replaces that app’s mark while retaining other assignments and returns to preview mode. **Cancel** clears the unsaved stroke and returns without writing storage.
 
 The pad records a single pointer stroke in a 440 × 190 coordinate space, scaled to the displayed surface. Pointer capture keeps the stroke active outside the pad, with points clamped to its bounds. A saved shortcut contains its app ID and up to 2,048 points. Each app has at most one saved mark.
 

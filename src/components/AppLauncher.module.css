@@ -96,22 +96,11 @@
   color: var(--accent);
 }
 
-.gestureHeading > div {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
 .gestureHeading strong {
   color: var(--chrome-text);
   font-size: 18px;
   font-weight: 500;
   letter-spacing: -0.4px;
-}
-
-.gestureHeading span {
-  color: var(--chrome-muted);
-  font-size: 11px;
 }
 
 .modeSwitch {

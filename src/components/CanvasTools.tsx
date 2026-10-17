@@ -1,4 +1,5 @@
 import { Hand, LassoSelect, LayoutGrid, Map } from 'lucide-react'
+import { useId } from 'react'
 import styles from './CanvasTools.module.css'
 
 interface CanvasToolsProps {
@@ -22,6 +23,7 @@ export default function CanvasTools({
   selectedCount,
   showHint,
 }: CanvasToolsProps) {
+  const arrangeHintId = useId()
   return (
     <div className={styles.container}>
       {showHint && mode === 'lasso' && (
@@ -56,6 +58,7 @@ export default function CanvasTools({
           >
             <LassoSelect size={18} aria-hidden="true" />
           </button>
+          <span className={styles.divider} aria-hidden="true" />
           <button
             type="button"
             className={styles.tool}
@@ -66,16 +69,21 @@ export default function CanvasTools({
           >
             <Map size={18} aria-hidden="true" />
           </button>
-          <button
-            type="button"
-            className={styles.tool}
-            aria-label="Arrange all windows"
-            title="Arrange all windows (A)"
-            onClick={onArrange}
-            disabled={windowCount === 0}
-          >
-            <LayoutGrid size={18} aria-hidden="true" />
-          </button>
+          <div className={styles.organize}>
+            <button
+              type="button"
+              className={styles.tool}
+              aria-label="Arrange all windows"
+              aria-describedby={arrangeHintId}
+              onClick={onArrange}
+              disabled={windowCount === 0}
+            >
+              <LayoutGrid size={18} aria-hidden="true" />
+            </button>
+            <span id={arrangeHintId} className={styles.tooltip} role="tooltip">
+              Arrange windows in a grid <kbd>A</kbd>
+            </span>
+          </div>
         </div>
       </div>
     </div>

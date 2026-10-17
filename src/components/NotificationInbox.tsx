@@ -1,4 +1,10 @@
-import { useEffect, useRef, useState } from 'react'
+import {
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+  type Ref,
+} from 'react'
 import {
   ArrowUpRight,
   Bell,
@@ -7,14 +13,21 @@ import {
   Folder,
   Globe,
   Plus,
+  Settings2,
   StickyNote,
   X,
+  type LucideIcon,
 } from 'lucide-react'
 import styles from './NotificationInbox.module.css'
 
-export type NotificationTarget = 'notes' | 'files' | 'browser'
+export type NotificationTarget = 'notes' | 'files' | 'browser' | 'gestures'
+
+export interface NotificationInboxHandle {
+  showGestureSettings: () => void
+}
 
 interface NotificationInboxProps {
+  ref?: Ref<NotificationInboxHandle>
   open: boolean
   previewVisible: boolean
   onToggle: () => void
@@ -31,10 +44,18 @@ interface Notification {
   unread: boolean
 }
 
-const APPS = {
+const APPS: Record<
+  NotificationTarget,
+  { name: string; Icon: LucideIcon; action?: string }
+> = {
   notes: { name: 'Notes', Icon: StickyNote },
   files: { name: 'Files', Icon: Folder },
   browser: { name: 'Browser', Icon: Globe },
+  gestures: {
+    name: 'Gesture settings',
+    Icon: Settings2,
+    action: 'Customize gestures',
+  },
 }
 
 const INITIAL_NOTIFICATIONS: Notification[] = [
@@ -65,6 +86,7 @@ const INITIAL_NOTIFICATIONS: Notification[] = [
 ]
 
 export default function NotificationInbox({
+  ref,
   open,
   previewVisible,
   onToggle,
@@ -77,6 +99,27 @@ export default function NotificationInbox({
   const trigger = useRef<HTMLButtonElement>(null)
   const previewCount = useRef(0)
   const unreadCount = notifications.filter((item) => item.unread).length
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      showGestureSettings() {
+        setNotifications((current) => [
+          {
+            id: 'gesture-settings',
+            target: 'gestures',
+            title: 'Customize gestures',
+            body: 'Choose an app and record its launch gesture.',
+            time: 'Just now',
+            unread: true,
+          },
+          ...current.filter((item) => item.id !== 'gesture-settings'),
+        ])
+        setToast(null)
+      },
+    }),
+    [],
+  )
 
   useEffect(() => {
     if (open) trigger.current?.focus({ preventScroll: true })
@@ -160,8 +203,8 @@ export default function NotificationInbox({
         ref={trigger}
         type="button"
         className={styles.trigger}
-        title="Notifications (N)"
-        aria-label={`Notifications, ${unreadCount} unread`}
+        title={`Notifications (N) · ${unreadCount ? `${unreadCount} new` : 'All clear'}`}
+        aria-label={`Notifications, ${unreadCount ? `${unreadCount} new` : 'all clear'}`}
         aria-expanded={open}
         aria-controls="notification-inbox"
         data-unread={unreadCount > 0}
@@ -170,18 +213,17 @@ export default function NotificationInbox({
           onToggle()
         }}
       >
-        <span className={styles.signal} aria-hidden="true" />
-        <span className={styles.triggerLabel}>
-          <span>Activity</span>
-          <span className={styles.triggerCaption}>
-            {unreadCount > 99 ? '99+' : unreadCount} unread
-          </span>
+        {unreadCount ? (
+          <BellRing size={18} aria-hidden="true" />
+        ) : (
+          <Bell size={18} aria-hidden="true" />
+        )}
+        <span className={styles.triggerLabel} aria-hidden="true">
+          {unreadCount ? `${unreadCount} new` : 'All clear'}
         </span>
-        <ArrowUpRight
-          className={styles.triggerArrow}
-          size={16}
-          aria-hidden="true"
-        />
+        <span className={styles.compactCount} aria-hidden="true">
+          {unreadCount > 99 ? '99+' : unreadCount}
+        </span>
       </button>
 
       {open && (
@@ -192,7 +234,7 @@ export default function NotificationInbox({
         >
           <header className={styles.heading}>
             <div>
-              <h2 id="notification-heading">Activity</h2>
+              <h2 id="notification-heading">Notifications</h2>
             </div>
             <span className={styles.headingCount}>
               {unreadCount}
@@ -218,7 +260,7 @@ export default function NotificationInbox({
           <div className={styles.list}>
             {notifications.length ? (
               notifications.map((item) => {
-                const { name, Icon } = APPS[item.target]
+                const { name, Icon, action } = APPS[item.target]
                 return (
                   <article
                     key={item.id}
@@ -246,7 +288,7 @@ export default function NotificationInbox({
                         className={styles.openButton}
                         onClick={() => openNotification(item)}
                       >
-                        Open {name}
+                        {action ?? `Open ${name}`}
                         <ArrowUpRight size={13} />
                       </button>
                     </div>
@@ -309,7 +351,8 @@ export default function NotificationInbox({
               className={styles.toastOpen}
               onClick={() => openNotification(toast)}
             >
-              Open {APPS[toast.target].name} <ArrowUpRight size={14} />
+              {APPS[toast.target].action ?? `Open ${APPS[toast.target].name}`}{' '}
+              <ArrowUpRight size={14} />
             </button>
           </div>
         </aside>

@@ -1,6 +1,6 @@
 # Visual language
 
-Hearthspace pairs warm glass with orange accents. The four corners keep distinct roles: activity at top left, device status at top right, navigation at bottom left, and applications at bottom right. The canvas leaves the center available for work.
+Hearthspace pairs warm glass with orange accents. The four corners keep distinct roles: notifications at top left, device status at top right, navigation at bottom left, and applications at bottom right. The canvas leaves the center available for work.
 
 ## Light and layers
 
@@ -8,15 +8,15 @@ The canvas is a flat warm surface with amber-gray dots spaced 28 pixels apart in
 
 Windows and controls share translucent surfaces, bright edges, backdrop blur, and soft shadows. Clear glass holds most controls and documents; smoked glass gives the terminal a darker reading surface. Keep enough surface color behind text for it to remain readable as windows overlap.
 
-Each window has a floating horizontal title rail above its translucent body. A continuous glass backplate supports the title, drag handle, and window controls so content underneath does not compete with them. An active window gains an orange icon and edge light. The body keeps its own content hierarchy and scrolling area.
+Each window joins its title bar and content in one glass frame, with a fine divider and no gap between them. The outer frame carries the border, shadow, and active or selected edge light. The header retains its drag handle and controls while the body keeps its own content hierarchy and scrolling area.
 
 ## Compact corners
 
-The corner controls share a 54-pixel resting height, keeping more canvas available before a panel opens. Activity uses a compact glass ribbon with an orange signal and unread text; it narrows to 64 pixels on small screens. It opens into a stream with a fine orange guide, app icons, and quiet timestamps. The 24-hour clock and three icon buttons for network, sound, and power share one glass row. The full date and device details live in tooltips and expanded panels.
+The corner controls share a 54-pixel resting height, keeping more canvas available before a panel opens. Notifications use a bell and single-line status: an orange unread count or subdued **All clear**, without a trailing arrow. Small screens retain the bell and count in a 64-pixel-wide button. The inbox opens into a stream with a fine orange guide, app icons, and quiet timestamps. The 24-hour clock and three icon buttons for network, sound, and power share one glass row. The full date and device details live in tooltips and expanded panels.
 
-The navigator is a single row of Pan, Select, Map, and Arrange icons at every width. Its map opens above the controls and supports continuous dragging. Each icon has a hover title, an accessible name, and a target at least 44 pixels wide and high.
+The navigator is a single row at every width, with a divider separating Pan/Select modes from Map/Arrange actions. Its map opens above the controls and supports continuous dragging. Each icon has a tooltip, an accessible name, and a target at least 44 pixels wide and high. Arrange’s tooltip also appears on keyboard focus and includes its A shortcut.
 
-The application gallery opens with search and an Apps/Draw toggle in one command bar. Grid view has four columns; list and search views have one. Icon-only dock buttons beside Apps show favorites and running apps, with counts and active markers. Names appear on hover and remain available to assistive technology; the gallery and window picker retain visible text. The picker identifies instances by title, number, and focus state. The drawing pad remains inside the launcher.
+The application gallery opens with search and an Apps/Draw toggle in one command bar. Grid view has four columns; list and search views have one. The default gallery omits its total app count; searches show result counts. Icon-only dock buttons beside Apps keep running-window counts and active markers. Names appear on hover and remain available to assistive technology; the gallery and window picker retain visible text. The drawing pad remains inside the launcher, with its cog leading through notifications to gesture customization.
 
 Expanded panels provide detail while the resting controls keep a small footprint. Keyboard shortcuts and direct touch targets remain available without hover.
 
@@ -37,7 +37,7 @@ Use the shared radius scale consistently across windows and controls:
 | `--radius-detail`  | 4px    | Small badges and details.                   |
 | `--radius-control` | 8px    | Buttons and other compact controls.         |
 | `--radius-tile`    | 12px   | App tiles and compact glass modules.        |
-| `--radius-panel`   | 16px   | Window bodies, title rails, and panels.     |
+| `--radius-panel`   | 16px   | Joined window frames and panels.            |
 | `--radius-round`   | 999px  | Circular targets and fully rounded markers. |
 
 Keep the four corners reachable when windows are maximized or panels open. On narrow screens, dock app icons move into a horizontally scrolling row above Apps. Panels reserve space for those controls and scroll internally when height is limited. Content windows retain their spatial dimensions and remain reachable through the map and window picker. The exact offsets and maximized-window clearances are recorded in [Spatial playground](spatial-playground.md).

@@ -17,6 +17,8 @@ interface AppLauncherProps {
   onModeChange: (mode: 'apps' | 'gestures') => void
   onClose: () => void
   onLaunch: (app: LauncherApp) => void
+  onCustomizeGestures: () => void
+  editingGestures?: boolean
 }
 
 export default function AppLauncher({
@@ -24,6 +26,8 @@ export default function AppLauncher({
   onModeChange,
   onClose,
   onLaunch,
+  onCustomizeGestures,
+  editingGestures = false,
 }: AppLauncherProps) {
   const [query, setQuery] = useState('')
   const [view, setView] = useState<'grid' | 'list'>('grid')
@@ -47,6 +51,7 @@ export default function AppLauncher({
   }, [mode])
 
   function handleNavigation(event: KeyboardEvent<HTMLDivElement>) {
+    if (mode !== 'apps') return
     const focusedId =
       event.target instanceof HTMLButtonElement
         ? event.target.dataset.appId
@@ -128,10 +133,7 @@ export default function AppLauncher({
         ) : (
           <div className={styles.gestureHeading}>
             <PenLine size={23} strokeWidth={1.6} />
-            <div>
-              <strong>Draw to open</strong>
-              <span>A shortcut in one stroke</span>
-            </div>
+            <strong>Draw to open</strong>
           </div>
         )}
         <div className={styles.modeSwitch} aria-label="Launcher views">
@@ -166,11 +168,7 @@ export default function AppLauncher({
           <div className={styles.collectionHeading}>
             <div>
               <h2>{normalizedQuery ? 'Search results' : 'Applications'}</h2>
-              <span>
-                {normalizedQuery
-                  ? `${apps.length} found`
-                  : `${APP_CATALOG.length} ready to open`}
-              </span>
+              {normalizedQuery && <span>{apps.length} found</span>}
             </div>
             {!normalizedQuery && (
               <div className={styles.viewToggle} aria-label="App layout">
@@ -247,7 +245,11 @@ export default function AppLauncher({
         </div>
       ) : (
         <div className={styles.gesturePanel}>
-          <GesturePad onLaunch={onLaunch} />
+          <GesturePad
+            onLaunch={onLaunch}
+            onCustomizeGestures={onCustomizeGestures}
+            initialEditing={editingGestures}
+          />
         </div>
       )}
     </section>

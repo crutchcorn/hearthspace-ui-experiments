@@ -20,20 +20,23 @@
 }
 
 .trigger {
-  position: relative;
   display: flex;
   min-height: 54px;
-  min-width: 164px;
+  min-width: 124px;
   align-items: center;
-  gap: 10px;
-  padding: 8px 12px;
+  justify-content: center;
+  gap: 9px;
+  padding: 8px 14px;
   border: 1px solid var(--chrome-border);
   border-radius: var(--radius-tile);
   background: linear-gradient(135deg, #ffffff80, #fff9ed15), var(--chrome);
   box-shadow: var(--shadow-panel), var(--glass-edge);
   backdrop-filter: var(--glass-blur);
-  color: var(--chrome-text);
-  text-align: left;
+  color: var(--chrome-muted);
+  font-size: 13px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 .trigger:hover,
@@ -41,43 +44,19 @@
   background: var(--chrome-raised);
 }
 
-.signal {
-  flex-shrink: 0;
-  width: 8px;
-  height: 8px;
-  border: 1px solid #ffffffb3;
-  border-radius: var(--radius-round);
-  background: #b5a49a;
-  box-shadow: 0 0 0 5px #c9b9ad1a;
+.trigger[data-unread='true'] {
+  border-color: #f4b583;
+  background: linear-gradient(135deg, #fff5eae6, #f9dfcdad);
+  color: var(--accent);
 }
 
-.trigger[data-unread='true'] .signal {
-  background: linear-gradient(135deg, #ffbe8a, var(--accent));
-  box-shadow:
-    0 0 0 5px #ef8c5520,
-    0 0 15px #e9642a60;
+.trigger[data-unread='true']:hover,
+.trigger[data-unread='true'][aria-expanded='true'] {
+  background: var(--accent-soft);
 }
 
-.triggerLabel {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.triggerLabel > span:first-child {
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.triggerCaption {
-  color: var(--chrome-muted);
-  font-size: 11px;
-  font-variant-numeric: tabular-nums;
-}
-
-.triggerArrow {
-  margin-left: auto;
-  color: var(--chrome-muted);
+.compactCount {
+  display: none;
 }
 
 .panel,
@@ -495,30 +474,24 @@
   }
 
   .trigger {
+    width: 64px;
     min-width: 64px;
-    justify-content: center;
+    gap: 6px;
     padding: 8px 6px;
-    text-align: center;
   }
 
-  .signal {
-    display: none;
+  .trigger > svg {
+    width: 16px;
+    height: 16px;
   }
 
   .triggerLabel {
-    gap: 4px;
-  }
-
-  .triggerLabel > span:first-child {
-    font-size: 11px;
-  }
-
-  .triggerCaption {
-    font-size: 10px;
-  }
-
-  .triggerArrow {
     display: none;
+  }
+
+  .compactCount {
+    display: inline;
+    font-size: 12px;
   }
 
   .panel,
