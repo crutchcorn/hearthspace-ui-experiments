@@ -3,9 +3,12 @@ export type PreviewSnapshot = Map<
   { x: number; y: number; width: number; height: number; opacity: number }
 >
 
-const duration = 320
-const easing = 'cubic-bezier(0.2, 0.7, 0.1, 1)'
-const identity = 'translate(0px, 0px) scale(1, 1)'
+const duration = 360
+const easing = 'cubic-bezier(0.22, 0.61, 0.36, 1)'
+const edgeClearance = 48
+
+type Rectangle = { x: number; y: number; width: number; height: number }
+type Viewport = { width: number; height: number }
 
 function hasBounds(bounds: DOMRect) {
   return (
@@ -13,6 +16,48 @@ function hasBounds(bounds: DOMRect) {
     bounds.width > 0 &&
     bounds.height > 0
   )
+}
+
+function isVisible(bounds: Rectangle, viewport: Viewport) {
+  return (
+    bounds.x < viewport.width &&
+    bounds.x + bounds.width > 0 &&
+    bounds.y < viewport.height &&
+    bounds.y + bounds.height > 0
+  )
+}
+
+function visibleTravel(start: Rectangle, end: Rectangle, viewport: Viewport) {
+  let enter = 0
+  let exit = 1
+  const distances = (bounds: Rectangle) => [
+    bounds.x + bounds.width + edgeClearance,
+    viewport.width + edgeClearance - bounds.x,
+    bounds.y + bounds.height + edgeClearance,
+    viewport.height + edgeClearance - bounds.y,
+  ]
+  const startDistances = distances(start)
+  const endDistances = distances(end)
+  for (let index = 0; index < startDistances.length; index++) {
+    const distance = startDistances[index]
+    const change = endDistances[index] - distance
+    if (change === 0) {
+      if (distance < 0) return null
+    } else if (change > 0) enter = Math.max(enter, -distance / change)
+    else exit = Math.min(exit, -distance / change)
+    if (enter > exit) return null
+  }
+  const at = (progress: number): Rectangle => ({
+    x: start.x + (end.x - start.x) * progress,
+    y: start.y + (end.y - start.y) * progress,
+    width: start.width + (end.width - start.width) * progress,
+    height: start.height + (end.height - start.height) * progress,
+  })
+  return { start: at(enter), end: at(exit) }
+}
+
+function compensate(bounds: Rectangle, target: Rectangle) {
+  return `translate(${bounds.x - target.x}px, ${bounds.y - target.y}px) scale(${bounds.width / target.width}, ${bounds.height / target.height})`
 }
 
 export function captureWindowPreview(
@@ -39,7 +84,14 @@ export function animateWindowReveal(
   elements: Map<string, HTMLElement>,
   snapshot: PreviewSnapshot,
   selectedId: string,
+  viewport: Viewport,
 ): Animation[] {
+  if (
+    ![viewport.width, viewport.height].every(Number.isFinite) ||
+    viewport.width <= 0 ||
+    viewport.height <= 0
+  )
+    return []
   // Read every final rectangle before animation writes can affect layout.
   const targets = [...elements].flatMap(([id, element]) => {
     const previous = snapshot.get(id)
@@ -55,40 +107,28 @@ export function animateWindowReveal(
     return hasBounds(bounds) ? [{ id, element, previous, bounds }] : []
   })
 
-  return targets.map(({ id, element, previous, bounds }) => {
-    const transform = `translate(${previous.x - bounds.x}px, ${previous.y - bounds.y}px) scale(${previous.width / bounds.width}, ${previous.height / bounds.height})`
-    const origin = { transformOrigin: '0 0' }
-    if (id === selectedId)
-      return element.animate(
+  return targets.flatMap(({ id, element, previous, bounds }) => {
+    const targetVisible = isVisible(bounds, viewport)
+    if (id !== selectedId && previous.opacity === 0 && !targetVisible) return []
+    // Discard distant, invisible travel without changing the path through view.
+    const travel = visibleTravel(previous, bounds, viewport)
+    if (!travel) return []
+    return [
+      element.animate(
         [
-          { ...origin, transform, opacity: previous.opacity },
-          { ...origin, transform: identity, opacity: 1 },
+          {
+            transformOrigin: '0 0',
+            transform: compensate(travel.start, bounds),
+            opacity: previous.opacity,
+          },
+          {
+            transformOrigin: '0 0',
+            transform: compensate(travel.end, bounds),
+            opacity: id === selectedId || targetVisible ? 1 : previous.opacity,
+          },
         ],
         { duration, easing, fill: 'both' },
-      )
-
-    // Other previews disappear in place, then reappear at their actual bounds.
-    const fadeOut = 100 / duration
-    return element.animate(
-      [
-        {
-          ...origin,
-          transform,
-          opacity: previous.opacity,
-          offset: 0,
-          easing,
-        },
-        { ...origin, transform, opacity: 0, offset: fadeOut },
-        {
-          ...origin,
-          transform: identity,
-          opacity: 0,
-          offset: fadeOut,
-          easing,
-        },
-        { ...origin, transform: identity, opacity: 1, offset: 1 },
-      ],
-      { duration, fill: 'both' },
-    )
+      ),
+    ]
   })
 }

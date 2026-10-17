@@ -174,7 +174,7 @@ function App() {
     top: number
     preview?: PreviewSnapshot
   } | null>(null)
-  const [previewExiting, setPreviewExiting] = useState(false)
+  const previewExiting = !!revealRequest?.preview
   const launcherTrigger = useRef<HTMLButtonElement>(null)
   const notificationInbox = useRef<NotificationInboxHandle>(null)
   const windowElements = useRef(new Map<string, HTMLElement>())
@@ -207,7 +207,6 @@ function App() {
       setShowMap(false)
       setLauncher(null)
       setRevealRequest(null)
-      setPreviewExiting(false)
       const canvas = viewport.current
       if (canvas)
         setSwitcherOrigin({ x: canvas.scrollLeft, y: canvas.scrollTop })
@@ -256,6 +255,7 @@ function App() {
 
   const leaveFocusView = useCallback(() => {
     if (!focusView) return
+    setRevealRequest(null)
     setWorkspace((current) => ({
       ...current,
       windows: current.windows.map((item) =>
@@ -291,7 +291,6 @@ function App() {
       setSelectedItemIds([])
       setTool('search')
       setRevealRequest(null)
-      setPreviewExiting(false)
       const pointerId = gesture.current?.pointerId
       gesture.current = null
       if (
@@ -315,6 +314,7 @@ function App() {
   )
 
   const arrangeAllWindows = useCallback(() => {
+    setRevealRequest(null)
     const canvas = viewport.current
     if (!canvas) return
     leaveFocusView()
@@ -361,20 +361,21 @@ function App() {
       top: revealRequest.top,
       behavior: revealRequest.preview || reducedMotion ? 'instant' : 'smooth',
     })
-    if (!revealRequest.preview || reducedMotion) return
-    const animations = animateWindowReveal(
-      windowElements.current,
-      revealRequest.preview,
-      revealRequest.id,
-      { width: view.width, height: view.height },
-    )
+    if (!revealRequest.preview) return
+    const animations = reducedMotion
+      ? []
+      : animateWindowReveal(
+          windowElements.current,
+          revealRequest.preview,
+          revealRequest.id,
+          { width: view.width, height: view.height },
+        )
     let canceled = false
     void Promise.allSettled(
       animations.map((animation) => animation.finished),
     ).then(() => {
       if (!canceled) {
         animations.forEach((animation) => animation.cancel())
-        setPreviewExiting(false)
         setRevealRequest(null)
       }
     })
@@ -920,6 +921,7 @@ function App() {
   }
 
   function maximize(item: DesktopWindow) {
+    setRevealRequest(null)
     if (focusView?.id === item.id) {
       leaveFocusView()
       return
@@ -1008,6 +1010,7 @@ function App() {
   }
 
   function closeWindow(id: string) {
+    setRevealRequest(null)
     if (focusView?.id === id) setFocusView(null)
     setWorkspace((current) => ({
       ...current,
@@ -1074,6 +1077,7 @@ function App() {
   }
 
   function launchApp(app: LauncherApp) {
+    setRevealRequest(null)
     addWindow(app)
     closeLauncher()
     closePopovers()
@@ -1091,7 +1095,6 @@ function App() {
       !window.matchMedia('(prefers-reduced-motion: reduce)').matches
         ? captureWindowPreview(windowElements.current)
         : undefined
-    setPreviewExiting(!!preview)
     const top = options?.center
       ? (view.height - item.height) / 2
       : item.restore
