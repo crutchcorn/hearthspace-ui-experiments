@@ -91,40 +91,22 @@
   color: var(--accent);
 }
 
-.count {
-  position: absolute;
-  top: 2px;
-  right: 2px;
-  display: grid;
-  min-width: 13px;
-  height: 13px;
-  padding-inline: 2px;
-  place-items: center;
-  border-radius: var(--radius-detail);
-  background: #8c6b5520;
-  color: var(--chrome-muted);
-  font-family: var(--mono);
-  font-size: 8px;
-  line-height: 1;
-}
-
-.runningMark {
+.runningDots {
   position: absolute;
   bottom: 4px;
+  display: flex;
+  gap: 3px;
+}
+
+.runningDots > span {
   width: 3px;
   height: 3px;
   border-radius: var(--radius-round);
   background: var(--chrome-muted);
 }
 
-.appButton[data-active='true'] .runningMark {
-  width: 12px;
+.appButton[data-active='true'] .runningDots > span {
   background: var(--accent);
-}
-
-.appButton[data-active='true'] .count {
-  background: var(--accent-soft);
-  color: var(--accent);
 }
 
 .launcher {
@@ -175,23 +157,11 @@
 
 .popoverHeading {
   display: flex;
-  min-height: 94px;
-  align-items: flex-start;
+  min-height: 64px;
+  align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 18px 14px 16px 20px;
-}
-
-.popoverHeading > div {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.popoverHeading p {
-  margin: 0 0 2px;
-  color: var(--chrome-muted);
-  font-size: 10px;
+  padding: 10px 14px 8px 20px;
 }
 
 .popoverHeading h2 {
@@ -200,11 +170,6 @@
   font-weight: 500;
   letter-spacing: -0.7px;
   line-height: 1;
-}
-
-.popoverHeading > div > span {
-  color: var(--chrome-muted);
-  font-size: 10px;
 }
 
 .closeButton {
@@ -232,14 +197,36 @@
   padding: 0 12px 12px;
 }
 
-.windowButton {
+.windowRow {
   position: relative;
   display: flex;
   min-height: 76px;
+  align-items: stretch;
+  padding-right: 6px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-control);
+  background: transparent;
+}
+
+.windowRow:hover,
+.windowRow[data-active='true'] {
+  border-color: #ffffffa6;
+  background: #fffaf06b;
+}
+
+.windowRow[data-dragging='true'] {
+  border-color: var(--accent-border);
+  background: var(--accent-soft);
+}
+
+.windowButton {
+  display: flex;
+  min-width: 0;
+  flex: 1;
   align-items: center;
   gap: 14px;
   padding: 10px;
-  border: 1px solid transparent;
+  border: 0;
   border-radius: var(--radius-control);
   background: transparent;
   color: var(--chrome-text);
@@ -247,10 +234,34 @@
   touch-action: manipulation;
 }
 
-.windowButton:hover,
-.windowButton[data-active='true'] {
-  border-color: #ffffffa6;
-  background: #fffaf06b;
+.reorderHandle {
+  display: grid;
+  width: 44px;
+  min-height: 44px;
+  flex-shrink: 0;
+  align-self: center;
+  padding: 0;
+  place-items: center;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--chrome-muted);
+  cursor: grab;
+  touch-action: none;
+}
+
+.reorderHandle:hover:not(:disabled) {
+  background: var(--chrome-hover);
+  color: var(--chrome-text);
+}
+
+.reorderHandle:active {
+  cursor: grabbing;
+}
+
+.reorderHandle:disabled {
+  cursor: default;
+  opacity: 0.35;
 }
 
 .windowPreview {
@@ -271,7 +282,7 @@
   background: #a78d7a26;
 }
 
-.windowButton[data-active='true'] .windowPreview > span {
+.windowRow[data-active='true'] .windowPreview > span {
   background: color-mix(in srgb, var(--accent) 50%, transparent);
 }
 
@@ -280,7 +291,6 @@
   min-width: 0;
   flex: 1;
   flex-direction: column;
-  gap: 7px;
 }
 
 .windowCopy strong {
@@ -290,11 +300,6 @@
   letter-spacing: -0.2px;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.windowCopy > span {
-  color: var(--chrome-muted);
-  font-size: 10px;
 }
 
 .popoverFooter {

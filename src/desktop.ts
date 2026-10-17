@@ -4,6 +4,7 @@ export type DesktopWindow = Bounds & {
   title: string
   kind: 'welcome' | 'notes' | 'empty'
   appId?: string
+  dockOrder?: number
   restore?: Bounds
 }
 export type Workspace = {
@@ -126,6 +127,12 @@ export function loadWorkspace(): Workspace {
           title:
             demoTitle?.previous === item.title ? demoTitle.current : item.title,
           appId: legacyFiles ? 'files' : item.appId,
+          dockOrder:
+            typeof item.dockOrder === 'number' &&
+            Number.isFinite(item.dockOrder) &&
+            item.dockOrder >= 0
+              ? item.dockOrder
+              : undefined,
           width,
           height,
           x: clamp(bounds.x, 0, value.width - width),

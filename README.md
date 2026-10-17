@@ -40,7 +40,7 @@ Canvas tools and dock apps use compact icon buttons. Hover to see their names an
 
 Choose **Apps** or press Ctrl/⌘ K to browse the four-column app gallery, switch to a list, or search app names and descriptions. Search results use the list view. Use arrow keys to move through results and Enter to open the selected app. Escape closes the launcher.
 
-**Browser**, **Files**, and **Notes** are preset favorites beside Apps. Other apps appear there while their windows are open. Running apps show a window count, and the active app is marked. Choose a running app to see its windows, then choose a window to bring it into view. **New window** adds another preview for that app. A favorite with no open windows launches directly. Favorites are fixed for this experiment.
+**Browser**, **Files**, and **Notes** are preset favorites beside Apps. Other apps appear there while their windows are open. Running apps show one dot per window, up to three dots, and the active app is marked. Hover for the exact count. Choose a running app to see its windows, then choose a window to bring it into view. **New window** adds another preview for that app. Drag a row’s right-hand handle to reorder the window list, or focus the handle and press Up or Down. The order stays saved without moving or restacking the canvas windows. A favorite with no open windows launches directly. Favorites are fixed for this experiment.
 
 Inside the launcher, switch from **Apps** to **Draw**, or press G from the canvas to open the dedicated gesture pad. Draw a stroke with touch, a stylus, or a pointer, then release to launch a Browser preview. Any completed stroke launches Browser for this experiment; gesture recognition is not implemented. A tap without drawing does not launch anything.
 

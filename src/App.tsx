@@ -791,6 +791,16 @@ function App() {
             setSpaceHeld(false)
           }}
           onFocusWindow={revealWindow}
+          onReorderWindows={(orderedIds) => {
+            const order = new Map(orderedIds.map((id, index) => [id, index]))
+            setWorkspace((current) => ({
+              ...current,
+              windows: current.windows.map((item) => {
+                const dockOrder = order.get(item.id)
+                return dockOrder === undefined ? item : { ...item, dockOrder }
+              }),
+            }))
+          }}
         />
       </div>
       {launcher && (
