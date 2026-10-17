@@ -8,7 +8,7 @@ import {
 import type { DesktopWindow, Workspace } from '../desktop'
 import type { AccentThemeId, AppPresentation } from '../theme'
 import type { BackgroundFit, BackgroundPhoto } from '../useBackground'
-import AppearanceSettings from './AppearanceSettings'
+import Settings from './Settings'
 import AppIcon from './AppIcon'
 import { APP_CATALOG } from './launcher-apps'
 import styles from './WindowContent.module.css'
@@ -202,7 +202,7 @@ export default function WindowContent({
 
   if (item.appId === 'settings') {
     return (
-      <AppearanceSettings
+      <Settings
         accentTheme={accentTheme}
         onAccentThemeChange={onAccentThemeChange}
         appPresentation={appPresentation}

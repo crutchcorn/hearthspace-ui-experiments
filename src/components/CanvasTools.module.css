@@ -121,18 +121,12 @@
   box-shadow: var(--shadow-panel);
   color: var(--chrome-text);
   font-size: 11px;
-  visibility: hidden;
   pointer-events: none;
 }
 
 .tooltip kbd {
   color: var(--chrome-muted);
   font: 10px var(--mono);
-}
-
-.organize:hover .tooltip,
-.organize:focus-within .tooltip {
-  visibility: visible;
 }
 
 .tool {

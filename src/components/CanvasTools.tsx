@@ -45,6 +45,7 @@ const selectionTools = [
 ] as const
 
 type ToolMenu = 'primary' | 'selection'
+type ToolHint = ToolMenu | 'map' | 'arrange'
 
 export default function CanvasTools({
   mode,
@@ -58,7 +59,7 @@ export default function CanvasTools({
   windowCount,
   menusAllowed,
 }: CanvasToolsProps) {
-  const arrangeHintId = useId()
+  const hintId = useId()
   const toolMenuId = useId()
   const selectionMenuId = useId()
   const pickerRef = useRef<HTMLDivElement>(null)
@@ -69,6 +70,8 @@ export default function CanvasTools({
   const selectionMenuRef = useRef<HTMLDivElement>(null)
   const [openToolMenu, setOpenToolMenu] = useState<ToolMenu | null>(null)
   const [primaryMode, setPrimaryMode] = useState<'pan' | 'cursor'>('cursor')
+  const [visibleHint, setVisibleHint] = useState<ToolHint | null>(null)
+  const hintTimeout = useRef<number | undefined>(undefined)
 
   if (mode !== 'select' && mode !== primaryMode) setPrimaryMode(mode)
   if (!menusAllowed && openToolMenu) setOpenToolMenu(null)
@@ -80,6 +83,15 @@ export default function CanvasTools({
     (tool) => tool.shape === selectionShape,
   )!
   const SelectionIcon = selectionTool.Icon
+  const hints = {
+    primary: { label: primaryTool.label, shortcut: primaryTool.shortcut },
+    selection: { label: selectionTool.label, shortcut: selectionTool.shortcut },
+    map: { label: 'Toggle canvas map', shortcut: 'M' },
+    arrange: { label: 'Arrange windows in a grid', shortcut: 'A' },
+  }
+  const hint = !visibleMenu && visibleHint ? hints[visibleHint] : null
+
+  useEffect(() => () => window.clearTimeout(hintTimeout.current), [])
 
   useEffect(() => {
     if (!visibleMenu) return
@@ -119,20 +131,45 @@ export default function CanvasTools({
   }, [visibleMenu, primaryMode, selectionShape])
 
   function openMenu(menu: ToolMenu) {
+    hideHint()
     onOpenToolMenu()
     setOpenToolMenu(menu)
   }
 
   function selectTool(nextMode: 'pan' | 'cursor') {
+    hideHint()
     onModeChange(nextMode)
     setOpenToolMenu(null)
     triggerRef.current?.focus({ preventScroll: true })
   }
 
   function selectShape(shape: WindowSelectionShape) {
+    hideHint()
     onSelectionShapeChange(shape)
     setOpenToolMenu(null)
     selectionTriggerRef.current?.focus({ preventScroll: true })
+  }
+
+  function hideHint() {
+    window.clearTimeout(hintTimeout.current)
+    setVisibleHint(null)
+  }
+
+  function showHint(nextHint: ToolHint) {
+    if (visibleMenu) return
+    window.clearTimeout(hintTimeout.current)
+    setVisibleHint(nextHint)
+    hintTimeout.current = window.setTimeout(() => setVisibleHint(null), 2500)
+  }
+
+  function hintProps(toolHint: ToolHint) {
+    return {
+      'aria-describedby': hint && visibleHint === toolHint ? hintId : undefined,
+      onPointerEnter: () => showHint(toolHint),
+      onPointerLeave: hideHint,
+      onFocus: () => showHint(toolHint),
+      onBlur: hideHint,
+    }
   }
 
   function navigateMenu(event: KeyboardEvent<HTMLDivElement>, menu: ToolMenu) {
@@ -204,8 +241,13 @@ export default function CanvasTools({
               aria-haspopup="menu"
               aria-expanded={visibleMenu === 'primary'}
               aria-controls={visibleMenu === 'primary' ? toolMenuId : undefined}
-              title={`${primaryTool.label} (${primaryTool.shortcut}) · Choose tool`}
+              {...hintProps('primary')}
               onClick={() => {
+                hideHint()
+                if (mode === 'select') {
+                  selectTool(primaryMode)
+                  return
+                }
                 if (visibleMenu === 'primary') setOpenToolMenu(null)
                 else openMenu('primary')
               }}
@@ -279,8 +321,13 @@ export default function CanvasTools({
               aria-controls={
                 visibleMenu === 'selection' ? selectionMenuId : undefined
               }
-              title={`${selectionTool.label} (${selectionTool.shortcut}) · Choose tool`}
+              {...hintProps('selection')}
               onClick={() => {
+                hideHint()
+                if (mode !== 'select') {
+                  selectShape(selectionShape)
+                  return
+                }
                 if (visibleMenu === 'selection') setOpenToolMenu(null)
                 else openMenu('selection')
               }}
@@ -339,18 +386,24 @@ export default function CanvasTools({
             className={styles.tool}
             aria-pressed={mapOpen}
             aria-label="Toggle canvas map"
-            title="Toggle canvas map (M)"
-            onClick={onToggleMap}
+            {...hintProps('map')}
+            onClick={() => {
+              hideHint()
+              onToggleMap()
+            }}
           >
             <Map size={18} aria-hidden="true" />
           </button>
-          <div className={styles.organize}>
+          <div>
             <button
               type="button"
               className={styles.tool}
               aria-label="Arrange all windows"
-              aria-describedby={arrangeHintId}
-              onClick={onArrange}
+              {...hintProps('arrange')}
+              onClick={() => {
+                hideHint()
+                onArrange()
+              }}
               disabled={windowCount === 0}
             >
               <svg
@@ -370,12 +423,14 @@ export default function CanvasTools({
                 <rect x={15} y={14} width={7} height={7} rx={1.5} />
               </svg>
             </button>
-            <span id={arrangeHintId} className={styles.tooltip} role="tooltip">
-              Arrange windows in a grid <kbd>A</kbd>
-            </span>
           </div>
         </div>
       </div>
+      {hint && (
+        <span id={hintId} className={styles.tooltip} role="tooltip">
+          {hint.label} <kbd>{hint.shortcut}</kbd>
+        </span>
+      )}
     </div>
   )
 }

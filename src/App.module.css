@@ -295,8 +295,8 @@
   pointer-events: auto;
 }
 
-.selecting,
-.selecting * {
+.selecting:not(.dragging),
+.selecting:not(.dragging) :not([data-grouped='true'], [data-grouped='true'] *) {
   cursor: crosshair !important;
 }
 
@@ -604,38 +604,6 @@
   font-size: 24px;
   font-weight: 450;
   letter-spacing: -0.7px;
-}
-
-.panelHeading > span {
-  color: var(--chrome-muted);
-  font-size: 11px;
-}
-
-.mapFooter {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 14px;
-  margin-top: 8px;
-  color: var(--chrome-muted);
-  font-size: 11px;
-}
-
-.mapFooter button {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  min-height: 44px;
-  padding: 0 8px;
-  border: 1px solid var(--chrome-border);
-  border-radius: var(--radius-control);
-  background: var(--chrome-raised);
-  color: var(--chrome-text);
-  font: inherit;
-}
-
-.mapFooter button:hover {
-  background: var(--chrome-hover);
 }
 
 @keyframes panel-in {

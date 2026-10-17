@@ -17,14 +17,14 @@ Open the local address printed in the terminal. The app fills the browser viewpo
 
 ## Explore your space
 
-- **Pan:** use the hand/cursor dropdown to choose **Pan canvas**, or press H, then drag the background or an item to move around. Scrolling with a trackpad, middle-button dragging, and holding Space while dragging also pan without changing the selected tool.
+- **Pan:** choose **Pan canvas** from the hand/cursor tool, or press H, then drag the background or an item to move around. If that tool is inactive, the first press selects it and a second press opens its choices. Scrolling with a trackpad, middle-button dragging, and holding Space while dragging also pan without changing the selected tool.
 - **Select desktop items:** the cursor is selected by default. To return to it, expand the hand/cursor tool and choose **Select desktop items**, or press V. Drag the background to select icons and folders in a rectangle. Click an item to select it; Shift, Ctrl, or ⌘ adds to or toggles the selection. Drag a selected item to move the group. Double-click an item or press Enter while it is focused to open a simulated app preview. Desktop items stay underneath every window, and their positions are saved.
-- **Select windows:** expand the second canvas tool to choose **Rectangle select** (R) or **Freeform lasso** (L). Drag a rectangle or draw a loop around windows; the lasso joins its end to its start. Intersecting windows are highlighted. Rectangle is the default, and your chosen shape is remembered. Moving a selected window group is not implemented yet. Escape clears selection without changing tools.
+- **Select windows:** choose the second canvas tool to activate your remembered selection shape; press it again to choose **Rectangle select** (R) or **Freeform lasso** (L). Drag a rectangle or draw a loop around windows; the lasso joins its end to its start. Intersecting windows are highlighted. Rectangle is the default, and your chosen shape is remembered. With more than one window selected, drag any selected window’s title bar to move the group. Start outside the group to draw a new selection. Escape clears selection without changing tools.
 - **Move:** drag a window’s title bar. Hold it near a screen edge to keep traveling across the canvas.
 - **Resize:** drag any of a window’s four edges or four corners.
 - **Manage windows:** use the title-bar controls to maximize, restore, or close a window. Open **Apps** to add an app preview window.
 - **Arrange:** choose the grid icon (**Arrange**) or press A to gather every open window into a grid near your current view, including windows outside the view or selection. Windows keep their sizes; maximized windows return to their previous size. Desktop items stay where they are. The arrangement is saved with your workspace.
-- **Find your way:** choose the map icon (**Map**) or press M, then drag the map’s visible-area rectangle to pan continuously, or press elsewhere on the map and keep dragging to explore. Use the Home key or the map’s **Home** action to return to the starting area.
+- **Find your way:** choose the map icon (**Map**) or press M, then drag the map’s visible-area rectangle to pan continuously, or press elsewhere on the map and keep dragging to explore. Use the Home key to return to the starting area.
 
 Controls stay in the four corners, leaving the top edge and middle of the canvas open:
 
@@ -35,7 +35,7 @@ Controls stay in the four corners, leaving the top edge and middle of the canvas
 | Bottom left  | Canvas tools: Pan/Select items, window selection, Map, and Arrange. |
 | Bottom right | Favorite and running apps, plus the Apps launcher.                  |
 
-Canvas tools and dock apps use compact icon buttons. Top-right expansion indicators on the first two tools open background-tool and window-selection menus. Hover to see control names and available shortcuts; buttons also retain accessible names and 44-pixel touch targets. The clock and three device icons share one row. Favorite and running apps share one continuous bar with Apps. On narrow screens, that whole bar moves above the canvas tools and stays aligned to the right. Scroll the app row horizontally when it fills up. Escape closes open panels; on the canvas, it clears the current selection. Your chosen tool stays active through these actions, arranging windows, and opening apps, and is remembered after reload.
+Canvas tools and dock apps use compact icon buttons. Top-right expansion indicators mark the first two tools: press an inactive tool to select it, then press it again to open its choices. Hover to briefly see control names and available shortcuts; buttons also retain accessible names and 44-pixel touch targets. The clock and three device icons share one row. Favorite and running apps share one continuous bar with Apps. On narrow screens, that whole bar moves above the canvas tools and stays aligned to the right. Scroll the app row horizontally when it fills up. Escape closes open panels; on the canvas, it clears the current selection. Your chosen tool stays active through these actions, arranging windows, and opening apps, and is remembered after reload.
 
 ## Try the launcher
 
@@ -51,13 +51,15 @@ Drawing in editing mode records the stroke without launching an app. Launching f
 
 ## Change the appearance
 
-Open **Settings** from Apps to choose a photo background under **Appearance**. **Repeat with canvas** tiles the photo at its original size and moves it with the canvas. **Stretch** fills the screen, **Contain** shows the whole photo with the desktop color around it, and **Cover** fills the screen while preserving proportions and cropping the edges. These three modes keep the photo still while you pan. Cover is the initial fit. **Use default background** removes the photo and restores the accent-colored dots. The photo stays in this browser and is remembered with its fit; if browser storage is unavailable, Settings shows that it will only last for the current session.
+Open **Settings** from Apps and use its sidebar to switch between **Appearance**, **Background**, and **System**. In a narrow Settings window, use the category toggle to open the collapsed sidebar.
+
+Choose a photo under **Background**. **Repeat with canvas** tiles the photo at its original size and moves it with the canvas. **Stretch** fills the screen, **Contain** shows the whole photo with the desktop color around it, and **Cover** fills the screen while preserving proportions and cropping the edges. These three modes keep the photo still while you pan. Cover is the initial fit. **Use default background** removes the photo and restores the accent-colored dots. The photo stays in this browser and is remembered with its fit; if browser storage is unavailable, Settings shows that it will only last for the current session.
 
 Choose an accent under **Appearance**: Orange, Rose, Violet, Blue, Teal, or Olive. Orange is the default. The choice updates the whole desktop immediately and stays selected after reload. Each color provides a coordinated palette for controls, window states, and the dotted canvas; individual components cannot be themed separately.
 
 Under **App appearance**, choose **Ideal** for the uniform icons and glass windows, or **Realistic** to try varied icon shapes, backgrounds, and app-owned window styling. Ideal is the default. Realistic simulates the visual differences between Linux apps while keeping the corner controls, app bar, and active-window cues consistent. App artwork and interiors keep their own colors; the accent still belongs to the shared desktop. Switching modes preserves the windows, their arrangement, and edited notes, and the choice survives reload. Both modes remain browser previews rather than host applications.
 
-Under **System tray**, enable **Show battery percentage** to display the simulated **87%** beside the battery icon. It is off by default, updates immediately, and stays selected after reload. The battery popover always shows the percentage.
+Under **System**, enable **Show battery percentage** to display the simulated **87%** beside the battery icon. It is off by default, updates immediately, and stays selected after reload. The battery popover always shows the percentage.
 
 ## Try notifications
 

@@ -14,7 +14,6 @@ import {
   ChevronRight,
   Maximize2,
   PanelsTopLeft,
-  RotateCcw,
   StickyNote,
   X,
 } from 'lucide-react'
@@ -75,6 +74,7 @@ type Gesture = {
   bounds?: Bounds
   edge?: string
   items?: DesktopItem[]
+  windows?: DesktopWindow[]
   selectedItemIds?: string[]
   moved?: boolean
   selectionShape?: WindowSelectionShape
@@ -109,6 +109,9 @@ function App() {
   const [tool, setTool] = useState(loadCanvasTool)
   const [selectionShape, setSelectionShape] = useState(loadWindowSelectionShape)
   const [selectedIds, setSelectedIds] = useState<string[]>([])
+  const selectedWindows = workspace.windows.filter((item) =>
+    selectedIds.includes(item.id),
+  )
   const [selectedItemIds, setSelectedItemIds] = useState<string[]>([])
   const [selection, setSelection] = useState<
     (Bounds & { target: 'windows' | 'items'; points?: SelectionPoint[] }) | null
@@ -251,7 +254,9 @@ function App() {
       }
       if (
         event.target instanceof HTMLElement &&
-        event.target.closest('input, textarea, [contenteditable="true"]')
+        event.target.closest(
+          'input, textarea, select, [contenteditable="true"]',
+        )
       )
         return
       if (launcher || event.metaKey || event.ctrlKey || event.altKey) return
@@ -460,6 +465,51 @@ function App() {
       }))
       return
     }
+    if (current.type === 'move' && current.windows) {
+      // Apply one bounded delta so selected windows keep their spacing.
+      const windows = current.windows
+      const moveX = clamp(
+        dx,
+        -Math.min(...windows.map((item) => item.x)),
+        workspace.width -
+          Math.max(...windows.map((item) => item.x + item.width)),
+      )
+      const moveY = clamp(
+        dy,
+        -Math.min(...windows.map((item) => item.y)),
+        workspace.height -
+          Math.max(...windows.map((item) => item.y + item.height)),
+      )
+      const origins = new Map(windows.map((item) => [item.id, item]))
+      setWorkspace((previous) => ({
+        ...previous,
+        windows: previous.windows.map((item) => {
+          const origin = origins.get(item.id)
+          if (!origin) return item
+          return {
+            ...item,
+            x: origin.x + moveX,
+            y: origin.y + moveY,
+            ...(origin.restore && {
+              restore: {
+                ...origin.restore,
+                x: clamp(
+                  origin.restore.x + moveX,
+                  0,
+                  previous.width - origin.restore.width,
+                ),
+                y: clamp(
+                  origin.restore.y + moveY,
+                  0,
+                  previous.height - origin.restore.height,
+                ),
+              },
+            }),
+          }
+        }),
+      }))
+      return
+    }
     const bounds = current.bounds!
     setWorkspace((previous) => ({
       ...previous,
@@ -514,10 +564,17 @@ function App() {
     item?: DesktopWindow,
     edge?: string,
   ) {
+    const group =
+      type === 'move' &&
+      item &&
+      selectedWindows.length > 1 &&
+      selectedIds.includes(item.id)
+        ? selectedWindows
+        : undefined
     if (
       gesture.current ||
       (event.button !== 0 && event.button !== 1) ||
-      (item?.restore && type !== 'pan')
+      (item?.restore && type !== 'pan' && !group)
     )
       return
     const canvas = viewport.current!
@@ -535,6 +592,7 @@ function App() {
       scrollY: canvas.scrollTop,
       id: item?.id,
       bounds: item,
+      windows: group,
       edge,
       selectionShape: type === 'window-select' ? selectionShape : undefined,
       points:
@@ -672,7 +730,13 @@ function App() {
     const canvas = viewport.current!
     const id = crypto.randomUUID()
     const offset = (workspace.windows.length % 5) * 24
-    const width = app?.id === 'settings' ? 420 : 360
+    const width =
+      app?.id === 'settings'
+        ? Math.max(
+            MIN_WIDTH,
+            Math.min(680, view.width - windowClearance.side * 2),
+          )
+        : 360
     const height = app?.id === 'settings' ? 500 : 260
     setWorkspace((current) => ({
       ...current,
@@ -773,10 +837,6 @@ function App() {
     }
   }
 
-  function goHome() {
-    viewport.current?.scrollTo(home.x, home.y)
-  }
-
   function changeAccentTheme(theme: AccentThemeId) {
     setAccentTheme(theme)
     saveAccentTheme(theme)
@@ -851,7 +911,11 @@ function App() {
         }}
         onPointerDownCapture={(event) => {
           if (event.button === 1 || spaceHeld) startGesture(event, 'pan')
-          else if (tool === 'select') startGesture(event, 'window-select')
+          else if (
+            tool === 'select' &&
+            !(event.target as Element).closest('[data-grouped="true"]')
+          )
+            startGesture(event, 'window-select')
         }}
         onPointerDown={(event) => {
           if (
@@ -924,6 +988,9 @@ function App() {
                 }
                 data-active={focusedWindowId === item.id}
                 data-selected={selectedIds.includes(item.id)}
+                data-grouped={
+                  selectedWindows.length > 1 && selectedIds.includes(item.id)
+                }
                 className={styles.window}
                 style={{
                   left: item.x,
@@ -1182,19 +1249,12 @@ function App() {
         <aside className={styles.mapPanel}>
           <div className={styles.panelHeading}>
             <h2>Overview</h2>
-            <span>{workspace.windows.length} open windows</span>
           </div>
           <Minimap
             workspace={workspace}
             view={view}
             onNavigate={(x, y) => viewport.current?.scrollTo(x, y)}
           />
-          <div className={styles.mapFooter}>
-            <span>Drag to explore</span>
-            <button onClick={goHome}>
-              <RotateCcw size={12} /> Home
-            </button>
-          </div>
         </aside>
       )}
     </main>
