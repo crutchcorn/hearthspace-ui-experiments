@@ -1,6 +1,6 @@
 # Hearthspace UI experiments
 
-A private, local playground for exploring the feel of [Hearthspace](https://github.com/crutchcorn/hearthspace), a Linux distribution experimenting with how computing could work.
+A playground for exploring the feel of [Hearthspace](https://github.com/crutchcorn/hearthspace), a Linux distribution experimenting with how computing could work.
 
 The current experiment is a spatial desktop with a large dotted canvas, desktop icons and folders beneath movable windows, canvas tools, and an app launcher with a dedicated drawing pad for gesture shortcuts. Compact glass controls occupy the four corners: notifications, device status, canvas tools, and applications. Settings offers accent colors, a photo background, and a choice between uniform app styling and a more varied desktop. The app opens as **Hearthspace**.
 
