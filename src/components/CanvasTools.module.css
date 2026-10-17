@@ -164,7 +164,8 @@
 }
 
 @media (width <= 760px) {
-  .selectionHint {
-    bottom: calc(100% + 64px);
+  .selectionHint,
+  .tooltip {
+    bottom: calc(100% + 74px);
   }
 }

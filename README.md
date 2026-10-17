@@ -34,7 +34,7 @@ Controls stay in the four corners, leaving the top edge and middle of the canvas
 | Bottom left  | Canvas tools: Pan, Select, Map, and Arrange.          |
 | Bottom right | Favorite and running apps, plus the Apps launcher.    |
 
-Canvas tools and dock apps use compact icon buttons. Hover to see their names and available shortcuts; buttons also retain accessible names and 44-pixel touch targets. The clock and three device icons share one row. The docks keep their corners on narrow screens, with favorite and running apps moving into a row above Apps. Scroll the app row horizontally when it fills up. Escape closes open panels; on the canvas, it clears the current selection.
+Canvas tools and dock apps use compact icon buttons. Hover to see their names and available shortcuts; buttons also retain accessible names and 44-pixel touch targets. The clock and three device icons share one row. Favorite and running apps share one continuous bar with Apps. On narrow screens, that whole bar moves above the canvas tools and stays aligned to the right. Scroll the app row horizontally when it fills up. Escape closes open panels; on the canvas, it clears the current selection.
 
 ## Try the launcher
 
@@ -42,11 +42,11 @@ Choose **Apps** or press Ctrl/⌘ K to browse the four-column app gallery, switc
 
 **Browser**, **Files**, and **Notes** are preset favorites beside Apps. Other apps appear there while their windows are open. Running apps show a window count, and the active app is marked. Choose a running app to see its windows, then choose a window to bring it into view. **New window** adds another preview for that app. A favorite with no open windows launches directly. Favorites are fixed for this experiment.
 
-Inside the launcher, switch from **Apps** to **Draw**, or press G from the canvas to open the dedicated gesture pad. Choose a **Preview app** and draw with touch, a stylus, or a pointer. **Retry** clears the current drawing.
+Inside the launcher, switch from **Apps** to **Draw**, or press G from the canvas to open the dedicated gesture pad. Draw a stroke with touch, a stylus, or a pointer, then release to launch a Browser preview. Any completed stroke launches Browser for this experiment; gesture recognition is not implemented. A tap without drawing does not launch anything.
 
 To customize a shortcut, choose the pad’s cog icon. It opens notifications with a **Customize gestures** item. Follow that item’s **Customize gestures** action to reopen Draw in editing mode, select an app, draw one stroke, and choose **Save shortcut**. Saving replaces that app’s existing gesture; **Cancel** returns to the preview without saving. Saved marks persist, but the pad does not show a shortcut library.
 
-Drawing records and previews the stroke; gesture recognition is not implemented. Use **Open [app]** to try the launch result. Launching creates labeled preview windows on the canvas, without opening applications in the host operating system.
+Drawing in editing mode records the stroke without launching an app. Launching from the normal pad creates a labeled preview window on the canvas, without opening applications in the host operating system.
 
 ## Choose an accent
 
@@ -54,7 +54,7 @@ Open **Settings** from Apps, then choose an accent under **Appearance**: Orange,
 
 ## Try notifications
 
-Open the bell in the top-left corner or press N. The bell shows an accented unread count, or **All clear** when there are no unread items. Narrow screens show the bell and a count. The inbox starts with three sample notifications. **Open Notes**, **Open Files**, and **Open Browser** bring the matching window into view, or create a preview window if it is missing. Opening a notification marks it read; **Mark all read** clears the unread count, and each notification’s close button removes it.
+Open the bell in the top-left corner or press N. The compact, left-aligned bell button fits its contents: an accented unread count, or **All clear** when there are no unread items. Narrow screens show the bell and a count. The inbox starts with three sample notifications. **Open Notes**, **Open Files**, and **Open Browser** bring the matching window into view, or create a preview window if it is missing. Opening a notification marks it read; **Mark all read** clears the unread count, and each notification’s close button removes it.
 
 Choose **Preview notification** to add a sample and show a toast below the notification button. The toast disappears after six seconds; dismissing the toast keeps the notification in the inbox. These notifications are simulated and reset when the page reloads. N is inactive while typing or using the launcher.
 

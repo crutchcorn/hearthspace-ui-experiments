@@ -12,11 +12,11 @@ Each window joins its title bar and content in one glass frame, with a fine divi
 
 ## Compact corners
 
-The corner controls share a 54-pixel resting height, keeping more canvas available before a panel opens. Notifications use a bell and single-line status: an accented unread count or subdued **All clear**, without a trailing arrow. Small screens retain the bell and count in a 64-pixel-wide button. The inbox opens into a stream with a fine accent-colored guide, app icons, and quiet timestamps. The 24-hour clock and three icon buttons for network, sound, and power share one glass row. The full date and device details live in tooltips and expanded panels.
+The corner controls share a 54-pixel resting height, keeping more canvas available before a panel opens. Notifications use a bell and single-line status: an accented unread count or subdued **All clear**, without a trailing arrow. The trigger’s left-aligned contents determine its width, with padding around the icon and text. Small screens retain the bell and count without a fixed button width. The inbox opens into a stream with a fine accent-colored guide, app icons, and quiet timestamps. The 24-hour clock and three icon buttons for network, sound, and power share one glass row. The full date and device details live in tooltips and expanded panels.
 
 The navigator is a single row at every width, with a divider separating Pan/Select modes from Map/Arrange actions. Its map opens above the controls and supports continuous dragging. Each icon has a tooltip, an accessible name, and a target at least 44 pixels wide and high. Arrange’s tooltip also appears on keyboard focus and includes its A shortcut.
 
-The application gallery opens with search and an Apps/Draw toggle in one command bar. Grid view has four columns; list and search views have one. The default gallery omits its total app count; searches show result counts. Icon-only dock buttons beside Apps keep running-window counts and active markers. Names appear on hover and remain available to assistive technology; the gallery and window picker retain visible text. The drawing pad remains inside the launcher, with its cog leading through notifications to gesture customization.
+The application gallery opens with search and an Apps/Draw toggle in one command bar. Grid view has four columns; list and search views have one. The default gallery omits its total app count; searches show result counts. Favorites, running apps, and Apps share one continuous glass bar. Its icon-only buttons use the common surface rather than individual resting bubbles, retaining running-window counts and active markers. Names appear on hover and remain available to assistive technology; the gallery and window picker retain visible text. The drawing view remains inside the launcher and consists of the pad and its cog, which leads through notifications to gesture customization. A completed stroke directly launches the prototype’s Browser preview; editing controls appear only when customizing an assignment.
 
 Expanded panels provide detail while the resting controls keep a small footprint. Keyboard shortcuts and direct touch targets remain available without hover.
 
@@ -42,7 +42,7 @@ Use the shared radius scale consistently across windows and controls:
 | `--radius-panel`   | 16px   | Joined window frames and panels.            |
 | `--radius-round`   | 999px  | Circular targets and fully rounded markers. |
 
-Keep the four corners reachable when windows are maximized or panels open. On narrow screens, dock app icons move into a horizontally scrolling row above Apps. Panels reserve space for those controls and scroll internally when height is limited. Content windows retain their spatial dimensions and remain reachable through the map and window picker. The exact offsets and maximized-window clearances are recorded in [Spatial playground](spatial-playground.md).
+Keep the four corners reachable when windows are maximized or panels open. On narrow screens, the entire application bar moves above the canvas tools and stays aligned to the right. Its app icons scroll horizontally when needed while Apps remains beside them. Panels reserve space for the whole bar and scroll internally when height is limited. Content windows retain their spatial dimensions and remain reachable through the map and window picker. The exact offsets and maximized-window clearances are recorded in [Spatial playground](spatial-playground.md).
 
 ## Motion follows interaction
 

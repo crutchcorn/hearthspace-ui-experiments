@@ -20,11 +20,11 @@
 }
 
 .trigger {
-  display: flex;
+  display: inline-flex;
+  width: max-content;
   min-height: 54px;
-  min-width: 124px;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 9px;
   padding: 8px 14px;
   border: 1px solid var(--chrome-border);
@@ -36,6 +36,7 @@
   font-size: 13px;
   font-weight: 500;
   font-variant-numeric: tabular-nums;
+  text-align: left;
   white-space: nowrap;
 }
 
@@ -481,10 +482,8 @@
   }
 
   .trigger {
-    width: 64px;
-    min-width: 64px;
     gap: 6px;
-    padding: 8px 6px;
+    padding: 8px;
   }
 
   .trigger > svg {
@@ -503,7 +502,7 @@
 
   .panel,
   .toast {
-    max-height: calc(100dvh - 210px);
+    max-height: calc(100dvh - 220px);
   }
 }
 

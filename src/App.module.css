@@ -386,9 +386,9 @@
   }
 
   .mapPanel {
-    bottom: 132px;
+    bottom: 142px;
     left: 12px;
-    max-height: calc(100dvh - 216px);
+    max-height: calc(100dvh - 226px);
   }
 }
 

@@ -1,12 +1,5 @@
 import { useEffect, useRef, useState, type PointerEvent } from 'react'
-import {
-  ArrowUpRight,
-  Check,
-  Pencil,
-  RotateCcw,
-  Settings,
-  X,
-} from 'lucide-react'
+import { Check, Pencil, RotateCcw, Settings, X } from 'lucide-react'
 import { APP_CATALOG, type LauncherApp } from './launcher-apps'
 import styles from './GesturePad.module.css'
 
@@ -111,6 +104,7 @@ export default function GesturePad({
   const [drawing, setDrawing] = useState(false)
   const [saved, setSaved] = useState(false)
   const appSelect = useRef<HTMLSelectElement>(null)
+  const settingsButton = useRef<HTMLButtonElement>(null)
   const gesture = useRef<{ pointerId: number; points: Point[] } | null>(null)
   const selectedApp =
     APP_CATALOG.find((app) => app.id === selectedId) ?? APP_CATALOG[0]
@@ -144,12 +138,18 @@ export default function GesturePad({
     setStroke([...current.points])
   }
 
-  function finishStroke(event: PointerEvent<SVGSVGElement>) {
-    if (gesture.current?.pointerId !== event.pointerId) return
+  function finishStroke(event: PointerEvent<SVGSVGElement>, completed = false) {
+    const current = gesture.current
+    if (current?.pointerId !== event.pointerId) return
     gesture.current = null
     setDrawing(false)
     if (event.currentTarget.hasPointerCapture(event.pointerId))
       event.currentTarget.releasePointerCapture(event.pointerId)
+    if (completed && !editing && current.points.length > 1) {
+      // Until gesture matching exists, every completed stroke opens Browser.
+      const app = APP_CATALOG.find((item) => item.id === 'browser')
+      if (app) onLaunch(app)
+    }
   }
 
   function clearStroke() {
@@ -171,6 +171,7 @@ export default function GesturePad({
     }
     setEditing(false)
     setSaved(true)
+    settingsButton.current?.focus({ preventScroll: true })
   }
 
   return (
@@ -187,7 +188,7 @@ export default function GesturePad({
           aria-label={
             editing
               ? `Draw a shortcut for ${selectedApp.name}`
-              : `Draw a preview for ${selectedApp.name}`
+              : 'Draw a gesture to launch an app'
           }
           onPointerDown={(event) => {
             if (event.button !== 0 || gesture.current) return
@@ -202,7 +203,7 @@ export default function GesturePad({
           onPointerMove={extendStroke}
           onPointerUp={(event) => {
             extendStroke(event)
-            finishStroke(event)
+            finishStroke(event, true)
           }}
           onPointerCancel={finishStroke}
           onLostPointerCapture={finishStroke}
@@ -216,6 +217,7 @@ export default function GesturePad({
           )}
         </svg>
         <button
+          ref={settingsButton}
           type="button"
           className={styles.settingsButton}
           aria-label="Customize gestures"
@@ -231,7 +233,7 @@ export default function GesturePad({
             <span>
               {editing
                 ? `One continuous stroke for ${selectedApp.name}.`
-                : `${selectedApp.name} selected. Drag to draw.`}
+                : 'Release to open.'}
             </span>
           </div>
         )}
@@ -245,7 +247,7 @@ export default function GesturePad({
               ) : editing ? (
                 'Recorded stroke'
               ) : (
-                'Gesture preview'
+                'Draw a gesture'
               )}
             </span>
             <button
@@ -260,29 +262,27 @@ export default function GesturePad({
         )}
       </div>
 
-      <div className={styles.footer}>
-        <div className={styles.assignment}>
-          <label htmlFor="gesture-app">
-            {editing ? 'Open this app' : 'Preview app'}
-          </label>
-          <select
-            ref={appSelect}
-            id="gesture-app"
-            value={selectedId}
-            onChange={(event) => {
-              setSelectedId(event.target.value)
-              clearStroke()
-            }}
-          >
-            {APP_CATALOG.map((app) => (
-              <option key={app.id} value={app.id}>
-                {app.name}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className={styles.actions}>
-          {editing && (
+      {editing && (
+        <div className={styles.footer}>
+          <div className={styles.assignment}>
+            <label htmlFor="gesture-app">Open this app</label>
+            <select
+              ref={appSelect}
+              id="gesture-app"
+              value={selectedId}
+              onChange={(event) => {
+                setSelectedId(event.target.value)
+                clearStroke()
+              }}
+            >
+              {APP_CATALOG.map((app) => (
+                <option key={app.id} value={app.id}>
+                  {app.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className={styles.actions}>
             <button
               type="button"
               className={styles.cancelButton}
@@ -290,32 +290,22 @@ export default function GesturePad({
               onClick={() => {
                 setEditing(false)
                 clearStroke()
-                appSelect.current?.focus({ preventScroll: true })
+                settingsButton.current?.focus({ preventScroll: true })
               }}
             >
               <X size={15} aria-hidden="true" /> Cancel
             </button>
-          )}
-          {editing ? (
             <button
               type="button"
-              className={styles.openButton}
+              className={styles.saveButton}
               disabled={!hasStroke || drawing}
               onClick={saveShortcut}
             >
               <Check size={15} /> Save shortcut
             </button>
-          ) : (
-            <button
-              type="button"
-              className={styles.openButton}
-              onClick={() => onLaunch(selectedApp)}
-            >
-              Open {selectedApp.name} <ArrowUpRight size={15} />
-            </button>
-          )}
+          </div>
         </div>
-      </div>
+      )}
     </section>
   )
 }

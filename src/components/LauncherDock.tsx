@@ -119,77 +119,80 @@ export default function LauncherDock({
       aria-label="Apps, favorites, and running windows"
       data-launcher-trigger
     >
-      <div
-        className={styles.appStrip}
-        role="group"
-        aria-label="Favorite and running apps"
-      >
-        {groups.map(({ app, windows: instances }) => {
-          const Icon = app.icon
-          const running = instances.length > 0
-          const active = instances.some((item) => item.id === activeWindowId)
-          const label = running
-            ? `${app.name}, ${instances.length} ${instances.length === 1 ? 'window' : 'windows'}${active ? ', active' : ''}`
-            : `Open ${app.name}`
+      <div className={styles.bar}>
+        <div
+          className={styles.appStrip}
+          role="group"
+          aria-label="Favorite and running apps"
+        >
+          {groups.map(({ app, windows: instances }) => {
+            const Icon = app.icon
+            const running = instances.length > 0
+            const active = instances.some((item) => item.id === activeWindowId)
+            const label = running
+              ? `${app.name}, ${instances.length} ${instances.length === 1 ? 'window' : 'windows'}${active ? ', active' : ''}`
+              : `Open ${app.name}`
 
-          return (
-            <button
-              key={app.id}
-              ref={(element) => {
-                if (element) appTriggers.current.set(app.id, element)
-                else appTriggers.current.delete(app.id)
-              }}
-              type="button"
-              className={styles.appButton}
-              title={label}
-              aria-label={label}
-              aria-expanded={running ? selectedAppId === app.id : undefined}
-              aria-controls={
-                running && selectedAppId === app.id ? panelId : undefined
-              }
-              data-active={active}
-              data-running={running}
-              onClick={() => {
-                if (running)
-                  onSelectApp(selectedAppId === app.id ? null : app.id)
-                else onLaunch(app)
-              }}
-              onKeyDown={(event) => {
-                if (!running || event.key !== 'ArrowDown') return
-                event.preventDefault()
-                if (selectedAppId === app.id) firstInstance.current?.focus()
-                else {
-                  focusOnOpen.current = app.id
-                  onSelectApp(app.id)
+            return (
+              <button
+                key={app.id}
+                ref={(element) => {
+                  if (element) appTriggers.current.set(app.id, element)
+                  else appTriggers.current.delete(app.id)
+                }}
+                type="button"
+                className={styles.appButton}
+                title={label}
+                aria-label={label}
+                aria-expanded={running ? selectedAppId === app.id : undefined}
+                aria-controls={
+                  running && selectedAppId === app.id ? panelId : undefined
                 }
-              }}
-            >
-              <span className={styles.appIcon}>
-                <Icon size={20} aria-hidden="true" />
-              </span>
-              {running && (
-                <>
-                  <span className={styles.count} aria-hidden="true">
-                    {instances.length > 99 ? '99+' : instances.length}
-                  </span>
-                  <span className={styles.runningMark} aria-hidden="true" />
-                </>
-              )}
-            </button>
-          )
-        })}
+                data-active={active}
+                data-running={running}
+                onClick={() => {
+                  if (running)
+                    onSelectApp(selectedAppId === app.id ? null : app.id)
+                  else onLaunch(app)
+                }}
+                onKeyDown={(event) => {
+                  if (!running || event.key !== 'ArrowDown') return
+                  event.preventDefault()
+                  if (selectedAppId === app.id) firstInstance.current?.focus()
+                  else {
+                    focusOnOpen.current = app.id
+                    onSelectApp(app.id)
+                  }
+                }}
+              >
+                <span className={styles.appIcon}>
+                  <Icon size={20} aria-hidden="true" />
+                </span>
+                {running && (
+                  <>
+                    <span className={styles.count} aria-hidden="true">
+                      {instances.length > 99 ? '99+' : instances.length}
+                    </span>
+                    <span className={styles.runningMark} aria-hidden="true" />
+                  </>
+                )}
+              </button>
+            )
+          })}
+        </div>
+        <span className={styles.divider} aria-hidden="true" />
+        <button
+          ref={triggerRef}
+          type="button"
+          className={styles.launcher}
+          aria-label="Open app launcher"
+          aria-expanded={open}
+          title="Open app launcher (⌘/Ctrl K)"
+          onClick={onToggle}
+        >
+          <LayoutGrid size={22} aria-hidden="true" />
+        </button>
       </div>
-      <button
-        ref={triggerRef}
-        type="button"
-        className={styles.launcher}
-        aria-label="Open app launcher"
-        aria-expanded={open}
-        title="Open app launcher (⌘/Ctrl K)"
-        onClick={onToggle}
-      >
-        <LayoutGrid size={22} aria-hidden="true" />
-      </button>
       {selectedGroup && (
         <section
           id={panelId}

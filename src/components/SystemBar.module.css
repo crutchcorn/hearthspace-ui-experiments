@@ -327,7 +327,7 @@
   }
 
   .popover {
-    max-height: calc(100dvh - 208px);
+    max-height: calc(100dvh - 220px);
   }
 }
 
