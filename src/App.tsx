@@ -32,6 +32,7 @@ import AppLauncher from './components/AppLauncher'
 import LauncherDock from './components/LauncherDock'
 import AppIcon from './components/AppIcon'
 import WindowContent from './components/WindowContent'
+import GatherWindows from './components/GatherWindows'
 import { APP_CATALOG, type LauncherApp } from './components/launcher-apps'
 import {
   arrangeWindows,
@@ -51,6 +52,7 @@ import {
 } from './desktop'
 import { polygonIntersectsBounds, type SelectionPoint } from './selection'
 import useBackground from './useBackground'
+import useAI from './useAI'
 import useShellPeek from './useShellPeek'
 import { getMaximizedBounds, getWindowClearance } from './window-layout'
 import {
@@ -98,6 +100,7 @@ const edges = ['n', 'e', 's', 'w', 'ne', 'se', 'sw', 'nw']
 
 function App() {
   const background = useBackground()
+  const ai = useAI()
   const [accentTheme, setAccentTheme] = useState(loadAccentTheme)
   const [colorMode, setColorMode] = useState(loadColorMode)
   const [gestureShortcuts, setGestureShortcuts] = useState(loadGestureShortcuts)
@@ -1076,7 +1079,8 @@ function App() {
           setView((current) => ({ ...current, x, y }))
         }}
         onPointerDownCapture={(event) => {
-          if (focusView) return
+          if (focusView || (event.target as Element).closest('dialog[open]'))
+            return
           if (event.button === 1 || spaceHeld) startGesture(event, 'pan')
           else if (
             tool === 'select' &&
@@ -1247,6 +1251,7 @@ function App() {
                   )}
                   <WindowContent
                     item={item}
+                    ai={ai}
                     workspace={workspace}
                     accentTheme={accentTheme}
                     colorMode={colorMode}
@@ -1334,6 +1339,14 @@ function App() {
           )}
         </div>
       </div>
+      {!focusView && selectedWindows.length > 0 && (
+        <GatherWindows
+          windows={selectedWindows}
+          view={view}
+          enabled={ai.enabled}
+          downloading={ai.downloading}
+        />
+      )}
       <div
         className={`${styles.docks} ${shellStyles.mobileSurface}`}
         data-shell-controls

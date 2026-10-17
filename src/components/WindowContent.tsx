@@ -9,12 +9,14 @@ import type { DesktopWindow, Workspace } from '../desktop'
 import type { AccentThemeId, AppPresentation, ColorMode } from '../theme'
 import type { BackgroundFit, BackgroundPhoto } from '../useBackground'
 import type { GestureShortcut } from '../gestures'
+import type { AIControls } from '../useAI'
 import Settings from './Settings'
 import AppIcon from './AppIcon'
 import { APP_CATALOG } from './launcher-apps'
 import styles from './WindowContent.module.css'
 
 interface WindowContentProps {
+  ai: AIControls
   item: DesktopWindow
   workspace: Workspace
   onNoteChange: (note: string) => void
@@ -54,6 +56,7 @@ const bookmarks = [
 ]
 
 export default function WindowContent({
+  ai,
   item,
   workspace,
   onNoteChange,
@@ -217,6 +220,7 @@ export default function WindowContent({
   if (item.appId === 'settings') {
     return (
       <Settings
+        ai={ai}
         colorMode={colorMode}
         onColorModeChange={onColorModeChange}
         accentTheme={accentTheme}

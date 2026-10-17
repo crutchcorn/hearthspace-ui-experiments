@@ -1,4 +1,5 @@
 import {
+  BrainCircuit,
   Check,
   Image,
   Monitor,
@@ -17,14 +18,17 @@ import {
   type ColorMode,
 } from '../theme'
 import type { BackgroundFit, BackgroundPhoto } from '../useBackground'
+import type { AIControls } from '../useAI'
 import type { GestureShortcut } from '../gestures'
 import { INITIAL_DISPLAY_LAYOUT } from '../display-layout'
 import BackgroundSettings from './BackgroundSettings'
+import AISettings from './AISettings'
 import DisplaySettings, { type DisplayPreferences } from './DisplaySettings'
 import GestureSettings from './GestureSettings'
 import styles from './Settings.module.css'
 
 interface SettingsProps {
+  ai: AIControls
   colorMode: ColorMode
   onColorModeChange: (mode: ColorMode) => void
   accentTheme: AccentThemeId
@@ -87,6 +91,12 @@ const CATEGORIES = [
     icon: Spline,
   },
   {
+    id: 'ai',
+    label: 'AI',
+    description: 'Find related windows across your canvas.',
+    icon: BrainCircuit,
+  },
+  {
     id: 'system',
     label: 'System',
     description: 'What appears in your system tray.',
@@ -95,6 +105,7 @@ const CATEGORIES = [
 ] as const
 
 export default function Settings({
+  ai,
   colorMode,
   onColorModeChange,
   accentTheme,
@@ -218,6 +229,7 @@ export default function Settings({
                 onScreenChange={() => content.current?.scrollTo({ top: 0 })}
               />
             )}
+            {category === 'ai' && <AISettings ai={ai} />}
             {category === 'appearance' && (
               <>
                 <fieldset className={styles.palette}>

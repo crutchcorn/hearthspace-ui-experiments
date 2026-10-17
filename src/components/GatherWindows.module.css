@@ -1,0 +1,46 @@
+.anchor {
+  position: absolute;
+  z-index: 500;
+}
+
+.surface {
+  width: 54px;
+}
+
+.button {
+  display: grid;
+  width: 44px;
+  padding: 0;
+  place-items: center;
+  color: var(--accent);
+}
+
+.button[aria-disabled='true'] {
+  color: var(--chrome-muted);
+}
+
+.tooltip {
+  position: absolute;
+  display: flex;
+  width: 230px;
+  max-width: calc(100vw - 24px);
+  flex-direction: column;
+  gap: 5px;
+  padding: 11px 12px;
+  border: 1px solid var(--chrome-border);
+  border-radius: var(--radius-control);
+  background: var(--chrome-raised);
+  box-shadow: var(--shadow-panel);
+  color: var(--chrome-text);
+  font-size: 11px;
+  line-height: 1.5;
+  pointer-events: none;
+}
+
+.tooltip strong {
+  font-weight: 550;
+}
+
+.tooltip span {
+  color: var(--chrome-muted);
+}
