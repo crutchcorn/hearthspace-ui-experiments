@@ -34,6 +34,8 @@ import AppIcon from './components/AppIcon'
 import WindowContent from './components/WindowContent'
 import GatherWindows from './components/GatherWindows'
 import WindowSwitcher from './components/WindowSwitcher'
+import CanvasSearch from './components/CanvasSearch'
+import { getCanvasSearchLayout, type CanvasSearchResult } from './canvas-search'
 import { APP_CATALOG, type LauncherApp } from './components/launcher-apps'
 import {
   arrangeWindows,
@@ -128,6 +130,22 @@ function App() {
   const [notificationsOpen, setNotificationsOpen] = useState(false)
   const [systemPanel, setSystemPanel] = useState<SystemPanel>(null)
   const [tool, setTool] = useState(loadCanvasTool)
+  const [canvasSearch, setCanvasSearch] = useState<{
+    x: number
+    y: number
+    anchor: { x: number; y: number }
+    query: string
+    selected: number
+  } | null>(null)
+  const searchLayout = canvasSearch
+    ? getCanvasSearchLayout(
+        workspace,
+        { ...view, x: canvasSearch.x, y: canvasSearch.y },
+        canvasSearch.anchor,
+        canvasSearch.query,
+      )
+    : null
+  const searchResult = searchLayout?.results[canvasSearch?.selected ?? 0]
   const [selectionShape, setSelectionShape] = useState(loadWindowSelectionShape)
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const selectedWindows = workspace.windows.filter((item) =>
@@ -170,6 +188,7 @@ function App() {
     activeWindowId: focusedWindowId,
     onCommit: (id) => revealWindow(id, { center: true }),
     onOpen: () => {
+      setCanvasSearch(null)
       const canvas = viewport.current
       canvas?.scrollTo({
         left: canvas.scrollLeft,
@@ -191,6 +210,7 @@ function App() {
   })
 
   const closePopovers = useCallback(() => {
+    setCanvasSearch(null)
     setNotificationsOpen(false)
     setSystemPanel(null)
     setDockAppId(null)
@@ -218,6 +238,27 @@ function App() {
     }))
     setFocusView(null)
   }, [focusView])
+
+  const openCanvasSearch = useCallback(
+    (anchor: { x: number; y: number }) => {
+      const canvas = viewport.current
+      if (!canvas || document.querySelector(':modal')) return
+      leaveFocusView()
+      closePopovers()
+      setLauncher(null)
+      setShowMap(false)
+      setSpaceHeld(false)
+      setSelection(null)
+      setSelectedIds([])
+      setSelectedItemIds([])
+      setTool('search')
+      setRevealRequest(null)
+      const origin = { x: canvas.scrollLeft, y: canvas.scrollTop }
+      canvas.scrollTo({ left: origin.x, top: origin.y, behavior: 'instant' })
+      setCanvasSearch({ ...origin, anchor, query: '', selected: 0 })
+    },
+    [closePopovers, leaveFocusView],
+  )
 
   const arrangeAllWindows = useCallback(() => {
     const canvas = viewport.current
@@ -307,6 +348,11 @@ function App() {
         return
       }
       if (event.key === 'Escape') {
+        if (canvasSearch) {
+          event.preventDefault()
+          setCanvasSearch(null)
+          viewport.current?.focus({ preventScroll: true })
+        }
         setShowMap(false)
         setLauncher(null)
         closePopovers()
@@ -334,6 +380,14 @@ function App() {
       )
         return
       if (launcher || event.metaKey || event.ctrlKey || event.altKey) return
+      if (event.key === '/') {
+        event.preventDefault()
+        openCanvasSearch({
+          x: window.innerWidth / 2,
+          y: window.innerHeight / 3,
+        })
+        return
+      }
       if (event.key.toLowerCase() === 'a') {
         event.preventDefault()
         if (!event.repeat) arrangeAllWindows()
@@ -409,7 +463,16 @@ function App() {
       window.removeEventListener('keyup', keyup)
       window.removeEventListener('blur', release)
     }
-  }, [home.x, home.y, launcher, closePopovers, arrangeAllWindows, focusView])
+  }, [
+    home.x,
+    home.y,
+    launcher,
+    closePopovers,
+    arrangeAllWindows,
+    focusView,
+    canvasSearch,
+    openCanvasSearch,
+  ])
 
   useEffect(() => {
     if (!launcher) return
@@ -650,6 +713,7 @@ function App() {
         : undefined
     if (
       focusView ||
+      canvasSearch ||
       gesture.current ||
       (event.button !== 0 && event.button !== 1) ||
       (item?.restore && type !== 'pan' && !group)
@@ -722,6 +786,11 @@ function App() {
     event: ReactPointerEvent<HTMLButtonElement>,
     item: DesktopItem,
   ) {
+    if (canvasSearch) {
+      event.preventDefault()
+      event.stopPropagation()
+      return
+    }
     if (focusView || event.button !== 0 || gesture.current) return
     if (tool === 'pan') {
       startGesture(event, 'pan')
@@ -962,6 +1031,17 @@ function App() {
     })
   }
 
+  function activateSearchResult(result: CanvasSearchResult | undefined) {
+    if (!result) return
+    setCanvasSearch(null)
+    if (result.kind === 'window') revealWindow(result.id, { center: true })
+    else {
+      const item = workspace.items.find((entry) => entry.id === result.id)
+      const app = APP_CATALOG.find((entry) => entry.id === item?.appId)
+      if (app) launchApp(app)
+    }
+  }
+
   function openNotificationTarget(target: NotificationTarget) {
     if (target === 'gestures') {
       closePopovers()
@@ -1025,6 +1105,7 @@ function App() {
       data-color-mode={colorMode}
       data-presentation="realistic"
       data-focus-mode={focusView !== null}
+      data-canvas-search={canvasSearch !== null}
       data-shell-peek={!focusView || shellPeek}
       style={{ '--accent-base': accent.color } as CSSProperties}
     >
@@ -1051,6 +1132,7 @@ function App() {
           open={notificationsOpen}
           previewVisible={!systemPanel && !launcher && !showMap && !dockAppId}
           onToggle={() => {
+            setCanvasSearch(null)
             setNotificationsOpen(!notificationsOpen)
             setDockAppId(null)
             setSystemPanel(null)
@@ -1065,6 +1147,7 @@ function App() {
           showBatteryPercentage={showBatteryPercentage}
           openPanel={systemPanel}
           onPanelChange={(panel) => {
+            setCanvasSearch(null)
             setSystemPanel(panel)
             if (panel) {
               setDockAppId(null)
@@ -1077,18 +1160,20 @@ function App() {
       </div>
       <div
         ref={viewport}
-        className={`${styles.viewport} ${!focusView && tool === 'cursor' ? styles.cursorReady : ''} ${!focusView && spaceHeld ? styles.panReady : ''} ${!focusView && dragging ? styles.dragging : ''} ${!focusView && tool === 'select' && !spaceHeld ? styles.selecting : ''}`}
+        tabIndex={-1}
+        className={`${styles.viewport} ${!focusView && (tool === 'cursor' || tool === 'search') ? styles.cursorReady : ''} ${!focusView && spaceHeld ? styles.panReady : ''} ${!focusView && dragging ? styles.dragging : ''} ${!focusView && tool === 'select' && !spaceHeld ? styles.selecting : ''}`}
         data-canvas-viewport
         onScroll={(event) => {
-          if (focusView) {
+          const lockedView = focusView ?? canvasSearch
+          if (lockedView) {
             const canvas = event.currentTarget
             const x = clamp(
-              focusView.x,
+              lockedView.x,
               0,
               canvas.scrollWidth - canvas.clientWidth,
             )
             const y = clamp(
-              focusView.y,
+              lockedView.y,
               0,
               canvas.scrollHeight - canvas.clientHeight,
             )
@@ -1100,7 +1185,11 @@ function App() {
           setView((current) => ({ ...current, x, y }))
         }}
         onPointerDownCapture={(event) => {
-          if (focusView || (event.target as Element).closest('dialog[open]'))
+          if (
+            focusView ||
+            canvasSearch ||
+            (event.target as Element).closest('dialog[open]')
+          )
             return
           if (event.button === 1 || spaceHeld) startGesture(event, 'pan')
           else if (
@@ -1115,8 +1204,16 @@ function App() {
               '[data-window-id], [data-desktop-item-id]',
             )
           ) {
+            if (canvasSearch) {
+              setCanvasSearch(null)
+              return
+            }
             closePopovers()
-            startGesture(event, tool === 'cursor' ? 'item-select' : 'pan')
+            if (tool === 'search' && event.button === 0) {
+              event.preventDefault()
+              openCanvasSearch({ x: event.clientX, y: event.clientY })
+            } else
+              startGesture(event, tool === 'cursor' ? 'item-select' : 'pan')
           }
         }}
         onPointerMove={(event) => {
@@ -1147,15 +1244,24 @@ function App() {
             <DesktopItems
               items={workspace.items}
               selectedIds={selectedItemIds}
+              searchPlacements={searchLayout?.items}
+              searchSelectedId={
+                searchResult?.kind === 'item' ? searchResult.id : undefined
+              }
               onPointerDown={startItemGesture}
               onSelect={selectDesktopItem}
               onOpen={(item) => {
+                if (canvasSearch) {
+                  activateSearchResult({ kind: 'item', id: item.id })
+                  return
+                }
                 const app = APP_CATALOG.find((entry) => entry.id === item.appId)
                 if (app) launchApp(app)
               }}
             />
           </div>
           {workspace.windows.map((item, index) => {
+            const searchPlacement = searchLayout?.windows.get(item.id)
             const app = APP_CATALOG.find((entry) => entry.id === item.appId)
             const appId =
               app?.id ??
@@ -1182,7 +1288,17 @@ function App() {
                 }
                 data-active={focusedWindowId === item.id}
                 data-focus-mode={focusView?.id === item.id}
-                inert={focusView !== null && focusView.id !== item.id}
+                data-search-match={searchPlacement?.matches}
+                data-search-selected={
+                  searchPlacement
+                    ? searchResult?.kind === 'window' &&
+                      searchResult.id === item.id
+                    : undefined
+                }
+                inert={
+                  (focusView !== null && focusView.id !== item.id) ||
+                  searchPlacement?.matches === false
+                }
                 data-selected={selectedIds.includes(item.id)}
                 data-grouped={
                   selectedWindows.length > 1 && selectedIds.includes(item.id)
@@ -1194,18 +1310,27 @@ function App() {
                   top: focusView?.id === item.id ? 0 : item.y,
                   width: focusView?.id === item.id ? view.width : item.width,
                   height: focusView?.id === item.id ? view.height : item.height,
+                  transform: searchPlacement
+                    ? `translate(${searchPlacement.x - item.x}px, ${searchPlacement.y - item.y}px) scale(${searchPlacement.scale})`
+                    : 'translate(0px, 0px) scale(1)',
                   zIndex:
                     focusView?.id === item.id
                       ? workspace.windows.length + 1
                       : index + 1,
                 }}
-                onFocusCapture={() => focusWindow(item.id)}
+                onFocusCapture={() => {
+                  if (!canvasSearch) focusWindow(item.id)
+                }}
                 onPointerDown={(event) => {
-                  if (!(event.target as Element).closest('button'))
+                  if (
+                    !canvasSearch &&
+                    !(event.target as Element).closest('button')
+                  )
                     focusWindow(item.id)
                 }}
               >
                 <header
+                  inert={canvasSearch !== null}
                   className={styles.titlebar}
                   onPointerDown={(event) => {
                     if (!(event.target as HTMLElement).closest('button'))
@@ -1261,7 +1386,10 @@ function App() {
                     </button>
                   </div>
                 </header>
-                <div className={styles.windowBody}>
+                <div
+                  className={styles.windowBody}
+                  inert={canvasSearch !== null}
+                >
                   {appId === 'notes' && (
                     <div className={styles.nativeMenu} aria-hidden="true">
                       <span>File</span>
@@ -1294,7 +1422,8 @@ function App() {
                     }
                   />
                 </div>
-                {!item.restore &&
+                {!canvasSearch &&
+                  !item.restore &&
                   edges.map((edge) => (
                     <div
                       key={edge}
@@ -1305,8 +1434,18 @@ function App() {
                       }
                     />
                   ))}
-                {!item.restore && (
+                {!canvasSearch && !item.restore && (
                   <ArrowDownRight className={styles.resizeHint} size={12} />
+                )}
+                {searchPlacement?.matches && (
+                  <button
+                    type="button"
+                    className={styles.searchWindowTarget}
+                    aria-label={`Open ${item.title} window`}
+                    onClick={() =>
+                      activateSearchResult({ kind: 'window', id: item.id })
+                    }
+                  />
                 )}
               </section>
             )
@@ -1358,7 +1497,7 @@ function App() {
           )}
         </div>
       </div>
-      {!focusView && selectedWindows.length > 0 && (
+      {!focusView && !canvasSearch && selectedWindows.length > 0 && (
         <GatherWindows
           windows={selectedWindows}
           view={view}
@@ -1502,6 +1641,29 @@ function App() {
           selectedId={windowSwitcher.selectedId}
           onSelect={windowSwitcher.select}
           onCancel={windowSwitcher.cancel}
+        />
+      )}
+      {canvasSearch && searchLayout && (
+        <CanvasSearch
+          position={searchLayout.position}
+          query={canvasSearch.query}
+          onQueryChange={(query) =>
+            setCanvasSearch({ ...canvasSearch, query, selected: 0 })
+          }
+          onClose={() => {
+            setCanvasSearch(null)
+            viewport.current?.focus({ preventScroll: true })
+          }}
+          onActivate={() => activateSearchResult(searchResult)}
+          onNavigate={(direction) => {
+            const count = searchLayout.results.length
+            if (count)
+              setCanvasSearch({
+                ...canvasSearch,
+                selected: (canvasSearch.selected + direction + count) % count,
+              })
+          }}
+          empty={searchLayout.results.length === 0}
         />
       )}
     </main>

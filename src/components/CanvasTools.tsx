@@ -5,6 +5,7 @@ import {
   Lasso,
   Map,
   MousePointer2,
+  Search,
   SquareDashedMousePointer,
 } from 'lucide-react'
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from 'react'
@@ -26,13 +27,14 @@ interface CanvasToolsProps {
 }
 
 const primaryTools = [
-  { mode: 'pan', label: 'Pan canvas', shortcut: 'H', Icon: Hand },
   {
     mode: 'cursor',
     label: 'Select desktop items',
     shortcut: 'V',
     Icon: MousePointer2,
   },
+  { mode: 'pan', label: 'Pan canvas', shortcut: 'H', Icon: Hand },
+  { mode: 'search', label: 'Search canvas', shortcut: '/', Icon: Search },
 ] as const
 
 const selectionTools = [
@@ -47,6 +49,7 @@ const selectionTools = [
 
 type ToolMenu = 'primary' | 'selection' | 'mobile'
 type ToolHint = 'primary' | 'selection' | 'map' | 'arrange'
+type PrimaryTool = (typeof primaryTools)[number]['mode']
 
 function focusMenuOption(
   menu: HTMLDivElement | null,
@@ -112,7 +115,7 @@ export default function CanvasTools({
   const mobileTriggerRef = useRef<HTMLButtonElement>(null)
   const mobileMenuRef = useRef<HTMLDivElement>(null)
   const [openToolMenu, setOpenToolMenu] = useState<ToolMenu | null>(null)
-  const [primaryMode, setPrimaryMode] = useState<'pan' | 'cursor'>('cursor')
+  const [primaryMode, setPrimaryMode] = useState<PrimaryTool>('cursor')
   const [visibleHint, setVisibleHint] = useState<ToolHint | null>(null)
   const hintTimeout = useRef<number | undefined>(undefined)
 
@@ -218,7 +221,7 @@ export default function CanvasTools({
     setOpenToolMenu(menu)
   }
 
-  function selectTool(nextMode: 'pan' | 'cursor') {
+  function selectTool(nextMode: PrimaryTool) {
     hideHint()
     onModeChange(nextMode)
     setOpenToolMenu(null)
@@ -376,31 +379,29 @@ export default function CanvasTools({
             aria-label="Canvas tools"
             onKeyDown={(event) => navigateMenu(event, 'mobile')}
           >
-            {[primaryTools[1], primaryTools[0]].map(
-              ({ mode: optionMode, label, shortcut, Icon }) => (
-                <button
-                  key={optionMode}
-                  type="button"
-                  role="menuitemradio"
-                  aria-checked={mode === optionMode}
-                  data-value={optionMode}
-                  className={styles.menuOption}
-                  tabIndex={-1}
-                  onClick={() => selectTool(optionMode)}
-                >
-                  <Icon size={18} strokeWidth={1.5} aria-hidden="true" />
-                  <span>{label}</span>
-                  <kbd>{shortcut}</kbd>
-                  {mode === optionMode && (
-                    <Check
-                      size={14}
-                      className={styles.check}
-                      aria-hidden="true"
-                    />
-                  )}
-                </button>
-              ),
-            )}
+            {primaryTools.map(({ mode: optionMode, label, shortcut, Icon }) => (
+              <button
+                key={optionMode}
+                type="button"
+                role="menuitemradio"
+                aria-checked={mode === optionMode}
+                data-value={optionMode}
+                className={styles.menuOption}
+                tabIndex={-1}
+                onClick={() => selectTool(optionMode)}
+              >
+                <Icon size={18} strokeWidth={1.5} aria-hidden="true" />
+                <span>{label}</span>
+                <kbd>{shortcut}</kbd>
+                {mode === optionMode && (
+                  <Check
+                    size={14}
+                    className={styles.check}
+                    aria-hidden="true"
+                  />
+                )}
+              </button>
+            ))}
             {selectionTools.map(({ shape, label, shortcut, Icon }) => (
               <button
                 key={shape}

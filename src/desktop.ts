@@ -1,7 +1,7 @@
 import { APP_CATALOG } from './components/launcher-apps'
 
 export type Bounds = { x: number; y: number; width: number; height: number }
-export type CanvasTool = 'cursor' | 'pan' | 'select'
+export type CanvasTool = 'cursor' | 'pan' | 'select' | 'search'
 export type WindowSelectionShape = 'rectangle' | 'freeform'
 export type DesktopItem = Bounds & {
   id: string
@@ -35,7 +35,8 @@ export const MIN_HEIGHT = 200
 export function loadCanvasTool(): CanvasTool {
   try {
     const saved = localStorage.getItem(CANVAS_TOOL_STORAGE_KEY)
-    if (saved === 'pan' || saved === 'select') return saved
+    if (saved === 'pan' || saved === 'select' || saved === 'search')
+      return saved
     if (saved === 'lasso') return 'select'
   } catch {
     /* Use the desktop cursor when preferences are unavailable. */
@@ -71,15 +72,49 @@ function createDesktopItems(home: Workspace['home']): DesktopItem[] {
     { id: 'projects', title: 'Projects', kind: 'folder', appId: 'files' },
     { id: 'pictures', title: 'Pictures', kind: 'folder', appId: 'files' },
     { id: 'notes-file', title: 'Notes.txt', kind: 'file', appId: 'notes' },
-    { id: 'browser-shortcut', title: 'Browser', kind: 'app', appId: 'browser' },
+    ...APP_CATALOG.map((app) => ({
+      id: `${app.id}-shortcut`,
+      title: app.name,
+      kind: 'app' as const,
+      appId: app.id,
+    })),
   ]
   return items.map((item, index) => ({
     ...item,
-    x: home.x + 28,
-    y: home.y + 112 + 104 * index,
+    x: home.x + 28 + 104 * Math.floor(index / 4),
+    y: home.y + 112 + 104 * (index % 4),
     width: 88,
     height: 96,
   }))
+}
+
+function includeAppShortcuts(
+  items: DesktopItem[],
+  home: Workspace['home'],
+  world: { width: number; height: number },
+): DesktopItem[] {
+  const appIds = new Set<string>()
+  const result = items.filter((item) => {
+    if (item.kind !== 'app') return true
+    if (appIds.has(item.appId)) return false
+    appIds.add(item.appId)
+    return true
+  })
+  const itemIds = new Set(result.map((item) => item.id))
+  for (const item of createDesktopItems(home)) {
+    if (item.kind !== 'app' || appIds.has(item.appId)) continue
+    let id = item.id
+    let suffix = 2
+    while (itemIds.has(id)) id = `${item.id}-${suffix++}`
+    itemIds.add(id)
+    result.push({
+      ...item,
+      id,
+      x: clamp(item.x, 0, world.width - item.width),
+      y: clamp(item.y, 0, world.height - item.height),
+    })
+  }
+  return result
 }
 
 function createWorkspace(): Workspace {
@@ -234,7 +269,7 @@ export function loadWorkspace(): Workspace {
       note: value.note === LEGACY_NOTE ? INITIAL_NOTE : value.note,
       home,
       windows,
-      items,
+      items: includeAppShortcuts(items, home, value),
     }
   } catch {
     return createWorkspace()
