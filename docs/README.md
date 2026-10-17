@@ -1,8 +1,9 @@
-# Technical documentation
+# Documentation
 
-Durable explanations of the playground’s architecture and decisions.
+Start with the [project README](../README.md) to run the playground and try its main interactions. These pages provide the next layer of detail:
 
-- [Spatial playground](spatial-playground.md): canvas coordinates, desktop items, rectangular and freeform window selection, group movement, AI gathering preview and opt-in, remembered tools, compact controls and clearances, unified mobile bars and flat tool selection, Overview zoom placeholders, window maximization and focused view, notifications, the unified app dock and saved window-list order, the Ctrl+1 window switcher, gesture assignment management and the React Aria app combobox in Settings, simulated monitor arrangement, placeholder gesture launching, and persistence.
-- [Visual language](visual-language.md): Light and Dark modes with varied Linux-style app presentation, opaque app content with glass chrome, focused windows and corner reveal, the dotted canvas, photo backgrounds and desktop-item layer, shared accent palettes, consistent corner surfaces and unified mobile bars, the quiet notification preview control, the continuous app bar and window dots, the keyboard window switcher, responsive settings navigation, the floating selection action and AI download preview, gesture previews, monitor layout controls, and motion.
+- [Features](features.md): what works in the browser, what is simulated, and which choices are remembered.
+- [Visual language](visual-language.md): the reasoning behind the four corners, restrained shell text, glass and opaque layers, shared colors, and varied app identities.
+- [Spatial playground](spatial-playground.md): canvas coordinates, window and tool behavior, component ownership, and persistence details.
 
-For provisional work, see [temporary notes](../notes/README.md).
+For development commands and verification, see [CONTRIBUTING.md](../CONTRIBUTING.md). [Temporary notes](../notes/README.md) contain provisional, untrusted material rather than maintained guidance.

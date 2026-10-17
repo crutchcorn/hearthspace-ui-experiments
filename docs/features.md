@@ -1,0 +1,121 @@
+# What you can try
+
+Move windows apart, travel across the canvas, then bring one back with the dock
+or keyboard switcher. Windows have a place, even outside the current view.
+
+Window movement, selection, navigation, settings, and local saving work in the
+browser; app contents and device services are previews. See the
+[README](../README.md) to get started, the
+[visual language](visual-language.md) for design decisions, and the
+[spatial playground](spatial-playground.md) for detailed behavior.
+
+## Find your way around
+
+Each corner has a job:
+
+| Corner       | What lives there                                                     |
+| ------------ | -------------------------------------------------------------------- |
+| Top left     | Notifications and a short unread status.                             |
+| Top right    | Local clock, calendar, Wi-Fi, sound, and battery.                    |
+| Bottom left  | Desktop selection, panning, window selection, Overview, and Arrange. |
+| Bottom right | Favorite apps, running apps, window instances, and the launcher.     |
+
+On narrow screens, the corners join into a top bar and bottom bar. Apps and
+tray icons scroll horizontally when needed, while the notification label stays
+visible. App icons stay right-aligned. Canvas tools become one selector with a
+flat list of choices.
+
+Icons carry routine actions without permanent captions. Hover and selection
+add backgrounds; the notification status tells you when something needs attention.
+
+## Work across the canvas
+
+- **Travel in any direction.** The world starts ten screens wide and tall,
+  with scrolling dots and hidden scrollbars. Use a trackpad, wheel, Pan tool,
+  Space-drag, or middle-button drag. Overview lets you drag the visible area
+  around the map or click to move somewhere.
+- **Place windows.** Drag their headers, resize, and close them. Dragging toward
+  the viewport edge carries a window farther across the canvas.
+- **Keep desktop items underneath.** The starter folders, document, and app
+  shortcut remain below every window. The default cursor tool selects them;
+  dragging the background draws a selection rectangle. Move selected items
+  together; double-click or Enter opens its app preview.
+- **Select windows separately.** Choose rectangle selection or a freeform
+  lasso. With several windows selected, drag any selected header to move the
+  group. Start outside the group to select again. Escape clears selection and
+  keeps the chosen tool.
+- **Arrange everything.** Arrange places every open window in a grid near the
+  current viewport, preserving ordinary window sizes. The grid can extend
+  offscreen and expand the world.
+
+## Focus and switch
+
+Double-clicking a header enlarges its window while leaving room for the shell.
+The maximize button instead fills the viewport, keeps the window chrome, hides
+the corners, and stops canvas movement. Approaching any corner reveals all four
+together. Switching to another window ends this focused view and leaves the
+previous window at its ordinary maximized size.
+
+Hold **Ctrl** and press **1** to cycle through every open window, including
+offscreen windows and multiple instances of an app. **Ctrl+Shift+1** goes
+backward. Only the highlighted window's name appears, centered beneath the
+preview grid. Releasing Ctrl focuses that window and centers it in the viewport,
+subject to the canvas edges. Enter or clicking also confirms; Escape, an outside
+click, or losing browser focus cancels. The canvas stays still while choosing.
+Browser-reserved shortcuts require their key events to reach the page.
+
+## Open apps and draw shortcuts
+
+The launcher offers a gallery, list, and search across eight app previews.
+**Ctrl/⌘ K** opens search; arrow keys and Enter select an app. Browser, Files,
+and Notes are preset favorites beside the launcher.
+
+Running apps show up to three dots for their window instances. Select an app
+to open its window list, bring an instance into view, or create another. Drag
+a row's right-hand handle to reorder the list without moving its windows.
+
+The launcher's **Draw** toggle opens a dedicated pad. Completing any stroke
+opens Browser. In **Settings → Gestures**, you can add, edit, and remove saved
+marks using a searchable app picker. The editor is a separate screen with a back
+button. The pad's cog offers another customization route through notifications.
+Saved marks don't yet drive gesture recognition.
+
+## Change the environment
+
+The Settings sidebar collapses in small windows.
+
+| Category   | What you can change                                                                                                                                                                                                               |
+| ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Appearance | Light or Dark mode and Orange, Rose, Violet, Blue, Teal, or Olive accents. Orange is the default; the initial color mode follows your system. Themes apply globally. App previews keep their varied Linux-style icons and chrome. |
+| Background | Choose a local photo. **Repeat with canvas** moves with the world; **Stretch**, **Contain**, and **Cover** stay fixed in the viewport. **Use default background** restores the dots.                                              |
+| Displays   | Drag two numbered monitors, release to snap them together and recenter the pair, then select one to change its displayed resolution, scale, and refresh rate.                                                                     |
+| Gestures   | Manage the saved app assignments and drawn marks.                                                                                                                                                                                 |
+| AI         | Opt in to a four-second, 3 GB download preview. Turning enabled AI off asks for confirmation about deleting the model and downloading it again later.                                                                             |
+| System     | Choose whether the battery percentage appears beside its tray icon.                                                                                                                                                               |
+
+**Gather similar windows** appears beside selected windows. AI starts off;
+enabling it makes this action available. Expandable explanations describe the
+intended on-device processing and gathering behavior.
+
+## Notifications, previews, and saving
+
+Notifications support unread state, dismissal, marking all read, and opening a
+related window. The subdued **Preview notification** control adds a sample and
+shows a toast.
+
+Prototype boundaries:
+
+- App launches create browser-rendered windows. They don't open host apps or
+  files. The original Scratchpad is editable; the catalog apps use sample content.
+- Overview's zoom buttons are placeholders. Display controls and tray values
+  don't change the host system. Notifications have no external event source.
+- AI doesn't download a model, inspect windows, or move related windows. The
+  gathering button previews feedback after opt-in. Desktop widgets and editing
+  favorites aren't implemented.
+
+The browser saves window layouts and stacking, desktop-item positions, window
+list order, the scratchpad, tool choices, gesture assignments, appearance,
+background, battery-label preference, and completed AI opt-in. Panels,
+selections, viewport travel, notifications, and mock display settings reset.
+Storage stays local to that browser; if it's unavailable, the current session
+remains usable without saving.

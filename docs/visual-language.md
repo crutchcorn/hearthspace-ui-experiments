@@ -1,85 +1,128 @@
 # Visual language
 
-Hearthspace pairs glass with one shared accent palette, using warm orange by default. Light and Dark modes change the environment's surfaces and contrast while keeping the chosen accent's identity. The four corners keep distinct roles: notifications at top left, device status at top right, navigation at bottom left, and applications at bottom right. Narrow screens merge these into a top bar and a bottom bar while preserving those roles. The canvas leaves the center available for work.
+Hearthspace puts your work at the center of the desktop. Windows and desktop items occupy a continuous canvas; small controls stay at its edges. Warm orange, glass, and clear boundaries give the environment its character without needing a logo, a welcome message, or a label on every control.
 
-## Light and layers
+The repeated direction across these experiments has been to remove visual explanation once the interaction can carry it. We still need to know which window is selected, where a tool lives, and what a setting changes. We can communicate much of that through placement, shape, and state, leaving text for the parts that need words.
 
-The canvas is a flat surface with subtly tinted dots spaced 28 pixels apart in both axes; the default orange palette uses a warm field and amber-gray dots. The dot pattern moves with the world so horizontal and vertical panning remain visible. Accent highlights belong to controls and interaction states. Desktop icons and folders sit directly on this field in a layer beneath every window. Their selection surfaces and drag rectangle provide feedback without a floating hint or count; app shortcuts carry the same app identity used by the launcher.
+This document explains how to extend that direction. The [feature list](features.md) describes what you can try today, including the simulated parts. [Spatial playground](spatial-playground.md) covers the implementation and saved state.
 
-A photo background replaces the dots without changing the desktop’s layers. **Repeat with canvas** anchors native-size image tiles to the world; **Stretch**, **Contain**, and **Cover** anchor the image to the viewport instead. Contain keeps the theme’s field color visible around the photo. The image retains its own colors while shell controls, selections, and glass surfaces retain the shared accent palette. Settings can restore the default dots at any time.
+## Keep the canvas available for work
 
-Shell controls, Workspace and Settings headers, and Settings navigation use translucent surfaces, bright edges, backdrop blur, and soft shadows. App content has an opaque background, keeping wallpaper and other windows from showing through reading and working areas. Light mode uses pale glass and warm paper with dark text; Dark mode uses smoked glass and dark paper with light text. The terminal keeps an opaque dark reading surface in both modes.
+The default background is a flat field of subtly tinted dots, spaced 28 pixels apart in both axes. Because those dots move with the canvas, even an empty area gives you a reference while panning. Desktop icons and folders belong to this background layer and always sit underneath windows.
 
-Settings exposes **Light** and **Dark** under Appearance. With no saved choice, the initial mode follows the operating system's `prefers-color-scheme` preference. An explicit choice applies immediately throughout the shell and app windows and persists independently of the accent. Realistic windows use app-specific light and dark palettes while preserving their different chrome designs; their icons keep their own artwork colors. Workspace and Settings continue to follow the shell. Photo backgrounds are never recolored.
+Leave decorative taglines and branding off the canvas. The Workspace window can show its own content, and apps can have headings, status lines, or descriptions. Those belong to the work inside a window; they don't need to become permanent desktop furniture.
 
-Shell-owned windows join their glass title bar and opaque content in one frame, with a fine divider and no gap between them. The outer frame carries the border, shadow, and active or selected edge light. The header retains its drag handle and controls while the body keeps its own content hierarchy and scrolling area. Realistic frames use the same window bounds and interactions with app-specific solid surfaces. Workspace and Settings keep opaque content; Settings applies its paper surface to the content pane so the sidebar can retain glass.
+A photo can replace the dots. **Repeat with canvas** attaches native-size tiles to the world. **Stretch**, **Contain**, and **Cover** keep the photo attached to the viewport while windows move over it. Contain exposes the theme's field color around the image. Photos retain their own colors, and **Use default background** restores the dots.
 
-Focused view gives one app the entire viewport while keeping its window chrome. The shell recedes until the pointer approaches a corner, which reveals all controls together. The canvas stays still while the app’s contents remain scrollable. Leaving focus returns the window to ordinary maximization with room for the shell; header double-clicking still toggles between that layout and the window’s original bounds.
+## Give each corner an intention
 
-## Apps can have their own identity
+The four corners provide stable places to look:
 
-App previews always use Realistic styling, with no appearance picker in Settings. This tests the shell against the uneven visual identity of a Linux desktop: icons can have opaque backgrounds, different silhouettes, and independent colors; windows can have different title bars, borders, and content treatments.
+| Corner       | Intention                         | Resting controls                                          |
+| ------------ | --------------------------------- | --------------------------------------------------------- |
+| Top left     | Catch up on activity.             | Bell and one line of notification status.                 |
+| Top right    | Check or change the device.       | Clock, Wi-Fi, sound, and battery.                         |
+| Bottom left  | Navigate and organize the canvas. | Background tool, window selection, Overview, and Arrange. |
+| Bottom right | Open apps and return to work.     | Favorites, running apps, and Apps.                        |
 
-The shared app bar provides a stable surface and consistent targets around varied artwork. Keep icons contained within their allotted space instead of forcing every icon onto a new matching bubble. The same app identity should carry into the launcher, window picker, and notifications. Running dots, selected controls, and active-window cues remain shell-owned, so app artwork does not have to communicate desktop state.
+Keep each corner to one row on desktop. The tray and clock have the same glass backing as the other corners, so their text and controls remain distinct from whatever passes underneath. Notifications stay left-aligned and take only the width their icon, status, and padding need. Apps share one continuous bar; each icon doesn't need another resting bubble.
 
-Realistic previews use distinct visual conventions, such as a tabbed browser, a file manager with rounded controls, classic menus for Notes, and an angular dark terminal. Their light and dark variants retain those structures and app-specific colors. Terminal, Music, and Photos already use dark surfaces and remain dark in either mode. These are illustrative treatments rather than copies of particular apps or toolkits. Workspace and Settings retain the shell’s visual language. Switching color mode changes presentation without replacing content or rearranging the workspace.
+The common surface is 54 pixels tall, with 4 pixels of padding, a 1-pixel border, and 44-pixel control targets. Buttons are transparent at rest. Hover adds a shared fill, active or expanded controls use the soft accent, and keyboard focus adds an inset outline. This treatment comes from [ShellControls.module.css](../src/components/ShellControls.module.css), including the tray's background.
 
-## Compact corners
+On screens 760 pixels wide or narrower, the top corners merge into one top bar and the bottom corners into one bottom bar. Notifications retain their full status text. Device icons and app icons can scroll horizontally within their own strips. Apps remain right-aligned; the canvas tool stays on the left. That tool becomes one selector with a flat menu containing the available tools and actions.
 
-All four corners use the same glass surface: a 54-pixel resting height, 4-pixel inset padding, a 16-pixel outer radius, and the shared border, blur, and shadow. `src/components/ShellControls.module.css` owns this treatment and the common control states, so the tray, notifications, canvas tools, and app dock change together. Their roles and content determine their widths on desktop. At 760 pixels or less, each pair shares one surface spanning the viewport with 12-pixel side insets, avoiding nested glass containers.
+The positions still tell us where to go, even when the available space changes.
 
-Buttons sit directly on that shared surface with transparent backgrounds at rest and 44-pixel targets. Their corner radius follows the parent’s curve: outer radius minus padding and border width, currently 16 − 4 − 1 = 11 pixels. Hover adds the same light fill across corners. A selected tool, open panel, or active app uses the shared soft accent fill; keyboard focus uses an inset accent outline. App artwork retains its own identity. Unread notifications accent the bell and status text without changing the corner’s glass background.
+## Make words earn their place
 
-Notifications use a bell and single-line status: an accented unread count or subdued **All clear**, without a trailing arrow. The trigger’s left-aligned contents determine its width, with padding around the icon and text. The full label remains visible at every width. The inbox opens into a stream with a fine accent-colored guide, app icons, and quiet timestamps. The 24-hour clock and three icon buttons for network, sound, and power share one glass row on desktop. On mobile, they occupy the right side of the shared top bar; the device-icon strip scrolls horizontally as needed while notifications retain their width. Settings can show the battery percentage beside the power icon. The full date and device details live in tooltips and expanded panels.
+Here, “accent text” includes the small headings, counts, captions, and instructions added around an interface to explain or decorate it. It isn't limited to text painted in the accent color. A quieter gray label can still repeat information we already have.
 
-The desktop navigator is a single row, with a divider separating background and window-selection tools from Map/Arrange actions. The background tool shows a hand or cursor with a small expansion indicator at its top right; its dropdown switches between panning and desktop-item selection. The adjacent window-selection tool uses a square or lasso icon and the same expansion indicator to expose rectangle and freeform selection. Pressing an inactive tool selects its remembered choice; another press opens its menu. Mobile replaces these buttons with one selector at the left of the bottom bar. Its single flat menu lists all four tools plus Overview and Arrange windows, with no submenus. Selection outlines follow the chosen shape, and selected windows are highlighted; selection adds no floating text or counts. A selected group can be moved from any member’s title bar. The cursor is the default, and the selected tool remains active until explicitly changed, including after reload. Its map opens above the controls and supports continuous dragging without a window count, hint text, or Home button. Overview adds quiet, icon-only zoom-out and zoom-in controls without accent text or extra visible labels; they preview the controls without changing zoom. Each canvas toolbar icon has an accessible name and a target at least 44 pixels wide and high. Desktop tooltips appear briefly on hover or keyboard focus, then disappear even if focus remains; Arrange’s includes its A shortcut.
+The default is to show the information needed for the current decision. Before adding another line, ask what the user can do with it. If the selected outline already shows the group, a floating “4 windows selected” label adds another thing to read while moving it.
 
-Window selection also reveals one compact glass action beside the selected windows. **Gather similar windows** uses two overlapping rectangles, keeping the action visually tied to its selected windows. Its tooltip supplies the name and directs users to AI settings while the feature is off. The control follows the selection and remains inside the visible work area; it disappears when the selection is entirely offscreen or focused view takes over.
+The current interface applies that choice in several places:
 
-The application gallery opens with search and an Apps/Draw toggle in one command bar. Grid view has four columns; list and search views have one. The default gallery omits its total app count; searches show result counts. Favorites, running apps, and Apps share one continuous glass bar. Its icon-only buttons use the common surface rather than individual resting bubbles. One to three dots below each running app indicate its window count, capped at three, while the active app remains marked. Names and exact counts appear on hover and remain available to assistive technology; the gallery and window picker retain visible text. The picker header contains just the app name and close button; its rows show previews, titles, and right-hand reorder handles, with a highlighted background marking the active window. The drawing view remains inside the launcher and consists of the pad and its cog, which leads through notifications to gesture customization. A completed stroke directly launches the prototype’s Browser preview; editing controls appear only when customizing an assignment.
+| Surface                                | What carries the meaning                                                              | Text we've removed                                                                                                   |
+| -------------------------------------- | ------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| Canvas selection                       | The selection shape and highlighted items or windows.                                 | “Drag to select desktop icons,” “Drag around windows,” and selected-item counts.                                     |
+| Corner controls                        | Position, icons, hover/focus states, and brief tooltips.                              | Persistent Activity, System, canvas-tool, and app-dock labels.                                                       |
+| App window picker                      | The app heading, each window's preview and title, and its reorder handle.             | “Open windows,” repeated window totals, “On canvas,” and numbered window subtitles.                                  |
+| Draw launcher                          | The drawing pad, stroke feedback, and customization cog.                              | “Gesture shortcuts,” “Select a shortcut, then draw in the pad,” the Preview app bar, and the Saved shortcut section. |
+| Overview                               | The map, viewport rectangle, and zoom controls.                                       | Window totals, “Drag to explore,” and a redundant Home button.                                                       |
+| Keyboard switcher                      | Window previews, selection highlight, and one centered title for the selected window. | Names beneath every candidate and the shortcut/release footer.                                                       |
+| Settings navigation and gesture editor | Category names, a dedicated editor heading, the app picker, and the stroke itself.    | A second Settings title in the sidebar, “One gesture per app,” and “Recorded stroke.”                                |
 
-Expanded panels provide detail while the resting controls keep a small footprint. Keyboard shortcuts and direct touch targets remain available without hover.
+Useful text stays. The notification trigger tells you whether there is unread activity; the inbox doesn't repeat that total as both events and unread items. Launcher results and window-picker rows identify what you can open. Search result counts describe the search you just made. A download size, a storage error, and the consequences of deleting a model explain a decision that an icon cannot.
 
-The keyboard window switcher temporarily appears above the desktop while Ctrl is held. A centered glass panel sizes itself to a compact grid of miniature window previews with app icons, including separate instances of one app. Tiles fit their previews without stretching and wrap into fewer columns on narrow screens. The grid scrolls to keep the highlighted candidate visible, and only that window’s title appears in a centered caption beneath the previews. The canvas stays still while cycling; releasing Ctrl focuses and centers the chosen window. No shortcut hints or additional window names appear. Shared glass, app identities, and the Light/Dark palette keep navigation consistent with the dock picker.
+Put longer explanations where someone has asked for detail. AI settings uses a plain **Features** subheading, followed by expandable **On-device AI** and **Gather similar windows** entries. The entries name features consistently. The opt-in's download information sits below the toggle, close to the choice it explains.
 
-The notification inbox keeps its heading and **Mark all read** action free of duplicate event or unread totals. Its **Preview notification** control is a muted, transparent button in a separate footer, leaving the notification stream visually primary and the prototype-only control easy to remove.
+This is a direction for the shell, not a claim that every app interior has been stripped of labels. The editable Scratchpad still has a word count; sample apps have their own content hierarchy. When adding shell copy, use the same restraint we've applied to the surrounding controls.
 
-Settings uses a sidebar to separate Appearance, Displays, Background, Gestures, AI, and System. Navigation starts directly with the categories, leaving the app name in the window title bar. The selected category controls the opaque content pane while saved preferences remain consistent across Settings windows. The sidebar collapses behind a category toggle when the window is narrow, leaving room for the controls rather than squeezing both columns into the same space.
+## Use glass around work and solid surfaces behind it
 
-AI places two collapsed, expandable entries beneath a plain **Features** subheading: **On-device AI** first, then **Gather similar windows**. The first holds the local-processing privacy explanation. The opt-in control starts off, with download information beneath its row. Enabling it shows progress through a simulated 3 GB download before making the action available; canceling a download takes effect immediately. Turning off enabled AI asks for confirmation and explains that the local model will be deleted and need downloading again. Download progress and enabled state use the existing accent and shared Light/Dark surfaces. The confirmation’s **Turn off and delete** action uses a fixed red destructive treatment independent of the selected accent.
+Glass provides depth for the shell, window headers, and navigation. Bright edges and restrained shadows separate those layers from the canvas. Light mode uses pale glass and warm paper; Dark mode uses smoked glass and dark paper. The content area of an app is opaque so wallpaper and neighboring windows don't compete with reading or editing.
 
-The Gestures category pairs each saved stroke preview with its app icon and name, with quiet edit and remove controls. **Add gesture** sits in the page header, keeping the list free of an extra toolbar or explanatory note. The editor replaces the list and its header with an **Add gesture** or **Edit gesture** screen and a back control, retaining the Settings sidebar. It reuses the launcher’s dark drawing surface and accent stroke. The app combobox combines an editable field and a popup list, carrying app icons beside their names. React Aria provides its interaction behavior while CSS Modules retain the shell’s visual treatment. Retry and save complete the editing flow; the stroke itself provides recording feedback without a **Recorded stroke** label. Drawing here never launches an app. Saved rows and picker choices use app-specific artwork and shared Light/Dark surfaces, keeping assignments legible without introducing another theme.
+Join a window's title bar and contents into one frame. Its border, shadow, and active or selected outline belong to the whole window. The header needs its own surface behind the drag controls and title, with a fine divider between header and body. A gap between them makes one window look like two unrelated pieces.
 
-Displays puts two numbered monitor tiles above the selected monitor’s controls in a compact preview capped at 400 × 225 pixels. The tiles show only their numbers; the selected monitor’s name and connection appear with its settings below. The selected tile carries the shared accent, linking it to those controls. Monitors can move freely during a drag, reconnect along an edge on release, and recenter together with space around the pair. The controls use the same Light/Dark surfaces and corner radius scale as the other Settings categories.
+Workspace and Settings follow this shell treatment. Settings keeps an opaque content pane beside its translucent sidebar. App-specific frames can use different materials while retaining the same movement, resizing, and window-state cues.
 
-## One accent carries state
+## Expect apps to look different
 
-Settings offers six coordinated accent palettes: Orange, Rose, Violet, Blue, Teal, and Olive. Orange is the default. One selection applies across the desktop, including canvas tints, active controls, launch actions, focus, and selected windows. Realistic app artwork and interior palettes keep their own identities while their surfaces respond to Light/Dark mode and shared state cues follow the accent. There are no per-component overrides or arbitrary color inputs.
+The playground now always uses the varied Linux-style app presentation. There is no Ideal/Realistic appearance switch. This lets us judge the shell with icons that have their own backgrounds, colors, and silhouettes, and with windows whose chrome we don't control.
 
-Strong accent gradients use the contrasting `--accent-ink` foreground; quieter states use accent text on `--accent-soft`. Dark mode uses lighter versions of the six accents for contrast against smoked glass. Counts, labels, and borders accompany state markers. Destructive hover states retain their red meaning across palettes.
+Give that artwork a consistent amount of space. The shared dock surface and target sizes provide order around it. Carry the same app identity through the launcher, window picker, switcher, and notification actions. Running dots and active-window highlights belong to the shell, so app artwork doesn't have to encode desktop state.
 
-Allowed accent names, base colors, and color-mode persistence live in `src/theme.ts`. The root app sets `--accent-base`, `data-accent`, and `data-color-mode`; `src/index.css` derives the displayed accent and shared palette from that color and mode, with explicit values preserving the original Orange appearance in Light mode. The native `color-scheme` follows the selected mode. `--paper` is the opaque content background in both modes; `--ink`, `--muted`, and `--line` describe content text and boundaries. `--chrome` and related properties describe translucent controls and window chrome. `--field` and `--field-dot` describe the canvas; `--accent` and `--accent-ink` describe the main signal colors. Reuse `--glass-blur`, `--glass-edge`, and `--shadow-panel` for the shared depth treatment.
+The previews include a tabbed browser, a file manager with rounded controls, classic Notes menus, and an angular terminal. These illustrate different app conventions without claiming to reproduce a particular toolkit. App-specific light and dark palettes preserve those structures; Terminal, Music, and Photos retain their dark interiors in either mode. Workspace and Settings continue to use the shared shell palette.
 
-## Type, shape, and space
+## Give color a consistent job
 
-Use restrained sans-serif headings and readable labels. Reserve monospace for shortcuts, coordinates, and terminal content. White edge highlights establish boundaries; shadows and blur establish depth.
+Orange is the default accent, carrying the warmth associated with Hearthspace. Settings offers Orange, Rose, Violet, Blue, Teal, and Olive as coordinated palettes. One selection applies to the environment: controls, selections, window outlines, gesture strokes, and canvas tints. There are no per-component color choices or arbitrary color inputs.
 
-Use the shared radius scale consistently across shell controls, Workspace, and Settings. Realistic app frames can use their own shapes while keeping the shell’s focus and selection cues:
+Light and Dark are separate choices. Without a saved choice, the initial mode follows the operating system's preference. A chosen mode applies immediately and persists independently of the accent. App artwork and photos keep their colors.
 
-| Property           | Radius | Role                                        |
-| ------------------ | ------ | ------------------------------------------- |
-| `--radius-detail`  | 4px    | Small badges and details.                   |
-| `--radius-control` | 8px    | Buttons and other compact controls.         |
-| `--radius-tile`    | 12px   | App tiles and compact glass modules.        |
-| `--radius-panel`   | 16px   | Joined window frames and panels.            |
-| `--radius-round`   | 999px  | Circular targets and fully rounded markers. |
+Use the accent to make focus, selection, activity, and action visible. Strong accent surfaces use the contrasting `--accent-ink` foreground; softer states use `--accent-soft` and an appropriate accent foreground. Dark mode adjusts the accents for its surfaces. Destructive actions retain red across palettes, including **Turn off and delete** in the AI confirmation.
 
-Keep the shell controls reachable when windows are maximized or panels open. On narrow screens, the canvas selector, scrollable app strip, and Apps launcher share one bottom bar. App icons stay aligned to the right beside Apps while the canvas selector stays left. The tray’s device icons and the dock’s app icons scroll independently when needed. Panels open between the top and bottom bars and scroll internally when height is limited. Content windows retain their spatial dimensions and remain reachable through the map and window picker. The exact offsets and maximized-window clearances are recorded in [Spatial playground](spatial-playground.md).
+## Size the container around its contents
 
-## Motion follows interaction
+Compact controls leave more room for windows, but previews and touch targets still need enough space to be useful. The keyboard switcher is a useful example: retain the miniature window previews, fit each tile to its preview, and let the panel follow those tiles. The selected window's title sits centered below the grid. Filling a wide panel with stretched tiles adds space without adding information; reducing everything to tiny icons loses the preview treatment we want to keep.
 
-Panels enter with a short translation and fade. Windows follow dragging and resizing immediately. Selecting an existing window pans to it after focus and stacking updates have committed. Reduced-motion preference removes panel entry animations and makes navigation immediate.
+Corner hover shapes should follow the curve of their parent. Their radius is the outer radius minus padding and border width: currently 16 − 4 − 1 = 11 pixels. Use that relationship when changing the container so the inset highlight continues to fit.
 
-## Content remains a preview
+Elsewhere, reuse the shared radius scale:
 
-The Workspace window’s Your space view shows an orbital window count and live canvas dimensions. Scratchpad is editable and stored locally. Files uses sample tiles; browser, terminal, and other app interiors remain identified as previews. Appearance settings update the desktop; device controls are simulated. Saved geometry and edited notes survive the visual changes; only known, untouched starter content is refreshed.
+| Token              | Radius | Use                                    |
+| ------------------ | ------ | -------------------------------------- |
+| `--radius-detail`  | 4px    | Small details and miniature previews.  |
+| `--radius-control` | 8px    | Buttons and compact controls.          |
+| `--radius-tile`    | 12px   | Tiles and small modules.               |
+| `--radius-panel`   | 16px   | Shell panels and joined window frames. |
+| `--radius-round`   | 999px  | Circular targets and rounded markers.  |
+
+Use readable sans-serif labels and restrained headings in the shared shell, with monospace for shortcuts and coordinates. App content can follow its own conventions, including the Scratchpad's monospace editor and terminal text. Expanded panels fit between the shell bars and scroll internally when height is limited. Settings collapses its sidebar according to the window's available width. Its gesture editor replaces the list and header with a separate screen and a back button, keeping the task clear without another explanatory paragraph.
+
+The monitor arrangement preview also has a bounded size. Two numbered monitors fit within a preview capped at 400 × 225 pixels, with the selected monitor's settings below. Recentring the pair after a move keeps the diagram usable without consuming the Settings window.
+
+## Let interaction provide feedback
+
+Selected tools stay selected. Escape dismisses a panel or clears selection without changing the canvas tool. On desktop, pressing an inactive expandable tool selects it; pressing it again opens its choices. The expansion indicator sits at the top right. Short-lived tooltips explain unfamiliar controls without remaining over the canvas after the user has moved on.
+
+Use distinct icons for distinct actions. Apps and Arrange have different silhouettes; Arrange's uneven grid suggests separate, non-overlapping windows. A divider separates background and selection tools from Overview and Arrange. **Gather similar windows** uses overlapping rectangles beside the selected windows, tying the action to its context.
+
+Pointer, trackpad, touch, and keyboard should reach the same work. Controls retain usable targets and accessible names when visible labels are removed. Hover can explain an action, while direct activation and keyboard commands make it available without hover.
+
+Dragging and resizing follow input immediately. Navigation pans to a chosen window after focus and stacking have updated. The Ctrl+1 switcher keeps the canvas still while choosing, then centers the window when Ctrl is released. Reduced-motion preferences remove panel entry animations and make navigation immediate.
+
+The maximize button enters focused view, keeping window chrome while the corners recede and canvas movement stops. Approaching any corner reveals all four together. Choosing a different window restores room for the shell and canvas navigation, including another instance of the same app; choosing the same window keeps focused view. Double-clicking the header toggles ordinary maximization, with the shell remaining available. These behaviors let the controls step back without changing where the user expects to find them.
+
+## Keep the prototype boundary clear
+
+The UI is a playground for OS interactions. Gesture assignments can be saved, but launcher strokes still open a hardcoded Browser preview. AI opt-in simulates a 3 GB download and a delete confirmation; no model runs and gathering does not move related windows. Display and device controls also stay inside the prototype.
+
+Keep those limits explicit in the [feature list](features.md) and usage documentation. Inside the interface, explanations should help with the interaction being tried. The quiet **Preview notification** footer button is a useful example: it makes sample activity available without adding a permanent “simulated notifications” banner to the inbox.
+
+The intended AI design is local processing with an explicit opt-in. Its local-processing explanation belongs in the feature details; its download and deletion consequences belong beside those choices. The prototype's copy demonstrates that intended experience, while the documentation distinguishes it from working AI.
+
+## Implementation anchors
+
+[theme.ts](../src/theme.ts) defines the allowed accents and saved color mode. [index.css](../src/index.css) supplies the shared tokens. Use `--paper`, `--ink`, `--muted`, and `--line` for content; `--chrome` and its related tokens for translucent controls; `--field` and `--field-dot` for the canvas. Reuse `--glass-blur`, `--glass-edge`, and `--shadow-panel` for depth.
+
+Use [ShellControls.module.css](../src/components/ShellControls.module.css) for the common corner surface and control states. The [spatial documentation](spatial-playground.md) records responsive clearances, component ownership, interaction details, and persistence so those mechanics don't need to be repeated in every visual decision.
