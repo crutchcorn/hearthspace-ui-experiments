@@ -2,6 +2,8 @@
 
 A private browser playground for trying desktop ideas for [Hearthspace](https://github.com/crutchcorn/hearthspace), a Linux distribution exploring how computing could work. You can spread windows across a large canvas, leave folders underneath them, and move between tasks without fitting everything onto one screen.
 
+![Hearthspace in dark mode, with overlapping windows on a warm dotted canvas and controls in all four corners.](assets/hearthspace-desktop.jpg)
+
 The direction is warm glass around a usable workspace: orange by default, opaque app content, and compact controls in the four corners. We've repeatedly removed labels, counts, and instructions that only describe what's already visible. The selected window's name in the switcher helps you choose; a permanent “Drag to explore” caption doesn't need to occupy your desktop.
 
 The [feature guide](docs/features.md) covers what you can try and what is simulated. The [visual language](docs/visual-language.md) explains the decisions behind the current design.
