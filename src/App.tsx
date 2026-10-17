@@ -16,6 +16,8 @@ import {
   PanelsTopLeft,
   StickyNote,
   X,
+  ZoomIn,
+  ZoomOut,
 } from 'lucide-react'
 import SystemBar, { type SystemPanel } from './components/SystemBar'
 import NotificationInbox, {
@@ -55,6 +57,7 @@ import {
   type GestureShortcut,
 } from './gestures'
 import styles from './App.module.css'
+import shellStyles from './components/ShellControls.module.css'
 import {
   ACCENT_THEMES,
   loadAccentTheme,
@@ -1291,6 +1294,26 @@ function App() {
         <aside className={styles.mapPanel}>
           <div className={styles.panelHeading}>
             <h2>Overview</h2>
+            <div
+              className={styles.zoomControls}
+              role="group"
+              aria-label="Canvas zoom"
+            >
+              <button
+                type="button"
+                className={`${styles.zoomButton} ${shellStyles.control}`}
+                aria-label="Zoom out"
+              >
+                <ZoomOut size={18} strokeWidth={1.5} aria-hidden="true" />
+              </button>
+              <button
+                type="button"
+                className={`${styles.zoomButton} ${shellStyles.control}`}
+                aria-label="Zoom in"
+              >
+                <ZoomIn size={18} strokeWidth={1.5} aria-hidden="true" />
+              </button>
+            </div>
           </div>
           <Minimap
             workspace={workspace}

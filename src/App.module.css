@@ -723,6 +723,19 @@
   letter-spacing: -0.7px;
 }
 
+.zoomControls {
+  display: flex;
+  flex-shrink: 0;
+  gap: 2px;
+}
+
+.zoomControls .zoomButton {
+  display: grid;
+  width: 44px;
+  place-items: center;
+  border-radius: var(--radius-control);
+}
+
 @keyframes panel-in {
   from {
     opacity: 0;
