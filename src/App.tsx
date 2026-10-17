@@ -34,6 +34,11 @@ import AppIcon from './components/AppIcon'
 import WindowContent from './components/WindowContent'
 import GatherWindows from './components/GatherWindows'
 import WindowSwitcher from './components/WindowSwitcher'
+import {
+  animateWindowReveal,
+  captureWindowPreview,
+  type PreviewSnapshot,
+} from './preview-motion'
 import CanvasSearch from './components/CanvasSearch'
 import {
   getCanvasSearchLayout,
@@ -167,7 +172,9 @@ function App() {
     id: string
     left: number
     top: number
+    preview?: PreviewSnapshot
   } | null>(null)
+  const [previewExiting, setPreviewExiting] = useState(false)
   const launcherTrigger = useRef<HTMLButtonElement>(null)
   const notificationInbox = useRef<NotificationInboxHandle>(null)
   const windowElements = useRef(new Map<string, HTMLElement>())
@@ -200,6 +207,7 @@ function App() {
       setShowMap(false)
       setLauncher(null)
       setRevealRequest(null)
+      setPreviewExiting(false)
       const canvas = viewport.current
       if (canvas)
         setSwitcherOrigin({ x: canvas.scrollLeft, y: canvas.scrollTop })
@@ -283,6 +291,7 @@ function App() {
       setSelectedItemIds([])
       setTool('search')
       setRevealRequest(null)
+      setPreviewExiting(false)
       const pointerId = gesture.current?.pointerId
       gesture.current = null
       if (
@@ -341,17 +350,39 @@ function App() {
   }, [home.x, home.y])
 
   useLayoutEffect(() => {
-    if (!revealRequest || focusView) return
+    if (!revealRequest || (focusView && !revealRequest.preview)) return
+    const reducedMotion = window.matchMedia(
+      '(prefers-reduced-motion: reduce)',
+    ).matches
     // Focus after restacking so React's focus restoration cannot cancel the pan.
     windowElements.current.get(revealRequest.id)?.focus({ preventScroll: true })
     viewport.current?.scrollTo({
       left: revealRequest.left,
       top: revealRequest.top,
-      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches
-        ? 'instant'
-        : 'smooth',
+      behavior: revealRequest.preview || reducedMotion ? 'instant' : 'smooth',
     })
-  }, [revealRequest, focusView])
+    if (!revealRequest.preview || reducedMotion) return
+    const animations = animateWindowReveal(
+      windowElements.current,
+      revealRequest.preview,
+      revealRequest.id,
+      { width: view.width, height: view.height },
+    )
+    let canceled = false
+    void Promise.allSettled(
+      animations.map((animation) => animation.finished),
+    ).then(() => {
+      if (!canceled) {
+        animations.forEach((animation) => animation.cancel())
+        setPreviewExiting(false)
+        setRevealRequest(null)
+      }
+    })
+    return () => {
+      canceled = true
+      animations.forEach((animation) => animation.cancel())
+    }
+  }, [revealRequest, focusView, view.width, view.height])
 
   useEffect(() => {
     try {
@@ -765,6 +796,7 @@ function App() {
     if (
       focusView ||
       previewLayout ||
+      previewExiting ||
       gesture.current ||
       (event.button !== 0 && event.button !== 1) ||
       (item?.restore && type !== 'pan' && !group)
@@ -837,7 +869,7 @@ function App() {
     event: ReactPointerEvent<HTMLButtonElement>,
     item: DesktopItem,
   ) {
-    if (previewLayout) {
+    if (previewLayout || previewExiting) {
       event.preventDefault()
       event.stopPropagation()
       return
@@ -1054,6 +1086,12 @@ function App() {
   function revealWindow(id: string, options?: { center: boolean }) {
     const item = workspace.windows.find((entry) => entry.id === id)
     if (!item) return
+    const preview =
+      previewLayout &&
+      !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+        ? captureWindowPreview(windowElements.current)
+        : undefined
+    setPreviewExiting(!!preview)
     const top = options?.center
       ? (view.height - item.height) / 2
       : item.restore
@@ -1072,13 +1110,16 @@ function App() {
     setSpaceHeld(false)
     focusWindow(item.id)
     if (focusView?.id === item.id) {
-      windowElements.current.get(item.id)?.focus({ preventScroll: true })
+      if (preview)
+        setRevealRequest({ id, left: focusView.x, top: focusView.y, preview })
+      else windowElements.current.get(item.id)?.focus({ preventScroll: true })
       return
     }
     setRevealRequest({
       id: item.id,
       left: clamp(item.x - left, 0, Math.max(0, workspace.width - view.width)),
       top: clamp(item.y - top, 0, Math.max(0, workspace.height - view.height)),
+      preview,
     })
   }
 
@@ -1157,6 +1198,7 @@ function App() {
       data-presentation="realistic"
       data-focus-mode={renderedFocusView !== null}
       data-canvas-preview={previewLayout !== null}
+      data-preview-exiting={previewExiting}
       data-shell-peek={!renderedFocusView || shellPeek}
       style={{ '--accent-base': accent.color } as CSSProperties}
     >
@@ -1229,9 +1271,12 @@ function App() {
         className={`${styles.viewport} ${previewLayout || (!focusView && (tool === 'cursor' || tool === 'search')) ? styles.cursorReady : ''} ${!focusView && spaceHeld ? styles.panReady : ''} ${!focusView && dragging ? styles.dragging : ''} ${!focusView && !previewLayout && tool === 'select' && !spaceHeld ? styles.selecting : ''}`}
         data-canvas-viewport
         onScroll={(event) => {
-          const lockedView = windowSwitcher.open
-            ? switcherOrigin
-            : (focusView ?? canvasSearch)
+          const lockedView =
+            previewExiting && revealRequest
+              ? { x: revealRequest.left, y: revealRequest.top }
+              : windowSwitcher.open
+                ? switcherOrigin
+                : (focusView ?? canvasSearch)
           if (lockedView) {
             const canvas = event.currentTarget
             const x = clamp(
@@ -1246,6 +1291,12 @@ function App() {
             )
             if (canvas.scrollLeft !== x || canvas.scrollTop !== y)
               canvas.scrollTo({ left: x, top: y, behavior: 'instant' })
+            if (previewExiting)
+              setView((current) =>
+                current.x === x && current.y === y
+                  ? current
+                  : { ...current, x, y },
+              )
             return
           }
           const { scrollLeft: x, scrollTop: y } = event.currentTarget
@@ -1255,6 +1306,7 @@ function App() {
           if (
             focusView ||
             previewLayout ||
+            previewExiting ||
             (event.target as Element).closest('dialog[open]')
           )
             return
@@ -1610,6 +1662,7 @@ function App() {
             setLauncher(null)
           }}
           menusAllowed={
+            !previewLayout &&
             !showMap &&
             !launcher &&
             !notificationsOpen &&

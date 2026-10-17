@@ -107,6 +107,19 @@
   outline: none;
 }
 
+.desktop[data-preview-exiting='true'] .viewport {
+  overflow: hidden;
+  cursor: default;
+}
+
+.desktop[data-preview-exiting='true'] .window {
+  transition: none;
+}
+
+.desktop[data-preview-exiting='true'] [data-desktop-item-id] {
+  transition: opacity 180ms ease;
+}
+
 .window:focus {
   outline: none;
 }
