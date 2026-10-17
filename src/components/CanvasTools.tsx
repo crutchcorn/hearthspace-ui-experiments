@@ -1,4 +1,4 @@
-import { Hand, LassoSelect, LayoutGrid, Map } from 'lucide-react'
+import { Hand, LassoSelect, Map } from 'lucide-react'
 import { useId } from 'react'
 import styles from './CanvasTools.module.css'
 
@@ -78,7 +78,22 @@ export default function CanvasTools({
               onClick={onArrange}
               disabled={windowCount === 0}
             >
-              <LayoutGrid size={18} aria-hidden="true" />
+              <svg
+                width={20}
+                height={20}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={1.6}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+                focusable="false"
+              >
+                <rect x={2} y={3} width={9} height={18} rx={1.5} />
+                <rect x={15} y={3} width={7} height={7} rx={1.5} />
+                <rect x={15} y={14} width={7} height={7} rx={1.5} />
+              </svg>
             </button>
             <span id={arrangeHintId} className={styles.tooltip} role="tooltip">
               Arrange windows in a grid <kbd>A</kbd>
