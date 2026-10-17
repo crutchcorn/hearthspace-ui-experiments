@@ -66,7 +66,7 @@
   cursor: default;
   border: 1px solid var(--chrome-border);
   border-radius: var(--window-radius, var(--radius-panel));
-  background: var(--paper);
+  background: var(--chrome);
   backdrop-filter: var(--glass-blur);
   box-shadow: var(--glass-edge), var(--window-shadow);
   transition:
@@ -183,10 +183,18 @@
   min-width: 0;
   min-height: 0;
   overflow: auto;
+  background: var(--paper);
   border-radius: 0 0 calc(var(--window-radius, var(--radius-panel)) - 1px)
     calc(var(--window-radius, var(--radius-panel)) - 1px);
   scrollbar-color: var(--scrollbar) transparent;
   scrollbar-width: thin;
+}
+
+.window[data-app-id='settings'] .windowBody,
+.desktop[data-presentation='realistic']
+  .window[data-external='true']
+  .windowBody {
+  background: transparent;
 }
 
 .window[data-active='true'] {

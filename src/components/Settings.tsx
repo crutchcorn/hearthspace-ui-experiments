@@ -130,7 +130,6 @@ export default function Settings({
           className={styles.sidebar}
           data-open={navigationOpen}
         >
-          <span className={styles.navigationTitle}>Settings</span>
           {CATEGORIES.map(({ id, label, icon: Icon }) => (
             <button
               key={id}

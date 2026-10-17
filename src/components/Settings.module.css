@@ -27,13 +27,6 @@
   background: var(--surface-subtle);
 }
 
-.navigationTitle {
-  margin: 0 10px 13px;
-  color: var(--muted);
-  font-size: 10px;
-  font-weight: 500;
-}
-
 .category,
 .navigationToggle {
   display: flex;
@@ -79,6 +72,7 @@
   min-width: 0;
   min-height: 0;
   overflow: auto;
+  background: var(--paper);
   overscroll-behavior: contain;
   scrollbar-color: var(--scrollbar) transparent;
   scrollbar-width: thin;
@@ -390,9 +384,5 @@
 
   .sidebar[data-open='true'] {
     display: flex;
-  }
-
-  .navigationTitle {
-    display: none;
   }
 }

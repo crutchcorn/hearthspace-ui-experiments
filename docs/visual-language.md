@@ -8,11 +8,11 @@ The canvas is a flat surface with subtly tinted dots spaced 28 pixels apart in b
 
 A photo background replaces the dots without changing the desktop’s layers. **Repeat with canvas** anchors native-size image tiles to the world; **Stretch**, **Contain**, and **Cover** anchor the image to the viewport instead. Contain keeps the theme’s field color visible around the photo. The image retains its own colors while shell controls, selections, and glass surfaces retain the shared accent palette. Settings can restore the default dots at any time.
 
-Shell controls and Ideal windows share translucent surfaces, bright edges, backdrop blur, and soft shadows. Light mode uses pale glass and dark text; Dark mode uses smoked glass and light text, with subtle canvas dots and surfaces tuned for the selected accent. The Ideal terminal keeps a dark reading surface in both modes. Keep enough surface color behind text for it to remain readable as windows overlap.
+Shell controls, Ideal window headers, and Settings navigation use translucent surfaces, bright edges, backdrop blur, and soft shadows. App content has an opaque background, keeping wallpaper and other windows from showing through reading and working areas. Light mode uses pale glass and warm paper with dark text; Dark mode uses smoked glass and dark paper with light text. The Ideal terminal keeps an opaque dark reading surface in both modes.
 
 Settings exposes **Light** and **Dark** under Appearance. With no saved choice, the initial mode follows the operating system's `prefers-color-scheme` preference. An explicit choice applies immediately throughout the shell and both Ideal and Realistic windows and persists independently of the accent. Realistic windows use app-specific light and dark palettes while preserving their different chrome designs; their icons keep their own artwork colors. Workspace and Settings continue to follow the shell. Photo backgrounds are never recolored.
 
-Each Ideal window joins its title bar and content in one glass frame, with a fine divider and no gap between them. The outer frame carries the border, shadow, and active or selected edge light. The header retains its drag handle and controls while the body keeps its own content hierarchy and scrolling area. Realistic frames use the same window bounds and interactions with app-specific surfaces.
+Each Ideal window joins its glass title bar and opaque content in one frame, with a fine divider and no gap between them. The outer frame carries the border, shadow, and active or selected edge light. The header retains its drag handle and controls while the body keeps its own content hierarchy and scrolling area. Realistic frames use the same window bounds and interactions with app-specific solid surfaces. Workspace and Settings keep opaque content in either presentation mode; Settings applies its paper surface to the content pane so the sidebar can retain glass.
 
 ## Apps can have their own identity
 
@@ -38,7 +38,7 @@ Expanded panels provide detail while the resting controls keep a small footprint
 
 The notification inbox keeps its heading and **Mark all read** action free of duplicate event or unread totals. Its **Preview notification** control is a muted, transparent button in a separate footer, leaving the notification stream visually primary and the prototype-only control easy to remove.
 
-Settings uses a sidebar to separate Appearance, Background, and System. The selected category controls the content pane while shared preferences remain consistent across Settings windows. The sidebar collapses behind a category toggle when the window is narrow, leaving room for the controls rather than squeezing both columns into the same space.
+Settings uses a sidebar to separate Appearance, Background, and System. Navigation starts directly with the categories, leaving the app name in the window title bar. The selected category controls the opaque content pane while shared preferences remain consistent across Settings windows. The sidebar collapses behind a category toggle when the window is narrow, leaving room for the controls rather than squeezing both columns into the same space.
 
 ## One accent carries state
 
@@ -46,7 +46,7 @@ Settings offers six coordinated accent palettes: Orange, Rose, Violet, Blue, Tea
 
 Strong accent gradients use the contrasting `--accent-ink` foreground; quieter states use accent text on `--accent-soft`. Dark mode uses lighter versions of the six accents for contrast against smoked glass. Counts, labels, and borders accompany state markers. Destructive hover states retain their red meaning across palettes.
 
-Allowed accent names, base colors, and color-mode persistence live in `src/theme.ts`. The root app sets `--accent-base`, `data-accent`, and `data-color-mode`; `src/index.css` derives the displayed accent and shared palette from that color and mode, with explicit values preserving the original Orange appearance in Light mode. The native `color-scheme` follows the selected mode. `--paper`, `--ink`, `--muted`, and `--line` describe content. `--chrome` and related properties describe controls. `--field` and `--field-dot` describe the canvas; `--accent` and `--accent-ink` describe the main signal colors. Reuse `--glass-blur`, `--glass-edge`, and `--shadow-panel` for the shared depth treatment.
+Allowed accent names, base colors, and color-mode persistence live in `src/theme.ts`. The root app sets `--accent-base`, `data-accent`, and `data-color-mode`; `src/index.css` derives the displayed accent and shared palette from that color and mode, with explicit values preserving the original Orange appearance in Light mode. The native `color-scheme` follows the selected mode. `--paper` is the opaque content background in both modes; `--ink`, `--muted`, and `--line` describe content text and boundaries. `--chrome` and related properties describe translucent controls and window chrome. `--field` and `--field-dot` describe the canvas; `--accent` and `--accent-ink` describe the main signal colors. Reuse `--glass-blur`, `--glass-edge`, and `--shadow-panel` for the shared depth treatment.
 
 ## Type, shape, and space
 
