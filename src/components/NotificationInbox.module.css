@@ -22,11 +22,11 @@
 .trigger {
   position: relative;
   display: flex;
-  min-height: 64px;
-  min-width: 196px;
+  min-height: 54px;
+  min-width: 164px;
   align-items: center;
-  gap: 14px;
-  padding: 12px 16px;
+  gap: 10px;
+  padding: 8px 12px;
   border: 1px solid var(--chrome-border);
   border-radius: var(--radius-tile);
   background: linear-gradient(135deg, #ffffff80, #fff9ed15), var(--chrome);
@@ -39,17 +39,6 @@
 .trigger:hover,
 .trigger[aria-expanded='true'] {
   background: var(--chrome-raised);
-}
-
-.trigger[aria-expanded='true']::after {
-  content: '';
-  position: absolute;
-  top: calc(100% + 8px);
-  left: 20px;
-  width: 1px;
-  height: 36px;
-  background: linear-gradient(#e9642a24, #e9642a75);
-  pointer-events: none;
 }
 
 .signal {
@@ -94,11 +83,11 @@
 .panel,
 .toast {
   position: absolute;
-  top: 116px;
+  top: calc(100% + 12px);
   left: 0;
   width: 390px;
   max-width: calc(100vw - 24px);
-  max-height: calc(100dvh - 300px);
+  max-height: calc(100dvh - 186px);
   overflow: auto;
   border: 1px solid var(--chrome-border);
   border-radius: var(--radius-panel);
@@ -506,22 +495,14 @@
   }
 
   .trigger {
-    min-width: 70px;
-    min-height: 80px;
-    flex-direction: column;
-    gap: 9px;
-    padding: 11px 8px 10px;
+    min-width: 64px;
+    justify-content: center;
+    padding: 8px 6px;
     text-align: center;
   }
 
   .signal {
-    width: 6px;
-    height: 6px;
-  }
-
-  .trigger[aria-expanded='true']::after {
-    left: 34px;
-    height: 50px;
+    display: none;
   }
 
   .triggerLabel {
@@ -542,15 +523,7 @@
 
   .panel,
   .toast {
-    top: 146px;
-    max-height: calc(100dvh - 334px);
-  }
-}
-
-@media (width <= 360px) {
-  .trigger {
-    min-width: 62px;
-    padding-inline: 6px;
+    max-height: calc(100dvh - 210px);
   }
 }
 

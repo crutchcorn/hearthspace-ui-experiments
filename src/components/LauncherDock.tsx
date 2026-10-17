@@ -167,9 +167,6 @@ export default function LauncherDock({
               <span className={styles.appIcon}>
                 <Icon size={20} aria-hidden="true" />
               </span>
-              <span className={styles.appName} aria-hidden="true">
-                {app.name}
-              </span>
               {running && (
                 <>
                   <span className={styles.count} aria-hidden="true">
@@ -182,7 +179,6 @@ export default function LauncherDock({
           )
         })}
       </div>
-      <span className={styles.divider} aria-hidden="true" />
       <button
         ref={triggerRef}
         type="button"
@@ -193,7 +189,6 @@ export default function LauncherDock({
         onClick={onToggle}
       >
         <LayoutGrid size={22} aria-hidden="true" />
-        <span>Apps</span>
       </button>
       {selectedGroup && (
         <section

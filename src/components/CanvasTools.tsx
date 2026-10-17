@@ -44,39 +44,37 @@ export default function CanvasTools({
             title="Pan the canvas (H)"
             onClick={() => onModeChange('pan')}
           >
-            <Hand size={24} strokeWidth={1.5} aria-hidden="true" />
-            <span>Move</span>
-            <kbd aria-hidden="true">H</kbd>
+            <Hand size={20} strokeWidth={1.5} aria-hidden="true" />
           </button>
           <button
             type="button"
             className={styles.tool}
             aria-pressed={mode === 'lasso'}
+            aria-label="Select windows"
             title="Select windows (L)"
             onClick={() => onModeChange('lasso')}
           >
             <LassoSelect size={18} aria-hidden="true" />
-            <span>Select</span>
           </button>
           <button
             type="button"
             className={styles.tool}
             aria-pressed={mapOpen}
+            aria-label="Toggle canvas map"
             title="Toggle canvas map (M)"
             onClick={onToggleMap}
           >
             <Map size={18} aria-hidden="true" />
-            <span>Map</span>
           </button>
           <button
             type="button"
             className={styles.tool}
+            aria-label="Arrange all windows"
             title="Arrange all windows (A)"
             onClick={onArrange}
             disabled={windowCount === 0}
           >
             <LayoutGrid size={18} aria-hidden="true" />
-            <span>Arrange</span>
           </button>
         </div>
       </div>

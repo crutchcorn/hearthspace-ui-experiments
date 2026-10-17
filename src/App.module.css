@@ -271,7 +271,7 @@
   align-items: flex-end;
   justify-content: space-between;
   gap: 10px;
-  height: 60px;
+  height: 54px;
   pointer-events: none;
 }
 
@@ -302,10 +302,12 @@
 .mapPanel {
   position: fixed;
   z-index: 600;
-  bottom: 160px;
+  bottom: 90px;
   left: 24px;
   width: 352px;
   max-width: calc(100vw - 28px);
+  max-height: calc(100dvh - 186px);
+  overflow: auto;
   padding: 20px;
   border: 1px solid var(--chrome-border);
   border-radius: var(--radius-panel);
@@ -387,8 +389,9 @@
   }
 
   .mapPanel {
-    bottom: 176px;
+    bottom: 132px;
     left: 12px;
+    max-height: calc(100dvh - 216px);
   }
 }
 

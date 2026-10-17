@@ -3,8 +3,19 @@
   z-index: 1000;
   top: 24px;
   right: 24px;
-  width: 300px;
-  height: 132px;
+  display: flex;
+  width: 224px;
+  height: 54px;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--chrome-border);
+  border-radius: var(--radius-panel);
+  background: var(--chrome-raised);
+  box-shadow:
+    var(--glass-edge),
+    0 5px 15px #69442c0d;
+  backdrop-filter: var(--glass-blur);
   color: var(--chrome-text);
   line-height: 1;
   user-select: none;
@@ -12,147 +23,66 @@
 
 .bar button {
   appearance: none;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
   color: inherit;
   cursor: pointer;
   transition:
     background 140ms ease,
-    box-shadow 140ms ease,
     color 140ms ease;
+}
+
+.bar button:hover {
+  background: var(--chrome-hover);
+}
+
+.bar button.active {
+  background: var(--accent-soft);
+  color: var(--accent);
 }
 
 .bar button:focus-visible,
 .bar input:focus-visible {
   outline: 2px solid var(--accent);
-  outline-offset: 3px;
+  outline-offset: -2px;
 }
 
 .clockButton {
-  display: flex;
-  width: 100%;
-  min-height: 68px;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 8px 10px 10px;
-  border: 1px solid var(--chrome-border);
-  border-radius: var(--radius-tile);
-  background: var(--chrome-raised);
-  backdrop-filter: var(--glass-blur);
-  box-shadow:
-    var(--glass-edge),
-    0 5px 15px #69442c0d;
-  text-align: left;
-}
-
-.clockButton:hover,
-.clockButton.active {
-  border-color: #f4b583;
-  background: var(--chrome-raised);
-}
-
-.clockReadout {
-  font-size: 44px;
-  font-weight: 400;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: -2px;
-  text-shadow: 0 1px 1px #ffffff80;
-}
-
-.clockMeta {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  min-width: 0;
-}
-
-.date {
-  font-size: 12px;
+  display: grid;
+  width: 70px;
+  height: 44px;
+  flex-shrink: 0;
+  padding: 0;
+  place-items: center;
+  font-size: 14px;
   font-weight: 500;
-  line-height: 1.3;
+  font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
 
-.clockLabel {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  color: var(--chrome-muted);
-  font-size: 11px;
-}
-
 .statusGroup {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 7px;
+  display: flex;
+  gap: 4px;
 }
 
 .statusButton {
-  display: flex;
-  min-height: 56px;
-  align-items: center;
-  justify-content: center;
-  gap: 9px;
-  padding: 9px 5px;
-  border: 1px solid var(--chrome-border);
-  border-radius: var(--radius-tile);
-  background: linear-gradient(145deg, #ffffff75, #fff8ee12), var(--chrome);
-  box-shadow:
-    0 5px 15px #69442c0d,
-    inset 0 1px #ffffffc7;
-  backdrop-filter: var(--glass-blur);
-  text-align: left;
-}
-
-.statusButton:hover {
-  background: var(--chrome-raised);
-  box-shadow:
-    0 6px 18px #69442c16,
-    inset 0 1px #fff;
-}
-
-.statusButton.active {
-  background: linear-gradient(135deg, #f9955c, var(--accent));
-  box-shadow:
-    0 6px 18px #dc672b2e,
-    inset 0 1px #ffffff80;
-  color: var(--accent-ink);
-}
-
-.statusButton > span {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.statusLabel {
-  color: var(--chrome-muted);
-  font-size: 10px;
-}
-
-.statusButton.active .statusLabel {
-  color: inherit;
-  opacity: 0.8;
-}
-
-.statusValue {
-  font-size: 12px;
-  font-weight: 500;
-  font-variant-numeric: tabular-nums;
+  display: grid;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  padding: 0;
+  place-items: center;
 }
 
 .popover {
   position: absolute;
-  top: 144px;
+  top: calc(100% + 12px);
   right: 0;
   overflow: auto;
   width: 320px;
   max-width: calc(100vw - 24px);
-  max-height: calc(100dvh - 272px);
+  max-height: calc(100dvh - 182px);
   box-sizing: border-box;
   border: 1px solid var(--chrome-border);
   border-radius: var(--radius-panel);
@@ -394,75 +324,10 @@
   .bar {
     top: 12px;
     right: 12px;
-    width: 250px;
-    height: 126px;
-  }
-
-  .clockButton {
-    min-height: 64px;
-    gap: 12px;
-    padding: 6px 6px 10px;
-  }
-
-  .clockReadout {
-    font-size: 38px;
-  }
-
-  .date {
-    font-size: 11px;
-  }
-
-  .clockLabel {
-    font-size: 10px;
-  }
-
-  .statusGroup {
-    gap: 5px;
-  }
-
-  .statusButton {
-    gap: 6px;
-  }
-
-  .statusLabel {
-    font-size: 9px;
-  }
-
-  .statusValue {
-    font-size: 11px;
   }
 
   .popover {
-    top: 138px;
-    max-height: calc(100dvh - 326px);
-  }
-}
-
-@media (width <= 360px) {
-  .bar {
-    width: 218px;
-  }
-
-  .clockReadout {
-    font-size: 32px;
-    letter-spacing: -1.5px;
-  }
-
-  .clockMeta {
-    gap: 8px;
-  }
-
-  .clockLabel {
-    gap: 3px;
-  }
-
-  .statusButton {
-    gap: 4px;
-    padding-inline: 3px;
-  }
-
-  .statusButton > svg {
-    width: 13px;
+    max-height: calc(100dvh - 208px);
   }
 }
 

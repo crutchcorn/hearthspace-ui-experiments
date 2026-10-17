@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import {
-  ArrowDownRight,
   BatteryFull,
   Check,
   Volume2,
@@ -75,74 +74,52 @@ export default function SystemBar({
         type="button"
         className={`${styles.clockButton} ${openPanel === 'clock' ? styles.active : ''}`}
         onClick={() => togglePanel('clock')}
+        title={now.toLocaleDateString(undefined, {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        })}
         aria-label="Date and time"
         aria-expanded={openPanel === 'clock'}
       >
-        <span className={styles.clockReadout}>
-          {now.toLocaleTimeString(undefined, {
-            hour: '2-digit',
-            minute: '2-digit',
-            hourCycle: 'h23',
-          })}
-        </span>
-        <span className={styles.clockMeta}>
-          <span className={styles.date}>
-            {now.toLocaleDateString(undefined, {
-              weekday: 'short',
-              month: 'short',
-              day: 'numeric',
-            })}
-          </span>
-          <span className={styles.clockLabel}>
-            Local time <ArrowDownRight size={14} aria-hidden="true" />
-          </span>
-        </span>
+        {now.toLocaleTimeString(undefined, {
+          hour: '2-digit',
+          minute: '2-digit',
+          hourCycle: 'h23',
+        })}
       </button>
 
       <div className={styles.statusGroup}>
         <button
           type="button"
           className={`${styles.statusButton} ${openPanel === 'wifi' ? styles.active : ''}`}
-          title="Wi-Fi"
+          title={wifiEnabled ? 'Wi-Fi · Studio network' : 'Wi-Fi · Off'}
           aria-label="Wi-Fi settings"
           aria-expanded={openPanel === 'wifi'}
           onClick={() => togglePanel('wifi')}
         >
-          {wifiEnabled ? <Wifi size={16} /> : <WifiOff size={16} />}
-          <span>
-            <span className={styles.statusLabel}>Network</span>
-            <span className={styles.statusValue}>
-              {wifiEnabled ? 'Online' : 'Offline'}
-            </span>
-          </span>
+          {wifiEnabled ? <Wifi size={17} /> : <WifiOff size={17} />}
         </button>
         <button
           type="button"
           className={`${styles.statusButton} ${openPanel === 'volume' ? styles.active : ''}`}
-          title="Sound"
+          title={volume > 0 ? `Sound · ${volume}%` : 'Sound · Muted'}
           aria-label="Sound settings"
           aria-expanded={openPanel === 'volume'}
           onClick={() => togglePanel('volume')}
         >
-          {volume > 0 ? <Volume2 size={16} /> : <VolumeX size={16} />}
-          <span>
-            <span className={styles.statusLabel}>Sound</span>
-            <span className={styles.statusValue}>{volume}%</span>
-          </span>
+          {volume > 0 ? <Volume2 size={17} /> : <VolumeX size={17} />}
         </button>
         <button
           type="button"
           className={`${styles.statusButton} ${openPanel === 'battery' ? styles.active : ''}`}
-          title="Battery"
+          title="Battery · 87%"
           aria-label="Battery status"
           aria-expanded={openPanel === 'battery'}
           onClick={() => togglePanel('battery')}
         >
           <BatteryFull size={19} />
-          <span>
-            <span className={styles.statusLabel}>Power</span>
-            <span className={styles.statusValue}>87%</span>
-          </span>
         </button>
       </div>
 

@@ -86,8 +86,8 @@ function App() {
   const home = workspace.home
   const windowClearance =
     view.width <= 760
-      ? { side: 12, top: 158, bottom: 176 }
-      : { side: 24, top: 176, bottom: 160 }
+      ? { side: 12, top: 84, bottom: 132 }
+      : { side: 24, top: 96, bottom: 96 }
   const focusedWindowId = workspace.windows.some((item) => item.id === activeId)
     ? activeId
     : (workspace.windows.at(-1)?.id ?? null)

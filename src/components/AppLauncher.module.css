@@ -2,10 +2,10 @@
   position: fixed;
   z-index: 800;
   right: 24px;
-  bottom: 104px;
+  bottom: 90px;
   width: 650px;
   max-width: calc(100vw - 24px);
-  max-height: calc(100dvh - 280px);
+  max-height: calc(100dvh - 186px);
   overflow: auto;
   border: 1px solid var(--chrome-border);
   border-radius: var(--radius-panel);
@@ -363,8 +363,8 @@
 @media (width <= 760px) {
   .launcher {
     right: 12px;
-    bottom: 176px;
-    max-height: calc(100dvh - 334px);
+    bottom: 132px;
+    max-height: calc(100dvh - 216px);
   }
 }
 

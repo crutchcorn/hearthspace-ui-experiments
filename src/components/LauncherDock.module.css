@@ -1,18 +1,18 @@
 .dock {
   position: relative;
   display: flex;
-  height: 60px;
+  height: 54px;
   flex-shrink: 0;
-  align-items: stretch;
-  gap: 12px;
+  align-items: center;
+  gap: 8px;
   color: var(--chrome-text);
   user-select: none;
 }
 
 .appStrip {
   display: flex;
-  max-width: min(560px, calc(100vw - 380px));
-  align-items: stretch;
+  max-width: min(560px, calc(100vw - 310px));
+  align-items: center;
   gap: 8px;
   overflow-x: auto;
   overscroll-behavior-inline: contain;
@@ -26,14 +26,12 @@
 .appButton {
   position: relative;
   display: flex;
-  width: 66px;
-  min-height: 60px;
+  width: 44px;
+  height: 44px;
   flex-shrink: 0;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  padding: 5px 4px 9px;
+  padding: 0;
   border: 1px solid var(--chrome-border);
   border-radius: var(--radius-tile);
   background: var(--chrome);
@@ -71,20 +69,10 @@
   color: var(--accent);
 }
 
-.appName {
-  width: 100%;
-  overflow: hidden;
-  font-size: 9px;
-  font-weight: 500;
-  text-align: center;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 .count {
   position: absolute;
-  top: 5px;
-  right: 5px;
+  top: 2px;
+  right: 2px;
   display: grid;
   min-width: 13px;
   height: 13px;
@@ -119,14 +107,12 @@
 
 .launcher {
   display: flex;
-  width: 66px;
-  min-width: 66px;
-  min-height: 60px;
-  flex-direction: column;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  gap: 5px;
-  padding: 5px;
+  padding: 0;
   border: 1px solid #ffd2a9;
   border-radius: var(--radius-tile);
   background: linear-gradient(145deg, #f89454, var(--accent) 72%);
@@ -134,8 +120,6 @@
     0 8px 24px #d66b3447,
     inset 0 1px 0 #ffe6c78c;
   color: var(--accent-ink);
-  font-size: 11px;
-  font-weight: 600;
   touch-action: manipulation;
   transition: box-shadow 160ms ease;
 }
@@ -147,17 +131,13 @@
     inset 0 1px 0 #fff1d7;
 }
 
-.divider {
-  display: none;
-}
-
 .windowPopover {
   position: absolute;
   right: 0;
-  bottom: calc(100% + 20px);
+  bottom: calc(100% + 12px);
   width: 370px;
   max-width: calc(100vw - 24px);
-  max-height: min(440px, calc(100dvh - 280px));
+  max-height: calc(100dvh - 186px);
   overflow-y: auto;
   border: 1px solid var(--chrome-border);
   border-radius: var(--radius-panel);
@@ -325,15 +305,15 @@
   .appStrip {
     position: absolute;
     right: 0;
-    bottom: calc(100% + 28px);
+    bottom: calc(100% + 8px);
     width: max-content;
     max-width: calc(100vw - 24px);
-    height: 60px;
+    height: 44px;
   }
 
   .windowPopover {
-    bottom: calc(100% + 106px);
-    max-height: min(440px, calc(100dvh - 338px));
+    bottom: calc(100% + 64px);
+    max-height: calc(100dvh - 216px);
   }
 }
 

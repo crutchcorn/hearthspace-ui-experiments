@@ -162,7 +162,7 @@ export function arrangeWindows(
   const cellHeight = Math.max(...windows.map((item) => item.height))
   const gap = 24
   const x = origin.x + 24
-  const y = origin.y + 176
+  const y = origin.y + 96
   const arranged = new Map(
     windows
       .toSorted((a, b) => a.y - b.y || a.x - b.x || a.id.localeCompare(b.id))

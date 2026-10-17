@@ -10,15 +10,15 @@ Windows and controls share translucent surfaces, bright edges, backdrop blur, an
 
 Each window has a floating horizontal title rail above its translucent body. A continuous glass backplate supports the title, drag handle, and window controls so content underneath does not compete with them. An active window gains an orange icon and edge light. The body keeps its own content hierarchy and scrolling area.
 
-## Four corners, four forms
+## Compact corners
 
-Activity is a narrow glass ribbon with an orange signal and unread text. It opens into a stream with a fine orange guide, app icons, and quiet timestamps. The 24-hour clock sits on its own glass backplate above three separate status modules for network, sound, and power. Its backplate keeps the time readable over window content.
+The corner controls share a 54-pixel resting height, keeping more canvas available before a panel opens. Activity uses a compact glass ribbon with an orange signal and unread text; it narrows to 64 pixels on small screens. It opens into a stream with a fine orange guide, app icons, and quiet timestamps. The 24-hour clock and three icon buttons for network, sound, and power share one glass row. The full date and device details live in tooltips and expanded panels.
 
-The navigator puts a circular Move control beside Select, Map, and Arrange. Its map opens above the controls and supports continuous dragging. At narrow widths, the navigator becomes a compact row.
+The navigator is a single row of Pan, Select, Map, and Arrange icons at every width. Its map opens above the controls and supports continuous dragging. Each icon has a hover title, an accessible name, and a target at least 44 pixels wide and high.
 
-The application gallery opens with search and an Apps/Draw toggle in one command bar. Grid view has four columns; list and search views have one. Named glass tiles beside Apps show favorites and running apps. Their window picker identifies instances by title, number, and focus state. The drawing pad remains inside the launcher.
+The application gallery opens with search and an Apps/Draw toggle in one command bar. Grid view has four columns; list and search views have one. Icon-only dock buttons beside Apps show favorites and running apps, with counts and active markers. Names appear on hover and remain available to assistive technology; the gallery and window picker retain visible text. The picker identifies instances by title, number, and focus state. The drawing pad remains inside the launcher.
 
-These forms share light, materials, and interaction states while retaining different compositions for their different jobs.
+Expanded panels provide detail while the resting controls keep a small footprint. Keyboard shortcuts and direct touch targets remain available without hover.
 
 ## Orange carries state
 
@@ -40,7 +40,7 @@ Use the shared radius scale consistently across windows and controls:
 | `--radius-panel`   | 16px   | Window bodies, title rails, and panels.     |
 | `--radius-round`   | 999px  | Circular targets and fully rounded markers. |
 
-Keep the four corners reachable when windows are maximized or panels open. On narrow screens, app tiles move into a horizontally scrolling row above Apps. Panels reserve space for those controls and scroll internally when height is limited. Content windows retain their spatial dimensions and remain reachable through the map and window picker.
+Keep the four corners reachable when windows are maximized or panels open. On narrow screens, dock app icons move into a horizontally scrolling row above Apps. Panels reserve space for those controls and scroll internally when height is limited. Content windows retain their spatial dimensions and remain reachable through the map and window picker. The exact offsets and maximized-window clearances are recorded in [Spatial playground](spatial-playground.md).
 
 ## Motion follows interaction
 
