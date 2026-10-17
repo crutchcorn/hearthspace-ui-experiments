@@ -2,7 +2,7 @@
 
 A private, local playground for exploring the feel of [Hearthspace](https://github.com/crutchcorn/hearthspace), a Linux distribution experimenting with how computing could work.
 
-The current experiment is a spatial desktop with a large dotted canvas, movable windows, canvas tools, and an app launcher with a dedicated drawing pad for gesture shortcuts. Compact glass controls occupy the four corners: notifications, device status, canvas tools, and applications. Orange marks active controls against the pale canvas. The app opens as **Hearthspace**.
+The current experiment is a spatial desktop with a large dotted canvas, movable windows, canvas tools, and an app launcher with a dedicated drawing pad for gesture shortcuts. Compact glass controls occupy the four corners: notifications, device status, canvas tools, and applications. Orange is the default accent, with a choice of colors in Settings. The app opens as **Hearthspace**.
 
 ## Run it
 
@@ -48,12 +48,16 @@ To customize a shortcut, choose the pad’s cog icon. It opens notifications wit
 
 Drawing records and previews the stroke; gesture recognition is not implemented. Use **Open [app]** to try the launch result. Launching creates labeled preview windows on the canvas, without opening applications in the host operating system.
 
+## Choose an accent
+
+Open **Settings** from Apps, then choose an accent under **Appearance**: Orange, Rose, Violet, Blue, Teal, or Olive. Orange is the default. The choice updates the whole desktop immediately and stays selected after reload. Each color provides a coordinated palette for controls, window states, and the dotted canvas; individual components cannot be themed separately.
+
 ## Try notifications
 
-Open the bell in the top-left corner or press N. The bell shows an orange unread count, or **All clear** when there are no unread items. Narrow screens show the bell and a count. The inbox starts with three sample notifications. **Open Notes**, **Open Files**, and **Open Browser** bring the matching window into view, or create a preview window if it is missing. Opening a notification marks it read; **Mark all read** clears the unread count, and each notification’s close button removes it.
+Open the bell in the top-left corner or press N. The bell shows an accented unread count, or **All clear** when there are no unread items. Narrow screens show the bell and a count. The inbox starts with three sample notifications. **Open Notes**, **Open Files**, and **Open Browser** bring the matching window into view, or create a preview window if it is missing. Opening a notification marks it read; **Mark all read** clears the unread count, and each notification’s close button removes it.
 
 Choose **Preview notification** to add a sample and show a toast below the notification button. The toast disappears after six seconds; dismissing the toast keeps the notification in the inbox. These notifications are simulated and reset when the page reloads. N is inactive while typing or using the launcher.
 
-Workspace, Scratchpad, and Files are the starter windows. The scratchpad is editable; file tiles and app interiors are interface previews. Window positions, sizes, scratchpad text, and saved gesture shortcuts persist in this browser’s local storage. Wi-Fi, sound, and battery controls are simulated; the 24-hour clock uses your device’s local time.
+Workspace, Scratchpad, and Files are the starter windows. The scratchpad is editable; file tiles and most app interiors are interface previews. Settings changes the playground’s appearance. Window positions, sizes, scratchpad text, saved gesture shortcuts, and the accent choice persist in this browser’s local storage. Wi-Fi, sound, and battery controls are simulated; the 24-hour clock uses your device’s local time.
 
 For development commands, see [CONTRIBUTING.md](CONTRIBUTING.md). The [technical documentation](docs/README.md) describes the experiment’s structure.

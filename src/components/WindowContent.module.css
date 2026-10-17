@@ -12,7 +12,11 @@
   justify-content: center;
   gap: 23px;
   padding: 25px 28px;
-  background: radial-gradient(ellipse at 15% 100%, #f9c49b20, transparent 65%);
+  background: radial-gradient(
+    ellipse at 15% 100%,
+    color-mix(in srgb, var(--accent-light) 13%, transparent),
+    transparent 65%
+  );
 }
 
 .spaceHeader h2 {
@@ -39,17 +43,17 @@
   justify-content: center;
   flex-direction: column;
   gap: 4px;
-  border: 1px solid #dbb99b52;
+  border: 1px solid color-mix(in srgb, var(--accent-border) 32%, transparent);
   border-radius: 50%;
   background: radial-gradient(
     ellipse at 50% 70%,
-    #f5b57a26,
+    color-mix(in srgb, var(--accent-light) 15%, transparent),
     #ffffff24 62%,
     #ffffff45
   );
   box-shadow:
     inset 0 1px 0 #ffffffad,
-    0 5px 15px #c8996410;
+    0 5px 15px color-mix(in srgb, var(--accent) 6%, transparent);
 }
 
 .spaceOrbit strong {
@@ -69,7 +73,7 @@
 .orbitTrack {
   position: absolute;
   inset: 18px -9px;
-  border: 1px solid #dba16d45;
+  border: 1px solid color-mix(in srgb, var(--accent-border) 27%, transparent);
   border-radius: 50%;
   transform: rotate(38deg);
   pointer-events: none;
@@ -87,10 +91,10 @@
   right: 12px;
   width: 8px;
   height: 8px;
-  border: 1px solid #fff1d8c9;
+  border: 1px solid color-mix(in srgb, var(--accent-wash) 79%, transparent);
   border-radius: 50%;
   background: var(--accent);
-  box-shadow: 0 0 12px #e9642a6b;
+  box-shadow: 0 0 12px color-mix(in srgb, var(--accent) 42%, transparent);
 }
 
 .stats {
@@ -156,7 +160,7 @@
 }
 
 .notes textarea:focus-visible {
-  box-shadow: inset 0 -1px #e9642a69;
+  box-shadow: inset 0 -1px color-mix(in srgb, var(--accent) 41%, transparent);
 }
 
 .footer {
@@ -225,7 +229,7 @@
 
 .fileTile > svg {
   flex-shrink: 0;
-  color: #ae8062;
+  color: color-mix(in srgb, var(--accent-strong) 45%, var(--muted));
 }
 
 .fileTile > div {
@@ -282,7 +286,7 @@
 }
 
 .console p > span:first-child {
-  color: #f9a972;
+  color: var(--accent-light);
 }
 
 .consoleOutput {
@@ -301,7 +305,7 @@
   width: 7px;
   height: 13px;
   border-radius: 0;
-  background: #f59d62;
+  background: var(--accent-bright);
   vertical-align: -2px;
 }
 
@@ -360,7 +364,7 @@
 .bookmark > svg {
   flex-shrink: 0;
   margin-left: auto;
-  color: #b48a69;
+  color: color-mix(in srgb, var(--accent-strong) 45%, var(--muted));
 }
 
 .bookmark strong,
@@ -392,7 +396,7 @@
 
 .previewHeading > svg {
   flex-shrink: 0;
-  color: #b47b53;
+  color: color-mix(in srgb, var(--accent-strong) 45%, var(--muted));
 }
 
 .previewHeading h2 {

@@ -7,9 +7,12 @@
   padding: 0;
   border: 1px solid #ffffffb3;
   border-radius: var(--radius-control);
-  background-color: #e8e5de;
+  background-color: var(--field);
   background-image:
-    radial-gradient(#8f83774a 0.65px, transparent 0.8px),
+    radial-gradient(
+      color-mix(in srgb, var(--field-dot) 65%, transparent) 0.65px,
+      transparent 0.8px
+    ),
     linear-gradient(#ffffff3d 1px, transparent 1px),
     linear-gradient(90deg, #ffffff3d 1px, transparent 1px);
   background-size:
@@ -44,7 +47,7 @@
   position: absolute;
   border: 2px solid var(--accent);
   border-radius: var(--radius-detail);
-  background: #e9642a17;
+  background: color-mix(in srgb, var(--accent) 9%, transparent);
   box-shadow: 0 0 0 1px #ffffff80;
   pointer-events: none;
 }

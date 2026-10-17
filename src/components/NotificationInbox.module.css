@@ -45,8 +45,12 @@
 }
 
 .trigger[data-unread='true'] {
-  border-color: #f4b583;
-  background: linear-gradient(135deg, #fff5eae6, #f9dfcdad);
+  border-color: var(--accent-border);
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--accent-wash) 90%, transparent),
+    color-mix(in srgb, var(--accent-soft) 68%, transparent)
+  );
   color: var(--accent);
 }
 
@@ -179,7 +183,7 @@
   bottom: 0;
   left: 34px;
   width: 1px;
-  background: #eb986e45;
+  background: color-mix(in srgb, var(--accent) 27%, transparent);
 }
 
 .notification:first-child::before {
@@ -191,8 +195,11 @@
 }
 
 .notification[data-unread='true']::before {
-  background: linear-gradient(#efa68070, #e9642a80);
-  box-shadow: 0 0 8px #e9642a15;
+  background: linear-gradient(
+    color-mix(in srgb, var(--accent-bright) 44%, transparent),
+    color-mix(in srgb, var(--accent) 50%, transparent)
+  );
+  box-shadow: 0 0 8px color-mix(in srgb, var(--accent) 8%, transparent);
 }
 
 .itemIcon {
@@ -354,8 +361,8 @@
   padding: 0 10px;
   border: 1px solid #ffffffa6;
   border-radius: var(--radius-control);
-  background: linear-gradient(135deg, #f9955c, var(--accent));
-  box-shadow: 0 3px 10px #e9642a20;
+  background: linear-gradient(135deg, var(--accent-bright), var(--accent));
+  box-shadow: 0 3px 10px color-mix(in srgb, var(--accent) 13%, transparent);
   color: var(--accent-ink);
   font-size: 11px;
 }
@@ -445,8 +452,8 @@
   padding: 0 12px;
   border: 1px solid #ffffffa6;
   border-radius: var(--radius-control);
-  background: linear-gradient(135deg, #f9955c, var(--accent));
-  box-shadow: 0 3px 10px #e9642a20;
+  background: linear-gradient(135deg, var(--accent-bright), var(--accent));
+  box-shadow: 0 3px 10px color-mix(in srgb, var(--accent) 13%, transparent);
   color: var(--accent-ink);
   font-size: 12px;
 }

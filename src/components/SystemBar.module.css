@@ -159,7 +159,7 @@
 }
 
 .toggle:checked {
-  background: linear-gradient(135deg, #f9955c, var(--accent));
+  background: linear-gradient(135deg, var(--accent-bright), var(--accent));
 }
 
 .toggle:checked::before {
@@ -239,7 +239,7 @@
   width: 87%;
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, #fbb47d, var(--accent));
+  background: linear-gradient(90deg, var(--accent-light), var(--accent));
 }
 
 .batteryDescription {
@@ -295,8 +295,8 @@
 .today {
   border: 1px solid #ffffff94;
   border-radius: var(--radius-control);
-  background: linear-gradient(135deg, #f9955c, var(--accent));
-  box-shadow: 0 3px 10px #d7672433;
+  background: linear-gradient(135deg, var(--accent-bright), var(--accent));
+  box-shadow: 0 3px 10px color-mix(in srgb, var(--accent) 20%, transparent);
   color: var(--accent-ink);
 }
 

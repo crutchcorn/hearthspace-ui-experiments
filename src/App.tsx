@@ -5,6 +5,7 @@ import {
   useLayoutEffect,
   useRef,
   useState,
+  type CSSProperties,
   type PointerEvent as ReactPointerEvent,
 } from 'react'
 import {
@@ -38,6 +39,12 @@ import {
   type DesktopWindow,
 } from './desktop'
 import styles from './App.module.css'
+import {
+  ACCENT_THEMES,
+  loadAccentTheme,
+  saveAccentTheme,
+  type AccentThemeId,
+} from './theme'
 
 type Gesture = {
   pointerId: number
@@ -54,6 +61,9 @@ type Gesture = {
 const edges = ['n', 'e', 's', 'w', 'ne', 'se', 'sw', 'nw']
 
 function App() {
+  const [accentTheme, setAccentTheme] = useState(loadAccentTheme)
+  const accent =
+    ACCENT_THEMES.find((theme) => theme.id === accentTheme) ?? ACCENT_THEMES[0]
   const [workspace, setWorkspace] = useState(loadWorkspace)
   const [view, setView] = useState(() => ({
     ...workspace.home,
@@ -453,6 +463,8 @@ function App() {
     const canvas = viewport.current!
     const id = crypto.randomUUID()
     const offset = (workspace.windows.length % 5) * 24
+    const width = app?.id === 'settings' ? 420 : 360
+    const height = app?.id === 'settings' ? 370 : 260
     setWorkspace((current) => ({
       ...current,
       windows: [
@@ -465,17 +477,19 @@ function App() {
           kind: 'empty',
           appId: app?.id,
           x: clamp(
-            canvas.scrollLeft + Math.max(20, (view.width - 360) / 2) + offset,
+            canvas.scrollLeft + Math.max(20, (view.width - width) / 2) + offset,
             0,
-            current.width - 360,
+            current.width - width,
           ),
           y: clamp(
-            canvas.scrollTop + Math.max(80, (view.height - 260) / 2) + offset,
+            canvas.scrollTop +
+              Math.max(80, (view.height - height) / 2) +
+              offset,
             0,
-            current.height - 260,
+            current.height - height,
           ),
-          width: 360,
-          height: 260,
+          width,
+          height,
         },
       ],
     }))
@@ -554,8 +568,17 @@ function App() {
     viewport.current?.scrollTo(home.x, home.y)
   }
 
+  function changeAccentTheme(theme: AccentThemeId) {
+    setAccentTheme(theme)
+    saveAccentTheme(theme)
+  }
+
   return (
-    <main className={styles.desktop}>
+    <main
+      className={styles.desktop}
+      data-accent={accentTheme}
+      style={{ '--accent': accent.color } as CSSProperties}
+    >
       <SystemBar
         openPanel={systemPanel}
         onPanelChange={(panel) => {
@@ -687,6 +710,8 @@ function App() {
                   <WindowContent
                     item={item}
                     workspace={workspace}
+                    accentTheme={accentTheme}
+                    onAccentThemeChange={changeAccentTheme}
                     onNoteChange={(note) =>
                       setWorkspace((current) => ({ ...current, note }))
                     }

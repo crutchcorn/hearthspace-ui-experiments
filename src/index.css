@@ -9,6 +9,11 @@
   --accent-hover: #f37a3e;
   --accent-ink: #fff8f0;
   --accent-soft: #f9dfcd;
+  --accent-strong: #d65d27;
+  --accent-bright: #ff9b5e;
+  --accent-light: #ffc184;
+  --accent-border: #f4b583;
+  --accent-wash: #fff3e4;
   --paper: #fffbf5bd;
   --ink: #362a25;
   --muted: #88776c;
@@ -39,6 +44,30 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color-scheme: light;
+}
+
+[data-accent] {
+  --accent-hover: color-mix(in srgb, var(--accent) 86%, white);
+  --accent-strong: color-mix(in srgb, var(--accent) 88%, #231f1c);
+  --accent-bright: color-mix(in srgb, var(--accent) 66%, white);
+  --accent-light: color-mix(in srgb, var(--accent) 40%, #fff8f0);
+  --accent-border: color-mix(in srgb, var(--accent) 45%, #fff8f0);
+  --accent-soft: color-mix(in srgb, var(--accent) 17%, #fff8f0);
+  --accent-wash: color-mix(in srgb, var(--accent) 7%, #fff8f0);
+  --field: color-mix(in srgb, var(--accent) 3%, #eeeae5);
+  --field-dot: color-mix(in srgb, var(--accent) 25%, #94877c73);
+}
+
+[data-accent='orange'] {
+  --accent-hover: #f37a3e;
+  --accent-strong: #d65d27;
+  --accent-bright: #ff9b5e;
+  --accent-light: #ffc184;
+  --accent-border: #f4b583;
+  --accent-soft: #f9dfcd;
+  --accent-wash: #fff3e4;
+  --field: #eee8e1;
+  --field-dot: #ad836b73;
 }
 
 * {

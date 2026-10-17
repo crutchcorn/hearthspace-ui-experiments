@@ -6,6 +6,8 @@ import {
   LockKeyhole,
 } from 'lucide-react'
 import type { DesktopWindow, Workspace } from '../desktop'
+import type { AccentThemeId } from '../theme'
+import AppearanceSettings from './AppearanceSettings'
 import { APP_CATALOG } from './launcher-apps'
 import styles from './WindowContent.module.css'
 
@@ -13,6 +15,8 @@ interface WindowContentProps {
   item: DesktopWindow
   workspace: Workspace
   onNoteChange: (note: string) => void
+  accentTheme: AccentThemeId
+  onAccentThemeChange: (theme: AccentThemeId) => void
 }
 
 const files = [
@@ -32,6 +36,8 @@ export default function WindowContent({
   item,
   workspace,
   onNoteChange,
+  accentTheme,
+  onAccentThemeChange,
 }: WindowContentProps) {
   if (item.kind === 'welcome') {
     return (
@@ -169,6 +175,15 @@ export default function WindowContent({
           ))}
         </div>
       </div>
+    )
+  }
+
+  if (item.appId === 'settings') {
+    return (
+      <AppearanceSettings
+        accentTheme={accentTheme}
+        onAccentThemeChange={onAccentThemeChange}
+      />
     )
   }
 

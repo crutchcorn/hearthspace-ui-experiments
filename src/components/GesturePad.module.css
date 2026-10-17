@@ -40,7 +40,12 @@
   border: 1px solid #ffffff5c;
   border-radius: var(--radius-tile);
   background:
-    radial-gradient(ellipse at 24% 100%, #ae61372b, transparent 70%), #302622ed;
+    radial-gradient(
+      ellipse at 24% 100%,
+      color-mix(in srgb, var(--accent) 17%, transparent),
+      transparent 70%
+    ),
+    #302622ed;
   box-shadow:
     inset 0 1px 0 #d3ab8933,
     0 8px 20px #51372517;
@@ -48,7 +53,7 @@
 }
 
 .pad[data-drawing='true'] {
-  border-color: #e6a772b3;
+  border-color: color-mix(in srgb, var(--accent-light) 70%, transparent);
 }
 
 .padMeta {
@@ -78,7 +83,7 @@
 
 .stroke {
   fill: none;
-  stroke: #ffc184;
+  stroke: var(--accent-light);
   stroke-linecap: round;
   stroke-linejoin: round;
   stroke-width: 2.5;
@@ -98,7 +103,7 @@
 }
 
 .padPrompt > svg {
-  color: #e9ad77;
+  color: var(--accent-light);
 }
 
 .padPrompt strong {
@@ -122,7 +127,7 @@
   max-width: calc(100% - 120px);
   align-items: center;
   gap: 5px;
-  color: #e9c39d;
+  color: var(--accent-light);
   font-size: 9px;
   pointer-events: none;
 }
@@ -196,12 +201,12 @@
   justify-content: center;
   gap: 8px;
   padding: 0 13px;
-  border: 1px solid #ffd3ae;
+  border: 1px solid var(--accent-border);
   border-radius: var(--radius-control);
   background: var(--accent);
   box-shadow:
-    0 4px 12px #bd602c21,
-    inset 0 1px 0 #ffe3c74d;
+    0 4px 12px color-mix(in srgb, var(--accent) 13%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--accent-wash) 30%, transparent);
   color: var(--accent-ink);
   font-size: 12px;
   font-weight: 500;

@@ -121,9 +121,9 @@
 }
 
 .window[data-active='true'] .windowTitle > svg {
-  color: #d65d27;
-  background: #fff3e4;
-  box-shadow: 0 0 18px #ed7b3324;
+  color: var(--accent-strong);
+  background: var(--accent-wash);
+  box-shadow: 0 0 18px color-mix(in srgb, var(--accent) 14%, transparent);
 }
 
 .windowTitle > span {
@@ -174,12 +174,12 @@
 }
 
 .window[data-active='true'] {
-  border-color: #f4b583;
+  border-color: var(--accent-border);
   box-shadow:
     var(--glass-edge),
-    0 0 0 1px #e8752a1c,
-    0 20px 48px #80401724,
-    0 4px 10px #8040170d;
+    0 0 0 1px color-mix(in srgb, var(--accent) 11%, transparent),
+    0 20px 48px color-mix(in srgb, var(--accent-strong) 14%, transparent),
+    0 4px 10px color-mix(in srgb, var(--accent-strong) 5%, transparent);
 }
 
 .resizeHandle {
@@ -285,15 +285,15 @@
   position: absolute;
   border: 1px solid var(--accent);
   border-radius: var(--radius-detail);
-  background: #e9642a12;
+  background: color-mix(in srgb, var(--accent) 7%, transparent);
   pointer-events: none;
 }
 
 .window[data-selected='true'] {
   border-color: var(--accent);
   box-shadow:
-    0 0 0 2px #e9642a60,
-    0 16px 40px #80401720;
+    0 0 0 2px color-mix(in srgb, var(--accent) 38%, transparent),
+    0 16px 40px color-mix(in srgb, var(--accent-strong) 13%, transparent);
 }
 
 .mapPanel {

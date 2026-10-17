@@ -49,8 +49,8 @@
 }
 
 .appButton[aria-expanded='true'] {
-  border-color: #e9845270;
-  background: #fff8ede6;
+  border-color: color-mix(in srgb, var(--accent) 44%, transparent);
+  background: color-mix(in srgb, var(--accent-wash) 90%, transparent);
 }
 
 .appButton:focus-visible {
@@ -113,12 +113,12 @@
   align-items: center;
   justify-content: center;
   padding: 0;
-  border: 1px solid #ffd2a9;
+  border: 1px solid var(--accent-border);
   border-radius: var(--radius-tile);
-  background: linear-gradient(145deg, #f89454, var(--accent) 72%);
+  background: linear-gradient(145deg, var(--accent-bright), var(--accent) 72%);
   box-shadow:
-    0 8px 24px #d66b3447,
-    inset 0 1px 0 #ffe6c78c;
+    0 8px 24px color-mix(in srgb, var(--accent) 28%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--accent-wash) 55%, transparent);
   color: var(--accent-ink);
   touch-action: manipulation;
   transition: box-shadow 160ms ease;
@@ -127,8 +127,8 @@
 .launcher:hover,
 .launcher[aria-expanded='true'] {
   box-shadow:
-    0 8px 30px #d66b3470,
-    inset 0 1px 0 #fff1d7;
+    0 8px 30px color-mix(in srgb, var(--accent) 44%, transparent),
+    inset 0 1px 0 var(--accent-wash);
 }
 
 .windowPopover {
@@ -251,7 +251,7 @@
 }
 
 .windowButton[data-active='true'] .windowPreview > span {
-  background: #e9845280;
+  background: color-mix(in srgb, var(--accent) 50%, transparent);
 }
 
 .windowCopy {
