@@ -6,8 +6,9 @@ import {
   LockKeyhole,
 } from 'lucide-react'
 import type { DesktopWindow, Workspace } from '../desktop'
-import type { AccentThemeId } from '../theme'
+import type { AccentThemeId, AppPresentation } from '../theme'
 import AppearanceSettings from './AppearanceSettings'
+import AppIcon from './AppIcon'
 import { APP_CATALOG } from './launcher-apps'
 import styles from './WindowContent.module.css'
 
@@ -17,6 +18,8 @@ interface WindowContentProps {
   onNoteChange: (note: string) => void
   accentTheme: AccentThemeId
   onAccentThemeChange: (theme: AccentThemeId) => void
+  appPresentation: AppPresentation
+  onAppPresentationChange: (presentation: AppPresentation) => void
 }
 
 const files = [
@@ -38,6 +41,8 @@ export default function WindowContent({
   onNoteChange,
   accentTheme,
   onAccentThemeChange,
+  appPresentation,
+  onAppPresentationChange,
 }: WindowContentProps) {
   if (item.kind === 'welcome') {
     return (
@@ -183,6 +188,8 @@ export default function WindowContent({
       <AppearanceSettings
         accentTheme={accentTheme}
         onAccentThemeChange={onAccentThemeChange}
+        appPresentation={appPresentation}
+        onAppPresentationChange={onAppPresentationChange}
       />
     )
   }
@@ -192,7 +199,12 @@ export default function WindowContent({
   return (
     <div className={styles.appPreview}>
       <div className={styles.previewHeading}>
-        <Icon size={22} strokeWidth={1.5} aria-hidden="true" />
+        <AppIcon
+          appId={app?.id ?? 'unknown'}
+          icon={Icon}
+          size={22}
+          strokeWidth={1.5}
+        />
         <div>
           <h2>{app?.name ?? item.title}</h2>
           <p>{app?.description}</p>

@@ -8,8 +8,10 @@ export const ACCENT_THEMES = [
 ] as const
 
 export type AccentThemeId = (typeof ACCENT_THEMES)[number]['id']
+export type AppPresentation = 'ideal' | 'realistic'
 
 const ACCENT_STORAGE_KEY = 'hearthspace-accent-v1'
+const APP_PRESENTATION_STORAGE_KEY = 'hearthspace-app-presentation-v1'
 
 export function loadAccentTheme(): AccentThemeId {
   try {
@@ -25,5 +27,23 @@ export function saveAccentTheme(theme: AccentThemeId) {
     localStorage.setItem(ACCENT_STORAGE_KEY, theme)
   } catch {
     // Keep the selected accent for this session if storage is unavailable.
+  }
+}
+
+export function loadAppPresentation(): AppPresentation {
+  try {
+    return localStorage.getItem(APP_PRESENTATION_STORAGE_KEY) === 'realistic'
+      ? 'realistic'
+      : 'ideal'
+  } catch {
+    return 'ideal'
+  }
+}
+
+export function saveAppPresentation(presentation: AppPresentation) {
+  try {
+    localStorage.setItem(APP_PRESENTATION_STORAGE_KEY, presentation)
+  } catch {
+    // Keep the selected presentation for this session if storage is unavailable.
   }
 }

@@ -1,0 +1,202 @@
+.identity {
+  position: relative;
+  display: inline-grid;
+  width: var(--app-icon-size);
+  height: var(--app-icon-size);
+  flex-shrink: 0;
+  place-items: center;
+  vertical-align: middle;
+}
+
+.ideal {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.realistic {
+  position: relative;
+  display: none;
+  width: 100%;
+  height: 100%;
+  place-items: center;
+  isolation: isolate;
+  color: #5c6269;
+  filter: drop-shadow(0 1px 1px #13202d33);
+}
+
+.realistic > svg {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.realistic::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+}
+
+:global([data-presentation='realistic']) .identity {
+  width: calc(var(--app-icon-size) * 1.3);
+  height: calc(var(--app-icon-size) * 1.3);
+}
+
+:global([data-presentation='realistic']) .ideal {
+  display: none;
+}
+
+:global([data-presentation='realistic']) .realistic {
+  display: grid;
+}
+
+.identity[data-app-icon='browser'] .realistic {
+  color: #fff8ee;
+}
+
+.identity[data-app-icon='browser'] .realistic::before {
+  border: 1px solid #4e62bc5c;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 35deg,
+    #4d6bd9,
+    #383bb2 30%,
+    #d7596c 53%,
+    #f4b35e 78%,
+    #4d6bd9
+  );
+  box-shadow: inset 0 1px 2px #ffffff70;
+}
+
+.identity[data-app-icon='browser'] .realistic > svg {
+  width: 71%;
+  height: 71%;
+}
+
+.identity[data-app-icon='files'] .realistic {
+  color: #2872a5;
+}
+
+.identity[data-app-icon='files'] .realistic > svg {
+  fill: #72b9e8;
+  stroke-width: 1.2px;
+}
+
+.identity[data-app-icon='notes'] .realistic {
+  transform: rotate(-5deg);
+  color: #bc9b40;
+}
+
+.identity[data-app-icon='notes'] .realistic > svg {
+  fill: #fff4c7;
+  stroke-width: 1.4px;
+}
+
+.identity[data-app-icon='notes'] .realistic::before {
+  z-index: 1;
+  inset: 28% 32% auto 23%;
+  height: 1px;
+  background: #c5ae73;
+  box-shadow:
+    0 calc(var(--app-icon-size) * 0.17) #c5ae73,
+    0 calc(var(--app-icon-size) * 0.34) #c5ae73;
+}
+
+.identity[data-app-icon='terminal'] .realistic {
+  color: #caf2bb;
+}
+
+.identity[data-app-icon='terminal'] .realistic::before {
+  inset: 8% 0;
+  border: 1px solid #11181e;
+  border-radius: 3px;
+  background: linear-gradient(#35414a 0 13%, #172129 14% 100%);
+  box-shadow: inset 0 1px 0 #75828b;
+}
+
+.identity[data-app-icon='terminal'] .realistic > svg {
+  width: 76%;
+  height: 76%;
+}
+
+.identity[data-app-icon='music'] .realistic {
+  color: white;
+}
+
+.identity[data-app-icon='music'] .realistic::before {
+  inset: 3%;
+  border: 1px solid #7d3c94;
+  border-radius: 24%;
+  background: linear-gradient(145deg, #dc68a7, #7844bc);
+  box-shadow: inset 0 1px 1px #ffb9e6;
+}
+
+.identity[data-app-icon='music'] .realistic > svg {
+  width: 68%;
+  height: 68%;
+  fill: #ffffff25;
+  stroke-width: 2px;
+}
+
+.identity[data-app-icon='photos'] .realistic {
+  transform: rotate(5deg);
+  color: #fff;
+}
+
+.identity[data-app-icon='photos'] .realistic::before {
+  inset: 9% 1%;
+  border: calc(var(--app-icon-size) * 0.07) solid #fff;
+  border-radius: 2px;
+  background: linear-gradient(
+    145deg,
+    #81c4ec,
+    #518db6 46%,
+    #64a26f 47%,
+    #d5b65d
+  );
+  box-shadow: 0 0 0 1px #8a928c5c;
+}
+
+.identity[data-app-icon='photos'] .realistic > svg {
+  width: 74%;
+  height: 74%;
+  stroke-width: 1.5px;
+}
+
+.identity[data-app-icon='calendar'] .realistic {
+  color: #694647;
+}
+
+.identity[data-app-icon='calendar'] .realistic::before {
+  inset: 9% 7% 3%;
+  border: 1px solid #c1a9a6;
+  border-radius: 2px;
+  background: linear-gradient(#c75455 0 25%, #fff9f0 26% 100%);
+}
+
+.identity[data-app-icon='calendar'] .realistic > svg {
+  width: 90%;
+  height: 90%;
+  stroke-width: 1.3px;
+}
+
+.identity[data-app-icon='settings'] .realistic,
+.identity[data-app-icon='gestures'] .realistic {
+  color: #68717a;
+}
+
+.identity[data-app-icon='settings'] .realistic > svg,
+.identity[data-app-icon='gestures'] .realistic > svg {
+  fill: #c1c8ce;
+  stroke-width: 1.5px;
+}
+
+.identity[data-app-icon^='workspace-'] .realistic {
+  color: #347e7b;
+}
+
+.identity[data-app-icon^='workspace-'] .realistic > svg {
+  fill: #deeeea;
+  stroke-width: 1.6px;
+}

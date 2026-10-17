@@ -9,6 +9,7 @@ import {
   X,
 } from 'lucide-react'
 import GesturePad from './GesturePad'
+import AppIcon from './AppIcon'
 import { APP_CATALOG, type LauncherApp } from './launcher-apps'
 import styles from './AppLauncher.module.css'
 
@@ -193,7 +194,6 @@ export default function AppLauncher({
           </div>
           <div className={showList ? styles.appList : styles.appGrid}>
             {apps.map((app, index) => {
-              const Icon = app.icon
               return (
                 <button
                   key={app.id}
@@ -212,7 +212,12 @@ export default function AppLauncher({
                   onClick={() => onLaunch(app)}
                 >
                   <span className={styles.appIcon}>
-                    <Icon size={30} strokeWidth={1.5} aria-hidden="true" />
+                    <AppIcon
+                      appId={app.id}
+                      icon={app.icon}
+                      size={showList ? 25 : 30}
+                      strokeWidth={1.5}
+                    />
                   </span>
                   <span className={styles.appCopy}>
                     <strong>{app.name}</strong>

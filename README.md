@@ -2,7 +2,7 @@
 
 A private, local playground for exploring the feel of [Hearthspace](https://github.com/crutchcorn/hearthspace), a Linux distribution experimenting with how computing could work.
 
-The current experiment is a spatial desktop with a large dotted canvas, movable windows, canvas tools, and an app launcher with a dedicated drawing pad for gesture shortcuts. Compact glass controls occupy the four corners: notifications, device status, canvas tools, and applications. Orange is the default accent, with a choice of colors in Settings. The app opens as **Hearthspace**.
+The current experiment is a spatial desktop with a large dotted canvas, movable windows, canvas tools, and an app launcher with a dedicated drawing pad for gesture shortcuts. Compact glass controls occupy the four corners: notifications, device status, canvas tools, and applications. Settings offers accent colors and a choice between uniform app styling and a more varied desktop. The app opens as **Hearthspace**.
 
 ## Run it
 
@@ -48,9 +48,11 @@ To customize a shortcut, choose the pad’s cog icon. It opens notifications wit
 
 Drawing in editing mode records the stroke without launching an app. Launching from the normal pad creates a labeled preview window on the canvas, without opening applications in the host operating system.
 
-## Choose an accent
+## Change the appearance
 
 Open **Settings** from Apps, then choose an accent under **Appearance**: Orange, Rose, Violet, Blue, Teal, or Olive. Orange is the default. The choice updates the whole desktop immediately and stays selected after reload. Each color provides a coordinated palette for controls, window states, and the dotted canvas; individual components cannot be themed separately.
+
+Under **App appearance**, choose **Ideal** for the uniform icons and glass windows, or **Realistic** to try varied icon shapes, backgrounds, and app-owned window styling. Ideal is the default. Realistic simulates the visual differences between Linux apps while keeping the corner controls, app bar, and active-window cues consistent. App artwork and interiors keep their own colors; the accent still belongs to the shared desktop. Switching modes preserves the windows, their arrangement, and edited notes, and the choice survives reload. Both modes remain browser previews rather than host applications.
 
 ## Try notifications
 
@@ -58,6 +60,6 @@ Open the bell in the top-left corner or press N. The compact, left-aligned bell 
 
 Choose **Preview notification** to add a sample and show a toast below the notification button. The toast disappears after six seconds; dismissing the toast keeps the notification in the inbox. These notifications are simulated and reset when the page reloads. N is inactive while typing or using the launcher.
 
-Workspace, Scratchpad, and Files are the starter windows. The scratchpad is editable; file tiles and most app interiors are interface previews. Settings changes the playground’s appearance. Window positions, sizes, scratchpad text, saved gesture shortcuts, and the accent choice persist in this browser’s local storage. Wi-Fi, sound, and battery controls are simulated; the 24-hour clock uses your device’s local time.
+Workspace, Scratchpad, and Files are the starter windows. The scratchpad is editable; file tiles and most app interiors are interface previews. Settings changes the playground’s appearance. Window positions, sizes, scratchpad text, saved gesture shortcuts, accent, and app appearance choices persist in this browser’s local storage. Wi-Fi, sound, and battery controls are simulated; the 24-hour clock uses your device’s local time.
 
 For development commands, see [CONTRIBUTING.md](CONTRIBUTING.md). The [technical documentation](docs/README.md) describes the experiment’s structure.

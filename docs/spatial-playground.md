@@ -10,7 +10,7 @@ The home viewport starts at 4.5 screen widths and heights into that world. Windo
 
 The minimap translates pointer positions into world coordinates. Grabbing its visible-area rectangle preserves the pointer’s offset within the viewport; pressing elsewhere centers the viewport there. Pointer capture keeps navigation continuous outside the map until release, and the native scroll container clamps travel at the world edges.
 
-Dragging a window’s title bar combines pointer movement with changes in scroll position. This keeps a grabbed window under the pointer while edge scrolling carries it farther across the world. Title and content share one glass frame, with a 44-pixel header increasing to 50 pixels for coarse pointers. The body scrolls in the remaining space. Eight resize handles constrain windows to the world bounds and a minimum size of 280 × 200 pixels.
+Dragging a window’s title bar combines pointer movement with changes in scroll position. This keeps a grabbed window under the pointer while edge scrolling carries it farther across the world. In Ideal mode, title and content share one glass frame, with a 44-pixel header increasing to 50 pixels for coarse pointers. Realistic mode gives external app previews their own frame styles while retaining the same window interactions. The body scrolls in the remaining space. Eight resize handles constrain windows to the world bounds and a minimum size of 280 × 200 pixels.
 
 Maximizing uses the current viewport with clearance for the corner controls, while retaining previous bounds for restore. The shared `windowClearance` uses 24-pixel side margins, 96 pixels above, and 96 below at desktop widths; at 760 pixels or less, these become 12, 84, and 142 pixels. Revealing a maximized window uses the same offsets; ordinary windows are centered with the top and side clearances as minimums. The same minimum window dimensions still apply on small viewports.
 
@@ -85,27 +85,32 @@ Gesture recognition is intentionally absent: the normal pad launches Browser reg
 
 The Settings app opens an Appearance view with six allowed accent choices: Orange, Rose, Violet, Blue, Teal, and Olive. Orange is the default. The selection belongs to `App`, so every Settings window reflects the same current choice. Changing it updates the root app’s `--accent` property and `data-accent` attribute. Shared CSS properties derive the environment’s palette from that color, while Orange retains its original values. Canvas tints, controls, window states, notifications, and gesture strokes use that shared palette. There are no per-component overrides or custom color inputs.
 
+The same view offers a global **App appearance** choice: **Ideal** by default, or **Realistic**. Ideal uses uniform app glyphs and joined glass frames. Realistic simulates independent app identities with varied icon silhouettes and backgrounds, frame shapes, title bars, and interior colors. The shell keeps its four-corner layout and shared accent cues; Workspace and Settings remain shell-owned surfaces. This is a visual approximation of a mixed Linux desktop, not an integration with host applications or a reproduction of particular toolkits.
+
+Presentation changes apply immediately to existing windows and their entries in the dock, launcher, and notifications. They do not replace the workspace or alter window geometry, stacking, dock ordering, or scratchpad content. The accent remains a separate global setting: it colors shell controls and window states in both modes, while Realistic app artwork and content retain their own identity colors. There are no individual app theme controls.
+
 ## Source map
 
-| File                                                                                    | Responsibility                                                                                        |
-| --------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| [`src/desktop.ts`](../src/desktop.ts)                                                   | Workspace types, initial layout, storage loading and validation, resizing, and arrangement.           |
-| [`src/theme.ts`](../src/theme.ts)                                                       | Allowed accent IDs and base colors, default choice, and accent storage validation.                    |
-| [`src/App.tsx`](../src/App.tsx)                                                         | Workspace rendering, pointer gestures, viewport navigation, window actions, accent state, and saving. |
-| [`src/components/SystemBar.tsx`](../src/components/SystemBar.tsx)                       | Compact 24-hour clock and status row, popovers, and simulated controls.                               |
-| [`src/components/NotificationInbox.tsx`](../src/components/NotificationInbox.tsx)       | Notification trigger, inbox, unread/dismissal state, and sample toasts.                               |
-| [`src/components/Minimap.tsx`](../src/components/Minimap.tsx)                           | Map rendering and pointer capture for dragging the visible canvas area.                               |
-| [`src/components/CanvasTools.tsx`](../src/components/CanvasTools.tsx)                   | Canvas mode controls, arrangement action, and selection status.                                       |
-| [`src/components/WindowContent.tsx`](../src/components/WindowContent.tsx)               | Workspace overview, editable scratchpad, appearance settings, and simulated app interiors.            |
-| [`src/components/AppearanceSettings.tsx`](../src/components/AppearanceSettings.tsx)     | Shared desktop accent selection in Settings.                                                          |
-| [`src/components/LauncherDock.tsx`](../src/components/LauncherDock.tsx)                 | Favorites, running-app groups, window instance picker, and the Apps trigger.                          |
-| [`src/components/AppLauncher.tsx`](../src/components/AppLauncher.tsx)                   | App gallery/list, filtering, keyboard navigation, and launcher views.                                 |
-| [`src/components/GesturePad.tsx`](../src/components/GesturePad.tsx)                     | Pointer drawing, placeholder gesture launching, shortcut assignment, and persistence.                 |
-| [`src/components/launcher-apps.ts`](../src/components/launcher-apps.ts)                 | Shared app catalog, icons, and descriptions.                                                          |
-| [`src/App.module.css`](../src/App.module.css)                                           | Canvas, windows, and navigation styling.                                                              |
-| [`src/components/WindowContent.module.css`](../src/components/WindowContent.module.css) | Document surfaces and simulated app interior styling.                                                 |
-| [`src/components/SystemBar.module.css`](../src/components/SystemBar.module.css)         | Compact glass system row and popover styling.                                                         |
-| [`src/index.css`](../src/index.css)                                                     | Shared visual tokens and accent palettes, typography, viewport, and element defaults.                 |
+| File                                                                                    | Responsibility                                                                                            |
+| --------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| [`src/desktop.ts`](../src/desktop.ts)                                                   | Workspace types, initial layout, storage loading and validation, resizing, and arrangement.               |
+| [`src/theme.ts`](../src/theme.ts)                                                       | Allowed accents and app presentation modes, defaults, and their storage validation.                       |
+| [`src/App.tsx`](../src/App.tsx)                                                         | Workspace rendering, pointer gestures, viewport navigation, window actions, appearance state, and saving. |
+| [`src/components/SystemBar.tsx`](../src/components/SystemBar.tsx)                       | Compact 24-hour clock and status row, popovers, and simulated controls.                                   |
+| [`src/components/NotificationInbox.tsx`](../src/components/NotificationInbox.tsx)       | Notification trigger, inbox, unread/dismissal state, and sample toasts.                                   |
+| [`src/components/Minimap.tsx`](../src/components/Minimap.tsx)                           | Map rendering and pointer capture for dragging the visible canvas area.                                   |
+| [`src/components/CanvasTools.tsx`](../src/components/CanvasTools.tsx)                   | Canvas mode controls, arrangement action, and selection status.                                           |
+| [`src/components/WindowContent.tsx`](../src/components/WindowContent.tsx)               | Workspace overview, editable scratchpad, appearance settings, and simulated app interiors.                |
+| [`src/components/AppearanceSettings.tsx`](../src/components/AppearanceSettings.tsx)     | Shared desktop accent and app presentation selection in Settings.                                         |
+| [`src/components/AppIcon.tsx`](../src/components/AppIcon.tsx)                           | Consistent icon sizing with Ideal glyphs and Realistic app artwork.                                       |
+| [`src/components/LauncherDock.tsx`](../src/components/LauncherDock.tsx)                 | Favorites, running-app groups, window instance picker, and the Apps trigger.                              |
+| [`src/components/AppLauncher.tsx`](../src/components/AppLauncher.tsx)                   | App gallery/list, filtering, keyboard navigation, and launcher views.                                     |
+| [`src/components/GesturePad.tsx`](../src/components/GesturePad.tsx)                     | Pointer drawing, placeholder gesture launching, shortcut assignment, and persistence.                     |
+| [`src/components/launcher-apps.ts`](../src/components/launcher-apps.ts)                 | Shared app catalog, icons, and descriptions.                                                              |
+| [`src/App.module.css`](../src/App.module.css)                                           | Canvas, windows, and navigation styling.                                                                  |
+| [`src/components/WindowContent.module.css`](../src/components/WindowContent.module.css) | Document surfaces and simulated app interior styling.                                                     |
+| [`src/components/SystemBar.module.css`](../src/components/SystemBar.module.css)         | Compact glass system row and popover styling.                                                             |
+| [`src/index.css`](../src/index.css)                                                     | Shared visual tokens and accent palettes, typography, viewport, and element defaults.                     |
 
 ## Saved state
 
@@ -114,5 +119,7 @@ The workspace is stored in `localStorage` under `hearthspace-playground-v1`. It 
 Gesture shortcuts are stored separately under `hearthspace-gesture-shortcuts-v1`. Loading accepts known catalog app IDs, unique assignments, and finite points within the pad bounds. If no valid shortcuts remain, the default examples are used. A storage failure leaves a newly saved mark available in the currently open gesture pad, but it will not persist when that component is remounted.
 
 The accent is stored separately under `hearthspace-accent-v1` as an allowed theme ID. Loading rejects unsupported values and falls back to Orange when storage is absent or unavailable. Changes remain usable in the current session if saving fails. This setting does not alter the workspace or gesture storage.
+
+The app appearance choice is stored under `hearthspace-app-presentation-v1`. Only `ideal` and `realistic` are accepted; missing, invalid, or unavailable storage falls back to Ideal. Switching remains usable in the current session if saving fails. Presentation storage is independent of the accent, workspace, and gesture assignments.
 
 Viewport travel, selection, open panels, search text, list/grid choice, notifications, and simulated system settings remain temporary. Notification read/dismissal state and preview items reset to the initial samples on reload. If storage is unavailable, the current desktop session remains usable without persistence.

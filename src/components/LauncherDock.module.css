@@ -67,7 +67,8 @@
     color 150ms ease;
 }
 
-.appButton:hover {
+.appButton:hover,
+.appButton[data-active='true'] {
   background: var(--chrome-hover);
 }
 
@@ -84,6 +85,10 @@
   width: 24px;
   height: 24px;
   place-items: center;
+}
+
+.appButton[data-running='true'] .appIcon {
+  transform: translateY(-1px);
 }
 
 .appButton[aria-expanded='true'] .appIcon,
@@ -265,7 +270,8 @@
 }
 
 .windowPreview {
-  display: block;
+  display: grid;
+  grid-template-rows: 8px 1fr;
   width: 64px;
   height: 44px;
   flex-shrink: 0;
@@ -276,14 +282,98 @@
   box-shadow: 0 3px 8px #73523c14;
 }
 
-.windowPreview > span {
+.previewTitlebar {
   display: block;
-  height: 9px;
   background: #a78d7a26;
 }
 
-.windowRow[data-active='true'] .windowPreview > span {
+.windowRow[data-active='true'] .previewTitlebar {
   background: color-mix(in srgb, var(--accent) 50%, transparent);
+}
+
+.previewBody {
+  display: grid;
+  place-items: center;
+  color: var(--chrome-muted);
+}
+
+:global([data-presentation='realistic'])
+  .windowPreview:not(
+    :where([data-app-id='settings'], [data-app-id^='workspace-'])
+  ) {
+  border-color: #88939c66;
+  border-radius: 3px;
+  background: #f1f3f4;
+}
+
+:global([data-presentation='realistic'])
+  .windowPreview:not(
+    :where([data-app-id='settings'], [data-app-id^='workspace-'])
+  )
+  .previewTitlebar {
+  border-bottom: 1px solid #aeb8bf99;
+  background: #d4dbe0;
+}
+
+:global([data-presentation='realistic']) .windowPreview[data-app-id='browser'] {
+  background: white;
+}
+
+:global([data-presentation='realistic'])
+  .windowPreview[data-app-id='browser']
+  .previewTitlebar {
+  border-color: #45434e;
+  background: #282730;
+}
+
+:global([data-presentation='realistic'])
+  .windowPreview[data-app-id='files']
+  .previewTitlebar {
+  background: #f1f1f1;
+}
+
+:global([data-presentation='realistic'])
+  .windowPreview[data-app-id='terminal'] {
+  border-radius: 1px;
+  background: #20262d;
+}
+
+:global([data-presentation='realistic'])
+  .windowPreview[data-app-id='terminal']
+  .previewTitlebar {
+  border-color: #11181e;
+  background: #424c55;
+}
+
+:global([data-presentation='realistic']) .windowPreview[data-app-id='notes'] {
+  border-radius: 1px;
+  background: #fffef9;
+}
+
+:global([data-presentation='realistic'])
+  .windowPreview[data-app-id='notes']
+  .previewTitlebar {
+  border-color: #b5b5b5;
+  background: #dedede;
+}
+
+:global([data-presentation='realistic'])
+  .windowPreview:is([data-app-id='music'], [data-app-id='photos']) {
+  background: #22232b;
+}
+
+:global([data-presentation='realistic'])
+  .windowPreview:is([data-app-id='music'], [data-app-id='photos'])
+  .previewTitlebar {
+  border-color: #383944;
+  background: #17181d;
+}
+
+:global([data-presentation='realistic'])
+  .windowPreview[data-app-id='calendar']
+  .previewTitlebar {
+  border-color: #bdcbdc;
+  background: #dce6f2;
 }
 
 .windowCopy {

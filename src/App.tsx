@@ -10,6 +10,8 @@ import {
 } from 'react'
 import {
   ArrowDownRight,
+  ChevronLeft,
+  ChevronRight,
   Maximize2,
   PanelsTopLeft,
   RotateCcw,
@@ -25,6 +27,7 @@ import Minimap from './components/Minimap'
 import CanvasTools from './components/CanvasTools'
 import AppLauncher from './components/AppLauncher'
 import LauncherDock from './components/LauncherDock'
+import AppIcon from './components/AppIcon'
 import WindowContent from './components/WindowContent'
 import { APP_CATALOG, type LauncherApp } from './components/launcher-apps'
 import {
@@ -42,8 +45,11 @@ import styles from './App.module.css'
 import {
   ACCENT_THEMES,
   loadAccentTheme,
+  loadAppPresentation,
   saveAccentTheme,
+  saveAppPresentation,
   type AccentThemeId,
+  type AppPresentation,
 } from './theme'
 
 type Gesture = {
@@ -62,6 +68,7 @@ const edges = ['n', 'e', 's', 'w', 'ne', 'se', 'sw', 'nw']
 
 function App() {
   const [accentTheme, setAccentTheme] = useState(loadAccentTheme)
+  const [appPresentation, setAppPresentation] = useState(loadAppPresentation)
   const accent =
     ACCENT_THEMES.find((theme) => theme.id === accentTheme) ?? ACCENT_THEMES[0]
   const [workspace, setWorkspace] = useState(loadWorkspace)
@@ -464,7 +471,7 @@ function App() {
     const id = crypto.randomUUID()
     const offset = (workspace.windows.length % 5) * 24
     const width = app?.id === 'settings' ? 420 : 360
-    const height = app?.id === 'settings' ? 370 : 260
+    const height = app?.id === 'settings' ? 500 : 260
     setWorkspace((current) => ({
       ...current,
       windows: [
@@ -573,10 +580,16 @@ function App() {
     saveAccentTheme(theme)
   }
 
+  function changeAppPresentation(mode: AppPresentation) {
+    setAppPresentation(mode)
+    saveAppPresentation(mode)
+  }
+
   return (
     <main
       className={styles.desktop}
       data-accent={accentTheme}
+      data-presentation={appPresentation}
       style={{ '--accent': accent.color } as CSSProperties}
     >
       <SystemBar
@@ -638,6 +651,13 @@ function App() {
         >
           {workspace.windows.map((item, index) => {
             const app = APP_CATALOG.find((entry) => entry.id === item.appId)
+            const appId =
+              app?.id ??
+              (item.kind === 'notes'
+                ? 'notes'
+                : item.kind === 'welcome'
+                  ? 'workspace-welcome'
+                  : 'workspace-windows')
             const Icon =
               app?.icon ?? (item.kind === 'notes' ? StickyNote : PanelsTopLeft)
             return (
@@ -650,6 +670,10 @@ function App() {
                 tabIndex={-1}
                 aria-label={item.title}
                 data-window-id={item.id}
+                data-app-id={appId}
+                data-external={
+                  appId !== 'settings' && !appId.startsWith('workspace-')
+                }
                 data-active={focusedWindowId === item.id}
                 data-selected={selectedIds.includes(item.id)}
                 className={styles.window}
@@ -676,9 +700,25 @@ function App() {
                       maximize(item)
                   }}
                 >
+                  {appPresentation === 'realistic' && appId === 'files' && (
+                    <span
+                      className={styles.nativeNavigation}
+                      aria-hidden="true"
+                    >
+                      <ChevronLeft size={17} />
+                      <ChevronRight size={17} />
+                    </span>
+                  )}
                   <span className={styles.windowTitle}>
-                    <Icon size={15} strokeWidth={1.7} />
-                    <span>{item.title}</span>
+                    <span className={styles.windowAppIcon}>
+                      <AppIcon
+                        appId={appId}
+                        icon={Icon}
+                        size={15}
+                        strokeWidth={1.7}
+                      />
+                    </span>
+                    <span className={styles.windowName}>{item.title}</span>
                   </span>
                   <div className={styles.windowActions}>
                     <button
@@ -707,11 +747,21 @@ function App() {
                   </div>
                 </header>
                 <div className={styles.windowBody}>
+                  {appPresentation === 'realistic' && appId === 'notes' && (
+                    <div className={styles.nativeMenu} aria-hidden="true">
+                      <span>File</span>
+                      <span>Edit</span>
+                      <span>View</span>
+                      <span>Search</span>
+                    </div>
+                  )}
                   <WindowContent
                     item={item}
                     workspace={workspace}
                     accentTheme={accentTheme}
                     onAccentThemeChange={changeAccentTheme}
+                    appPresentation={appPresentation}
+                    onAppPresentationChange={changeAppPresentation}
                     onNoteChange={(note) =>
                       setWorkspace((current) => ({ ...current, note }))
                     }

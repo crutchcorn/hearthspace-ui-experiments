@@ -394,7 +394,7 @@
   margin-bottom: 24px;
 }
 
-.previewHeading > svg {
+.previewHeading > span {
   flex-shrink: 0;
   color: color-mix(in srgb, var(--accent-strong) 45%, var(--muted));
 }
@@ -440,6 +440,110 @@
   margin-top: 20px;
   border-radius: var(--radius-round);
   background: var(--accent);
+}
+
+:global([data-presentation='realistic']) .notes {
+  height: calc(100% - 29px);
+  min-height: 180px;
+  padding: 10px 12px 0;
+  background: #fffef9;
+}
+
+:global([data-presentation='realistic']) .documentHeader {
+  padding-bottom: 7px;
+  border-bottom: 1px solid #d6d6d3;
+}
+
+:global([data-presentation='realistic']) .documentHeader h2 {
+  display: none;
+}
+
+:global([data-presentation='realistic']) .notes textarea {
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+:global([data-presentation='realistic']) .files {
+  padding: 14px 16px 0;
+  background: #fafafa;
+}
+
+:global([data-presentation='realistic']) .fileHeader h2 {
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+:global([data-presentation='realistic']) .fileTile {
+  min-height: 68px;
+  border-color: #e2e2e2;
+  border-radius: 5px;
+  background: #fff;
+  box-shadow: none;
+}
+
+:global([data-presentation='realistic']) .fileTile > svg {
+  color: #4281be;
+  fill: #dbebf7;
+}
+
+:global([data-presentation='realistic']) .terminal {
+  padding: 12px 14px 0;
+  background: #17191d;
+  color: #e0e1e3;
+}
+
+:global([data-presentation='realistic']) .terminalSession {
+  margin-bottom: 14px;
+  padding-bottom: 9px;
+  border-color: #393b42;
+  color: #969da8;
+}
+
+:global([data-presentation='realistic']) .console p > span:first-child {
+  color: #91c886;
+}
+
+:global([data-presentation='realistic']) .consoleOutput,
+:global([data-presentation='realistic']) .directoryList {
+  color: #a8b8cf;
+}
+
+:global([data-presentation='realistic']) .cursor {
+  background: #c6d2c3;
+}
+
+:global([data-presentation='realistic']) .terminal .footer {
+  border-color: #393b42;
+  color: #969da8;
+}
+
+:global([data-presentation='realistic']) .browser {
+  padding: 0;
+  background: #fff;
+}
+
+:global([data-presentation='realistic']) .addressBar {
+  min-height: 40px;
+  padding: 10px 14px;
+  border: 0;
+  border-bottom: 1px solid #d5d5de;
+  border-radius: 0;
+  background: #eeeef3;
+  color: #5a5c67;
+}
+
+:global([data-presentation='realistic']) .bookmarks {
+  padding: 20px;
+}
+
+:global([data-presentation='realistic']) .bookmark > svg {
+  color: #6465ab;
+}
+
+:global([data-presentation='realistic']) .previewRule {
+  background: currentcolor;
 }
 
 @container (width < 330px) {

@@ -6,9 +6,17 @@ Hearthspace pairs glass with one shared accent palette, using warm orange by def
 
 The canvas is a flat surface with subtly tinted dots spaced 28 pixels apart in both axes; the default orange palette uses a warm field and amber-gray dots. The dot pattern moves with the world so horizontal and vertical panning remain visible. Accent highlights belong to controls and interaction states.
 
-Windows and controls share translucent surfaces, bright edges, backdrop blur, and soft shadows. Clear glass holds most controls and documents; smoked glass gives the terminal a darker reading surface. Keep enough surface color behind text for it to remain readable as windows overlap.
+Shell controls and Ideal windows share translucent surfaces, bright edges, backdrop blur, and soft shadows. Clear glass holds most controls and documents; smoked glass gives the Ideal terminal a darker reading surface. Keep enough surface color behind text for it to remain readable as windows overlap.
 
-Each window joins its title bar and content in one glass frame, with a fine divider and no gap between them. The outer frame carries the border, shadow, and active or selected edge light. The header retains its drag handle and controls while the body keeps its own content hierarchy and scrolling area.
+Each Ideal window joins its title bar and content in one glass frame, with a fine divider and no gap between them. The outer frame carries the border, shadow, and active or selected edge light. The header retains its drag handle and controls while the body keeps its own content hierarchy and scrolling area. Realistic frames use the same window bounds and interactions with app-specific surfaces.
+
+## Apps can have their own identity
+
+Settings offers **Ideal** and **Realistic** app appearance modes. Ideal is the default and gives app glyphs and window frames the shared visual language. Realistic tests the shell against the uneven visual identity of a Linux desktop: icons can have opaque backgrounds, different silhouettes, and independent colors; windows can have different title bars, borders, and content treatments.
+
+The shared app bar provides a stable surface and consistent targets around either kind of artwork. Keep icons contained within their allotted space instead of forcing every icon onto a new matching bubble. The same app identity should carry into the launcher, window picker, and notifications. Running dots, selected controls, and active-window cues remain shell-owned, so app artwork does not have to communicate desktop state.
+
+Realistic previews use distinct visual conventions, such as a dark tabbed browser, a light file manager, classic menus for Notes, and an angular dark terminal. These are illustrative treatments rather than copies of particular apps or toolkits. Workspace and Settings retain the shell’s visual language. Switching the mode changes presentation without replacing content or rearranging the workspace.
 
 ## Compact corners
 
@@ -22,7 +30,7 @@ Expanded panels provide detail while the resting controls keep a small footprint
 
 ## One accent carries state
 
-Settings offers six coordinated accent palettes: Orange, Rose, Violet, Blue, Teal, and Olive. Orange is the default. One selection applies across the desktop, including canvas tints, active controls, launch actions, focus, and selected windows. There are no per-component overrides or arbitrary color inputs.
+Settings offers six coordinated accent palettes: Orange, Rose, Violet, Blue, Teal, and Olive. Orange is the default. One selection applies across the desktop, including canvas tints, active controls, launch actions, focus, and selected windows. Realistic app artwork and interiors retain their own colors while these shared state cues follow the accent. There are no per-component overrides or arbitrary color inputs.
 
 Strong accent gradients use the light `--accent-ink` foreground; quieter states use accent text on `--accent-soft`. Counts, labels, and borders accompany state markers. Destructive hover states retain their red meaning across palettes.
 
@@ -32,7 +40,7 @@ Allowed accent names and base colors live in `src/theme.ts`. The root app sets `
 
 Use restrained sans-serif headings and readable labels. Reserve monospace for shortcuts, coordinates, and terminal content. White edge highlights establish boundaries; shadows and blur establish depth.
 
-Use the shared radius scale consistently across windows and controls:
+Use the shared radius scale consistently across shell controls and Ideal windows. Realistic app frames can use their own shapes while keeping the shell’s focus and selection cues:
 
 | Property           | Radius | Role                                        |
 | ------------------ | ------ | ------------------------------------------- |

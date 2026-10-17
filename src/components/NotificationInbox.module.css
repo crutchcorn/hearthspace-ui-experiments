@@ -222,6 +222,12 @@
   color: var(--accent);
 }
 
+:global([data-presentation='realistic']) .itemIcon {
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+}
+
 .itemContent {
   flex: 1;
   min-width: 0;
@@ -440,6 +446,9 @@
 }
 
 .toastFooter > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
   color: var(--chrome-muted);
   font-size: 11px;
 }

@@ -9,6 +9,7 @@ import {
   type Ref,
 } from 'react'
 import type { DesktopWindow } from '../desktop'
+import AppIcon from './AppIcon'
 import { APP_CATALOG, type LauncherApp } from './launcher-apps'
 import styles from './LauncherDock.module.css'
 
@@ -41,12 +42,14 @@ function windowAppId(item: DesktopWindow) {
 }
 
 function WindowInstanceList({
+  app,
   windows,
   activeWindowId,
   firstInstance,
   onFocusWindow,
   onReorderWindows,
 }: {
+  app: LauncherApp
   windows: DesktopWindow[]
   activeWindowId: string | null
   firstInstance: Ref<HTMLButtonElement>
@@ -179,8 +182,15 @@ function WindowInstanceList({
             aria-label={`Show ${item.title}, window ${index + 1}${item.id === activeWindowId ? ', active' : ''}`}
             onClick={() => onFocusWindow(item.id)}
           >
-            <span className={styles.windowPreview} aria-hidden="true">
-              <span />
+            <span
+              className={styles.windowPreview}
+              data-app-id={app.id}
+              aria-hidden="true"
+            >
+              <span className={styles.previewTitlebar} />
+              <span className={styles.previewBody}>
+                <AppIcon appId={app.id} icon={app.icon} size={14} />
+              </span>
             </span>
             <span className={styles.windowCopy}>
               <strong>{item.title}</strong>
@@ -331,7 +341,6 @@ export default function LauncherDock({
           aria-label="Favorite and running apps"
         >
           {groups.map(({ app, windows: instances }) => {
-            const Icon = app.icon
             const running = instances.length > 0
             const active = instances.some((item) => item.id === activeWindowId)
             const label = running
@@ -371,7 +380,7 @@ export default function LauncherDock({
                 }}
               >
                 <span className={styles.appIcon}>
-                  <Icon size={20} aria-hidden="true" />
+                  <AppIcon appId={app.id} icon={app.icon} size={20} />
                 </span>
                 {running && (
                   <span className={styles.runningDots} aria-hidden="true">
@@ -419,6 +428,7 @@ export default function LauncherDock({
           </header>
           <WindowInstanceList
             key={selectedGroup.app.id}
+            app={selectedGroup.app}
             windows={selectedGroup.windows}
             activeWindowId={activeWindowId}
             firstInstance={firstInstance}

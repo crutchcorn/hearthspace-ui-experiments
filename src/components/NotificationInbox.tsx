@@ -18,6 +18,7 @@ import {
   X,
   type LucideIcon,
 } from 'lucide-react'
+import AppIcon from './AppIcon'
 import styles from './NotificationInbox.module.css'
 
 export type NotificationTarget = 'notes' | 'files' | 'browser' | 'gestures'
@@ -268,7 +269,12 @@ export default function NotificationInbox({
                     data-unread={item.unread}
                   >
                     <div className={styles.itemIcon}>
-                      <Icon size={17} strokeWidth={1.6} />
+                      <AppIcon
+                        appId={item.target}
+                        icon={Icon}
+                        size={17}
+                        strokeWidth={1.6}
+                      />
                     </div>
                     <div className={styles.itemContent}>
                       <div className={styles.itemMeta}>
@@ -345,7 +351,14 @@ export default function NotificationInbox({
           <h3>{toast.title}</h3>
           <p>{toast.body}</p>
           <div className={styles.toastFooter}>
-            <span>{APPS[toast.target].name} · Simulated</span>
+            <span>
+              <AppIcon
+                appId={toast.target}
+                icon={APPS[toast.target].Icon}
+                size={16}
+              />
+              {APPS[toast.target].name} · Simulated
+            </span>
             <button
               type="button"
               className={styles.toastOpen}

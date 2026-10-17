@@ -286,11 +286,6 @@
   height: 44px;
 }
 
-.appList .appIcon svg {
-  width: 25px;
-  height: 25px;
-}
-
 .appList .appCopy strong {
   font-size: 14px;
 }
@@ -414,11 +409,6 @@
   .appIcon {
     width: 47px;
     height: 44px;
-  }
-
-  .appIcon svg {
-    width: 27px;
-    height: 27px;
   }
 
   .appCopy strong {

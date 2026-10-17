@@ -47,7 +47,7 @@
   min-height: 0;
   cursor: default;
   border: 1px solid #ffffffd9;
-  border-radius: var(--radius-panel);
+  border-radius: var(--window-radius, var(--radius-panel));
   background: var(--paper);
   backdrop-filter: var(--glass-blur);
   box-shadow:
@@ -73,8 +73,8 @@
   min-width: 0;
   padding: 0 6px;
   border-bottom: 1px solid var(--line);
-  border-radius: calc(var(--radius-panel) - 1px) calc(var(--radius-panel) - 1px)
-    0 0;
+  border-radius: calc(var(--window-radius, var(--radius-panel)) - 1px)
+    calc(var(--window-radius, var(--radius-panel)) - 1px) 0 0;
   background: var(--chrome-raised);
   color: #67564b;
   cursor: grab;
@@ -112,21 +112,22 @@
   letter-spacing: -0.15px;
 }
 
-.windowTitle > svg {
+.windowAppIcon {
+  display: grid;
   flex-shrink: 0;
-  box-sizing: content-box;
+  place-items: center;
   padding: 7px;
   border: 0;
   border-radius: var(--radius-control);
 }
 
-.window[data-active='true'] .windowTitle > svg {
+.window[data-active='true'] .windowAppIcon {
   color: var(--accent-strong);
   background: var(--accent-wash);
   box-shadow: 0 0 18px color-mix(in srgb, var(--accent) 14%, transparent);
 }
 
-.windowTitle > span {
+.windowName {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -167,8 +168,8 @@
   min-width: 0;
   min-height: 0;
   overflow: auto;
-  border-radius: 0 0 calc(var(--radius-panel) - 1px)
-    calc(var(--radius-panel) - 1px);
+  border-radius: 0 0 calc(var(--window-radius, var(--radius-panel)) - 1px)
+    calc(var(--window-radius, var(--radius-panel)) - 1px);
   scrollbar-color: #ad8c734d transparent;
   scrollbar-width: thin;
 }
@@ -296,6 +297,237 @@
     0 16px 40px color-mix(in srgb, var(--accent-strong) 13%, transparent);
 }
 
+.nativeNavigation {
+  display: flex;
+  flex-shrink: 0;
+  gap: 14px;
+  padding-left: 8px;
+  color: #6b6d72;
+}
+
+.nativeMenu {
+  display: flex;
+  gap: 20px;
+  padding: 7px 13px;
+  border-bottom: 1px solid #c9c9c9;
+  background: #f1f1ef;
+  color: #323232;
+  font:
+    12px Arial,
+    sans-serif;
+}
+
+.desktop[data-presentation='realistic'] .window[data-external='true'] {
+  --window-radius: 7px;
+  --ink: #292b30;
+  --muted: #72767e;
+  --line: #00000018;
+
+  border-color: #9b9da3;
+  background: #fff;
+  color: var(--ink);
+  backdrop-filter: none;
+  box-shadow: 0 10px 25px #1b1e2730;
+  font-family: Arial, sans-serif;
+}
+
+.desktop[data-presentation='realistic']
+  .window[data-external='true'][data-active='true'] {
+  outline: 2px solid var(--accent-border);
+  outline-offset: 2px;
+}
+
+.desktop[data-presentation='realistic']
+  .window[data-external='true'][data-selected='true'] {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.desktop[data-presentation='realistic']
+  .window[data-external='true']
+  .titlebar {
+  background: #e7e7e9;
+  color: #33353a;
+}
+
+.desktop[data-presentation='realistic']
+  .window[data-external='true']
+  .titlebar::after {
+  display: none;
+}
+
+.desktop[data-presentation='realistic']
+  .window[data-external='true']
+  .windowTitle {
+  max-width: calc(100% - 80px);
+  gap: 7px;
+}
+
+.desktop[data-presentation='realistic']
+  .window[data-external='true']
+  .windowAppIcon {
+  padding: 3px;
+  background: none;
+  box-shadow: none;
+}
+
+.desktop[data-presentation='realistic'] .window[data-app-id='browser'] {
+  --window-radius: 9px;
+}
+
+.desktop[data-presentation='realistic']
+  .window[data-app-id='browser']
+  .titlebar {
+  align-items: flex-end;
+  gap: 8px;
+  border-color: #45434e;
+  background: #282730;
+  color: #ecebf2;
+}
+
+.desktop[data-presentation='realistic']
+  .window[data-app-id='browser']
+  .windowTitle {
+  width: 220px;
+  height: 34px;
+  padding: 4px 10px;
+  border-radius: 8px 8px 0 0;
+  background: #45434e;
+  font-weight: 400;
+}
+
+.desktop[data-presentation='realistic']
+  .window[data-app-id='browser']
+  .windowActions {
+  align-self: center;
+}
+
+.desktop[data-presentation='realistic'] .window[data-app-id='files'] {
+  --window-radius: 12px;
+}
+
+.desktop[data-presentation='realistic'] .window[data-app-id='files'] .titlebar {
+  flex-basis: 52px;
+  gap: 8px;
+  background: #f1f1f1;
+}
+
+.desktop[data-presentation='realistic']
+  .window[data-app-id='files']
+  .windowTitle {
+  justify-content: center;
+  flex: 1;
+  padding: 0;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.desktop[data-presentation='realistic']
+  .window[data-app-id='files']
+  .windowAppIcon {
+  display: none;
+}
+
+.desktop[data-presentation='realistic']
+  .window[data-app-id='files']
+  .windowActions
+  button {
+  border-radius: 50%;
+  background: #dedede;
+}
+
+.desktop[data-presentation='realistic'] .window[data-app-id='notes'] {
+  --window-radius: 2px;
+
+  border-color: #8b8b8b;
+}
+
+.desktop[data-presentation='realistic'] .window[data-app-id='notes'] .titlebar {
+  flex-basis: 32px;
+  background: linear-gradient(#eee, #d6d6d6);
+  font-size: 12px;
+}
+
+.desktop[data-presentation='realistic']
+  .window[data-app-id='notes']
+  .windowActions
+  button {
+  width: 25px;
+  height: 25px;
+  border: 1px solid #b5b5b5;
+  border-radius: 2px;
+  background: #f0f0f0;
+}
+
+.desktop[data-presentation='realistic'] .window[data-app-id='terminal'] {
+  --window-radius: 3px;
+
+  border-color: #383b40;
+  background: #17191d;
+}
+
+.desktop[data-presentation='realistic']
+  .window[data-app-id='terminal']
+  .titlebar {
+  flex-basis: 36px;
+  border-color: #111;
+  background: #303338;
+  color: #dddfe3;
+  font-family: var(--mono);
+}
+
+.desktop[data-presentation='realistic']
+  .window[data-app-id='terminal']
+  .windowActions
+  button {
+  border-radius: 2px;
+}
+
+.desktop[data-presentation='realistic']
+  .window:is([data-app-id='music'], [data-app-id='photos']) {
+  --ink: #f0f1f5;
+  --muted: #a4a8b5;
+  --window-radius: 10px;
+
+  border-color: #383944;
+  background: #22232b;
+}
+
+.desktop[data-presentation='realistic']
+  .window:is([data-app-id='music'], [data-app-id='photos'])
+  .titlebar {
+  background: #17181d;
+  color: #e9e9ed;
+}
+
+.desktop[data-presentation='realistic']
+  .window[data-app-id='music']
+  .windowActions {
+  order: -1;
+}
+
+.desktop[data-presentation='realistic']
+  .window[data-app-id='calendar']
+  .titlebar {
+  background: #dce6f2;
+  color: #294a73;
+}
+
+.desktop[data-presentation='realistic']
+  .window[data-external='true']
+  .windowActions
+  button:hover {
+  background: #8b8d944d;
+}
+
+.desktop[data-presentation='realistic']
+  .window[data-external='true']
+  .windowActions
+  button:last-child:hover {
+  background: #c54646;
+  color: #fff;
+}
+
 .mapPanel {
   position: fixed;
   z-index: 600;
@@ -411,6 +643,20 @@
 
   .titlebar::after {
     display: none;
+  }
+
+  .desktop[data-presentation='realistic']
+    .window[data-external='true']
+    .titlebar {
+    min-height: 50px;
+  }
+
+  .desktop[data-presentation='realistic']
+    .window[data-external='true']
+    .windowActions
+    button {
+    width: 44px;
+    height: 44px;
   }
 }
 
