@@ -51,6 +51,33 @@
   opacity: 0.35;
 }
 
+@media (width <= 760px) {
+  .mobileSurface {
+    --shell-padding: 4px;
+    --shell-border-width: 1px;
+
+    height: 54px;
+    isolation: isolate;
+    padding: var(--shell-padding);
+    border: var(--shell-border-width) solid var(--chrome-border);
+    border-radius: var(--radius-panel);
+    box-shadow: var(--shadow-panel);
+    color: var(--chrome-text);
+  }
+
+  .mobileSurface::before {
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+    border-radius: inherit;
+    background: var(--chrome);
+    box-shadow: var(--glass-edge);
+    backdrop-filter: var(--glass-blur);
+    pointer-events: none;
+    content: '';
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .control {
     transition: none;

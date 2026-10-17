@@ -8,6 +8,10 @@
   width: 203px;
 }
 
+.mobileDock {
+  display: none;
+}
+
 .toolGrid {
   display: grid;
   grid-template-columns: repeat(2, 44px) 1px repeat(2, 44px);
@@ -78,8 +82,12 @@
   color: var(--accent);
 }
 
-.menuOption:hover {
+.menuOption:hover:not(:disabled) {
   background: var(--chrome-hover);
+}
+
+.menuOption:disabled {
+  opacity: 0.35;
 }
 
 .menuOption:focus-visible {
@@ -135,8 +143,23 @@
 }
 
 @media (width <= 760px) {
-  .tooltip,
-  .toolMenu {
-    bottom: calc(100% + 74px);
+  .dock,
+  .tooltip {
+    display: none;
+  }
+
+  .mobileDock {
+    display: block;
+    width: 44px;
+    height: 44px;
+  }
+
+  .mobileMenu {
+    position: fixed;
+    bottom: 78px;
+    left: 12px;
+    max-height: calc(100dvh - 156px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
 }

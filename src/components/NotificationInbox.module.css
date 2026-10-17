@@ -48,10 +48,6 @@
   color: var(--chrome-muted);
 }
 
-.compactCount {
-  display: none;
-}
-
 .panel,
 .toast {
   position: absolute;
@@ -438,32 +434,25 @@
 
 @media (width <= 760px) {
   .corner {
-    top: 12px;
-    left: 12px;
+    position: static;
+    flex: none;
   }
 
-  .trigger {
-    gap: 6px;
-    padding: 0 6px;
-  }
-
-  .trigger > svg {
-    width: 16px;
-    height: 16px;
-  }
-
-  .triggerLabel {
-    display: none;
-  }
-
-  .compactCount {
-    display: inline;
-    font-size: 12px;
+  .corner .bar {
+    height: 44px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+    backdrop-filter: none;
   }
 
   .panel,
   .toast {
-    max-height: calc(100dvh - 220px);
+    position: fixed;
+    top: 78px;
+    left: 12px;
+    max-height: calc(100dvh - 156px);
   }
 }
 

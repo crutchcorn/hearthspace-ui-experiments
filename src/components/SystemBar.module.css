@@ -306,24 +306,37 @@
 }
 
 @media (width <= 760px) {
-  .bar {
-    top: 12px;
-    right: 12px;
+  .bar[data-system-popover-root] {
+    position: static;
+    flex: 1;
+    width: auto;
+    min-width: 0;
+    height: 44px;
+    justify-content: flex-end;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+    backdrop-filter: none;
+  }
+
+  .statusGroup {
+    min-width: 0;
+    overflow: auto hidden;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    touch-action: pan-x;
+  }
+
+  .statusGroup::-webkit-scrollbar {
+    display: none;
   }
 
   .popover {
-    max-height: calc(100dvh - 220px);
-  }
-}
-
-@media (width <= 380px) {
-  .bar[data-battery-percentage='true'],
-  .bar[data-battery-percentage='true'] .statusGroup {
-    gap: 2px;
-  }
-
-  .bar[data-battery-percentage='true'] .clockButton {
-    width: 62px;
+    position: fixed;
+    top: 78px;
+    right: 12px;
+    max-height: calc(100dvh - 156px);
   }
 }
 

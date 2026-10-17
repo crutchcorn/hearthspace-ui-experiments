@@ -147,7 +147,7 @@ function App() {
   const home = workspace.home
   const windowClearance =
     view.width <= 760
-      ? { side: 12, top: 84, bottom: 142 }
+      ? { side: 12, top: 78, bottom: 78 }
       : { side: 24, top: 96, bottom: 96 }
   const focusedWindowId = workspace.windows.some((item) => item.id === activeId)
     ? activeId
@@ -912,34 +912,36 @@ function App() {
           }}
         />
       )}
-      <SystemBar
-        showBatteryPercentage={showBatteryPercentage}
-        openPanel={systemPanel}
-        onPanelChange={(panel) => {
-          setSystemPanel(panel)
-          if (panel) {
+      <div className={`${styles.topbar} ${shellStyles.mobileSurface}`}>
+        <NotificationInbox
+          ref={notificationInbox}
+          open={notificationsOpen}
+          previewVisible={!systemPanel && !launcher && !showMap && !dockAppId}
+          onToggle={() => {
+            setNotificationsOpen(!notificationsOpen)
             setDockAppId(null)
-            setNotificationsOpen(false)
+            setSystemPanel(null)
             setLauncher(null)
             setShowMap(false)
-          }
-        }}
-      />
-      <NotificationInbox
-        ref={notificationInbox}
-        open={notificationsOpen}
-        previewVisible={!systemPanel && !launcher && !showMap && !dockAppId}
-        onToggle={() => {
-          setNotificationsOpen(!notificationsOpen)
-          setDockAppId(null)
-          setSystemPanel(null)
-          setLauncher(null)
-          setShowMap(false)
-          setSpaceHeld(false)
-        }}
-        onClose={() => setNotificationsOpen(false)}
-        onNavigate={openNotificationTarget}
-      />
+            setSpaceHeld(false)
+          }}
+          onClose={() => setNotificationsOpen(false)}
+          onNavigate={openNotificationTarget}
+        />
+        <SystemBar
+          showBatteryPercentage={showBatteryPercentage}
+          openPanel={systemPanel}
+          onPanelChange={(panel) => {
+            setSystemPanel(panel)
+            if (panel) {
+              setDockAppId(null)
+              setNotificationsOpen(false)
+              setLauncher(null)
+              setShowMap(false)
+            }
+          }}
+        />
+      </div>
       <div
         ref={viewport}
         className={`${styles.viewport} ${tool === 'cursor' ? styles.cursorReady : ''} ${spaceHeld ? styles.panReady : ''} ${dragging ? styles.dragging : ''} ${tool === 'select' && !spaceHeld ? styles.selecting : ''}`}
@@ -1198,7 +1200,7 @@ function App() {
           )}
         </div>
       </div>
-      <div className={styles.docks}>
+      <div className={`${styles.docks} ${shellStyles.mobileSurface}`}>
         <CanvasTools
           mode={tool}
           selectionShape={selectionShape}
@@ -1240,6 +1242,7 @@ function App() {
           onArrange={arrangeAllWindows}
           windowCount={workspace.windows.length}
         />
+        <span className={styles.dockDivider} aria-hidden="true" />
         <LauncherDock
           open={launcher !== null}
           triggerRef={launcherTrigger}

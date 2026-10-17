@@ -72,7 +72,6 @@ export default function SystemBar({
       className={`${styles.bar} ${shellStyles.surface}`}
       aria-label="Device status"
       data-system-popover-root
-      data-battery-percentage={showBatteryPercentage}
     >
       <button
         type="button"
@@ -94,7 +93,12 @@ export default function SystemBar({
         })}
       </button>
 
-      <div className={styles.statusGroup}>
+      <div
+        className={styles.statusGroup}
+        role="group"
+        aria-label="System tray"
+        onWheel={(event) => event.stopPropagation()}
+      >
         <button
           type="button"
           className={`${styles.statusButton} ${shellStyles.control}`}

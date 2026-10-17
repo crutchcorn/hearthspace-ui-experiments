@@ -221,11 +221,8 @@ export default function NotificationInbox({
           ) : (
             <Bell size={18} aria-hidden="true" />
           )}
-          <span className={styles.triggerLabel} aria-hidden="true">
+          <span aria-hidden="true">
             {unreadCount ? `${unreadCount} new` : 'All clear'}
-          </span>
-          <span className={styles.compactCount} aria-hidden="true">
-            {unreadCount > 99 ? '99+' : unreadCount}
           </span>
         </button>
       </div>
