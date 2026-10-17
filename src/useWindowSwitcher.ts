@@ -1,4 +1,11 @@
-import { useCallback, useEffect, useEffectEvent, useRef, useState } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useEffectEvent,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react'
 import type { DesktopWindow } from './desktop'
 
 interface WindowSwitcherOptions {
@@ -22,14 +29,37 @@ export default function useWindowSwitcher({
   const [session, setSession] = useState<SwitchSession | null>(null)
   const currentSession = useRef<SwitchSession | null>(null)
   const previousFocus = useRef<HTMLElement | null>(null)
+  const pendingFocus = useRef<{ target: HTMLElement | null } | null>(null)
 
   const cancel = useCallback((restoreFocus = true) => {
     currentSession.current = null
-    setSession(null)
-    if (restoreFocus && previousFocus.current?.isConnected)
-      previousFocus.current.focus({ preventScroll: true })
+    pendingFocus.current = restoreFocus
+      ? { target: previousFocus.current }
+      : null
     previousFocus.current = null
+    setSession(null)
   }, [])
+
+  useLayoutEffect(() => {
+    if (session || !pendingFocus.current) return
+    const { target } = pendingFocus.current
+    pendingFocus.current = null
+
+    // Window contents become focusable again after the preview is removed.
+    let restored = false
+    if (
+      target?.isConnected &&
+      target !== document.body &&
+      !target.closest('[inert]')
+    ) {
+      target.focus({ preventScroll: true })
+      restored = document.activeElement === target
+    }
+    if (!restored)
+      document
+        .querySelector<HTMLElement>('[data-canvas-viewport]')
+        ?.focus({ preventScroll: true })
+  }, [session])
 
   const select = useCallback(
     (id: string) => {
@@ -39,6 +69,7 @@ export default function useWindowSwitcher({
       if (!selected || !current.ids.includes(id)) return
       currentSession.current = null
       previousFocus.current = null
+      pendingFocus.current = null
       setSession(null)
       onCommit(id)
     },
@@ -68,6 +99,7 @@ export default function useWindowSwitcher({
         ids,
         selectedId: ids[(event.shiftKey ? ids.length - 1 : 1) % ids.length],
       }
+      pendingFocus.current = null
       const focusedElement =
         document.activeElement instanceof HTMLElement
           ? document.activeElement

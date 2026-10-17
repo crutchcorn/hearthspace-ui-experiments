@@ -77,17 +77,17 @@
   transform-origin: top left;
 }
 
-.window[data-search-match='false'] {
+.window[data-preview-match='false'] {
   opacity: 0;
   pointer-events: none;
 }
 
-.window[data-search-selected='true'] {
+.window[data-preview-selected='true'] {
   outline: 2px solid var(--accent);
   outline-offset: 5px;
 }
 
-.searchWindowTarget {
+.previewWindowTarget {
   position: absolute;
   z-index: 5;
   inset: 0;
@@ -97,13 +97,14 @@
   cursor: pointer;
 }
 
-.searchWindowTarget:focus-visible {
+.previewWindowTarget:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 4px;
 }
 
-.desktop[data-canvas-search='true'] .viewport {
+.desktop[data-canvas-preview='true'] .viewport {
   overflow: hidden;
+  outline: none;
 }
 
 .window:focus {

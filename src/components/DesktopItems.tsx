@@ -9,8 +9,8 @@ import styles from './DesktopItems.module.css'
 interface DesktopItemsProps {
   items: DesktopItem[]
   selectedIds: string[]
-  searchPlacements?: Map<string, SearchPlacement>
-  searchSelectedId?: string
+  placements?: Map<string, SearchPlacement>
+  previewSelectedId?: string
   onPointerDown: (
     event: PointerEvent<HTMLButtonElement>,
     item: DesktopItem,
@@ -22,8 +22,8 @@ interface DesktopItemsProps {
 export default function DesktopItems({
   items,
   selectedIds,
-  searchPlacements,
-  searchSelectedId,
+  placements,
+  previewSelectedId,
   onPointerDown,
   onOpen,
   onSelect,
@@ -31,7 +31,7 @@ export default function DesktopItems({
   return (
     <div className={styles.layer} role="group" aria-label="Desktop items">
       {items.map((item) => {
-        const placement = searchPlacements?.get(item.id)
+        const placement = placements?.get(item.id)
         return (
           <button
             key={item.id}
@@ -39,9 +39,9 @@ export default function DesktopItems({
             className={styles.item}
             data-desktop-item-id={item.id}
             data-item-kind={item.kind}
-            data-search-match={placement?.matches}
-            data-search-selected={
-              placement ? searchSelectedId === item.id : undefined
+            data-preview-match={placement?.matches}
+            data-preview-selected={
+              placement ? previewSelectedId === item.id : undefined
             }
             inert={placement?.matches === false}
             aria-label={item.title}
@@ -61,7 +61,7 @@ export default function DesktopItems({
               onOpen(item)
             }}
             onClick={(event) => {
-              if (searchPlacements || event.detail === 0) onOpen(item)
+              if (placements || event.detail === 0) onOpen(item)
             }}
             onKeyDown={(event) => {
               if (event.key === 'Enter') {

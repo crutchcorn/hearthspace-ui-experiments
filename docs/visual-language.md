@@ -22,6 +22,8 @@ Keep the field near the click. Results appear below a field in the upper half of
 
 The arrangement is temporary. Closing search restores the workspace, and choosing a window takes you to its saved position. This distinction lets us be quite bold about moving things during search: the user can explore a different arrangement without having to rebuild the one they made.
 
+The keyboard switcher uses the same idea. Holding Ctrl+1 gathers the actual open windows into a grid and moves desktop items aside. Their contents and chrome remain recognizable as you cycle. The selected window receives an outline and one centered title underneath; there is no separate tray of app-icon proxies. Committing restores the workspace before centering the chosen window. Canceling restores the previous view, including an app's focused view.
+
 Use the existing items and window surfaces as results. Scaled windows retain their content and chrome, and app shortcuts carry the same artwork seen elsewhere. A clear selection highlight identifies the next item to open. The search field needs its placeholder, a close control, and an empty-result message when relevant; it doesn't need another heading, result count, or instruction strip. The dock and launcher remain useful alongside this spatial route to the same apps.
 
 ## Give each corner an intention
@@ -51,16 +53,16 @@ The default is to show the information needed for the current decision. Before a
 
 The current interface applies that choice in several places:
 
-| Surface                                | What carries the meaning                                                              | Text we've removed                                                                                                   |
-| -------------------------------------- | ------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| Canvas selection                       | The selection shape and highlighted items or windows.                                 | “Drag to select desktop icons,” “Drag around windows,” and selected-item counts.                                     |
-| Canvas search                          | The search field, rearranged items and windows, and the selected result's highlight.  | Additional headings, result counts, and permanent keyboard instructions.                                             |
-| Corner controls                        | Position, icons, hover/focus states, and brief tooltips.                              | Persistent Activity, System, canvas-tool, and app-dock labels.                                                       |
-| App window picker                      | The app heading, each window's preview and title, and its reorder handle.             | “Open windows,” repeated window totals, “On canvas,” and numbered window subtitles.                                  |
-| Draw launcher                          | The drawing pad, stroke feedback, and customization cog.                              | “Gesture shortcuts,” “Select a shortcut, then draw in the pad,” the Preview app bar, and the Saved shortcut section. |
-| Overview                               | The map, viewport rectangle, and zoom controls.                                       | Window totals, “Drag to explore,” and a redundant Home button.                                                       |
-| Keyboard switcher                      | Window previews, selection highlight, and one centered title for the selected window. | Names beneath every candidate and the shortcut/release footer.                                                       |
-| Settings navigation and gesture editor | Category names, a dedicated editor heading, the app picker, and the stroke itself.    | A second Settings title in the sidebar, “One gesture per app,” and “Recorded stroke.”                                |
+| Surface                                | What carries the meaning                                                             | Text we've removed                                                                                                   |
+| -------------------------------------- | ------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------- |
+| Canvas selection                       | The selection shape and highlighted items or windows.                                | “Drag to select desktop icons,” “Drag around windows,” and selected-item counts.                                     |
+| Canvas search                          | The search field, rearranged items and windows, and the selected result's highlight. | Additional headings, result counts, and permanent keyboard instructions.                                             |
+| Corner controls                        | Position, icons, hover/focus states, and brief tooltips.                             | Persistent Activity, System, canvas-tool, and app-dock labels.                                                       |
+| App window picker                      | The app heading, each window's preview and title, and its reorder handle.            | “Open windows,” repeated window totals, “On canvas,” and numbered window subtitles.                                  |
+| Draw launcher                          | The drawing pad, stroke feedback, and customization cog.                             | “Gesture shortcuts,” “Select a shortcut, then draw in the pad,” the Preview app bar, and the Saved shortcut section. |
+| Overview                               | The map, viewport rectangle, and zoom controls.                                      | Window totals, “Drag to explore,” and a redundant Home button.                                                       |
+| Keyboard switcher                      | Actual windows arranged temporarily, a selected outline, and one centered title.     | Repeated candidate labels and the shortcut/release footer.                                                           |
+| Settings navigation and gesture editor | Category names, a dedicated editor heading, the app picker, and the stroke itself.   | A second Settings title in the sidebar, “One gesture per app,” and “Recorded stroke.”                                |
 
 Useful text stays. The notification trigger tells you whether there is unread activity; the inbox doesn't repeat that total as both events and unread items. Launcher results and window-picker rows identify what you can open. The existing launcher search retains a result count; canvas search uses the visible arrangement and a concise empty state. A download size, a storage error, and the consequences of deleting a model explain a decision that an icon cannot.
 
@@ -94,7 +96,7 @@ Use the accent to make focus, selection, activity, and action visible. Strong ac
 
 ## Size the container around its contents
 
-Compact controls leave more room for windows, but previews and touch targets still need enough space to be useful. The keyboard switcher is a useful example: retain the miniature window previews, fit each tile to its preview, and let the panel follow those tiles. The selected window's title sits centered below the grid. Filling a wide panel with stretched tiles adds space without adding information; reducing everything to tiny icons loses the preview treatment we want to keep.
+Compact controls leave more room for windows, but recognizable content and touch targets still need enough space to be useful. Search and the keyboard switcher scale actual windows to fit the available viewport. Keep their proportions and leave space between them, so window content and app-specific chrome help identify a choice. Only the selected switcher window needs an extra title beneath it. Shared panels elsewhere should follow their contents instead of growing to fill unused width.
 
 Corner hover shapes should follow the curve of their parent. Their radius is the outer radius minus padding and border width: currently 16 − 4 − 1 = 11 pixels. Use that relationship when changing the container so the inset highlight continues to fit.
 
@@ -120,7 +122,7 @@ Use distinct icons for distinct actions. Apps and Arrange have different silhoue
 
 Pointer, trackpad, touch, and keyboard should reach the same work. Controls retain usable targets and accessible names when visible labels are removed. Hover can explain an action, while direct activation and keyboard commands make it available without hover.
 
-Dragging and resizing follow input immediately. Navigation pans to a chosen window after focus and stacking have updated. The Ctrl+1 switcher keeps the canvas still while choosing, then centers the window when Ctrl is released. Reduced-motion preferences remove panel entry animations and make navigation immediate.
+Dragging and resizing follow input immediately. Navigation pans to a chosen window after focus and stacking have updated. During Ctrl+1 switching, the viewport stays still while windows occupy temporary presentation positions. The saved workspace is untouched until the user chooses a window; only then does ordinary focus and navigation resume. Reduced-motion preferences remove presentation transitions and make navigation immediate.
 
 The maximize button enters focused view, keeping window chrome while the corners recede and canvas movement stops. Approaching any corner reveals all four together. Choosing a different window restores room for the shell and canvas navigation, including another instance of the same app; choosing the same window keeps focused view. Double-clicking the header toggles ordinary maximization, with the shell remaining available. These behaviors let the controls step back without changing where the user expects to find them.
 

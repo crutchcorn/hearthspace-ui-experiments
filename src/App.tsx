@@ -35,7 +35,11 @@ import WindowContent from './components/WindowContent'
 import GatherWindows from './components/GatherWindows'
 import WindowSwitcher from './components/WindowSwitcher'
 import CanvasSearch from './components/CanvasSearch'
-import { getCanvasSearchLayout, type CanvasSearchResult } from './canvas-search'
+import {
+  getCanvasSearchLayout,
+  getWindowSwitcherLayout,
+  type CanvasSearchResult,
+} from './canvas-search'
 import { APP_CATALOG, type LauncherApp } from './components/launcher-apps'
 import {
   arrangeWindows,
@@ -130,6 +134,7 @@ function App() {
   const [notificationsOpen, setNotificationsOpen] = useState(false)
   const [systemPanel, setSystemPanel] = useState<SystemPanel>(null)
   const [tool, setTool] = useState(loadCanvasTool)
+  const [switcherOrigin, setSwitcherOrigin] = useState({ x: view.x, y: view.y })
   const [canvasSearch, setCanvasSearch] = useState<{
     x: number
     y: number
@@ -189,7 +194,15 @@ function App() {
     onCommit: (id) => revealWindow(id, { center: true }),
     onOpen: () => {
       setCanvasSearch(null)
+      setNotificationsOpen(false)
+      setSystemPanel(null)
+      setDockAppId(null)
+      setShowMap(false)
+      setLauncher(null)
+      setRevealRequest(null)
       const canvas = viewport.current
+      if (canvas)
+        setSwitcherOrigin({ x: canvas.scrollLeft, y: canvas.scrollTop })
       canvas?.scrollTo({
         left: canvas.scrollLeft,
         top: canvas.scrollTop,
@@ -208,6 +221,23 @@ function App() {
       setSelection(null)
     },
   })
+  const switcherView = { ...view, ...switcherOrigin }
+  const switcherLayout = windowSwitcher.open
+    ? getWindowSwitcherLayout(workspace, switcherView, windowSwitcher.windows)
+    : null
+  const previewLayout = switcherLayout ?? searchLayout
+  const previewWindowId = windowSwitcher.open
+    ? windowSwitcher.selectedId
+    : searchResult?.kind === 'window'
+      ? searchResult.id
+      : null
+  const renderedFocusView = windowSwitcher.open ? null : focusView
+  const switcherWindow = windowSwitcher.windows.find(
+    (item) => item.id === windowSwitcher.selectedId,
+  )
+  const switcherPlacement = switcherWindow
+    ? switcherLayout?.windows.get(switcherWindow.id)
+    : undefined
 
   const closePopovers = useCallback(() => {
     setCanvasSearch(null)
@@ -734,7 +764,7 @@ function App() {
         : undefined
     if (
       focusView ||
-      canvasSearch ||
+      previewLayout ||
       gesture.current ||
       (event.button !== 0 && event.button !== 1) ||
       (item?.restore && type !== 'pan' && !group)
@@ -807,7 +837,7 @@ function App() {
     event: ReactPointerEvent<HTMLButtonElement>,
     item: DesktopItem,
   ) {
-    if (canvasSearch) {
+    if (previewLayout) {
       event.preventDefault()
       event.stopPropagation()
       return
@@ -1125,9 +1155,9 @@ function App() {
       data-accent={accentTheme}
       data-color-mode={colorMode}
       data-presentation="realistic"
-      data-focus-mode={focusView !== null}
-      data-canvas-search={canvasSearch !== null}
-      data-shell-peek={!focusView || shellPeek}
+      data-focus-mode={renderedFocusView !== null}
+      data-canvas-preview={previewLayout !== null}
+      data-shell-peek={!renderedFocusView || shellPeek}
       style={{ '--accent-base': accent.color } as CSSProperties}
     >
       {background.photo && background.photo.fit !== 'repeat' && (
@@ -1147,11 +1177,18 @@ function App() {
       <div
         className={`${styles.topbar} ${shellStyles.mobileSurface}`}
         data-shell-controls
+        inert={windowSwitcher.open}
       >
         <NotificationInbox
           ref={notificationInbox}
           open={notificationsOpen}
-          previewVisible={!systemPanel && !launcher && !showMap && !dockAppId}
+          previewVisible={
+            !previewLayout &&
+            !systemPanel &&
+            !launcher &&
+            !showMap &&
+            !dockAppId
+          }
           onToggle={() => {
             setCanvasSearch(null)
             setNotificationsOpen(!notificationsOpen)
@@ -1182,10 +1219,19 @@ function App() {
       <div
         ref={viewport}
         tabIndex={-1}
-        className={`${styles.viewport} ${!focusView && (tool === 'cursor' || tool === 'search') ? styles.cursorReady : ''} ${!focusView && spaceHeld ? styles.panReady : ''} ${!focusView && dragging ? styles.dragging : ''} ${!focusView && tool === 'select' && !spaceHeld ? styles.selecting : ''}`}
+        role={windowSwitcher.open ? 'listbox' : undefined}
+        aria-label={windowSwitcher.open ? 'Switch windows' : undefined}
+        aria-activedescendant={
+          windowSwitcher.open
+            ? `switcher-${windowSwitcher.selectedId}`
+            : undefined
+        }
+        className={`${styles.viewport} ${previewLayout || (!focusView && (tool === 'cursor' || tool === 'search')) ? styles.cursorReady : ''} ${!focusView && spaceHeld ? styles.panReady : ''} ${!focusView && dragging ? styles.dragging : ''} ${!focusView && !previewLayout && tool === 'select' && !spaceHeld ? styles.selecting : ''}`}
         data-canvas-viewport
         onScroll={(event) => {
-          const lockedView = focusView ?? canvasSearch
+          const lockedView = windowSwitcher.open
+            ? switcherOrigin
+            : (focusView ?? canvasSearch)
           if (lockedView) {
             const canvas = event.currentTarget
             const x = clamp(
@@ -1208,7 +1254,7 @@ function App() {
         onPointerDownCapture={(event) => {
           if (
             focusView ||
-            canvasSearch ||
+            previewLayout ||
             (event.target as Element).closest('dialog[open]')
           )
             return
@@ -1225,6 +1271,12 @@ function App() {
               '[data-window-id], [data-desktop-item-id]',
             )
           ) {
+            if (windowSwitcher.open) {
+              event.preventDefault()
+              event.stopPropagation()
+              windowSwitcher.cancel()
+              return
+            }
             if (canvasSearch) {
               setCanvasSearch(null)
               return
@@ -1261,12 +1313,12 @@ function App() {
                 : undefined,
           }}
         >
-          <div inert={focusView !== null}>
+          <div inert={focusView !== null || windowSwitcher.open}>
             <DesktopItems
               items={workspace.items}
               selectedIds={selectedItemIds}
-              searchPlacements={searchLayout?.items}
-              searchSelectedId={
+              placements={previewLayout?.items}
+              previewSelectedId={
                 searchResult?.kind === 'item' ? searchResult.id : undefined
               }
               onPointerDown={startItemGesture}
@@ -1282,7 +1334,7 @@ function App() {
             />
           </div>
           {workspace.windows.map((item, index) => {
-            const searchPlacement = searchLayout?.windows.get(item.id)
+            const placement = previewLayout?.windows.get(item.id)
             const app = APP_CATALOG.find((entry) => entry.id === item.appId)
             const appId =
               app?.id ??
@@ -1307,51 +1359,54 @@ function App() {
                 data-external={
                   appId !== 'settings' && !appId.startsWith('workspace-')
                 }
-                data-active={!canvasSearch && focusedWindowId === item.id}
-                data-focus-mode={focusView?.id === item.id}
-                data-search-match={searchPlacement?.matches}
-                data-search-selected={
-                  searchPlacement
-                    ? searchResult?.kind === 'window' &&
-                      searchResult.id === item.id
-                    : undefined
+                data-active={!previewLayout && focusedWindowId === item.id}
+                data-focus-mode={renderedFocusView?.id === item.id}
+                data-preview-match={placement?.matches}
+                data-preview-selected={
+                  placement ? previewWindowId === item.id : undefined
                 }
                 inert={
-                  (focusView !== null && focusView.id !== item.id) ||
-                  searchPlacement?.matches === false
+                  (renderedFocusView !== null &&
+                    renderedFocusView.id !== item.id) ||
+                  placement?.matches === false
                 }
-                data-selected={selectedIds.includes(item.id)}
+                data-selected={!previewLayout && selectedIds.includes(item.id)}
                 data-grouped={
                   selectedWindows.length > 1 && selectedIds.includes(item.id)
                 }
                 className={styles.window}
                 style={{
-                  position: focusView?.id === item.id ? 'fixed' : undefined,
-                  left: focusView?.id === item.id ? 0 : item.x,
-                  top: focusView?.id === item.id ? 0 : item.y,
-                  width: focusView?.id === item.id ? view.width : item.width,
-                  height: focusView?.id === item.id ? view.height : item.height,
-                  transform: searchPlacement
-                    ? `translate(${searchPlacement.x - item.x}px, ${searchPlacement.y - item.y}px) scale(${searchPlacement.scale})`
+                  position:
+                    renderedFocusView?.id === item.id ? 'fixed' : undefined,
+                  left: renderedFocusView?.id === item.id ? 0 : item.x,
+                  top: renderedFocusView?.id === item.id ? 0 : item.y,
+                  width:
+                    renderedFocusView?.id === item.id ? view.width : item.width,
+                  height:
+                    renderedFocusView?.id === item.id
+                      ? view.height
+                      : item.height,
+                  transform: placement
+                    ? `translate(${placement.x - item.x}px, ${placement.y - item.y}px) scale(${placement.scale})`
                     : 'translate(0px, 0px) scale(1)',
                   zIndex:
-                    focusView?.id === item.id
+                    renderedFocusView?.id === item.id
                       ? workspace.windows.length + 1
                       : index + 1,
                 }}
                 onFocusCapture={() => {
-                  if (!canvasSearch) focusWindow(item.id)
+                  if (!previewLayout) focusWindow(item.id)
                 }}
                 onPointerDown={(event) => {
                   if (
-                    !canvasSearch &&
+                    !previewLayout &&
                     !(event.target as Element).closest('button')
                   )
                     focusWindow(item.id)
                 }}
               >
                 <header
-                  inert={canvasSearch !== null}
+                  inert={previewLayout !== null}
                   className={styles.titlebar}
                   onPointerDown={(event) => {
                     if (!(event.target as HTMLElement).closest('button'))
@@ -1409,7 +1464,7 @@ function App() {
                 </header>
                 <div
                   className={styles.windowBody}
-                  inert={canvasSearch !== null}
+                  inert={previewLayout !== null}
                 >
                   {appId === 'notes' && (
                     <div className={styles.nativeMenu} aria-hidden="true">
@@ -1443,7 +1498,7 @@ function App() {
                     }
                   />
                 </div>
-                {!canvasSearch &&
+                {!previewLayout &&
                   !item.restore &&
                   edges.map((edge) => (
                     <div
@@ -1455,16 +1510,27 @@ function App() {
                       }
                     />
                   ))}
-                {!canvasSearch && !item.restore && (
+                {!previewLayout && !item.restore && (
                   <ArrowDownRight className={styles.resizeHint} size={12} />
                 )}
-                {searchPlacement?.matches && (
+                {placement?.matches && (
                   <button
                     type="button"
-                    className={styles.searchWindowTarget}
+                    id={windowSwitcher.open ? `switcher-${item.id}` : undefined}
+                    role={windowSwitcher.open ? 'option' : undefined}
+                    aria-selected={
+                      windowSwitcher.open
+                        ? windowSwitcher.selectedId === item.id
+                        : undefined
+                    }
+                    tabIndex={windowSwitcher.open ? -1 : 0}
+                    className={styles.previewWindowTarget}
                     aria-label={`Open ${item.title} window`}
+                    onPointerDown={(event) => event.preventDefault()}
                     onClick={() =>
-                      activateSearchResult({ kind: 'window', id: item.id })
+                      windowSwitcher.open
+                        ? windowSwitcher.select(item.id)
+                        : activateSearchResult({ kind: 'window', id: item.id })
                     }
                   />
                 )}
@@ -1518,7 +1584,7 @@ function App() {
           )}
         </div>
       </div>
-      {!focusView && !canvasSearch && selectedWindows.length > 0 && (
+      {!focusView && !previewLayout && selectedWindows.length > 0 && (
         <GatherWindows
           windows={selectedWindows}
           view={view}
@@ -1529,6 +1595,7 @@ function App() {
       <div
         className={`${styles.docks} ${shellStyles.mobileSurface}`}
         data-shell-controls
+        inert={windowSwitcher.open}
       >
         <CanvasTools
           mode={tool}
@@ -1656,12 +1723,19 @@ function App() {
           />
         </aside>
       )}
-      {windowSwitcher.open && windowSwitcher.selectedId && (
+      {switcherWindow && switcherPlacement && (
         <WindowSwitcher
-          windows={windowSwitcher.windows}
-          selectedId={windowSwitcher.selectedId}
-          onSelect={windowSwitcher.select}
-          onCancel={windowSwitcher.cancel}
+          title={switcherWindow.title}
+          focusTarget={viewport}
+          position={{
+            x: switcherPlacement.x - switcherView.x,
+            y:
+              switcherPlacement.y -
+              switcherView.y +
+              switcherWindow.height * switcherPlacement.scale +
+              10,
+            width: switcherWindow.width * switcherPlacement.scale,
+          }}
         />
       )}
       {canvasSearch && searchLayout && (

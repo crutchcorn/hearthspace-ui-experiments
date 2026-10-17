@@ -83,11 +83,16 @@ previous window at its ordinary maximized size.
 
 Hold **Ctrl** and press **1** to cycle through every open window, including
 offscreen windows and multiple instances of an app. **Ctrl+Shift+1** goes
-backward. Only the highlighted window's name appears, centered beneath the
-preview grid. Releasing Ctrl focuses that window and centers it in the viewport,
-subject to the canvas edges. Enter or clicking also confirms; Escape, an outside
-click, or losing browser focus cancels. The canvas stays still while choosing.
-Browser-reserved shortcuts require their key events to reach the page.
+backward. The actual windows move into a temporary grid, retaining their content
+and chrome, while desktop items move aside. The selected window has an outline
+and a single centered title underneath.
+
+Releasing Ctrl restores the layout, focuses the chosen window, and centers it
+in the viewport, subject to the canvas edges. Enter or clicking also confirms.
+Escape, an outside click, or losing browser focus restores the previous view,
+including focused view when it was active. Cycling holds the viewport still and
+leaves saved positions, sizes, and stacking unchanged. Browser-reserved shortcuts
+require their key events to reach the page.
 
 ## Open apps and draw shortcuts
 
