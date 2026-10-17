@@ -10,6 +10,7 @@ interface CanvasSearchProps {
   onActivate: () => void
   onNavigate: (direction: 1 | -1) => void
   empty: boolean
+  resultsAbove: boolean
 }
 
 export default function CanvasSearch({
@@ -20,6 +21,7 @@ export default function CanvasSearch({
   onActivate,
   onNavigate,
   empty,
+  resultsAbove,
 }: CanvasSearchProps) {
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -33,7 +35,12 @@ export default function CanvasSearch({
       aria-label="Canvas search"
       data-canvas-search
       className={styles.search}
-      style={{ left: position.x, top: position.y, width: position.width }}
+      data-results-above={resultsAbove}
+      style={{
+        left: position.x,
+        top: position.y + (resultsAbove ? 54 : 0),
+        width: position.width,
+      }}
       onPointerDown={(event) => event.stopPropagation()}
       onSubmit={(event) => {
         event.preventDefault()

@@ -13,12 +13,12 @@ browser; app contents and device services are previews. See the
 
 Each corner has a job:
 
-| Corner       | What lives there                                                     |
-| ------------ | -------------------------------------------------------------------- |
-| Top left     | Notifications and a short unread status.                             |
-| Top right    | Local clock, calendar, Wi-Fi, sound, and battery.                    |
-| Bottom left  | Desktop selection, panning, window selection, Overview, and Arrange. |
-| Bottom right | Favorite apps, running apps, window instances, and the launcher.     |
+| Corner       | What lives there                                                                    |
+| ------------ | ----------------------------------------------------------------------------------- |
+| Top left     | Notifications and a short unread status.                                            |
+| Top right    | Local clock, calendar, Wi-Fi, sound, and battery.                                   |
+| Bottom left  | Desktop selection, panning, canvas search, window selection, Overview, and Arrange. |
+| Bottom right | Favorite apps, running apps, window instances, and the launcher.                    |
 
 On narrow screens, the corners join into a top bar and bottom bar. Apps and
 tray icons scroll horizontally when needed, while the notification label stays
@@ -36,8 +36,9 @@ add backgrounds; the notification status tells you when something needs attentio
   around the map or click to move somewhere.
 - **Place windows.** Drag their headers, resize, and close them. Dragging toward
   the viewport edge carries a window farther across the canvas.
-- **Keep desktop items underneath.** The starter folders, document, and app
-  shortcut remain below every window. The default cursor tool selects them;
+- **Keep desktop items underneath.** Every catalog app has a permanent, movable
+  shortcut beside the starter folders and document. Items remain below every
+  window. The default cursor tool selects them;
   dragging the background draws a selection rectangle. Move selected items
   together; double-click or Enter opens its app preview.
 - **Select windows separately.** Choose rectangle selection or a freeform
@@ -47,6 +48,30 @@ add backgrounds; the notification status tells you when something needs attentio
 - **Arrange everything.** Arrange places every open window in a grid near the
   current viewport, preserving ordinary window sizes. The grid can extend
   offscreen and expand the world.
+
+## Bring work to you with search
+
+Choose **Search canvas** from the cursor tool's dropdown, then click the
+background. Windows move aside and a search field opens near that point, within
+the available space. Results appear below a field in the upper half of the
+screen and above one in the lower half. Pressing **/** selects Search and opens
+the field near the upper center of the screen.
+
+With an empty query, every desktop item comes into view. Typing brings matching
+app shortcuts, files, folders, and open windows into a temporary arrangement.
+Try **Notes** to see its app shortcut, Notes.txt, and matching open windows
+together. Names and item types are searchable; window matches also include app
+names. Matching windows retain their contents and chrome, scaled to fit.
+
+Use **Up/Down** to choose a result and **Enter** to open it, or click the result.
+An item opens its app preview; a window becomes active and the canvas centers on
+it. **Escape**, the close button, clicking empty canvas, or using another shell
+control ends search. The temporary layout never replaces saved positions, so
+closing it restores where everything was. Search remains the selected tool
+until you choose another.
+
+The existing dock and launcher remain available. Canvas search adds a way to
+find work by rearranging the space you're already using.
 
 ## Focus and switch
 
@@ -107,6 +132,8 @@ Prototype boundaries:
 
 - App launches create browser-rendered windows. They don't open host apps or
   files. The original Scratchpad is editable; the catalog apps use sample content.
+- Canvas search matches the playground's desktop items and open windows. It
+  doesn't index the host filesystem or search inside app content.
 - Overview's zoom buttons are placeholders. Display controls and tray values
   don't change the host system. Notifications have no external event source.
 - AI doesn't download a model, inspect windows, or move related windows. The
@@ -116,6 +143,7 @@ Prototype boundaries:
 The browser saves window layouts and stacking, desktop-item positions, window
 list order, the scratchpad, tool choices, gesture assignments, appearance,
 background, battery-label preference, and completed AI opt-in. Panels,
-selections, viewport travel, notifications, and mock display settings reset.
+selections, temporary search arrangements, viewport travel, notifications, and
+mock display settings reset.
 Storage stays local to that browser; if it's unavailable, the current session
 remains usable without saving.

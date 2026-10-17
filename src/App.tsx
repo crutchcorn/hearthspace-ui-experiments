@@ -214,7 +214,7 @@ function App() {
     setNotificationsOpen(false)
     setSystemPanel(null)
     setDockAppId(null)
-  }, [])
+  }, [setDockAppId])
 
   const leaveFocusView = useCallback(() => {
     if (!focusView) return
@@ -253,11 +253,26 @@ function App() {
       setSelectedItemIds([])
       setTool('search')
       setRevealRequest(null)
+      const pointerId = gesture.current?.pointerId
+      gesture.current = null
+      if (
+        pointerId !== undefined &&
+        captureTarget.current?.hasPointerCapture(pointerId)
+      )
+        captureTarget.current.releasePointerCapture(pointerId)
+      captureTarget.current = null
+      setDragging(false)
       const origin = { x: canvas.scrollLeft, y: canvas.scrollTop }
       canvas.scrollTo({ left: origin.x, top: origin.y, behavior: 'instant' })
       setCanvasSearch({ ...origin, anchor, query: '', selected: 0 })
     },
-    [closePopovers, leaveFocusView],
+    [
+      closePopovers,
+      leaveFocusView,
+      setLauncher,
+      setSelectedIds,
+      setSelectedItemIds,
+    ],
   )
 
   const arrangeAllWindows = useCallback(() => {
@@ -283,7 +298,13 @@ function App() {
     setLauncher(null)
     closePopovers()
     setWorkspace((current) => arrangeWindows(current, origin))
-  }, [closePopovers, leaveFocusView])
+  }, [
+    closePopovers,
+    leaveFocusView,
+    setLauncher,
+    setSelectedIds,
+    setSelectedItemIds,
+  ])
 
   useLayoutEffect(() => {
     viewport.current?.scrollTo(home.x, home.y)
@@ -1286,7 +1307,7 @@ function App() {
                 data-external={
                   appId !== 'settings' && !appId.startsWith('workspace-')
                 }
-                data-active={focusedWindowId === item.id}
+                data-active={!canvasSearch && focusedWindowId === item.id}
                 data-focus-mode={focusView?.id === item.id}
                 data-search-match={searchPlacement?.matches}
                 data-search-selected={
@@ -1646,6 +1667,7 @@ function App() {
       {canvasSearch && searchLayout && (
         <CanvasSearch
           position={searchLayout.position}
+          resultsAbove={searchLayout.resultsAbove}
           query={canvasSearch.query}
           onQueryChange={(query) =>
             setCanvasSearch({ ...canvasSearch, query, selected: 0 })

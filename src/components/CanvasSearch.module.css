@@ -1,4 +1,5 @@
 .search {
+  display: flex;
   position: fixed;
   z-index: 650;
   max-width: calc(100vw - 24px);
@@ -9,6 +10,12 @@
   box-shadow: var(--shadow-panel), var(--glass-edge);
   backdrop-filter: var(--glass-blur);
   color: var(--chrome-text);
+  flex-direction: column;
+}
+
+.search[data-results-above='true'] {
+  flex-direction: column-reverse;
+  transform: translateY(-100%);
 }
 
 .search:focus-within {
@@ -73,4 +80,9 @@
   border-top: 1px solid var(--line);
   color: var(--chrome-muted);
   font-size: 13px;
+}
+
+.search[data-results-above='true'] .empty {
+  border-top: 0;
+  border-bottom: 1px solid var(--line);
 }

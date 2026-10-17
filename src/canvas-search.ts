@@ -40,6 +40,7 @@ export function getCanvasSearchLayout(
   ]
   const clearance = getWindowClearance(view.width)
   const fieldWidth = Math.min(420, view.width - clearance.side * 2)
+  const fieldHeight = 54
   const position = {
     x: clamp(
       anchor.x - fieldWidth / 2,
@@ -47,37 +48,72 @@ export function getCanvasSearchLayout(
       view.width - clearance.side - fieldWidth,
     ),
     y: clamp(
-      anchor.y - 26,
+      anchor.y - fieldHeight / 2,
       clearance.top,
-      Math.max(clearance.top, view.height * 0.3 - 26),
+      Math.max(clearance.top, view.height - clearance.bottom - fieldHeight),
     ),
     width: fieldWidth,
   }
+  const resultsAbove =
+    position.y + fieldHeight / 2 >
+    (clearance.top + view.height - clearance.bottom) / 2
   const availableWidth = Math.max(1, view.width - clearance.side * 2)
-  const resultTop = position.y + 76
   const availableHeight = Math.max(
-    64,
-    view.height - clearance.bottom - resultTop,
+    1,
+    resultsAbove
+      ? position.y - 24 - clearance.top
+      : view.height - clearance.bottom - position.y - fieldHeight - 24,
   )
-  const gap = 18
   const hasWindows = windows.length > 0
-  const columns = Math.max(
+  const initialColumns = Math.max(
     1,
     Math.min(
       results.length,
-      Math.floor((availableWidth + gap) / (hasWindows ? 258 : 114)),
+      Math.floor((availableWidth + 18) / (hasWindows ? 258 : 114)),
     ),
   )
-  const rows = Math.max(1, Math.ceil(results.length / columns))
-  const cellWidth = Math.min(
-    hasWindows ? 320 : 96,
-    (availableWidth - gap * (columns - 1)) / columns,
-  )
-  const cellHeight = Math.min(
-    hasWindows ? 216 : 104,
-    Math.max(1, (availableHeight - gap * (rows - 1)) / rows),
-  )
-  const left = (view.width - (columns * cellWidth + (columns - 1) * gap)) / 2
+  const desiredWidth = hasWindows ? 320 : 96
+  const desiredHeight = hasWindows ? 216 : 104
+  const fitGrid = (columns: number) => {
+    const rows = Math.max(1, Math.ceil(results.length / columns))
+    const columnGap = Math.min(18, availableWidth / (columns * 4))
+    const rowGap = Math.min(18, availableHeight / (rows * 4))
+    const cellWidth = Math.min(
+      desiredWidth,
+      (availableWidth - columnGap * (columns - 1)) / columns,
+    )
+    const cellHeight = Math.min(
+      desiredHeight,
+      (availableHeight - rowGap * (rows - 1)) / rows,
+    )
+    return {
+      columns,
+      rows,
+      columnGap,
+      rowGap,
+      cellWidth,
+      cellHeight,
+      score: Math.min(cellWidth / desiredWidth, cellHeight / desiredHeight),
+    }
+  }
+  let grid = fitGrid(initialColumns)
+  if (hasWindows) {
+    // Add columns only when they make crowded previews larger.
+    for (
+      let columns = initialColumns + 1;
+      columns <= results.length;
+      columns++
+    ) {
+      const candidate = fitGrid(columns)
+      if (candidate.score > grid.score) grid = candidate
+    }
+  }
+  const { columns, rows, columnGap, rowGap, cellWidth, cellHeight } = grid
+  const left =
+    (view.width - (columns * cellWidth + (columns - 1) * columnGap)) / 2
+  const resultTop = resultsAbove
+    ? position.y - 24 - (rows * cellHeight + (rows - 1) * rowGap)
+    : position.y + fieldHeight + 24
 
   const placement = (item: Bounds, index: number): SearchPlacement => {
     const scale = Math.min(1, cellWidth / item.width, cellHeight / item.height)
@@ -85,12 +121,12 @@ export function getCanvasSearchLayout(
       x:
         view.x +
         left +
-        (index % columns) * (cellWidth + gap) +
+        (index % columns) * (cellWidth + columnGap) +
         (cellWidth - item.width * scale) / 2,
       y:
         view.y +
         resultTop +
-        Math.floor(index / columns) * (cellHeight + gap) +
+        Math.floor(index / columns) * (cellHeight + rowGap) +
         (cellHeight - item.height * scale) / 2,
       scale,
       matches: true,
@@ -122,6 +158,7 @@ export function getCanvasSearchLayout(
   )
   return {
     position,
+    resultsAbove,
     results,
     items: new Map(
       workspace.items.map((item) => {

@@ -8,11 +8,21 @@ This document explains how to extend that direction. The [feature list](features
 
 ## Keep the canvas available for work
 
-The default background is a flat field of subtly tinted dots, spaced 28 pixels apart in both axes. Because those dots move with the canvas, even an empty area gives you a reference while panning. Desktop icons and folders belong to this background layer and always sit underneath windows.
+The default background is a flat field of subtly tinted dots, spaced 28 pixels apart in both axes. Because those dots move with the canvas, even an empty area gives you a reference while panning. Desktop shortcuts, files, and folders belong to this background layer and always sit underneath windows. Every catalog app has a shortcut: you can decide where it belongs, while its continued presence makes the desktop a complete place to find apps.
 
 Leave decorative taglines and branding off the canvas. The Workspace window can show its own content, and apps can have headings, status lines, or descriptions. Those belong to the work inside a window; they don't need to become permanent desktop furniture.
 
 A photo can replace the dots. **Repeat with canvas** attaches native-size tiles to the world. **Stretch**, **Contain**, and **Cover** keep the photo attached to the viewport while windows move over it. Contain exposes the theme's field color around the image. Photos retain their own colors, and **Use default background** restores the dots.
+
+## Let search borrow the space
+
+Finding a window doesn't have to mean remembering where you left it. The Search cursor opens a field where you click the desktop, and the surrounding work moves aside to make room. Matching shortcuts, files, folders, and windows come into the viewport as you type. An empty query gathers all desktop items, making every app available from the canvas.
+
+Keep the field near the click. Results appear below a field in the upper half of the screen and above one in the lower half, with room for the corner controls. This gives the chosen point a purpose instead of pulling every search toward the same part of the screen. The keyboard shortcut opens near the upper center when there is no pointer location to use.
+
+The arrangement is temporary. Closing search restores the workspace, and choosing a window takes you to its saved position. This distinction lets us be quite bold about moving things during search: the user can explore a different arrangement without having to rebuild the one they made.
+
+Use the existing items and window surfaces as results. Scaled windows retain their content and chrome, and app shortcuts carry the same artwork seen elsewhere. A clear selection highlight identifies the next item to open. The search field needs its placeholder, a close control, and an empty-result message when relevant; it doesn't need another heading, result count, or instruction strip. The dock and launcher remain useful alongside this spatial route to the same apps.
 
 ## Give each corner an intention
 
@@ -44,6 +54,7 @@ The current interface applies that choice in several places:
 | Surface                                | What carries the meaning                                                              | Text we've removed                                                                                                   |
 | -------------------------------------- | ------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
 | Canvas selection                       | The selection shape and highlighted items or windows.                                 | “Drag to select desktop icons,” “Drag around windows,” and selected-item counts.                                     |
+| Canvas search                          | The search field, rearranged items and windows, and the selected result's highlight.  | Additional headings, result counts, and permanent keyboard instructions.                                             |
 | Corner controls                        | Position, icons, hover/focus states, and brief tooltips.                              | Persistent Activity, System, canvas-tool, and app-dock labels.                                                       |
 | App window picker                      | The app heading, each window's preview and title, and its reorder handle.             | “Open windows,” repeated window totals, “On canvas,” and numbered window subtitles.                                  |
 | Draw launcher                          | The drawing pad, stroke feedback, and customization cog.                              | “Gesture shortcuts,” “Select a shortcut, then draw in the pad,” the Preview app bar, and the Saved shortcut section. |
@@ -51,7 +62,7 @@ The current interface applies that choice in several places:
 | Keyboard switcher                      | Window previews, selection highlight, and one centered title for the selected window. | Names beneath every candidate and the shortcut/release footer.                                                       |
 | Settings navigation and gesture editor | Category names, a dedicated editor heading, the app picker, and the stroke itself.    | A second Settings title in the sidebar, “One gesture per app,” and “Recorded stroke.”                                |
 
-Useful text stays. The notification trigger tells you whether there is unread activity; the inbox doesn't repeat that total as both events and unread items. Launcher results and window-picker rows identify what you can open. Search result counts describe the search you just made. A download size, a storage error, and the consequences of deleting a model explain a decision that an icon cannot.
+Useful text stays. The notification trigger tells you whether there is unread activity; the inbox doesn't repeat that total as both events and unread items. Launcher results and window-picker rows identify what you can open. The existing launcher search retains a result count; canvas search uses the visible arrangement and a concise empty state. A download size, a storage error, and the consequences of deleting a model explain a decision that an icon cannot.
 
 Put longer explanations where someone has asked for detail. AI settings uses a plain **Features** subheading, followed by expandable **On-device AI** and **Gather similar windows** entries. The entries name features consistently. The opt-in's download information sits below the toggle, close to the choice it explains.
 
@@ -69,7 +80,7 @@ Workspace and Settings follow this shell treatment. Settings keeps an opaque con
 
 The playground now always uses the varied Linux-style app presentation. There is no Ideal/Realistic appearance switch. This lets us judge the shell with icons that have their own backgrounds, colors, and silhouettes, and with windows whose chrome we don't control.
 
-Give that artwork a consistent amount of space. The shared dock surface and target sizes provide order around it. Carry the same app identity through the launcher, window picker, switcher, and notification actions. Running dots and active-window highlights belong to the shell, so app artwork doesn't have to encode desktop state.
+Give that artwork a consistent amount of space. The shared dock surface and target sizes provide order around it. Carry the same app identity through desktop shortcuts, canvas search, the launcher, window picker, switcher, and notification actions. Running dots and active-window highlights belong to the shell, so app artwork doesn't have to encode desktop state.
 
 The previews include a tabbed browser, a file manager with rounded controls, classic Notes menus, and an angular terminal. These illustrate different app conventions without claiming to reproduce a particular toolkit. App-specific light and dark palettes preserve those structures; Terminal, Music, and Photos retain their dark interiors in either mode. Workspace and Settings continue to use the shared shell palette.
 
@@ -103,7 +114,7 @@ The monitor arrangement preview also has a bounded size. Two numbered monitors f
 
 ## Let interaction provide feedback
 
-Selected tools stay selected. Escape dismisses a panel or clears selection without changing the canvas tool. On desktop, pressing an inactive expandable tool selects it; pressing it again opens its choices. The expansion indicator sits at the top right. Short-lived tooltips explain unfamiliar controls without remaining over the canvas after the user has moved on.
+Selected tools stay selected, including Search after its field closes. Escape dismisses a panel or clears selection without changing the canvas tool. On desktop, pressing an inactive expandable tool selects it; pressing it again opens its choices. The primary cursor dropdown remembers desktop selection, Pan, or Search. The expansion indicator sits at the top right. Short-lived tooltips explain unfamiliar controls without remaining over the canvas after the user has moved on.
 
 Use distinct icons for distinct actions. Apps and Arrange have different silhouettes; Arrange's uneven grid suggests separate, non-overlapping windows. A divider separates background and selection tools from Overview and Arrange. **Gather similar windows** uses overlapping rectangles beside the selected windows, tying the action to its context.
 
