@@ -17,6 +17,14 @@
   cursor: grab;
 }
 
+.photoBackground {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
 .viewport::-webkit-scrollbar {
   display: none;
 }
@@ -41,6 +49,12 @@
   background-color: var(--field);
   background-image: radial-gradient(var(--field-dot) 1px, transparent 1.2px);
   background-size: 28px 28px;
+}
+
+.customBackground {
+  background-color: transparent;
+  background-image: none;
+  background-size: auto;
 }
 
 .window {

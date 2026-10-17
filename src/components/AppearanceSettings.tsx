@@ -5,6 +5,8 @@ import {
   type AccentThemeId,
   type AppPresentation,
 } from '../theme'
+import type { BackgroundFit, BackgroundPhoto } from '../useBackground'
+import BackgroundSettings from './BackgroundSettings'
 import styles from './AppearanceSettings.module.css'
 
 interface AppearanceSettingsProps {
@@ -14,6 +16,12 @@ interface AppearanceSettingsProps {
   onAppPresentationChange: (presentation: AppPresentation) => void
   showBatteryPercentage: boolean
   onShowBatteryPercentageChange: (show: boolean) => void
+  background: BackgroundPhoto | null
+  backgroundBusy: boolean
+  backgroundError: string | null
+  onBackgroundUpload: (file: File) => void
+  onBackgroundFitChange: (fit: BackgroundFit) => void
+  onBackgroundReset: () => void
 }
 
 const APP_PRESENTATIONS = [
@@ -32,6 +40,12 @@ export default function AppearanceSettings({
   onAppPresentationChange,
   showBatteryPercentage,
   onShowBatteryPercentageChange,
+  background,
+  backgroundBusy,
+  backgroundError,
+  onBackgroundUpload,
+  onBackgroundFitChange,
+  onBackgroundReset,
 }: AppearanceSettingsProps) {
   const groupName = useId()
   const presentationGroupName = useId()
@@ -41,8 +55,16 @@ export default function AppearanceSettings({
     <section className={styles.appearance}>
       <header className={styles.heading}>
         <h2>Appearance</h2>
-        <p>App presentation and desktop color.</p>
+        <p>Your desktop, color, and app presentation.</p>
       </header>
+      <BackgroundSettings
+        background={background}
+        backgroundBusy={backgroundBusy}
+        backgroundError={backgroundError}
+        onBackgroundUpload={onBackgroundUpload}
+        onBackgroundFitChange={onBackgroundFitChange}
+        onBackgroundReset={onBackgroundReset}
+      />
       <fieldset className={styles.palette}>
         <legend>App appearance</legend>
         <div className={styles.presentationOptions}>

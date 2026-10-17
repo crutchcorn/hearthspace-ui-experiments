@@ -49,6 +49,7 @@ import {
   type WindowSelectionShape,
 } from './desktop'
 import { polygonIntersectsBounds, type SelectionPoint } from './selection'
+import useBackground from './useBackground'
 import styles from './App.module.css'
 import {
   ACCENT_THEMES,
@@ -83,6 +84,7 @@ type Gesture = {
 const edges = ['n', 'e', 's', 'w', 'ne', 'se', 'sw', 'nw']
 
 function App() {
+  const background = useBackground()
   const [accentTheme, setAccentTheme] = useState(loadAccentTheme)
   const [appPresentation, setAppPresentation] = useState(loadAppPresentation)
   const [showBatteryPercentage, setShowBatteryPercentage] = useState(
@@ -797,6 +799,20 @@ function App() {
       data-presentation={appPresentation}
       style={{ '--accent': accent.color } as CSSProperties}
     >
+      {background.photo && background.photo.fit !== 'repeat' && (
+        <div
+          className={styles.photoBackground}
+          data-background-fit={background.photo.fit}
+          aria-hidden="true"
+          style={{
+            backgroundImage: `url("${background.photo.url}")`,
+            backgroundSize:
+              background.photo.fit === 'stretch'
+                ? '100% 100%'
+                : background.photo.fit,
+          }}
+        />
+      )}
       <SystemBar
         showBatteryPercentage={showBatteryPercentage}
         openPanel={systemPanel}
@@ -858,8 +874,18 @@ function App() {
         onAuxClick={(event) => event.preventDefault()}
       >
         <div
-          className={styles.world}
-          style={{ width: workspace.width, height: workspace.height }}
+          className={`${styles.world} ${background.photo ? styles.customBackground : ''}`}
+          data-background-fit={
+            background.photo?.fit === 'repeat' ? 'repeat' : undefined
+          }
+          style={{
+            width: workspace.width,
+            height: workspace.height,
+            backgroundImage:
+              background.photo?.fit === 'repeat'
+                ? `url("${background.photo.url}")`
+                : undefined,
+          }}
         >
           <DesktopItems
             items={workspace.items}
@@ -986,6 +1012,12 @@ function App() {
                     onAppPresentationChange={changeAppPresentation}
                     showBatteryPercentage={showBatteryPercentage}
                     onShowBatteryPercentageChange={changeShowBatteryPercentage}
+                    background={background.photo}
+                    backgroundBusy={background.busy}
+                    backgroundError={background.error}
+                    onBackgroundUpload={background.upload}
+                    onBackgroundFitChange={background.changeFit}
+                    onBackgroundReset={background.reset}
                     onNoteChange={(note) =>
                       setWorkspace((current) => ({ ...current, note }))
                     }

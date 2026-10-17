@@ -7,6 +7,7 @@ import {
 } from 'lucide-react'
 import type { DesktopWindow, Workspace } from '../desktop'
 import type { AccentThemeId, AppPresentation } from '../theme'
+import type { BackgroundFit, BackgroundPhoto } from '../useBackground'
 import AppearanceSettings from './AppearanceSettings'
 import AppIcon from './AppIcon'
 import { APP_CATALOG } from './launcher-apps'
@@ -22,6 +23,12 @@ interface WindowContentProps {
   onAppPresentationChange: (presentation: AppPresentation) => void
   showBatteryPercentage: boolean
   onShowBatteryPercentageChange: (show: boolean) => void
+  background: BackgroundPhoto | null
+  backgroundBusy: boolean
+  backgroundError: string | null
+  onBackgroundUpload: (file: File) => void
+  onBackgroundFitChange: (fit: BackgroundFit) => void
+  onBackgroundReset: () => void
 }
 
 const files = [
@@ -47,6 +54,12 @@ export default function WindowContent({
   onAppPresentationChange,
   showBatteryPercentage,
   onShowBatteryPercentageChange,
+  background,
+  backgroundBusy,
+  backgroundError,
+  onBackgroundUpload,
+  onBackgroundFitChange,
+  onBackgroundReset,
 }: WindowContentProps) {
   if (item.kind === 'welcome') {
     return (
@@ -196,6 +209,12 @@ export default function WindowContent({
         onAppPresentationChange={onAppPresentationChange}
         showBatteryPercentage={showBatteryPercentage}
         onShowBatteryPercentageChange={onShowBatteryPercentageChange}
+        background={background}
+        backgroundBusy={backgroundBusy}
+        backgroundError={backgroundError}
+        onBackgroundUpload={onBackgroundUpload}
+        onBackgroundFitChange={onBackgroundFitChange}
+        onBackgroundReset={onBackgroundReset}
       />
     )
   }
