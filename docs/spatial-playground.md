@@ -40,7 +40,7 @@ The fixed canvas dock at the bottom left contains a hand/cursor tool dropdown an
 
 The navigator remains a compact 54-pixel-high row at every width, with icon-only controls. Both bottom docks sit 24 pixels from the viewport edge on desktop. At widths of 760 pixels or less, canvas tools sit 14 pixels above the bottom, while the entire 54-pixel app bar sits 76 pixels above it. Map, launcher, and window picker panels sit 90 pixels above the viewport bottom on desktop and 142 pixels above it on narrow screens, keeping the controls reachable.
 
-The top controls sit 24 pixels from the top and side edges on desktop, or 12 pixels on narrow screens. The notification trigger pairs a bell with a single-line unread status. Its contents are left-aligned, with an intrinsic width determined by the icon, text, and padding; its height remains 54 pixels. Narrow screens retain the compact bell-and-count presentation without imposing a fixed width. The system row occupies 224 × 54 pixels: a 70 × 44-pixel clock button and three 44 × 44-pixel device buttons. The full date and simulated device values appear in hover titles and expanded panels. Top panels open 12 pixels below their triggers. Panel heights are capped and their contents scroll to preserve the bottom controls.
+The top controls sit 24 pixels from the top and side edges on desktop, or 12 pixels on narrow screens. The notification trigger pairs a bell with a single-line unread status. Its contents are left-aligned, with an intrinsic width determined by the icon, text, and padding; its height remains 54 pixels. Narrow screens retain the compact bell-and-count presentation without imposing a fixed width. The system row is 54 pixels high and fits its contents: a clock button and three device buttons. Enabling the battery percentage widens its button and the row. With the percentage enabled at 380 pixels wide or less, the clock and spacing become more compact to preserve room for notifications. The full date and simulated device values appear in hover titles and expanded panels. Top panels open 12 pixels below their triggers. Panel heights are capped and their contents scroll to preserve the bottom controls.
 
 One continuous glass dock at the bottom right contains preset Browser, Files, and Notes favorites, other apps with open windows, and Apps. Individual icon buttons have no separate resting bubbles. Running favorites reuse their existing icon button. Each running app shows one dot per window below its icon, capped at three dots; its hover title and accessible name retain the exact count. The app containing the active window is marked. Apps opens the launcher, where an Apps/Draw toggle in the command bar selects browsing or the gesture pad.
 
@@ -98,12 +98,14 @@ The same view offers a global **App appearance** choice: **Ideal** by default, o
 
 Presentation changes apply immediately to existing windows and their entries in the dock, launcher, and notifications. They do not replace the workspace or alter window geometry, stacking, dock ordering, or scratchpad content. The accent remains a separate global setting: it colors shell controls and window states in both modes, while Realistic app artwork and content retain their own identity colors. There are no individual app theme controls.
 
+The **System tray** section has a **Show battery percentage** toggle, off by default. `App` shares the preference across Settings windows and passes it to the system row, where it displays **87%** beside the battery icon. The battery value remains simulated, and its popover shows the percentage regardless of this preference.
+
 ## Source map
 
 | File                                                                                    | Responsibility                                                                                            |
 | --------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
 | [`src/desktop.ts`](../src/desktop.ts)                                                   | Workspace types, starter desktop items, storage validation, window resizing, and arrangement.             |
-| [`src/theme.ts`](../src/theme.ts)                                                       | Allowed accents and app presentation modes, defaults, and their storage validation.                       |
+| [`src/theme.ts`](../src/theme.ts)                                                       | Accent, app appearance, and battery-label preferences, defaults, and storage validation.                  |
 | [`src/App.tsx`](../src/App.tsx)                                                         | Workspace rendering, pointer gestures, viewport navigation, window actions, appearance state, and saving. |
 | [`src/components/SystemBar.tsx`](../src/components/SystemBar.tsx)                       | Compact 24-hour clock and status row, popovers, and simulated controls.                                   |
 | [`src/components/NotificationInbox.tsx`](../src/components/NotificationInbox.tsx)       | Notification trigger, inbox, unread/dismissal state, and sample toasts.                                   |
@@ -111,7 +113,7 @@ Presentation changes apply immediately to existing windows and their entries in 
 | [`src/components/CanvasTools.tsx`](../src/components/CanvasTools.tsx)                   | Background-tool dropdown, window lasso, arrangement action, and selected-window count.                    |
 | [`src/components/DesktopItems.tsx`](../src/components/DesktopItems.tsx)                 | Desktop-item layer, item artwork, and selection/opening input.                                            |
 | [`src/components/WindowContent.tsx`](../src/components/WindowContent.tsx)               | Workspace overview, editable scratchpad, appearance settings, and simulated app interiors.                |
-| [`src/components/AppearanceSettings.tsx`](../src/components/AppearanceSettings.tsx)     | Shared desktop accent and app presentation selection in Settings.                                         |
+| [`src/components/AppearanceSettings.tsx`](../src/components/AppearanceSettings.tsx)     | Shared desktop accent, app appearance, and battery-percentage visibility in Settings.                     |
 | [`src/components/AppIcon.tsx`](../src/components/AppIcon.tsx)                           | Consistent icon sizing with Ideal glyphs and Realistic app artwork.                                       |
 | [`src/components/LauncherDock.tsx`](../src/components/LauncherDock.tsx)                 | Favorites, running-app groups, window instance picker, and the Apps trigger.                              |
 | [`src/components/AppLauncher.tsx`](../src/components/AppLauncher.tsx)                   | App gallery/list, filtering, keyboard navigation, and launcher views.                                     |
@@ -134,4 +136,6 @@ The app appearance choice is stored under `hearthspace-app-presentation-v1`. Onl
 
 The selected canvas tool is stored under `hearthspace-canvas-tool-v1`. Loading accepts `cursor`, `pan`, or `lasso`; missing, invalid, or unavailable storage defaults to the cursor. Explicit tool changes remain active through Escape, arrangement, app launches, and window navigation. Temporary panning does not change the saved tool.
 
-Viewport travel, selection, open panels, search text, list/grid choice, notifications, and simulated system settings remain temporary. Notification read/dismissal state and preview items reset to the initial samples on reload. If storage is unavailable, the current desktop session remains usable without persistence.
+Battery-percentage visibility is stored under `hearthspace-battery-percentage-v1`. Only the literal string `true` enables it; missing, invalid, or unavailable storage defaults to off. The preference applies immediately and remains usable in the current session if saving fails.
+
+Viewport travel, selection, open panels, search text, list/grid choice, notifications, and simulated device-control values remain temporary. Notification read/dismissal state and preview items reset to the initial samples on reload. If storage is unavailable, the current desktop session remains usable without persistence.

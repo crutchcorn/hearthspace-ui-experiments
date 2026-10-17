@@ -12,6 +12,8 @@ interface AppearanceSettingsProps {
   onAccentThemeChange: (theme: AccentThemeId) => void
   appPresentation: AppPresentation
   onAppPresentationChange: (presentation: AppPresentation) => void
+  showBatteryPercentage: boolean
+  onShowBatteryPercentageChange: (show: boolean) => void
 }
 
 const APP_PRESENTATIONS = [
@@ -28,9 +30,12 @@ export default function AppearanceSettings({
   onAccentThemeChange,
   appPresentation,
   onAppPresentationChange,
+  showBatteryPercentage,
+  onShowBatteryPercentageChange,
 }: AppearanceSettingsProps) {
   const groupName = useId()
   const presentationGroupName = useId()
+  const batterySettingId = useId()
 
   return (
     <section className={styles.appearance}>
@@ -105,6 +110,30 @@ export default function AppearanceSettings({
             </label>
           ))}
         </div>
+      </fieldset>
+      <fieldset className={styles.palette}>
+        <legend>System tray</legend>
+        <label className={styles.toggleRow}>
+          <span className={styles.toggleCopy}>
+            <strong id={`${batterySettingId}-label`}>
+              Show battery percentage
+            </strong>
+            <span id={`${batterySettingId}-description`}>
+              Display the charge beside the battery icon.
+            </span>
+          </span>
+          <input
+            className={styles.toggle}
+            type="checkbox"
+            role="switch"
+            aria-labelledby={`${batterySettingId}-label`}
+            aria-describedby={`${batterySettingId}-description`}
+            checked={showBatteryPercentage}
+            onChange={(event) =>
+              onShowBatteryPercentageChange(event.target.checked)
+            }
+          />
+        </label>
       </fieldset>
     </section>
   )

@@ -14,11 +14,13 @@ export type SystemPanel = 'wifi' | 'volume' | 'battery' | 'clock' | null
 interface SystemBarProps {
   openPanel: SystemPanel
   onPanelChange: (panel: SystemPanel) => void
+  showBatteryPercentage: boolean
 }
 
 export default function SystemBar({
   openPanel,
   onPanelChange,
+  showBatteryPercentage,
 }: SystemBarProps) {
   const [wifiEnabled, setWifiEnabled] = useState(true)
   const [volume, setVolume] = useState(64)
@@ -69,6 +71,7 @@ export default function SystemBar({
       className={styles.bar}
       aria-label="Device status"
       data-system-popover-root
+      data-battery-percentage={showBatteryPercentage}
     >
       <button
         type="button"
@@ -113,13 +116,18 @@ export default function SystemBar({
         </button>
         <button
           type="button"
-          className={`${styles.statusButton} ${openPanel === 'battery' ? styles.active : ''}`}
+          className={`${styles.statusButton} ${showBatteryPercentage ? styles.batteryWithPercentage : ''} ${openPanel === 'battery' ? styles.active : ''}`}
           title="Battery · 87%"
-          aria-label="Battery status"
+          aria-label="Battery status, 87%"
           aria-expanded={openPanel === 'battery'}
           onClick={() => togglePanel('battery')}
         >
-          <BatteryFull size={19} />
+          <BatteryFull size={19} aria-hidden="true" />
+          {showBatteryPercentage && (
+            <span className={styles.batteryPercentage} aria-hidden="true">
+              87%
+            </span>
+          )}
         </button>
       </div>
 

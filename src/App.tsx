@@ -50,8 +50,10 @@ import {
   ACCENT_THEMES,
   loadAccentTheme,
   loadAppPresentation,
+  loadShowBatteryPercentage,
   saveAccentTheme,
   saveAppPresentation,
+  saveShowBatteryPercentage,
   type AccentThemeId,
   type AppPresentation,
 } from './theme'
@@ -76,6 +78,9 @@ const edges = ['n', 'e', 's', 'w', 'ne', 'se', 'sw', 'nw']
 function App() {
   const [accentTheme, setAccentTheme] = useState(loadAccentTheme)
   const [appPresentation, setAppPresentation] = useState(loadAppPresentation)
+  const [showBatteryPercentage, setShowBatteryPercentage] = useState(
+    loadShowBatteryPercentage,
+  )
   const accent =
     ACCENT_THEMES.find((theme) => theme.id === accentTheme) ?? ACCENT_THEMES[0]
   const [workspace, setWorkspace] = useState(loadWorkspace)
@@ -709,6 +714,11 @@ function App() {
     saveAppPresentation(mode)
   }
 
+  function changeShowBatteryPercentage(show: boolean) {
+    setShowBatteryPercentage(show)
+    saveShowBatteryPercentage(show)
+  }
+
   return (
     <main
       className={styles.desktop}
@@ -717,6 +727,7 @@ function App() {
       style={{ '--accent': accent.color } as CSSProperties}
     >
       <SystemBar
+        showBatteryPercentage={showBatteryPercentage}
         openPanel={systemPanel}
         onPanelChange={(panel) => {
           setSystemPanel(panel)
@@ -902,6 +913,8 @@ function App() {
                     onAccentThemeChange={changeAccentTheme}
                     appPresentation={appPresentation}
                     onAppPresentationChange={changeAppPresentation}
+                    showBatteryPercentage={showBatteryPercentage}
+                    onShowBatteryPercentageChange={changeShowBatteryPercentage}
                     onNoteChange={(note) =>
                       setWorkspace((current) => ({ ...current, note }))
                     }

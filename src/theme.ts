@@ -12,6 +12,7 @@ export type AppPresentation = 'ideal' | 'realistic'
 
 const ACCENT_STORAGE_KEY = 'hearthspace-accent-v1'
 const APP_PRESENTATION_STORAGE_KEY = 'hearthspace-app-presentation-v1'
+const BATTERY_PERCENTAGE_STORAGE_KEY = 'hearthspace-battery-percentage-v1'
 
 export function loadAccentTheme(): AccentThemeId {
   try {
@@ -45,5 +46,21 @@ export function saveAppPresentation(presentation: AppPresentation) {
     localStorage.setItem(APP_PRESENTATION_STORAGE_KEY, presentation)
   } catch {
     // Keep the selected presentation for this session if storage is unavailable.
+  }
+}
+
+export function loadShowBatteryPercentage(): boolean {
+  try {
+    return localStorage.getItem(BATTERY_PERCENTAGE_STORAGE_KEY) === 'true'
+  } catch {
+    return false
+  }
+}
+
+export function saveShowBatteryPercentage(show: boolean) {
+  try {
+    localStorage.setItem(BATTERY_PERCENTAGE_STORAGE_KEY, String(show))
+  } catch {
+    // Keep the selected tray preference for this session if storage is unavailable.
   }
 }

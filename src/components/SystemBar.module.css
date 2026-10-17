@@ -4,7 +4,7 @@
   top: 24px;
   right: 24px;
   display: flex;
-  width: 224px;
+  width: max-content;
   height: 54px;
   align-items: center;
   gap: 4px;
@@ -73,6 +73,23 @@
   flex-shrink: 0;
   padding: 0;
   place-items: center;
+}
+
+.batteryWithPercentage {
+  display: flex;
+  width: auto;
+  min-width: 44px;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 0 10px;
+}
+
+.batteryPercentage {
+  font-size: 11px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 .popover {
@@ -328,6 +345,17 @@
 
   .popover {
     max-height: calc(100dvh - 220px);
+  }
+}
+
+@media (width <= 380px) {
+  .bar[data-battery-percentage='true'],
+  .bar[data-battery-percentage='true'] .statusGroup {
+    gap: 2px;
+  }
+
+  .bar[data-battery-percentage='true'] .clockButton {
+    width: 62px;
   }
 }
 

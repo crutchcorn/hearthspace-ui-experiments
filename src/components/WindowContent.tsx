@@ -20,6 +20,8 @@ interface WindowContentProps {
   onAccentThemeChange: (theme: AccentThemeId) => void
   appPresentation: AppPresentation
   onAppPresentationChange: (presentation: AppPresentation) => void
+  showBatteryPercentage: boolean
+  onShowBatteryPercentageChange: (show: boolean) => void
 }
 
 const files = [
@@ -43,6 +45,8 @@ export default function WindowContent({
   onAccentThemeChange,
   appPresentation,
   onAppPresentationChange,
+  showBatteryPercentage,
+  onShowBatteryPercentageChange,
 }: WindowContentProps) {
   if (item.kind === 'welcome') {
     return (
@@ -190,6 +194,8 @@ export default function WindowContent({
         onAccentThemeChange={onAccentThemeChange}
         appPresentation={appPresentation}
         onAppPresentationChange={onAppPresentationChange}
+        showBatteryPercentage={showBatteryPercentage}
+        onShowBatteryPercentageChange={onShowBatteryPercentageChange}
       />
     )
   }

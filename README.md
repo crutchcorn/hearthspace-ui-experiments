@@ -55,12 +55,14 @@ Open **Settings** from Apps, then choose an accent under **Appearance**: Orange,
 
 Under **App appearance**, choose **Ideal** for the uniform icons and glass windows, or **Realistic** to try varied icon shapes, backgrounds, and app-owned window styling. Ideal is the default. Realistic simulates the visual differences between Linux apps while keeping the corner controls, app bar, and active-window cues consistent. App artwork and interiors keep their own colors; the accent still belongs to the shared desktop. Switching modes preserves the windows, their arrangement, and edited notes, and the choice survives reload. Both modes remain browser previews rather than host applications.
 
+Under **System tray**, enable **Show battery percentage** to display the simulated **87%** beside the battery icon. It is off by default, updates immediately, and stays selected after reload. The battery popover always shows the percentage.
+
 ## Try notifications
 
 Open the bell in the top-left corner or press N. The compact, left-aligned bell button fits its contents: an accented unread count, or **All clear** when there are no unread items. Narrow screens show the bell and a count. The inbox starts with three sample notifications. **Open Notes**, **Open Files**, and **Open Browser** bring the matching window into view, or create a preview window if it is missing. Opening a notification marks it read; **Mark all read** clears the unread count, and each notification’s close button removes it.
 
 Choose **Preview notification** to add a sample and show a toast below the notification button. The toast disappears after six seconds; dismissing the toast keeps the notification in the inbox. These notifications are simulated and reset when the page reloads. N is inactive while typing or using the launcher.
 
-Workspace, Scratchpad, and Files are the starter windows. The scratchpad is editable; file tiles and most app interiors are interface previews. Settings changes the playground’s appearance. Desktop item positions, window positions and sizes, scratchpad text, chosen canvas tool, saved gesture shortcuts, accent, and app appearance choices persist in this browser’s local storage. Wi-Fi, sound, and battery controls are simulated; the 24-hour clock uses your device’s local time.
+Workspace, Scratchpad, and Files are the starter windows. The scratchpad is editable; file tiles and most app interiors are interface previews. Settings changes the playground’s appearance. Desktop item positions, window positions and sizes, scratchpad text, chosen canvas tool, saved gesture shortcuts, accent, app appearance, and battery-percentage visibility persist in this browser’s local storage. Wi-Fi, sound, and battery controls are simulated; the 24-hour clock uses your device’s local time.
 
 For development commands, see [CONTRIBUTING.md](CONTRIBUTING.md). The [technical documentation](docs/README.md) describes the experiment’s structure.
