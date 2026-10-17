@@ -23,6 +23,25 @@ pnpm dev
 
 Run the relevant checks before considering an experiment complete. Investigate Knip findings before removing code.
 
+## GitHub Pages deployment
+
+The [deployment workflow](.github/workflows/deploy.yml) checks and builds the site on pushes to `main`, then publishes `dist/` to GitHub Pages. You can also run **Deploy to GitHub Pages** manually from the repository’s Actions tab with `main` selected. Other branches can build through a manual run, but cannot deploy.
+
+Before the first deployment, open the repository’s [Pages settings](https://github.com/crutchcorn/hearthspace-ui-experiments/settings/pages) and select **GitHub Actions** under **Build and deployment → Source**. No personal access token or repository secret is required; the deployment job uses GitHub’s built-in token and the `github-pages` environment.
+
+After a successful deployment, the site is available at [crutchcorn.github.io/hearthspace-ui-experiments](https://crutchcorn.github.io/hearthspace-ui-experiments/). The `base` in [vite.config.ts](vite.config.ts) is `/hearthspace-ui-experiments/`, so generated asset URLs include the repository prefix. Update it if the repository name or hosting path changes.
+
+The workflow reads the supported Node version and pnpm version from `package.json`, installs with the frozen lockfile, and runs the same checks listed above before uploading the build. Deployment permissions are limited to the deployment job, and an active deployment finishes before the next one starts.
+
+To check the production build locally:
+
+```sh
+pnpm build
+pnpm preview
+```
+
+Open the printed address at `/hearthspace-ui-experiments/` and check that the desktop and its assets load. This follows [Vite’s GitHub Pages deployment guide](https://vite.dev/guide/static-deploy#github-pages), adapted for pnpm.
+
 ## Implementation
 
 Keep experiments small enough to change quickly. The app uses React, TypeScript, Vite, CSS Modules, and Lucide icons. Local interaction state is sufficient for the current desktop; add routing, server rendering, or an API when an experiment actually needs them.
