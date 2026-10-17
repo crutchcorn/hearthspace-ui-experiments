@@ -14,6 +14,8 @@ Settings exposes **Light** and **Dark** under Appearance. With no saved choice, 
 
 Each Ideal window joins its glass title bar and opaque content in one frame, with a fine divider and no gap between them. The outer frame carries the border, shadow, and active or selected edge light. The header retains its drag handle and controls while the body keeps its own content hierarchy and scrolling area. Realistic frames use the same window bounds and interactions with app-specific solid surfaces. Workspace and Settings keep opaque content in either presentation mode; Settings applies its paper surface to the content pane so the sidebar can retain glass.
 
+Focused view gives one app the entire viewport while keeping its window chrome. The shell recedes until the pointer approaches a corner, which reveals all controls together. The canvas stays still while the app’s contents remain scrollable. Leaving focus returns the window to ordinary maximization with room for the shell; header double-clicking still toggles between that layout and the window’s original bounds.
+
 ## Apps can have their own identity
 
 Settings offers **Ideal** and **Realistic** app appearance modes. Ideal is the default and gives app glyphs and window frames the shared visual language. Realistic tests the shell against the uneven visual identity of a Linux desktop: icons can have opaque backgrounds, different silhouettes, and independent colors; windows can have different title bars, borders, and content treatments.

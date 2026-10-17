@@ -288,6 +288,40 @@
   display: contents;
 }
 
+.topbar > *,
+.docks {
+  transition: opacity 160ms ease;
+}
+
+.desktop[data-focus-mode='true'][data-shell-peek='false'] .topbar > *,
+.desktop[data-focus-mode='true'][data-shell-peek='false'] .docks,
+.desktop[data-focus-mode='true'][data-shell-peek='false'] .docks > * {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.desktop[data-focus-mode='true'] .viewport {
+  overflow: hidden;
+  touch-action: auto;
+  cursor: default;
+}
+
+.desktop .window[data-focus-mode='true'] {
+  --window-radius: 0px;
+
+  min-width: 0;
+  min-height: 0;
+  border-radius: 0;
+}
+
+.desktop .window[data-focus-mode='true'] .titlebar {
+  cursor: default;
+}
+
+.desktop .window[data-focus-mode='true'] .windowBody {
+  overscroll-behavior: contain;
+}
+
 .dockDivider {
   display: none;
 }
@@ -764,6 +798,12 @@
     display: flex;
     align-items: center;
     gap: 4px;
+    transition: opacity 160ms ease;
+  }
+
+  .desktop[data-focus-mode='true'][data-shell-peek='false'] .topbar {
+    opacity: 0;
+    pointer-events: none;
   }
 
   .docks {
@@ -818,7 +858,10 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .window {
+  .window,
+  .topbar,
+  .topbar > *,
+  .docks {
     transition: none;
   }
 

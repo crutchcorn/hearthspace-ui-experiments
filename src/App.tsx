@@ -13,6 +13,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Maximize2,
+  Minimize2,
   PanelsTopLeft,
   StickyNote,
   X,
@@ -39,7 +40,6 @@ import {
   loadCanvasTool,
   loadWindowSelectionShape,
   loadWorkspace,
-  MIN_HEIGHT,
   MIN_WIDTH,
   resizeBounds,
   STORAGE_KEY,
@@ -51,6 +51,8 @@ import {
 } from './desktop'
 import { polygonIntersectsBounds, type SelectionPoint } from './selection'
 import useBackground from './useBackground'
+import useShellPeek from './useShellPeek'
+import { getMaximizedBounds, getWindowClearance } from './window-layout'
 import {
   loadGestureShortcuts,
   saveGestureShortcuts,
@@ -114,6 +116,11 @@ function App() {
   const [activeId, setActiveId] = useState<string | null>(
     workspace.windows.at(-1)?.id ?? null,
   )
+  const [focusView, setFocusView] = useState<{
+    id: string
+    x: number
+    y: number
+  } | null>(null)
   const [dragging, setDragging] = useState(false)
   const [spaceHeld, setSpaceHeld] = useState(false)
   const [showMap, setShowMap] = useState(false)
@@ -145,10 +152,15 @@ function App() {
   const captureTarget = useRef<Element | null>(null)
   const latestPointer = useRef({ x: 0, y: 0 })
   const home = workspace.home
-  const windowClearance =
-    view.width <= 760
-      ? { side: 12, top: 78, bottom: 78 }
-      : { side: 24, top: 96, bottom: 96 }
+  const windowClearance = getWindowClearance(view.width)
+  const shellPeek = useShellPeek(
+    focusView !== null,
+    notificationsOpen ||
+      systemPanel !== null ||
+      showMap ||
+      launcher !== null ||
+      dockAppId !== null,
+  )
   const focusedWindowId = workspace.windows.some((item) => item.id === activeId)
     ? activeId
     : (workspace.windows.at(-1)?.id ?? null)
@@ -159,9 +171,33 @@ function App() {
     setDockAppId(null)
   }, [])
 
+  const leaveFocusView = useCallback(() => {
+    if (!focusView) return
+    setWorkspace((current) => ({
+      ...current,
+      windows: current.windows.map((item) =>
+        item.id === focusView.id
+          ? {
+              ...item,
+              ...getMaximizedBounds(
+                {
+                  ...focusView,
+                  width: window.innerWidth,
+                  height: window.innerHeight,
+                },
+                current,
+              ),
+            }
+          : item,
+      ),
+    }))
+    setFocusView(null)
+  }, [focusView])
+
   const arrangeAllWindows = useCallback(() => {
     const canvas = viewport.current
     if (!canvas) return
+    leaveFocusView()
     const origin = { x: canvas.scrollLeft, y: canvas.scrollTop }
     canvas.scrollTo({ left: origin.x, top: origin.y, behavior: 'instant' })
     const pointerId = gesture.current?.pointerId
@@ -181,14 +217,14 @@ function App() {
     setLauncher(null)
     closePopovers()
     setWorkspace((current) => arrangeWindows(current, origin))
-  }, [closePopovers])
+  }, [closePopovers, leaveFocusView])
 
   useLayoutEffect(() => {
     viewport.current?.scrollTo(home.x, home.y)
   }, [home.x, home.y])
 
   useLayoutEffect(() => {
-    if (!revealRequest) return
+    if (!revealRequest || focusView) return
     // Focus after restacking so React's focus restoration cannot cancel the pan.
     windowElements.current.get(revealRequest.id)?.focus({ preventScroll: true })
     viewport.current?.scrollTo({
@@ -198,7 +234,7 @@ function App() {
         ? 'instant'
         : 'smooth',
     })
-  }, [revealRequest])
+  }, [revealRequest, focusView])
 
   useEffect(() => {
     try {
@@ -317,6 +353,7 @@ function App() {
         setSpaceHeld(false)
       }
       if (event.code === 'Space') {
+        if (focusView) return
         if (event.target instanceof Element && event.target.closest('button'))
           return
         event.preventDefault()
@@ -324,7 +361,7 @@ function App() {
       }
       if (event.code === 'Home') {
         event.preventDefault()
-        viewport.current?.scrollTo(home.x, home.y)
+        if (!focusView) viewport.current?.scrollTo(home.x, home.y)
       }
     }
     const release = () => {
@@ -347,7 +384,7 @@ function App() {
       window.removeEventListener('keyup', keyup)
       window.removeEventListener('blur', release)
     }
-  }, [home.x, home.y, launcher, closePopovers, arrangeAllWindows])
+  }, [home.x, home.y, launcher, closePopovers, arrangeAllWindows, focusView])
 
   useEffect(() => {
     if (!launcher) return
@@ -363,6 +400,7 @@ function App() {
   }, [launcher])
 
   function focusWindow(id: string) {
+    if (focusView && focusView.id !== id) leaveFocusView()
     setActiveId(id)
     setWorkspace((current) => {
       const item = current.windows.find((entry) => entry.id === id)
@@ -377,7 +415,7 @@ function App() {
   function applyGesture(clientX: number, clientY: number) {
     const current = gesture.current
     const canvas = viewport.current
-    if (!current || !canvas) return
+    if (!current || !canvas || focusView) return
     if (current.type === 'pan') {
       canvas.scrollTo(
         current.scrollX - clientX + current.startX,
@@ -543,6 +581,7 @@ function App() {
   }
 
   const panAtEdge = useEffectEvent(() => {
+    if (focusView) return
     const canvas = viewport.current
     if (
       canvas &&
@@ -585,6 +624,7 @@ function App() {
         ? selectedWindows
         : undefined
     if (
+      focusView ||
       gesture.current ||
       (event.button !== 0 && event.button !== 1) ||
       (item?.restore && type !== 'pan' && !group)
@@ -657,7 +697,7 @@ function App() {
     event: ReactPointerEvent<HTMLButtonElement>,
     item: DesktopItem,
   ) {
-    if (event.button !== 0 || gesture.current) return
+    if (focusView || event.button !== 0 || gesture.current) return
     if (tool === 'pan') {
       startGesture(event, 'pan')
       return
@@ -703,8 +743,11 @@ function App() {
   }
 
   function maximize(item: DesktopWindow) {
+    if (focusView?.id === item.id) {
+      leaveFocusView()
+      return
+    }
     const canvas = viewport.current!
-    const { side, top, bottom } = windowClearance
     setWorkspace((current) => ({
       ...current,
       windows: current.windows.map((entry) => {
@@ -713,14 +756,6 @@ function App() {
           const { restore, ...rest } = entry
           return { ...rest, ...restore }
         }
-        const width = Math.min(
-          current.width,
-          Math.max(MIN_WIDTH, view.width - side * 2),
-        )
-        const height = Math.min(
-          current.height,
-          Math.max(MIN_HEIGHT, view.height - top - bottom),
-        )
         return {
           ...entry,
           restore: {
@@ -729,17 +764,82 @@ function App() {
             width: entry.width,
             height: entry.height,
           },
-          x: clamp(canvas.scrollLeft + side, 0, current.width - width),
-          y: clamp(canvas.scrollTop + top, 0, current.height - height),
-          width,
-          height,
+          ...getMaximizedBounds(
+            {
+              x: canvas.scrollLeft,
+              y: canvas.scrollTop,
+              width: view.width,
+              height: view.height,
+            },
+            current,
+          ),
         }
       }),
     }))
     focusWindow(item.id)
   }
 
+  function toggleFocusView(item: DesktopWindow) {
+    if (focusView?.id === item.id) {
+      leaveFocusView()
+      return
+    }
+    const canvas = viewport.current!
+    const origin = { x: canvas.scrollLeft, y: canvas.scrollTop }
+    canvas.scrollTo({ left: origin.x, top: origin.y, behavior: 'instant' })
+    const pointerId = gesture.current?.pointerId
+    gesture.current = null
+    if (
+      pointerId !== undefined &&
+      captureTarget.current?.hasPointerCapture(pointerId)
+    )
+      captureTarget.current.releasePointerCapture(pointerId)
+    captureTarget.current = null
+    setDragging(false)
+    setSpaceHeld(false)
+    setSelection(null)
+    setSelectedIds([])
+    setSelectedItemIds([])
+    setRevealRequest(null)
+    setShowMap(false)
+    setLauncher(null)
+    closePopovers()
+    focusWindow(item.id)
+    setWorkspace((current) => ({
+      ...current,
+      windows: current.windows.map((entry) =>
+        entry.id === item.id
+          ? {
+              ...entry,
+              restore: entry.restore ?? {
+                x: entry.x,
+                y: entry.y,
+                width: entry.width,
+                height: entry.height,
+              },
+              ...getMaximizedBounds(
+                { ...origin, width: view.width, height: view.height },
+                current,
+              ),
+            }
+          : entry,
+      ),
+    }))
+    setView((current) => ({ ...current, ...origin }))
+    setFocusView({ id: item.id, ...origin })
+    windowElements.current.get(item.id)?.focus({ preventScroll: true })
+  }
+
+  function closeWindow(id: string) {
+    if (focusView?.id === id) setFocusView(null)
+    setWorkspace((current) => ({
+      ...current,
+      windows: current.windows.filter((entry) => entry.id !== id),
+    }))
+  }
+
   function addWindow(app?: LauncherApp) {
+    leaveFocusView()
     const canvas = viewport.current!
     const id = crypto.randomUUID()
     const offset = (workspace.windows.length % 5) * 24
@@ -822,6 +922,10 @@ function App() {
     setSelectedItemIds([])
     setSpaceHeld(false)
     focusWindow(item.id)
+    if (focusView?.id === item.id) {
+      windowElements.current.get(item.id)?.focus({ preventScroll: true })
+      return
+    }
     setRevealRequest({
       id: item.id,
       left: clamp(item.x - left, 0, Math.max(0, workspace.width - view.width)),
@@ -896,6 +1000,8 @@ function App() {
       data-accent={accentTheme}
       data-color-mode={colorMode}
       data-presentation={appPresentation}
+      data-focus-mode={focusView !== null}
+      data-shell-peek={!focusView || shellPeek}
       style={{ '--accent-base': accent.color } as CSSProperties}
     >
       {background.photo && background.photo.fit !== 'repeat' && (
@@ -912,7 +1018,10 @@ function App() {
           }}
         />
       )}
-      <div className={`${styles.topbar} ${shellStyles.mobileSurface}`}>
+      <div
+        className={`${styles.topbar} ${shellStyles.mobileSurface}`}
+        data-shell-controls
+      >
         <NotificationInbox
           ref={notificationInbox}
           open={notificationsOpen}
@@ -944,13 +1053,30 @@ function App() {
       </div>
       <div
         ref={viewport}
-        className={`${styles.viewport} ${tool === 'cursor' ? styles.cursorReady : ''} ${spaceHeld ? styles.panReady : ''} ${dragging ? styles.dragging : ''} ${tool === 'select' && !spaceHeld ? styles.selecting : ''}`}
+        className={`${styles.viewport} ${!focusView && tool === 'cursor' ? styles.cursorReady : ''} ${!focusView && spaceHeld ? styles.panReady : ''} ${!focusView && dragging ? styles.dragging : ''} ${!focusView && tool === 'select' && !spaceHeld ? styles.selecting : ''}`}
         data-canvas-viewport
         onScroll={(event) => {
+          if (focusView) {
+            const canvas = event.currentTarget
+            const x = clamp(
+              focusView.x,
+              0,
+              canvas.scrollWidth - canvas.clientWidth,
+            )
+            const y = clamp(
+              focusView.y,
+              0,
+              canvas.scrollHeight - canvas.clientHeight,
+            )
+            if (canvas.scrollLeft !== x || canvas.scrollTop !== y)
+              canvas.scrollTo({ left: x, top: y, behavior: 'instant' })
+            return
+          }
           const { scrollLeft: x, scrollTop: y } = event.currentTarget
           setView((current) => ({ ...current, x, y }))
         }}
         onPointerDownCapture={(event) => {
+          if (focusView) return
           if (event.button === 1 || spaceHeld) startGesture(event, 'pan')
           else if (
             tool === 'select' &&
@@ -992,16 +1118,18 @@ function App() {
                 : undefined,
           }}
         >
-          <DesktopItems
-            items={workspace.items}
-            selectedIds={selectedItemIds}
-            onPointerDown={startItemGesture}
-            onSelect={selectDesktopItem}
-            onOpen={(item) => {
-              const app = APP_CATALOG.find((entry) => entry.id === item.appId)
-              if (app) launchApp(app)
-            }}
-          />
+          <div inert={focusView !== null}>
+            <DesktopItems
+              items={workspace.items}
+              selectedIds={selectedItemIds}
+              onPointerDown={startItemGesture}
+              onSelect={selectDesktopItem}
+              onOpen={(item) => {
+                const app = APP_CATALOG.find((entry) => entry.id === item.appId)
+                if (app) launchApp(app)
+              }}
+            />
+          </div>
           {workspace.windows.map((item, index) => {
             const app = APP_CATALOG.find((entry) => entry.id === item.appId)
             const appId =
@@ -1028,18 +1156,25 @@ function App() {
                   appId !== 'settings' && !appId.startsWith('workspace-')
                 }
                 data-active={focusedWindowId === item.id}
+                data-focus-mode={focusView?.id === item.id}
+                inert={focusView !== null && focusView.id !== item.id}
                 data-selected={selectedIds.includes(item.id)}
                 data-grouped={
                   selectedWindows.length > 1 && selectedIds.includes(item.id)
                 }
                 className={styles.window}
                 style={{
-                  left: item.x,
-                  top: item.y,
-                  width: item.width,
-                  height: item.height,
-                  zIndex: index + 1,
+                  position: focusView?.id === item.id ? 'fixed' : undefined,
+                  left: focusView?.id === item.id ? 0 : item.x,
+                  top: focusView?.id === item.id ? 0 : item.y,
+                  width: focusView?.id === item.id ? view.width : item.width,
+                  height: focusView?.id === item.id ? view.height : item.height,
+                  zIndex:
+                    focusView?.id === item.id
+                      ? workspace.windows.length + 1
+                      : index + 1,
                 }}
+                onFocusCapture={() => focusWindow(item.id)}
                 onPointerDown={(event) => {
                   if (!(event.target as Element).closest('button'))
                     focusWindow(item.id)
@@ -1079,24 +1214,23 @@ function App() {
                   <div className={styles.windowActions}>
                     <button
                       title={
-                        item.restore ? 'Restore window' : 'Maximize window'
+                        focusView?.id === item.id
+                          ? 'Leave focused view'
+                          : 'Maximize window'
                       }
-                      aria-label={`${item.restore ? 'Restore' : 'Maximize'} ${item.title}`}
-                      onClick={() => maximize(item)}
+                      aria-label={`${focusView?.id === item.id ? 'Leave focused view for' : 'Maximize'} ${item.title}`}
+                      onClick={() => toggleFocusView(item)}
                     >
-                      <Maximize2 size={12} />
+                      {focusView?.id === item.id ? (
+                        <Minimize2 size={12} />
+                      ) : (
+                        <Maximize2 size={12} />
+                      )}
                     </button>
                     <button
                       title="Close window"
                       aria-label={`Close ${item.title}`}
-                      onClick={() =>
-                        setWorkspace((current) => ({
-                          ...current,
-                          windows: current.windows.filter(
-                            (entry) => entry.id !== item.id,
-                          ),
-                        }))
-                      }
+                      onClick={() => closeWindow(item.id)}
                     >
                       <X size={15} />
                     </button>
@@ -1200,7 +1334,10 @@ function App() {
           )}
         </div>
       </div>
-      <div className={`${styles.docks} ${shellStyles.mobileSurface}`}>
+      <div
+        className={`${styles.docks} ${shellStyles.mobileSurface}`}
+        data-shell-controls
+      >
         <CanvasTools
           mode={tool}
           selectionShape={selectionShape}
@@ -1294,7 +1431,7 @@ function App() {
         />
       )}
       {showMap && (
-        <aside className={styles.mapPanel}>
+        <aside className={styles.mapPanel} data-shell-controls>
           <div className={styles.panelHeading}>
             <h2>Overview</h2>
             <div
@@ -1321,7 +1458,9 @@ function App() {
           <Minimap
             workspace={workspace}
             view={view}
-            onNavigate={(x, y) => viewport.current?.scrollTo(x, y)}
+            onNavigate={(x, y) => {
+              if (!focusView) viewport.current?.scrollTo(x, y)
+            }}
           />
         </aside>
       )}

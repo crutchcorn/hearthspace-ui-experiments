@@ -101,6 +101,7 @@ export default function AppLauncher({
       className={styles.launcher}
       aria-label="App launcher"
       data-launcher-root
+      data-shell-controls
       onKeyDown={handleNavigation}
     >
       <header className={styles.commandBar}>
