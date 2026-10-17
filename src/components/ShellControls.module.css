@@ -1,0 +1,58 @@
+.surface {
+  --shell-padding: 4px;
+  --shell-border-width: 1px;
+
+  height: 54px;
+  padding: var(--shell-padding);
+  border: var(--shell-border-width) solid var(--chrome-border);
+  border-radius: var(--radius-panel);
+  background: var(--chrome);
+  box-shadow: var(--shadow-panel), var(--glass-edge);
+  backdrop-filter: var(--glass-blur);
+  color: var(--chrome-text);
+}
+
+.control {
+  appearance: none;
+  min-width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: calc(
+    var(--radius-panel) - var(--shell-padding) - var(--shell-border-width)
+  );
+  background: transparent;
+  color: var(--chrome-text);
+  touch-action: manipulation;
+  transition:
+    background 150ms ease,
+    color 150ms ease;
+}
+
+.control:hover:where(:not(:disabled)) {
+  background: var(--chrome-hover);
+}
+
+.control:is(
+  [aria-pressed='true'],
+  [aria-expanded='true'],
+  [data-active='true']
+),
+.control:active:not(:disabled) {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.control:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.control:disabled {
+  opacity: 0.35;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .control {
+    transition: none;
+  }
+}

@@ -6,15 +6,6 @@
 
 .dock {
   width: 203px;
-  height: 54px;
-  padding: 4px;
-  border: 1px solid var(--chrome-border);
-  border-radius: var(--radius-panel);
-  background: var(--chrome);
-  box-shadow:
-    var(--shadow-panel),
-    inset 0 1px 0 #fff;
-  backdrop-filter: blur(24px) saturate(1.25);
 }
 
 .toolGrid {
@@ -132,75 +123,12 @@
 .tool {
   display: flex;
   width: 44px;
-  height: 44px;
   align-items: center;
   justify-content: center;
   padding: 4px;
-  border: 1px solid #ffffffd9;
-  border-radius: var(--radius-control);
-  background: #ffffff70;
-  color: var(--chrome-muted);
-  touch-action: manipulation;
-  transition:
-    background 150ms ease,
-    color 150ms ease,
-    box-shadow 150ms ease;
-}
-
-.tool:hover:not(:disabled) {
-  background: var(--chrome-hover);
-  color: var(--chrome-text);
-}
-
-.tool[aria-pressed='true'] {
-  background: var(--accent-soft);
-  color: var(--accent);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 13%, transparent);
-}
-
-.move[aria-pressed='true'] {
-  background: linear-gradient(
-    145deg,
-    var(--accent-bright),
-    var(--accent) 65%,
-    var(--accent-strong)
-  );
-  color: var(--accent-ink);
-  box-shadow:
-    inset 0 1px 0 #ffffff69,
-    0 4px 12px color-mix(in srgb, var(--accent) 22%, transparent);
-}
-
-.tool[aria-pressed='true']:hover:not(:disabled) {
-  background: var(--accent-soft);
-  color: var(--accent);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 28%, transparent);
-}
-
-.move[aria-pressed='true']:hover:not(:disabled) {
-  background: linear-gradient(
-    145deg,
-    var(--accent-bright),
-    var(--accent-hover) 65%,
-    var(--accent-strong)
-  );
-  color: var(--accent-ink);
-  box-shadow:
-    inset 0 1px 0 #ffffff80,
-    0 4px 16px color-mix(in srgb, var(--accent) 31%, transparent);
-}
-
-.tool:focus-visible {
-  outline: 2px solid var(--chrome-text);
-  outline-offset: 2px;
-}
-
-.tool:disabled {
-  opacity: 0.35;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .tool,
   .expandIndicator {
     transition: none;
   }

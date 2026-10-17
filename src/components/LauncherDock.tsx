@@ -11,6 +11,7 @@ import {
 import type { DesktopWindow } from '../desktop'
 import AppIcon from './AppIcon'
 import { APP_CATALOG, type LauncherApp } from './launcher-apps'
+import shellStyles from './ShellControls.module.css'
 import styles from './LauncherDock.module.css'
 
 const FAVORITE_IDS = ['browser', 'files', 'notes']
@@ -334,7 +335,7 @@ export default function LauncherDock({
       aria-label="Apps, favorites, and running windows"
       data-launcher-trigger
     >
-      <div className={styles.bar}>
+      <div className={`${shellStyles.surface} ${styles.bar}`}>
         <div
           className={styles.appStrip}
           role="group"
@@ -355,7 +356,7 @@ export default function LauncherDock({
                   else appTriggers.current.delete(app.id)
                 }}
                 type="button"
-                className={styles.appButton}
+                className={`${shellStyles.control} ${styles.appButton}`}
                 title={label}
                 aria-label={label}
                 aria-expanded={running ? selectedAppId === app.id : undefined}
@@ -397,7 +398,7 @@ export default function LauncherDock({
         <button
           ref={triggerRef}
           type="button"
-          className={styles.launcher}
+          className={`${shellStyles.control} ${styles.launcher}`}
           aria-label="Open app launcher"
           aria-expanded={open}
           title="Open app launcher (⌘/Ctrl K)"

@@ -8,6 +8,7 @@ import {
   WifiOff,
 } from 'lucide-react'
 import styles from './SystemBar.module.css'
+import shellStyles from './ShellControls.module.css'
 
 export type SystemPanel = 'wifi' | 'volume' | 'battery' | 'clock' | null
 
@@ -68,14 +69,14 @@ export default function SystemBar({
 
   return (
     <header
-      className={styles.bar}
+      className={`${styles.bar} ${shellStyles.surface}`}
       aria-label="Device status"
       data-system-popover-root
       data-battery-percentage={showBatteryPercentage}
     >
       <button
         type="button"
-        className={`${styles.clockButton} ${openPanel === 'clock' ? styles.active : ''}`}
+        className={`${styles.clockButton} ${shellStyles.control}`}
         onClick={() => togglePanel('clock')}
         title={now.toLocaleDateString(undefined, {
           weekday: 'long',
@@ -96,7 +97,7 @@ export default function SystemBar({
       <div className={styles.statusGroup}>
         <button
           type="button"
-          className={`${styles.statusButton} ${openPanel === 'wifi' ? styles.active : ''}`}
+          className={`${styles.statusButton} ${shellStyles.control}`}
           title={wifiEnabled ? 'Wi-Fi · Studio network' : 'Wi-Fi · Off'}
           aria-label="Wi-Fi settings"
           aria-expanded={openPanel === 'wifi'}
@@ -106,7 +107,7 @@ export default function SystemBar({
         </button>
         <button
           type="button"
-          className={`${styles.statusButton} ${openPanel === 'volume' ? styles.active : ''}`}
+          className={`${styles.statusButton} ${shellStyles.control}`}
           title={volume > 0 ? `Sound · ${volume}%` : 'Sound · Muted'}
           aria-label="Sound settings"
           aria-expanded={openPanel === 'volume'}
@@ -116,7 +117,7 @@ export default function SystemBar({
         </button>
         <button
           type="button"
-          className={`${styles.statusButton} ${showBatteryPercentage ? styles.batteryWithPercentage : ''} ${openPanel === 'battery' ? styles.active : ''}`}
+          className={`${styles.statusButton} ${showBatteryPercentage ? styles.batteryWithPercentage : ''} ${shellStyles.control}`}
           title="Battery · 87%"
           aria-label="Battery status, 87%"
           aria-expanded={openPanel === 'battery'}

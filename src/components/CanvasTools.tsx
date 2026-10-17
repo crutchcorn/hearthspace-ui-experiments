@@ -10,6 +10,7 @@ import {
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from 'react'
 import type { CanvasTool, WindowSelectionShape } from '../desktop'
 import styles from './CanvasTools.module.css'
+import shellStyles from './ShellControls.module.css'
 
 interface CanvasToolsProps {
   mode: CanvasTool
@@ -222,7 +223,11 @@ export default function CanvasTools({
 
   return (
     <div className={styles.container}>
-      <div className={styles.dock} role="group" aria-label="Canvas tools">
+      <div
+        className={`${styles.dock} ${shellStyles.surface}`}
+        role="group"
+        aria-label="Canvas tools"
+      >
         <div className={styles.toolGrid}>
           <div
             ref={pickerRef}
@@ -235,7 +240,7 @@ export default function CanvasTools({
             <button
               ref={triggerRef}
               type="button"
-              className={`${styles.tool} ${styles.move} ${styles.expandable}`}
+              className={`${styles.tool} ${styles.expandable} ${shellStyles.control}`}
               aria-pressed={mode !== 'select'}
               aria-label={`${primaryTool.label}, choose canvas tool`}
               aria-haspopup="menu"
@@ -313,7 +318,7 @@ export default function CanvasTools({
             <button
               ref={selectionTriggerRef}
               type="button"
-              className={`${styles.tool} ${styles.expandable}`}
+              className={`${styles.tool} ${styles.expandable} ${shellStyles.control}`}
               aria-pressed={mode === 'select'}
               aria-label={`${selectionTool.label}, choose window selection tool`}
               aria-haspopup="menu"
@@ -383,7 +388,7 @@ export default function CanvasTools({
           <span className={styles.divider} aria-hidden="true" />
           <button
             type="button"
-            className={styles.tool}
+            className={`${styles.tool} ${shellStyles.control}`}
             aria-pressed={mapOpen}
             aria-label="Toggle canvas map"
             {...hintProps('map')}
@@ -397,7 +402,7 @@ export default function CanvasTools({
           <div>
             <button
               type="button"
-              className={styles.tool}
+              className={`${styles.tool} ${shellStyles.control}`}
               aria-label="Arrange all windows"
               {...hintProps('arrange')}
               onClick={() => {

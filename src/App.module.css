@@ -620,22 +620,15 @@
 
 @media (width <= 760px) {
   .docks {
-    inset: auto 12px 14px;
+    inset: auto 12px 12px;
     gap: 10px;
     justify-content: space-between;
   }
 
   .mapPanel {
-    bottom: 142px;
+    bottom: 140px;
     left: 12px;
     max-height: calc(100dvh - 226px);
-  }
-}
-
-@media (width <= 360px) {
-  .docks {
-    inset-inline: 8px;
-    gap: 6px;
   }
 }
 

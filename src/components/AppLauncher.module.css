@@ -347,7 +347,7 @@
 @media (width <= 760px) {
   .launcher {
     right: 12px;
-    bottom: 142px;
+    bottom: 140px;
     max-height: calc(100dvh - 226px);
   }
 }

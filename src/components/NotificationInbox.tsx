@@ -19,6 +19,7 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import AppIcon from './AppIcon'
+import shellStyles from './ShellControls.module.css'
 import styles from './NotificationInbox.module.css'
 
 export type NotificationTarget = 'notes' | 'files' | 'browser' | 'gestures'
@@ -200,32 +201,34 @@ export default function NotificationInbox({
       onPointerDown={(event) => event.stopPropagation()}
       onWheel={(event) => event.stopPropagation()}
     >
-      <button
-        ref={trigger}
-        type="button"
-        className={styles.trigger}
-        title={`Notifications (N) · ${unreadCount ? `${unreadCount} new` : 'All clear'}`}
-        aria-label={`Notifications, ${unreadCount ? `${unreadCount} new` : 'all clear'}`}
-        aria-expanded={open}
-        aria-controls="notification-inbox"
-        data-unread={unreadCount > 0}
-        onClick={() => {
-          setToast(null)
-          onToggle()
-        }}
-      >
-        {unreadCount ? (
-          <BellRing size={18} aria-hidden="true" />
-        ) : (
-          <Bell size={18} aria-hidden="true" />
-        )}
-        <span className={styles.triggerLabel} aria-hidden="true">
-          {unreadCount ? `${unreadCount} new` : 'All clear'}
-        </span>
-        <span className={styles.compactCount} aria-hidden="true">
-          {unreadCount > 99 ? '99+' : unreadCount}
-        </span>
-      </button>
+      <div className={`${shellStyles.surface} ${styles.bar}`}>
+        <button
+          ref={trigger}
+          type="button"
+          className={`${shellStyles.control} ${styles.trigger}`}
+          title={`Notifications (N) · ${unreadCount ? `${unreadCount} new` : 'All clear'}`}
+          aria-label={`Notifications, ${unreadCount ? `${unreadCount} new` : 'all clear'}`}
+          aria-expanded={open}
+          aria-controls="notification-inbox"
+          data-unread={unreadCount > 0}
+          onClick={() => {
+            setToast(null)
+            onToggle()
+          }}
+        >
+          {unreadCount ? (
+            <BellRing size={18} aria-hidden="true" />
+          ) : (
+            <Bell size={18} aria-hidden="true" />
+          )}
+          <span className={styles.triggerLabel} aria-hidden="true">
+            {unreadCount ? `${unreadCount} new` : 'All clear'}
+          </span>
+          <span className={styles.compactCount} aria-hidden="true">
+            {unreadCount > 99 ? '99+' : unreadCount}
+          </span>
+        </button>
+      </div>
 
       {open && (
         <section

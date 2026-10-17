@@ -6,7 +6,8 @@
   color: var(--chrome-text);
 }
 
-.corner button {
+.panel button,
+.toast button {
   cursor: pointer;
   transition:
     background 140ms ease,
@@ -14,25 +15,24 @@
     box-shadow 140ms ease;
 }
 
-.corner button:focus-visible {
+.panel button:focus-visible,
+.toast button:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 3px;
+}
+
+.bar {
+  display: flex;
+  width: max-content;
 }
 
 .trigger {
   display: inline-flex;
   width: max-content;
-  min-height: 54px;
   align-items: center;
   justify-content: flex-start;
   gap: 9px;
-  padding: 8px 14px;
-  border: 1px solid var(--chrome-border);
-  border-radius: var(--radius-tile);
-  background: linear-gradient(135deg, #ffffff80, #fff9ed15), var(--chrome);
-  box-shadow: var(--shadow-panel), var(--glass-edge);
-  backdrop-filter: var(--glass-blur);
-  color: var(--chrome-muted);
+  padding: 0 10px;
   font-size: 13px;
   font-weight: 500;
   font-variant-numeric: tabular-nums;
@@ -40,24 +40,12 @@
   white-space: nowrap;
 }
 
-.trigger:hover,
-.trigger[aria-expanded='true'] {
-  background: var(--chrome-raised);
-}
-
 .trigger[data-unread='true'] {
-  border-color: var(--accent-border);
-  background: linear-gradient(
-    135deg,
-    color-mix(in srgb, var(--accent-wash) 90%, transparent),
-    color-mix(in srgb, var(--accent-soft) 68%, transparent)
-  );
   color: var(--accent);
 }
 
-.trigger[data-unread='true']:hover,
-.trigger[data-unread='true'][aria-expanded='true'] {
-  background: var(--accent-soft);
+.trigger[data-unread='false']:not([aria-expanded='true']) {
+  color: var(--chrome-muted);
 }
 
 .compactCount {
@@ -492,7 +480,7 @@
 
   .trigger {
     gap: 6px;
-    padding: 8px;
+    padding: 0 6px;
   }
 
   .trigger > svg {
