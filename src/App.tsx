@@ -65,15 +65,12 @@ import shellStyles from './components/ShellControls.module.css'
 import {
   ACCENT_THEMES,
   loadAccentTheme,
-  loadAppPresentation,
   loadColorMode,
   loadShowBatteryPercentage,
   saveAccentTheme,
-  saveAppPresentation,
   saveColorMode,
   saveShowBatteryPercentage,
   type AccentThemeId,
-  type AppPresentation,
   type ColorMode,
 } from './theme'
 
@@ -104,7 +101,6 @@ function App() {
   const [accentTheme, setAccentTheme] = useState(loadAccentTheme)
   const [colorMode, setColorMode] = useState(loadColorMode)
   const [gestureShortcuts, setGestureShortcuts] = useState(loadGestureShortcuts)
-  const [appPresentation, setAppPresentation] = useState(loadAppPresentation)
   const [showBatteryPercentage, setShowBatteryPercentage] = useState(
     loadShowBatteryPercentage,
   )
@@ -982,11 +978,6 @@ function App() {
     saveGestureShortcuts(next)
   }
 
-  function changeAppPresentation(mode: AppPresentation) {
-    setAppPresentation(mode)
-    saveAppPresentation(mode)
-  }
-
   function changeColorMode(mode: ColorMode) {
     setColorMode(mode)
     saveColorMode(mode)
@@ -1002,7 +993,7 @@ function App() {
       className={styles.desktop}
       data-accent={accentTheme}
       data-color-mode={colorMode}
-      data-presentation={appPresentation}
+      data-presentation="realistic"
       data-focus-mode={focusView !== null}
       data-shell-peek={!focusView || shellPeek}
       style={{ '--accent-base': accent.color } as CSSProperties}
@@ -1195,7 +1186,7 @@ function App() {
                       maximize(item)
                   }}
                 >
-                  {appPresentation === 'realistic' && appId === 'files' && (
+                  {appId === 'files' && (
                     <span
                       className={styles.nativeNavigation}
                       aria-hidden="true"
@@ -1241,7 +1232,7 @@ function App() {
                   </div>
                 </header>
                 <div className={styles.windowBody}>
-                  {appPresentation === 'realistic' && appId === 'notes' && (
+                  {appId === 'notes' && (
                     <div className={styles.nativeMenu} aria-hidden="true">
                       <span>File</span>
                       <span>Edit</span>
@@ -1260,8 +1251,6 @@ function App() {
                     onSaveGestureShortcut={saveGestureShortcut}
                     onRemoveGestureShortcut={removeGestureShortcut}
                     onAccentThemeChange={changeAccentTheme}
-                    appPresentation={appPresentation}
-                    onAppPresentationChange={changeAppPresentation}
                     showBatteryPercentage={showBatteryPercentage}
                     onShowBatteryPercentageChange={changeShowBatteryPercentage}
                     background={background.photo}

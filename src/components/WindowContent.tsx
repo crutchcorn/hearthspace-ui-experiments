@@ -6,7 +6,7 @@ import {
   LockKeyhole,
 } from 'lucide-react'
 import type { DesktopWindow, Workspace } from '../desktop'
-import type { AccentThemeId, AppPresentation, ColorMode } from '../theme'
+import type { AccentThemeId, ColorMode } from '../theme'
 import type { BackgroundFit, BackgroundPhoto } from '../useBackground'
 import type { GestureShortcut } from '../gestures'
 import type { AIControls } from '../useAI'
@@ -24,8 +24,6 @@ interface WindowContentProps {
   onColorModeChange: (mode: ColorMode) => void
   accentTheme: AccentThemeId
   onAccentThemeChange: (theme: AccentThemeId) => void
-  appPresentation: AppPresentation
-  onAppPresentationChange: (presentation: AppPresentation) => void
   showBatteryPercentage: boolean
   onShowBatteryPercentageChange: (show: boolean) => void
   background: BackgroundPhoto | null
@@ -64,8 +62,6 @@ export default function WindowContent({
   onColorModeChange,
   accentTheme,
   onAccentThemeChange,
-  appPresentation,
-  onAppPresentationChange,
   showBatteryPercentage,
   onShowBatteryPercentageChange,
   background,
@@ -225,8 +221,6 @@ export default function WindowContent({
         onColorModeChange={onColorModeChange}
         accentTheme={accentTheme}
         onAccentThemeChange={onAccentThemeChange}
-        appPresentation={appPresentation}
-        onAppPresentationChange={onAppPresentationChange}
         showBatteryPercentage={showBatteryPercentage}
         onShowBatteryPercentageChange={onShowBatteryPercentageChange}
         background={background}
