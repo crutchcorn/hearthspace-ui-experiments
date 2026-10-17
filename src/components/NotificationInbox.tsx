@@ -237,16 +237,7 @@ export default function NotificationInbox({
           aria-labelledby="notification-heading"
         >
           <header className={styles.heading}>
-            <div>
-              <h2 id="notification-heading">Notifications</h2>
-            </div>
-            <span className={styles.headingCount}>
-              {unreadCount}
-              <small>unread</small>
-            </span>
-          </header>
-          <div className={styles.feedToolbar}>
-            <span>{notifications.length} events</span>
+            <h2 id="notification-heading">Notifications</h2>
             <button
               type="button"
               className={styles.markRead}
@@ -259,7 +250,7 @@ export default function NotificationInbox({
             >
               <CheckCheck size={15} /> Mark all read
             </button>
-          </div>
+          </header>
 
           <div className={styles.list}>
             {notifications.length ? (
@@ -323,8 +314,8 @@ export default function NotificationInbox({
             )}
           </div>
 
-          <footer className={styles.footer}>
-            <span>Simulated notifications</span>
+          {/* Prototype-only control; remove this footer for the OS shell. */}
+          <footer className={styles.previewTools}>
             <button
               type="button"
               className={styles.previewButton}

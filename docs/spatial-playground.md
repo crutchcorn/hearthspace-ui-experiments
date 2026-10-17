@@ -79,7 +79,7 @@ Notifications open from the top-left bell or with N. The trigger shows an accent
 
 The gesture pad’s cog asks `App` to close the launcher and open notifications. The `NotificationInbox` ref exposes `showGestureSettings()`, which moves a single **Customize gestures** item to the top, marks it unread, and clears any toast. Its `gestures` target reopens Draw in editing mode through `App`. Repeating the request does not create duplicate items.
 
-**Preview notification** cycles through Notes, Files, and Browser examples, prepends a new unread item, closes the inbox, and shows a toast for six seconds. Toast actions use the same window navigation as inbox actions. Outside pointer input dismisses the toast, and opening another corner panel suppresses it so controls remain visible on narrow screens. Closing or timing out the toast leaves the item in the inbox. All notification content and relative timestamps are simulated, with no external event source.
+The separate prototype footer contains a quiet **Preview notification** button. It cycles through Notes, Files, and Browser examples, prepends a new unread item, closes the inbox, and shows a toast for six seconds. Toast actions use the same window navigation as inbox actions. Outside pointer input dismisses the toast, and opening another corner panel suppresses it so controls remain visible on narrow screens. Closing or timing out the toast leaves the item in the inbox. All notification content and relative timestamps are simulated, with no external event source.
 
 ## Gesture shortcuts
 

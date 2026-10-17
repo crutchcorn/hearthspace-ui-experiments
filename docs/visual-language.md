@@ -36,6 +36,8 @@ The application gallery opens with search and an Apps/Draw toggle in one command
 
 Expanded panels provide detail while the resting controls keep a small footprint. Keyboard shortcuts and direct touch targets remain available without hover.
 
+The notification inbox keeps its heading and **Mark all read** action free of duplicate event or unread totals. Its **Preview notification** control is a muted, transparent button in a separate footer, leaving the notification stream visually primary and the prototype-only control easy to remove.
+
 Settings uses a sidebar to separate Appearance, Background, and System. The selected category controls the content pane while shared preferences remain consistent across Settings windows. The sidebar collapses behind a category toggle when the window is narrow, leaving room for the controls rather than squeezing both columns into the same space.
 
 ## One accent carries state
