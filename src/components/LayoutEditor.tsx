@@ -75,64 +75,63 @@ export default function LayoutEditor({
           <span className={styles.title} title={target ? title : undefined}>
             {target ? title : 'Choose an item to place'}
           </span>
-          <button
-            type="button"
-            className={`${styles.button} ${shellStyles.control}`}
-            aria-label="Done changing layout"
-            aria-describedby={hint === 'Done' ? hintId : undefined}
-            onPointerEnter={() => showHint('Done')}
-            onPointerLeave={hideHint}
-            onFocus={() => showHint('Done')}
-            onBlur={hideHint}
-            onClick={onDone}
-          >
-            <Check size={19} aria-hidden="true" />
-          </button>
-        </div>
-        {target && (
-          <>
-            <div
-              className={styles.placements}
-              role="group"
-              aria-label="Place on"
-            >
-              {choices.map((choice) => {
-                const active = placement?.surface === choice.surface
-                return (
-                  <button
-                    key={choice.label}
-                    type="button"
-                    className={`${styles.button} ${shellStyles.control}`}
-                    aria-label={choice.label}
-                    aria-pressed={active}
-                    aria-describedby={
-                      hint === choice.label ? hintId : undefined
-                    }
-                    onPointerEnter={() => showHint(choice.label)}
-                    onPointerLeave={hideHint}
-                    onFocus={() => showHint(choice.label)}
-                    onBlur={hideHint}
-                    onClick={() => choosePlacement(choice)}
-                  >
-                    <choice.Icon size={19} aria-hidden="true" />
-                  </button>
-                )
-              })}
-            </div>
-            {canRemove && (
+          <div className={styles.actions}>
+            {target && canRemove && (
               <button
                 type="button"
-                className={`${styles.remove} ${shellStyles.control}`}
+                className={`${styles.button} ${shellStyles.control}`}
+                aria-label={removeLabel}
+                aria-describedby={hint === removeLabel ? hintId : undefined}
+                onPointerEnter={() => showHint(removeLabel)}
+                onPointerLeave={hideHint}
+                onFocus={() => showHint(removeLabel)}
+                onBlur={hideHint}
                 onClick={() => {
                   hideHint()
                   onRemove()
                 }}
               >
-                <Trash2 size={15} aria-hidden="true" />
-                {removeLabel}
+                <Trash2 size={19} aria-hidden="true" />
               </button>
             )}
-          </>
+            <button
+              type="button"
+              className={`${styles.button} ${shellStyles.control}`}
+              aria-label="Done changing layout"
+              aria-describedby={hint === 'Done' ? hintId : undefined}
+              onPointerEnter={() => showHint('Done')}
+              onPointerLeave={hideHint}
+              onFocus={() => showHint('Done')}
+              onBlur={hideHint}
+              onClick={onDone}
+            >
+              <Check size={19} aria-hidden="true" />
+            </button>
+          </div>
+        </div>
+        {target && (
+          <div className={styles.placements} role="group" aria-label="Place on">
+            {choices.map((choice) => {
+              const active = placement?.surface === choice.surface
+              return (
+                <button
+                  key={choice.label}
+                  type="button"
+                  className={`${styles.button} ${shellStyles.control}`}
+                  aria-label={choice.label}
+                  aria-pressed={active}
+                  aria-describedby={hint === choice.label ? hintId : undefined}
+                  onPointerEnter={() => showHint(choice.label)}
+                  onPointerLeave={hideHint}
+                  onFocus={() => showHint(choice.label)}
+                  onBlur={hideHint}
+                  onClick={() => choosePlacement(choice)}
+                >
+                  <choice.Icon size={19} aria-hidden="true" />
+                </button>
+              )
+            })}
+          </div>
         )}
       </div>
       {hint && (
