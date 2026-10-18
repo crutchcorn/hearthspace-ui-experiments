@@ -63,7 +63,6 @@ import {
   loadWindowSelectionShape,
   loadWorkspace,
   MIN_WIDTH,
-  resizeBounds,
   STORAGE_KEY,
   WINDOW_SELECTION_STORAGE_KEY,
   type Bounds,
@@ -84,7 +83,7 @@ import {
 } from './peek-layout'
 import { gatherRelatedWindows } from './gather-windows'
 import { getMaximizedBounds, getWindowClearance } from './window-layout'
-import { getCanvasMoveDelta } from './canvas-grid'
+import { getCanvasMoveDelta, getCanvasResizeBounds } from './canvas-grid'
 import {
   loadGestureShortcuts,
   saveGestureShortcuts,
@@ -874,6 +873,7 @@ function App() {
       }))
       return
     }
+    if (!current.moved) return
     const bounds = current.bounds!
     setWorkspace((previous) => ({
       ...previous,
@@ -882,7 +882,14 @@ function App() {
           ? item
           : {
               ...item,
-              ...resizeBounds(bounds, current.edge!, dx, dy, previous),
+              ...getCanvasResizeBounds(
+                bounds,
+                current.edge!,
+                dx,
+                dy,
+                previous,
+                latestPointer.current.altKey,
+              ),
             },
       ),
     }))
@@ -892,7 +899,9 @@ function App() {
     const pointer = latestPointer.current
     if (
       !gesture.current ||
-      !['move', 'item-move', 'drawing-move'].includes(gesture.current.type) ||
+      !['move', 'resize', 'item-move', 'drawing-move'].includes(
+        gesture.current.type,
+      ) ||
       pointer.altKey === event.altKey
     )
       return

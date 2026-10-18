@@ -21,8 +21,15 @@ Selected windows or desktop items preserve their offsets and use the grabbed
 object as the anchor. Placement stays within the world bounds; if a group has
 no valid dot position on an axis, the boundary takes precedence. The grid remains
 available with a photo background and applies to drawings on either layer.
-Deliberate moves still clear a background object's `peekOrigin`. Resizing,
-Arrange, launches, and automatic peeking do not use this snap behavior.
+Deliberate moves still clear a background object's `peekOrigin`.
+
+Holding Alt during a window resize snaps only the moving edges to the same dot
+grid. A corner handle snaps both edges; their opposite edges stay fixed, even
+when those edges aren't on dots. Pressing or releasing Alt updates the resize
+immediately, so you can return to free resizing without letting go of the
+handle. The minimum size of 280 × 200 pixels and world bounds take precedence
+if an edge has no reachable dot. Arrange, launches, and automatic peeking do
+not use this snap behavior.
 
 Windows may cover one another completely during a drag or resize. Releasing a
 moved window or background object, or opening a new window, checks for fully
@@ -201,6 +208,7 @@ The app strip scrolls horizontally when crowded, including within the shared mob
 | Ctrl+1       | Cycle open windows; release Ctrl to switch.            |
 | Ctrl+Shift+1 | Cycle open windows backward.                           |
 | Alt + drag   | Align the grabbed object's bounds with wallpaper dots. |
+| Alt + resize | Align the moving window edges with wallpaper dots.     |
 | Space + drag | Temporarily pan over desktop items or windows.         |
 | Home         | Return to the starting viewport.                       |
 | Escape       | Close a panel, or clear selection; keep the tool.      |
@@ -284,7 +292,7 @@ Each Settings window owns its mock layout and per-monitor values, retaining them
 | [`src/desktop.ts`](../src/desktop.ts)                                                   | Workspace types, starter desktop items, storage validation, window resizing, and arrangement.         |
 | [`src/drawings.ts`](../src/drawings.ts)                                                 | Drawing types, stroke bounds, local coordinates, and saved-art validation.                            |
 | [`src/window-layout.ts`](../src/window-layout.ts)                                       | Responsive shell clearances and ordinary maximized window bounds.                                     |
-| [`src/canvas-grid.ts`](../src/canvas-grid.ts)                                           | Bounded movement and dot snapping shared by windows, desktop items, and drawings.                     |
+| [`src/canvas-grid.ts`](../src/canvas-grid.ts)                                           | Bounded object movement and dot snapping, including moving window edges during resizing.              |
 | [`src/peek-layout.ts`](../src/peek-layout.ts)                                           | Covered-window placement, temporary background peeking, and return-home positions.                    |
 | [`src/usePeekMotion.ts`](../src/usePeekMotion.ts)                                       | Short slide animations for peeking objects and background objects returning home.                     |
 | [`src/canvas-search.ts`](../src/canvas-search.ts)                                       | Search matching and shared grid/parking layouts for canvas search and window switching.               |

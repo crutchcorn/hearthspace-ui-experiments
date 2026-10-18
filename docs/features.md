@@ -40,7 +40,10 @@ add backgrounds; the notification status tells you when something needs attentio
   or drawing to snap the top-left of its bounds to the wallpaper dots. Release
   Alt to move freely again. Selected groups keep their spacing, using the
   grabbed window or item as the anchor. The same hidden grid works with a
-  photo background and with drawings on either layer.
+  photo background and with drawings on either layer. Hold Alt while resizing
+  to align the edges you're moving with the dots, keeping opposite edges fixed.
+  You can press or release Alt during the resize; minimum sizes and canvas
+  boundaries still apply.
 - **Leave covered work in sight.** Windows can overlap completely while you
   drag. On release or when a new window opens, fully hidden windows, desktop
   icons, and drawings below windows slide toward the nearest opening until a

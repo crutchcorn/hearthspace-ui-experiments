@@ -1,6 +1,9 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { getCanvasMoveDelta } from '../src/canvas-grid.ts'
+import {
+  getCanvasMoveDelta,
+  getCanvasResizeBounds,
+} from '../src/canvas-grid.ts'
 
 const world = { width: 1000, height: 800 }
 const window = { x: 103, y: 209, width: 280, height: 200 }
@@ -71,5 +74,68 @@ test('an axis without a reachable dot stays bounded while the other still snaps'
   assert.deepEqual(
     getCanvasMoveDelta([fullWidth], fullWidth, { x: 80, y: 40 }, world, true),
     { x: 0, y: 54 },
+  )
+})
+
+const resizableWindow = { x: 103, y: 209, width: 400, height: 300 }
+
+for (const [edge, expected] of [
+  ['w', { x: 126, y: 209, width: 377, height: 300 }],
+  ['e', { x: 103, y: 209, width: 415, height: 300 }],
+  ['n', { x: 103, y: 182, width: 400, height: 327 }],
+  ['s', { x: 103, y: 209, width: 400, height: 281 }],
+  ['nw', { x: 126, y: 182, width: 377, height: 327 }],
+  ['ne', { x: 103, y: 182, width: 415, height: 327 }],
+  ['sw', { x: 126, y: 209, width: 377, height: 281 }],
+  ['se', { x: 103, y: 209, width: 415, height: 281 }],
+] as const) {
+  test(`Alt-resizing ${edge} snaps only the moving edges and holds the opposite edges fixed`, () => {
+    assert.deepEqual(
+      getCanvasResizeBounds(resizableWindow, edge, 23, -17, world, true),
+      expected,
+    )
+  })
+}
+
+test('snapped resizing cannot shrink past the minimum window size', () => {
+  assert.deepEqual(
+    getCanvasResizeBounds(resizableWindow, 'se', -1000, -1000, world, true),
+    { x: 103, y: 209, width: 303, height: 225 },
+  )
+  assert.deepEqual(
+    getCanvasResizeBounds(resizableWindow, 'nw', 1000, 1000, world, true),
+    { x: 210, y: 294, width: 293, height: 215 },
+  )
+})
+
+test('snapped resizing stays on dots inside the canvas boundary', () => {
+  assert.deepEqual(
+    getCanvasResizeBounds(resizableWindow, 'se', 1000, 1000, world, true),
+    { x: 103, y: 209, width: 891, height: 589 },
+  )
+  assert.deepEqual(
+    getCanvasResizeBounds(resizableWindow, 'nw', -1000, -1000, world, true),
+    { x: 14, y: 14, width: 489, height: 495 },
+  )
+})
+
+test('size constraints override snapping on an edge with no reachable dot', () => {
+  assert.deepEqual(
+    getCanvasResizeBounds(
+      { x: 220, y: 10, width: 280, height: 250 },
+      'se',
+      100,
+      31,
+      { width: 500, height: 400 },
+      true,
+    ),
+    { x: 220, y: 10, width: 280, height: 284 },
+  )
+})
+
+test('resizing without Alt keeps unrestricted edge positions', () => {
+  assert.deepEqual(
+    getCanvasResizeBounds(resizableWindow, 'nw', 23.75, -17.5, world, false),
+    { x: 126.75, y: 191.5, width: 376.25, height: 317.5 },
   )
 })

@@ -1,4 +1,11 @@
-import { CANVAS_GRID_SIZE, clamp, type Bounds } from './desktop.ts'
+import {
+  CANVAS_GRID_SIZE,
+  clamp,
+  MIN_HEIGHT,
+  MIN_WIDTH,
+  resizeBounds,
+  type Bounds,
+} from './desktop.ts'
 
 function moveAxis(
   origin: number,
@@ -41,4 +48,39 @@ export function getCanvasMoveDelta(
       snap,
     ),
   }
+}
+
+export function getCanvasResizeBounds(
+  bounds: Bounds,
+  edge: string,
+  dx: number,
+  dy: number,
+  world: { width: number; height: number },
+  snap: boolean,
+): Bounds {
+  if (snap) {
+    const right = bounds.x + bounds.width
+    const bottom = bounds.y + bounds.height
+    if (edge.includes('w'))
+      dx = moveAxis(bounds.x, dx, -bounds.x, bounds.width - MIN_WIDTH, true)
+    else if (edge.includes('e'))
+      dx = moveAxis(
+        right,
+        dx,
+        MIN_WIDTH - bounds.width,
+        world.width - right,
+        true,
+      )
+    if (edge.includes('n'))
+      dy = moveAxis(bounds.y, dy, -bounds.y, bounds.height - MIN_HEIGHT, true)
+    else if (edge.includes('s'))
+      dy = moveAxis(
+        bottom,
+        dy,
+        MIN_HEIGHT - bounds.height,
+        world.height - bottom,
+        true,
+      )
+  }
+  return resizeBounds(bounds, edge, dx, dy, world)
 }
