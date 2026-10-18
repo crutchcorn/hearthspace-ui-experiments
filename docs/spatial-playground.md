@@ -120,7 +120,7 @@ The separate prototype footer contains a quiet **Preview notification** button. 
 
 ## Gesture shortcuts
 
-The Draw view contains a dedicated pad so drawing does not compete with desktop panning or window selection. Its default view contains the pad and customization cog, without an app selector, saved-shortcut list, or manual launch action. Any completed stroke launches a hardcoded Browser preview and closes the launcher. Settings has a separate **Gestures** category for viewing and managing assignments, initially populated with Browser, Terminal, and Notes examples.
+The Draw view contains a dedicated pad so drawing does not compete with desktop panning or window selection. Its default view contains the pad and customization cog, without an app selector, saved-shortcut list, or manual launch action. A recognized stroke launches its assigned app and closes the launcher. Unrecognized marks remain available to retry. Settings has a separate **Gestures** category for viewing and managing assignments, initially populated with Browser, Terminal, and Notes examples.
 
 The pad’s cog opens the notification flow described above. Following **Customize gestures** opens the launcher editor, where **Open this app** uses the searchable app picker to select an assignment target. **Save shortcut** replaces that app’s mark while retaining other assignments and returns to preview mode. This launcher flow retains **Cancel**, which clears the unsaved stroke and returns without writing storage.
 
@@ -134,7 +134,7 @@ The picker popup portals into the themed desktop root, escaping window scrolling
 
 The pad records a single pointer stroke in a 440 × 190 coordinate space, scaled to the displayed surface. Pointer capture keeps the stroke active outside the pad, with points clamped to its bounds. A saved shortcut contains its app ID and up to 2,048 points. Each app has at most one saved mark.
 
-Gesture recognition is intentionally absent: the normal pad launches Browser regardless of the stroke’s shape or saved assignments. Launching requires a completed stroke with at least two points and pointer release; a tap, pointer cancellation, or lost pointer capture does not launch. Editing mode never auto-launches. Saving requires a mark with at least two points and no active pointer stroke; an existing mark can be reassigned without redrawing it.
+The normal pad uses the local $P geometric template matcher to compare a completed stroke with saved assignments. Matching preserves orientation while allowing changes in position, size, stroke order, and direction. Weak or ambiguous matches show **No match found** and leave the mark available to retry; taps and canceled pointers never launch. Editing mode never auto-launches. Saving requires a mark with at least two points and no active pointer stroke; an existing mark can be reassigned without redrawing it.
 
 ## Settings
 
@@ -150,7 +150,7 @@ App previews always use Realistic styling; **Appearance** contains only color mo
 
 Accent and Light/Dark changes apply immediately to existing windows and their entries in the dock, launcher, and notifications. They do not replace the workspace or alter window geometry, stacking, dock ordering, or scratchpad content. The accent and Light/Dark mode remain separate global settings: shared controls and state cues use the accent, while each Realistic app keeps its own light/dark surface palette and chrome design. App icon artwork and photo backgrounds keep their original colors in either mode. There are no individual app theme controls.
 
-**Gestures** presents the saved app assignments and the add, edit, and remove flow described above. These controls edit the prototype’s local configuration; they do not enable gesture recognition or change the launcher’s hardcoded Browser action.
+**Gestures** presents the saved app assignments and the add, edit, and remove flow described above. These controls edit the local templates used by the gesture launcher.
 
 **AI** includes a **Features** subheading with two collapsed entries. **On-device AI** comes first and describes the intended local processing, without sending device information off the device. **Gather similar windows** follows, explaining how selected windows would provide context for bringing related windows into the current viewport. AI is off by default. Download information sits below its toggle row; opting in starts a simulated 3 GB model download lasting about four seconds. Turning the toggle off during the download cancels it immediately. Completion enables the gathering preview across all Settings windows.
 

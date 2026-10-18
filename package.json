@@ -11,6 +11,7 @@
     "dev": "vite",
     "build": "vite build",
     "typecheck": "tsc -b",
+    "test": "node --test tests/*.test.ts",
     "lint": "eslint .",
     "lint:css": "stylelint \"src/**/*.css\"",
     "format": "prettier . --write",

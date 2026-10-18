@@ -49,6 +49,6 @@ Gestures lets you add, edit, and remove app assignments using a searchable app p
 
 Window and desktop-item positions, scratchpad text, gesture assignments, and preferences are saved in this browser when storage is available. Notifications and mock display settings reset on reload.
 
-This remains an interaction experiment. App windows are previews, device controls don't change your computer, and any completed launch gesture opens the same Browser preview. AI starts off and performs no model download or analysis. After opt-in, Gather similar windows uses a same-app rule: following a brief shimmer, other windows from the selected applications move into view. The [feature guide](docs/features.md) keeps those boundaries alongside the relevant controls.
+This remains an interaction experiment. App windows are previews, device controls don't change your computer, and drawn launch gestures match the shortcuts saved in Settings. AI starts off and performs no model download or analysis. After opt-in, Gather similar windows uses a same-app rule: following a brief shimmer, other windows from the selected applications move into view. The [feature guide](docs/features.md) keeps those boundaries alongside the relevant controls.
 
 For contributor commands, see [CONTRIBUTING.md](CONTRIBUTING.md). For implementation details, start with the [technical documentation](docs/README.md).

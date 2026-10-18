@@ -21,6 +21,7 @@ interface AppLauncherProps {
   onLaunch: (app: LauncherApp) => void
   onCustomizeGestures: () => void
   onSaveGestureShortcut: (shortcut: GestureShortcut) => void
+  gestureShortcuts: GestureShortcut[]
   editingGestures?: boolean
 }
 
@@ -31,6 +32,7 @@ export default function AppLauncher({
   onLaunch,
   onCustomizeGestures,
   onSaveGestureShortcut,
+  gestureShortcuts,
   editingGestures = false,
 }: AppLauncherProps) {
   const [query, setQuery] = useState('')
@@ -256,6 +258,7 @@ export default function AppLauncher({
         <div className={styles.gesturePanel}>
           <GesturePad
             mode="launcher"
+            shortcuts={gestureShortcuts}
             onSaveShortcut={onSaveGestureShortcut}
             onLaunch={onLaunch}
             onCustomizeGestures={onCustomizeGestures}

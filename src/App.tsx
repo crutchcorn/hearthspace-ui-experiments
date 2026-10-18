@@ -1764,6 +1764,7 @@ function App() {
       </div>
       {launcher && (
         <AppLauncher
+          gestureShortcuts={gestureShortcuts}
           mode={launcher}
           editingGestures={editingGestures}
           onSaveGestureShortcut={saveGestureShortcut}

@@ -104,8 +104,10 @@ Running apps show up to three dots for their window instances. Select an app
 to open its window list, bring an instance into view, or create another. Drag
 a row's right-hand handle to reorder the list without moving its windows.
 
-The launcher's **Draw** toggle opens a dedicated pad. Completing any stroke
-opens Browser. In **Settings → Gestures**, you can add, edit, and remove saved
+The launcher's **Draw** toggle opens a dedicated pad. A matching stroke opens
+its assigned app; unknown or ambiguous marks show **No match found**. Matching
+uses local geometry, without a model or a network request.
+In **Settings → Gestures**, you can add, edit, and remove saved
 marks using a searchable app picker. The editor is a separate screen with a back
 button. The pad's cog offers another customization route through notifications.
 Saved marks don't yet drive gesture recognition.

@@ -130,7 +130,7 @@ The maximize button enters focused view, keeping window chrome while the corners
 
 ## Keep the prototype boundary clear
 
-The UI is a playground for OS interactions. Gesture assignments can be saved, but launcher strokes still open a hardcoded Browser preview. AI opt-in simulates a 3 GB download and a delete confirmation. Gathering shows a brief shimmer, then moves other windows from the selected applications into view using app identity alone; no model runs or inspects their contents. Display and device controls also stay inside the prototype.
+The UI is a playground for OS interactions. Launcher strokes are compared locally with saved gesture assignments; unknown or ambiguous shapes remain visible with a brief no-match message. AI opt-in simulates a 3 GB download and a delete confirmation. Gathering shows a brief shimmer, then moves other windows from the selected applications into view using app identity alone; no model runs or inspects their contents. Display and device controls also stay inside the prototype.
 
 Keep those limits explicit in the [feature list](features.md) and usage documentation. Inside the interface, explanations should help with the interaction being tried. The quiet **Preview notification** footer button is a useful example: it makes sample activity available without adding a permanent “simulated notifications” banner to the inbox.
 

@@ -8,6 +8,7 @@ import {
   type GestureShortcut,
 } from '../gestures'
 import AppPicker from './AppPicker'
+import { recognizeGesture } from '../gesture-recognition'
 import styles from './GesturePad.module.css'
 
 type GesturePadProps = {
@@ -18,6 +19,7 @@ type GesturePadProps = {
       onLaunch: (app: LauncherApp) => void
       onCustomizeGestures: () => void
       initialEditing?: boolean
+      shortcuts: GestureShortcut[]
     }
   | {
       mode: 'editor'
@@ -39,6 +41,7 @@ export default function GesturePad(props: GesturePadProps) {
   )
   const [drawing, setDrawing] = useState(false)
   const [saved, setSaved] = useState(false)
+  const [noMatch, setNoMatch] = useState(false)
   const settingsButton = useRef<HTMLButtonElement>(null)
   const gesture = useRef<{ pointerId: number; points: GesturePoint[] } | null>(
     null,
@@ -90,15 +93,17 @@ export default function GesturePad(props: GesturePadProps) {
       !editing &&
       current.points.length > 1
     ) {
-      // Until gesture matching exists, every completed stroke opens Browser.
-      const app = APP_CATALOG.find((item) => item.id === 'browser')
+      const match = recognizeGesture([current.points], props.shortcuts)
+      const app = APP_CATALOG.find((item) => item.id === match?.appId)
       if (app) props.onLaunch(app)
+      else setNoMatch(true)
     }
   }
 
   function clearStroke() {
     setStroke([])
     setSaved(false)
+    setNoMatch(false)
   }
 
   function saveShortcut() {
@@ -139,6 +144,7 @@ export default function GesturePad(props: GesturePadProps) {
             setStroke([point])
             setDrawing(true)
             setSaved(false)
+            setNoMatch(false)
           }}
           onPointerMove={extendStroke}
           onPointerUp={(event) => {
@@ -181,14 +187,14 @@ export default function GesturePad(props: GesturePadProps) {
         )}
         {!!stroke.length && (
           <>
-            {!editing && (
+            {!editing && (saved || noMatch) && (
               <span className={styles.padLabel} aria-live="polite">
                 {saved ? (
                   <>
                     <Check size={12} /> Shortcut saved
                   </>
                 ) : (
-                  'Draw a gesture'
+                  'No match found'
                 )}
               </span>
             )}
