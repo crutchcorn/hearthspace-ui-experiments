@@ -312,10 +312,11 @@ export function getWidgetFrameDropTarget(
   bounds: Bounds,
   viewport: { width: number; height: number },
   maximumDistance = 72,
+  currentEdge?: FrameEdge,
 ): Extract<ObjectPlacement, { surface: 'frame' }> | null {
   // Turning a toolbar must not change its edge target and turn it back again.
   const size = Math.min(bounds.width, bounds.height)
-  return getFrameDropTarget(
+  const target = getFrameDropTarget(
     {
       x: bounds.x + (bounds.width - size) / 2,
       y: bounds.y + (bounds.height - size) / 2,
@@ -325,4 +326,17 @@ export function getWidgetFrameDropTarget(
     viewport,
     maximumDistance,
   )
+  if (!target || (target.position !== 0 && target.position !== 1)) return target
+
+  const targetIsVertical = target.edge === 'left' || target.edge === 'right'
+  const atLeft =
+    target.edge === 'left' || (!targetIsVertical && target.position === 0)
+  const atTop =
+    target.edge === 'top' || (targetIsVertical && target.position === 0)
+  const keepVertical = currentEdge === 'left' || currentEdge === 'right'
+  return {
+    surface: 'frame',
+    edge: keepVertical ? (atLeft ? 'left' : 'right') : atTop ? 'top' : 'bottom',
+    position: keepVertical ? (atTop ? 0 : 1) : atLeft ? 0 : 1,
+  }
 }

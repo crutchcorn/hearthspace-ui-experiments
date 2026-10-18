@@ -113,6 +113,9 @@ directions. Release snaps the attachment into its final position.
 Widget edge detection uses a centered square based on the shorter toolbar
 dimension. That probe stays stable when the toolbar turns, preventing the new
 bounding box from selecting another edge and immediately turning it back.
+Corner targets preserve the current drag orientation, choosing the vertical
+or horizontal edge of that corner accordingly. Preview and release use the
+same rule; only entering a non-corner edge changes orientation.
 Windows, desktop items, and drawings use their object bounds for edge targets.
 
 `useObjectLayout` owns the selected object and the Change layout pointer

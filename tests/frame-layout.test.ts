@@ -396,6 +396,97 @@ test('a widget keeps its corner snap through an orientation change', () => {
   assert.deepEqual(getWidgetFrameDropTarget(vertical, viewport), target)
 })
 
+for (const corner of [
+  { name: 'top-left', x: 90, y: 90, horizontal: 'top', vertical: 'left' },
+  { name: 'top-right', x: 910, y: 90, horizontal: 'top', vertical: 'right' },
+  {
+    name: 'bottom-left',
+    x: 90,
+    y: 710,
+    horizontal: 'bottom',
+    vertical: 'left',
+  },
+  {
+    name: 'bottom-right',
+    x: 910,
+    y: 710,
+    horizontal: 'bottom',
+    vertical: 'right',
+  },
+] as const) {
+  test(`a horizontal toolbar stays horizontal when previewed and dropped in the ${corner.name} corner`, () => {
+    const viewport = { width: 1000, height: 800 }
+    const bounds = {
+      x: corner.x - 299 / 2,
+      y: corner.y - 54 / 2,
+      width: 299,
+      height: 54,
+    }
+    const expected = {
+      surface: 'frame',
+      edge: corner.horizontal,
+      position: corner.vertical === 'left' ? 0 : 1,
+    }
+    for (const currentEdge of ['top', 'bottom'] as const) {
+      assert.deepEqual(
+        getWidgetFrameDropTarget(bounds, viewport, 72, currentEdge),
+        expected,
+      )
+      assert.deepEqual(
+        getWidgetFrameDropTarget(bounds, viewport, Infinity, currentEdge),
+        expected,
+      )
+    }
+  })
+
+  test(`a vertical toolbar stays vertical when previewed and dropped in the ${corner.name} corner`, () => {
+    const viewport = { width: 1000, height: 800 }
+    const bounds = {
+      x: corner.x - 54 / 2,
+      y: corner.y - 299 / 2,
+      width: 54,
+      height: 299,
+    }
+    const expected = {
+      surface: 'frame',
+      edge: corner.vertical,
+      position: corner.horizontal === 'top' ? 0 : 1,
+    }
+    for (const currentEdge of ['left', 'right'] as const) {
+      assert.deepEqual(
+        getWidgetFrameDropTarget(bounds, viewport, 72, currentEdge),
+        expected,
+      )
+      assert.deepEqual(
+        getWidgetFrameDropTarget(bounds, viewport, Infinity, currentEdge),
+        expected,
+      )
+    }
+  })
+}
+
+test('a toolbar still changes orientation when entering an edge away from a corner', () => {
+  const viewport = { width: 1000, height: 800 }
+  assert.deepEqual(
+    getWidgetFrameDropTarget(
+      { x: 90 - 299 / 2, y: 400 - 54 / 2, width: 299, height: 54 },
+      viewport,
+      72,
+      'top',
+    ),
+    { surface: 'frame', edge: 'left', position: 0.5 },
+  )
+  assert.deepEqual(
+    getWidgetFrameDropTarget(
+      { x: 500 - 54 / 2, y: 90 - 299 / 2, width: 54, height: 299 },
+      viewport,
+      72,
+      'left',
+    ),
+    { surface: 'frame', edge: 'top', position: 0.5 },
+  )
+})
+
 test('interior widgets remain untargeted until a final nearest-edge attachment is requested', () => {
   const viewport = { width: 1000, height: 800 }
   const horizontal = {

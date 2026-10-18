@@ -45,8 +45,9 @@ on the left or right stack vertically with upright icons; top and bottom
 attachments stay horizontal. While dragging, entering a new edge area animates
 the surface, outline, and contents into that orientation together. The toolbar
 keeps its orientation while crossing the interior until it reaches another
-edge area, then snaps into place on release. The animation works in either
-direction. Icons and toolbars use the same screen inset along every edge,
+edge area, then snaps into place on release. Corners preserve the incoming
+orientation: a vertical toolbar stays vertical, and a horizontal one stays
+horizontal. The animation works in either direction. Icons and toolbars use the same screen inset along every edge,
 including the default mobile bars. Windows and drawings stay flush with the edge.
 
 The default Notifications, System tray, Canvas tools, and Apps groups are

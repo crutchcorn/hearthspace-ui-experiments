@@ -424,11 +424,10 @@ export default function useObjectLayout(
     if (!current.moved && Math.hypot(dx, dy) < 6) return
     current.moved = true
     const movingBounds = dragBounds(current, dx, dy)
-    const drop = (
+    const drop =
       current.target.kind === 'widget'
-        ? getWidgetFrameDropTarget
-        : getFrameDropTarget
-    )(movingBounds, view)
+        ? getWidgetFrameDropTarget(movingBounds, view, 72, draggingWidget?.edge)
+        : getFrameDropTarget(movingBounds, view)
     setDropTarget(drop)
     if (current.target.kind === 'widget') {
       const previousEdge = draggingWidget?.edge
@@ -463,11 +462,16 @@ export default function useObjectLayout(
     const dy = event.clientY - current.y
     const movingBounds = dragBounds(current, dx, dy)
     if (current.moved || Math.hypot(dx, dy) >= 6) {
-      const drop = (
+      const maximumDistance = current.startedOnFrame ? Infinity : 72
+      const drop =
         current.target.kind === 'widget'
-          ? getWidgetFrameDropTarget
-          : getFrameDropTarget
-      )(movingBounds, view, current.startedOnFrame ? Infinity : 72)
+          ? getWidgetFrameDropTarget(
+              movingBounds,
+              view,
+              maximumDistance,
+              draggingWidget?.edge,
+            )
+          : getFrameDropTarget(movingBounds, view, maximumDistance)
       if (drop) place(current.target, drop)
       else {
         if (current.target.kind === 'widget') {
