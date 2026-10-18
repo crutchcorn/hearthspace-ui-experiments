@@ -275,6 +275,28 @@ test('further peeks retain the first home rather than the latest displaced spot'
   assert.deepEqual(restored.items[0], before.items[0])
 })
 
+test('repeatedly displaced icons return beside nearby glyphs once windows leave', () => {
+  const originals = [icon('one'), icon('two', { y: 184 })]
+  const firstWindow = window('first', { width: 88, height: 96 })
+  const first = settleCoveredItems(workspace([firstWindow], originals))
+  assert.equal(first.items[0].y, 58)
+  assert.deepEqual(first.items[0].peekOrigin, { x: 100, y: 100 })
+  const second = settleCoveredItems({
+    ...first,
+    windows: [
+      firstWindow,
+      window('second', { y: first.items[0].y, width: 88, height: 96 }),
+    ],
+  })
+  assert.equal(second.items[0].y, 16)
+  assert.deepEqual(second.items[0].peekOrigin, { x: 100, y: 100 })
+  // The home label/padding overlaps the adjacent icon by two pixels,
+  // but their glyphs remain separate, just as they were before either peek.
+  const restored = settleCoveredItems({ ...second, windows: [] })
+  assert.deepEqual(restored.items, originals)
+  assert.equal(settleCoveredItems(restored), restored)
+})
+
 test('an icon does not restore over another icon, even a lower peer', () => {
   const before = workspace(
     [],

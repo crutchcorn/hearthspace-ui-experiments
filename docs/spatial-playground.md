@@ -46,13 +46,17 @@ no opening is possible.
 
 Windows keep these adjusted positions. Desktop items and background drawings
 instead retain a `peekOrigin` for the position before their first automatic
-move. Further peeks preserve that origin. Once the original space is completely
-clear, they return there and discard the origin. A partial overlap keeps them
+move. Further peeks preserve that origin. Once the original space is clear,
+they return there and discard the origin. A partial window overlap keeps them
 away, even when moving home would leave some of the object visible. Dragging
 or editing a background object deliberately establishes a new home.
 
-Returning checks the object's full original bounds against windows and other
-desktop icons' artwork. Touching edges is allowed. Drawings don't act as opaque
+Returning checks the object's full original bounds against windows. Between
+desktop icons, it checks artwork against artwork; overlapping label space or
+invisible padding doesn't prevent a return. This lets icons placed three grid
+dots apart return after any number of window pushes. Background drawings still
+check their full bounds against icons' artwork. Touching edges is allowed.
+Drawings don't act as opaque
 blockers, so empty space around their ink cannot hold another object away.
 Displaced icons can return together when they temporarily occupy each other's
 homes. Their intended destinations must be clear; a window or stationary icon

@@ -196,17 +196,32 @@ function moveBackground<T extends BackgroundItem>(
 
 function restoreBackground<T extends BackgroundItem>(
   item: T,
-  blockers: Bounds[],
+  windows: Bounds[],
+  icons: Bounds[],
 ): T {
   if (!item.peekOrigin) return item
   const home = { ...item, ...item.peekOrigin }
-  if (blockers.some((other) => intersect(home, other))) return item
+  if (homeBlocked(home, windows, icons)) return item
   const restored = { ...home }
   delete restored.peekOrigin
   return restored
 }
 
-/** Return displaced background objects only when their entire home is clear. */
+function homeBlocked(
+  home: BackgroundItem,
+  windows: Bounds[],
+  icons: Bounds[],
+): boolean {
+  // Windows must clear the whole object, including its label. Neighboring
+  // icons only block artwork, so tightly spaced desktop layouts can return.
+  const body = 'strokes' in home ? home : iconBody(home)
+  return (
+    windows.some((other) => intersect(home, other)) ||
+    icons.some((other) => intersect(body, other))
+  )
+}
+
+/** Return displaced background objects once their home has room again. */
 export function restoreBackgroundItems(workspace: Workspace): Workspace {
   const items = [...workspace.items]
   let changed = false
@@ -223,15 +238,12 @@ export function restoreBackgroundItems(workspace: Workspace): Workspace {
     do {
       blocked = false
       for (const index of returning) {
-        const blockers = [
-          ...workspace.windows,
-          ...items.flatMap((item, other) =>
-            other === index
-              ? []
-              : [iconBody(returning.has(other) ? homes[other] : item)],
-          ),
-        ]
-        if (blockers.some((other) => intersect(homes[index], other))) {
+        const icons = items.flatMap((item, other) =>
+          other === index
+            ? []
+            : [iconBody(returning.has(other) ? homes[other] : item)],
+        )
+        if (homeBlocked(homes[index], workspace.windows, icons)) {
           returning.delete(index)
           blocked = true
         }
@@ -252,11 +264,8 @@ export function restoreBackgroundItems(workspace: Workspace): Workspace {
     for (let index = items.length - 1; index >= 0; index--) {
       const item = items[index]
       if (!item.peekOrigin) continue
-      const blockers = [
-        ...workspace.windows,
-        ...items.filter((_, other) => other !== index).map(iconBody),
-      ]
-      items[index] = restoreBackground(item, blockers)
+      const icons = items.filter((_, other) => other !== index).map(iconBody)
+      items[index] = restoreBackground(item, workspace.windows, icons)
       if (items[index] !== item) {
         restored = true
         changed = true
@@ -265,10 +274,10 @@ export function restoreBackgroundItems(workspace: Workspace): Workspace {
     // Returning one icon can clear another icon's home. An origin is removed
     // at most once, so this converges without making peers trade positions.
   } while (restored)
-  const blockers = [...workspace.windows, ...items.map(iconBody)]
+  const icons = items.map(iconBody)
   const drawings = workspace.drawings.map((drawing) => {
     if (drawing.layer !== 'below') return drawing
-    const result = restoreBackground(drawing, blockers)
+    const result = restoreBackground(drawing, workspace.windows, icons)
     changed ||= result !== drawing
     return result
   })
