@@ -9,19 +9,20 @@ around it.
 The canvas is the place where things live. The frame is the place where you keep
 things close.
 
-This is the intended interaction model. The configurable frame, **Change
-layout** tool, and recovery of removed frame controls are being implemented.
-The [feature list](features.md) describes the working playground; this document
-records the decisions that should guide the new behavior.
+This model guides the configurable frame, **Change layout** tool, and recovery
+of removed controls in the playground. The [feature list](features.md)
+describes what you can try and its limits; this document records the decisions
+behind the behavior.
 
 ## Two places, one collection of things
 
 The canvas extends beyond the viewport. Windows, app shortcuts, files, folders,
-drawings, and future widgets can occupy it together. Panning changes which part
+drawings, and widgets can occupy it together. The current widgets are the four
+built-in control groups; future widgets can follow the same placement rules. Panning changes which part
 you see without changing where those objects belong.
 
-The frame follows the viewport. An attached item stays at the chosen edge while
-the canvas moves. A system tray is an obvious candidate, but the same placement
+The frame follows the viewport. An attached item sits flush with the chosen
+screen edge while the canvas moves. A system tray is an obvious candidate, but the same placement
 should work for a file you keep referring to, a drawing, a widget, or a window.
 The object keeps its identity and purpose when its placement changes.
 
@@ -53,14 +54,32 @@ something belongs without having to redesign it.
 
 ## Change layout changes where things belong
 
-**Change layout** is a canvas tool for choosing an object's placement. It should
-make the available frame edges and canvas layers visible while arranging
-things, then get out of the way during ordinary work.
+**Change layout** is a canvas tool for choosing an object's placement. It makes
+frame guides and canvas-layer choices visible while arranging things, then
+gets out of the way during ordinary work.
 
 Use this tool to attach an item to a frame edge, return it to the canvas, or
 affix it to the canvas background. The same operation applies to drawings,
 windows, desktop items, and widgets. Placement belongs to the object, rather
 than to a separate drawing mode or a special version of an app.
+
+Drag an object to an edge to attach it there. Distinct animated corner targets
+help align the placement. Once attached, dropping it in the interior snaps it
+to the nearest frame edge. Choose Canvas or Background to detach it deliberately.
+The small editor handles the choices
+that dragging alone doesn't express: Canvas, Background, or Frame, removal,
+and Done. Frame attaches to the nearest edge without choosing an individual
+edge button.
+Edge buttons and position sliders would repeat a choice the user can already
+make directly on the frame.
+
+Toolbars adapt their orientation to the edge: horizontal along the top or
+bottom, vertical along either side, with icons staying upright. Entering a new
+edge area during a drag changes that orientation; crossing the interior keeps
+the last orientation until another edge area is reached. The surface, outline,
+and contents animate together in either direction, and releasing snaps the
+object into place. This makes the frame a boundary the object belongs to,
+rather than an approximate region near the screen edge.
 
 Drawing therefore has one job: create ink. **Change layout** replaces the
 above/below drawing modes and the separate drawing pinning controls. A drawing
@@ -70,6 +89,12 @@ on the frame. Its strokes remain one object through those changes.
 Ordinary dragging still moves an object within its chosen place. The layout
 tool is the deliberate way to change that place, so a window dragged near an
 edge doesn't unexpectedly become a frame attachment.
+
+Attached objects can adapt to the space. A pinned window leaves a narrow strip
+visible, reveals a little more on hover, and opens fully on click. It slides
+back when focus moves away. A pinned shortcut shrinks into a compact glass
+tile. The object is still recognizable and available without permanently
+covering a large part of the painting.
 
 ## A raised painting has layers
 
@@ -92,6 +117,12 @@ peek into view, and displaced background objects can return home when their
 space clears. The frame stays above those arrangements. Search can temporarily
 borrow the visible canvas without rewriting the places the user chose.
 
+Deliberately placing something on the background also establishes a new
+arrangement there. Background objects moved aside by that placement keep their
+adjusted positions as new homes. They don't keep trying to return beneath the
+object the user just placed. Temporary displacement by raised windows still
+uses the return-home behavior.
+
 ## Removal changes the layout
 
 Removing a frame attachment means taking it off the frame. It doesn't close an
@@ -99,6 +130,10 @@ open window, delete a file or drawing, or uninstall an app. Personal objects
 return to the canvas and remain searchable. Default controls, such as the
 system tray or running-app list, remain available in a searchable catalog even
 when they aren't placed anywhere.
+
+Closing a pinned window is a separate action. Its confirmation says **Close
+and remove from pinned?** because this closes the window as well as removing
+its attachment. Canceling keeps both.
 
 All installed apps have a shortcut on the canvas. Moving one far away or
 attaching it to the frame doesn't remove the app from that collection. Only
@@ -110,13 +145,13 @@ Canvas tools need one extra safeguard because removing them can hide the way
 to change the layout again. They stay removable only after the user enables
 **Make canvas tools hide-able** in Settings. The setting is off by default. An
 attempt to remove the tools while it is off explains the consequence and
-points to that setting; it doesn't remove them. The warning should explain how
+points to that setting; it doesn't remove them. The warning explains how
 to recover the tools through search before the user opts in.
 
-Search must remain reachable independently of the tools' attachment. The
-keyboard search command is one route; Settings must also provide a reachable
-way back to the layout controls for users who remove their toolbar. The exact
-recovery controls belong in the implementation documentation once verified.
+Search remains reachable through **/** and **Ctrl/⌘ K**, independently of the
+tools' attachment. **Settings → System** also has a **Restore canvas tools**
+button. Turning the hide-able preference off restores hidden tools. These
+routes let users recover the editor without resetting their layout.
 
 ## Search happens on the painting
 

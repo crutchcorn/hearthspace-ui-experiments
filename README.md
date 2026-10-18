@@ -1,10 +1,10 @@
 # Hearthspace UI experiments
 
-A private browser playground for trying desktop ideas for [Hearthspace](https://github.com/crutchcorn/hearthspace), a Linux distribution exploring how computing could work. You can spread windows across a large canvas, place app shortcuts beside files and folders, draw directly on the canvas, and use search to bring matching work into view without losing its place.
+A private browser playground for trying desktop ideas for [Hearthspace](https://github.com/crutchcorn/hearthspace), a Linux distribution exploring how computing could work. Spread windows, files, and drawings across a large canvas, attach things you want nearby to its frame, and use search to bring work into view without losing its place.
 
 ![Hearthspace in dark mode, with overlapping windows on a warm dotted canvas and controls in all four corners.](assets/hearthspace-desktop.jpg)
 
-The direction is warm glass around a usable workspace: orange by default, opaque app content, and compact controls in the four corners. We've repeatedly removed labels, counts, and instructions that only describe what's already visible. The selected window's name in the switcher helps you choose; a permanent “Drag to explore” caption doesn't need to occupy your desktop.
+Think of it as a [painting canvas inside a frame](docs/canvas-and-frame.md). Work can move with the painting or stay attached to its edges. The default arrangement puts compact controls in four corners, with warm glass around opaque app content. We've repeatedly removed labels, counts, and instructions that only describe what's already visible. The selected window's name in the switcher helps you choose; a permanent “Drag to explore” caption doesn't need to occupy your desktop.
 
 The [feature guide](docs/features.md) covers what you can try and what is simulated. The [visual language](docs/visual-language.md) explains the decisions behind the current design.
 
@@ -21,26 +21,28 @@ Open the address printed in the terminal. Browser full-screen mode gives the exp
 
 ## Find your way around
 
-Each corner has a job, leaving the middle for your work:
+Each corner starts with a job, leaving the middle for your work:
 
-| Corner       | What belongs there                                                                           |
-| ------------ | -------------------------------------------------------------------------------------------- |
-| Top left     | Notifications and unread status.                                                             |
-| Top right    | Clock, Wi-Fi, sound, and battery.                                                            |
-| Bottom left  | Desktop selection, panning, canvas search, window selection, drawing, Overview, and Arrange. |
-| Bottom right | Favorite and running apps, window pickers, and the app launcher.                             |
+| Corner       | What belongs there                                                                                          |
+| ------------ | ----------------------------------------------------------------------------------------------------------- |
+| Top left     | Notifications and unread status.                                                                            |
+| Top right    | Clock, Wi-Fi, sound, and battery.                                                                           |
+| Bottom left  | Desktop selection, panning, canvas search, window selection, drawing, Change layout, Overview, and Arrange. |
+| Bottom right | Favorite and running apps, window pickers, and the app launcher.                                            |
 
-On mobile, the corners join into a top bar and a bottom bar. Notifications keep their space; tray icons and the right-aligned app row can scroll horizontally. Canvas tools become one selector with a flat list of choices.
+On mobile, the default corners join into a top bar and a bottom bar. Notifications keep their space; tray icons and the right-aligned app row can scroll horizontally. Canvas tools become one selector with a flat list of choices. Change layout lets you move those controls to another edge or onto the canvas.
 
 A few things to try:
 
 - **Move around.** Scroll with a trackpad, hold Space and drag, or select Pan with H. Open Overview with M and drag the map to travel farther.
-- **Arrange a workspace.** Drag window title bars and resize their edges. Select desktop icons with V, or windows with rectangle selection (R) or freeform lasso (L). Drag any selected window's title bar to move a group. Arrange (A) places every open window into a grid, including those offscreen.
-- **Draw on the canvas.** Choose the pencil or press D. Its dropdown places your drawing above or below windows. Add strokes, then press the floating check to finish. Use the cursor (V) to select and drag the ink; its side controls change the layer or delete it. With saved gestures, Play tries to launch a matching app over the drawing, consuming the ink on success.
-- **Search the canvas.** Choose Search in the cursor dropdown and click the background, or press /. Windows move aside for a search field. Start typing to bring matching shortcuts, files, folders, and open windows into view. Up/Down changes the selection; Enter or a click opens it. Escape restores the layout. Every app has a movable, permanent desktop shortcut alongside the files and folders. The search field’s pencil opens a handwriting pad; recognized words join the editable query.
+- **Arrange a workspace.** Drag window title bars and resize their edges. Select desktop icons with V, or windows with rectangle selection (R) or freeform lasso (L). Drag any selected window's title bar to move a group. Arrange (A) places unpinned windows into a grid, including those offscreen.
+- **Change the layout.** Choose Change layout, then drag a window, desktop item, drawing, or control to a frame edge. Animated corner targets help align attachments with the screen boundary. A frame attachment dropped in the interior snaps to the nearest edge; choose Canvas or Background to detach it. Frame in the small editor also attaches to the nearest edge. Remove takes a personal item off the frame without deleting it; removed default controls remain searchable. Done finishes arranging.
+- **Keep a window nearby.** A window pinned to the frame leaves a small strip visible. Hover reveals a little more; click to open it fully and keep it focused. Moving focus away slides it back. Closing it asks whether to close and remove it from the frame. Pinned desktop shortcuts shrink into compact glass tiles.
+- **Draw on the canvas.** Choose the pencil or press D. Add strokes, then press the floating check to finish. Use the cursor (V) to select and drag the ink; its side controls open Change layout or delete it. With saved gestures, Play tries to launch a matching app over the drawing, consuming the ink on success.
+- **Search the canvas.** Choose Search in the cursor dropdown and click the background, or press / or Ctrl/⌘ K. Windows move aside for a search field. Typing brings matching shortcuts, files, folders, windows, drawings, and shell widgets into one arrangement. Up/Down changes the selection; Enter or a click opens it. Find System tray or Canvas tools here to restore a removed control. Escape restores the layout. Every app has a movable, permanent shortcut; the search field's pencil also accepts handwritten queries.
 - **Give an app your attention.** Double-click its header to enlarge it with room for the corner controls. The maximize button fills the viewport and hides those controls; approaching any corner reveals them together. Switching to another window returns you to the movable canvas.
 - **Switch windows.** Hold Ctrl and press 1 to bring the open windows into a temporary grid. Press 1 again to cycle forward, or add Shift to go backward. Release Ctrl to restore the layout, focus the chosen window, and center it on the canvas. Escape cancels and restores the previous view. This shortcut depends on the browser delivering it to the page.
-- **Open something.** Choose Apps or press Ctrl/⌘ K to browse, search, or switch between icon and list views. Running apps show window dots and open a picker for their instances. The launcher's Draw view offers a dedicated gesture pad.
+- **Open something.** Choose Apps to browse, search, or switch between icon and list views. Running apps show window dots and open a picker for their instances. The launcher's Draw view offers a dedicated gesture pad.
 
 ## Make it yours
 
@@ -48,7 +50,9 @@ Open Settings from Apps. Appearance offers Light/Dark mode and six accents, with
 
 Gestures lets you add, edit, and remove app assignments using a searchable app picker and drawing pad. Displays lets you drag two monitor previews, snap their edges together, and try per-monitor settings. AI presents opt-in controls for gathering related windows, including a simulated model download and a confirmation before turning it off.
 
-Window and desktop-item positions, canvas drawings, scratchpad text, gesture assignments, and preferences are saved in this browser when storage is available. Notifications and mock display settings reset on reload.
+Canvas tools are protected from removal until you enable **Make canvas tools hide-able** in System settings. An attempted removal explains how to recover them. Search remains available through / or Ctrl/⌘ K, and System settings has a **Restore canvas tools** button.
+
+Window and desktop-item positions, canvas drawings, frame attachments, canvas layers, scratchpad text, gesture assignments, and preferences are saved in this browser when storage is available. Notifications and mock display settings reset on reload.
 
 This remains an interaction experiment. App windows are previews, device controls don't change your computer, and drawn launch gestures match the shortcuts saved in Settings. AI gathering starts off and performs no model download or analysis. After opt-in, Gather similar windows uses a same-app rule: following a brief shimmer, other windows from the selected applications move into view.
 

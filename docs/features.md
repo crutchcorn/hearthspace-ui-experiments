@@ -11,22 +11,72 @@ browser; app contents and device services are previews. See the
 
 ## Find your way around
 
-Each corner has a job:
+Each corner starts with a job. These are the default frame attachments:
 
-| Corner       | What lives there                                                                             |
-| ------------ | -------------------------------------------------------------------------------------------- |
-| Top left     | Notifications and a short unread status.                                                     |
-| Top right    | Local clock, calendar, Wi-Fi, sound, and battery.                                            |
-| Bottom left  | Desktop selection, panning, canvas search, window selection, drawing, Overview, and Arrange. |
-| Bottom right | Favorite apps, running apps, window instances, and the launcher.                             |
+| Corner       | What lives there                                                                                            |
+| ------------ | ----------------------------------------------------------------------------------------------------------- |
+| Top left     | Notifications and a short unread status.                                                                    |
+| Top right    | Local clock, calendar, Wi-Fi, sound, and battery.                                                           |
+| Bottom left  | Desktop selection, panning, canvas search, window selection, drawing, Change layout, Overview, and Arrange. |
+| Bottom right | Favorite apps, running apps, window instances, and the launcher.                                            |
 
-On narrow screens, the corners join into a top bar and bottom bar. Apps and
+On narrow screens, the default corners join into a top bar and bottom bar. Apps and
 tray icons scroll horizontally when needed, while the notification label stays
 visible. App icons stay right-aligned. Canvas tools become one selector with a
 flat list of choices.
 
 Icons carry routine actions without permanent captions. Hover and selection
 add backgrounds; the notification status tells you when something needs attention.
+
+## Arrange the canvas and frame
+
+Choose **Change layout** in canvas tools, then select or drag a window,
+desktop item, drawing, or shell control. Drag it to an edge to attach it to the
+frame; animated corner targets help align it with the screen boundary. It stays
+nearby while you pan the canvas. Dropping an attached item in the interior
+animates it to the nearest frame edge. The editor's
+**Canvas**, **Background**, and **Frame** choices set where it belongs. Frame
+attaches to the nearest edge; dragging chooses an edge or corner directly.
+There are no individual edge buttons or position slider. **Done** or Escape leaves
+layout editing.
+
+Choose **Canvas** or **Background** to detach an object deliberately. Toolbars
+on the left or right stack vertically with upright icons; top and bottom
+attachments stay horizontal. While dragging, entering a new edge area animates
+the surface, outline, and contents into that orientation together. The toolbar
+keeps its orientation while crossing the interior until it reaches another
+edge area, then snaps into place on release. The animation works in either
+direction. The default mobile bars also sit flush with the screen edges.
+
+The default Notifications, System tray, Canvas tools, and Apps groups are
+movable shell widgets. They can also live on the canvas or its background.
+Custom widgets aren't part of the playground yet.
+
+Finishing a layout move reveals work that the placement fully covers. Placing
+an object on the background also moves blocked background objects aside; those
+adjusted positions become their new homes. This differs from a window
+temporarily pushing background icons out of the way, after which they return.
+
+**Remove from frame** returns a window, desktop item, or drawing to the canvas
+without closing or deleting it. **Remove** hides a shell widget, leaving it
+available in search. App shortcuts cannot be deleted; their presence represents
+installed apps, and uninstalling is outside this prototype.
+
+Removing Canvas tools first requires **Make canvas tools hide-able** in
+**Settings → System**. With the setting off, a warning explains recovery and
+offers to open Settings. To recover removed controls, press **/** or **Ctrl/⌘ K**
+and search for their name. Choosing a widget restores its default corner and
+opens Change layout. System settings also offers **Restore canvas tools**;
+turning the hide-able setting off restores the tools if they were hidden.
+
+Pinned windows leave a small strip visible at the frame edge. Hover reveals
+a little more, and clicking opens it fully and focuses it. Focusing
+another window or clicking outside slides it back toward the edge. Layout
+editing reveals pinned windows so they're easy to move. Closing one asks
+**Close and remove from pinned?**; cancel keeps the window and its attachment.
+The maximize control and header double-click toggle its reveal while pinned.
+Pinned desktop shortcuts animate into compact glass tiles, keeping their app
+artwork recognizable while taking less room on the frame.
 
 ## Work across the canvas
 
@@ -53,29 +103,29 @@ add backgrounds; the notification status tells you when something needs attentio
   adjusted positions. Partly visible items stay put. Header double-click
   maximization does the same; the maximize button's focused view leaves the
   underlying layout alone.
-- **Keep desktop items underneath.** Every catalog app has a permanent, movable
-  shortcut beside the starter folders and document. Items remain below every
-  window. The default cursor tool selects them;
+- **Place desktop items.** Every catalog app has a permanent, movable
+  shortcut beside the starter folders and document. Items start on the background;
+  Change layout can raise them or attach them to the frame. The default cursor tool selects them;
   dragging the background draws a selection rectangle. Move selected items
   together; double-click or Enter opens its app preview.
 - **Select windows separately.** Choose rectangle selection or a freeform
   lasso. With several windows selected, drag any selected header to move the
   group. Start outside the group to select again. Escape clears selection and
   keeps the chosen tool.
-- **Arrange everything.** Arrange places every open window in a grid near the
+- **Arrange canvas windows.** Arrange places unpinned windows in a grid near the
   current viewport, preserving ordinary window sizes. The grid can extend
   offscreen and expand the world.
 
 ## Draw on the canvas
 
-Choose the pencil or press **D** to draw. Press the active pencil again to
-choose **Draw below windows** or **Draw above windows**. On mobile, both choices
-appear directly in the tool menu.
+Choose the pencil or press **D** to draw. New drawings begin above windows.
+Change layout handles their placement, just as it does other canvas objects.
 
 Each stroke joins the current drawing until you press its floating check to
 finish. Use the cursor (**V**) to select the ink and drag the whole drawing.
-The compact controls beside it switch its layer or delete it. Drawings move
-with the canvas and keep their strokes, position, and layer after reload.
+The compact controls beside it open Change layout or delete it. A drawing can
+move with the canvas, sit on its background, or stay on the frame. Its strokes
+and placement survive reload.
 
 When at least one gesture is saved in Settings, the selected drawing also
 shows a **Play** button. It compares all of the drawing's strokes with those
@@ -83,8 +133,8 @@ assignments. A match fades out and removes the drawing, opens the assigned app
 centered over it, and returns to the cursor. **No match found** leaves the art
 in place to edit or try again. Drawing alone never launches an app.
 
-Search, window switching, and focused view temporarily hide drawings, leaving
-them in place for your return. Arrange preserves your art's placement; a drawing
+Search includes drawings as results. Window switching and focused view
+temporarily hide them, leaving them in place for your return. Arrange preserves your art's placement; a drawing
 that had peeked out can return home when the rearranged windows clear its space.
 
 ## Bring work to you with search
@@ -93,13 +143,17 @@ Choose **Search canvas** from the cursor tool's dropdown, then click the
 background. Windows move aside and a search field opens near that point, within
 the available space. Results appear below a field in the upper half of the
 screen and above one in the lower half. Pressing **/** selects Search and opens
-the field near the upper center of the screen.
+the field near the upper center of the screen. **Ctrl/⌘ K** also opens canvas
+search, including when the toolbar is hidden.
 
-With an empty query, every desktop item comes into view. Typing brings matching
-app shortcuts, files, folders, and open windows into a temporary arrangement.
+With an empty query, desktop items, drawings, and shell widgets come into view.
+Typing brings matching app shortcuts, files, folders, open windows, drawings,
+and widgets into a temporary arrangement.
 Try **Notes** to see its app shortcut, Notes.txt, and matching open windows
 together. Names and item types are searchable; window matches also include app
-names. Matching windows retain their contents and chrome, scaled to fit.
+names. Drawings match their numbered name or words such as **ink** and **sketch**;
+widgets also match related terms such as **battery** or **dock**. Matching
+windows retain their contents and chrome, scaled to fit.
 
 The field's pencil opens a one-line handwriting pad. Write with a mouse, pen,
 or touch, then pause for 800 milliseconds or press the check to read it. The
@@ -115,17 +169,20 @@ is independent of the simulated 3 GB download in **Settings → AI**.
 
 Use **Up/Down** to choose a result and **Enter** to open it, or click the result.
 An item opens its app preview; a window becomes active and the canvas centers on
-it. **Escape**, the close button, clicking empty canvas, or using another shell
+it, unless it is pinned, in which case it opens at the frame. Choosing a drawing
+selects it and brings its canvas position into view. Choosing a widget restores
+it at its default corner and opens Change layout. **Escape**, the close button,
+clicking empty canvas, or using another shell
 control ends search. The temporary layout never replaces saved positions, so
 closing it restores where everything was. Search remains the selected tool
 until you choose another.
 
-The existing dock and launcher remain available. Canvas search adds a way to
-find work by rearranging the space you're already using.
+The dock and launcher offer additional routes to work while they are placed.
+Canvas search remains available independently of those controls.
 
 ## Focus and switch
 
-Double-clicking a header enlarges its window while leaving room for the shell.
+For an unpinned window, double-clicking a header enlarges it while leaving room for the shell.
 The maximize button instead fills the viewport, keeps the window chrome, hides
 the corners, and stops canvas movement. Approaching any corner reveals all four
 together. Switching to another window ends this focused view and leaves the
@@ -138,7 +195,8 @@ and chrome, while desktop items move aside. The selected window has an outline
 and a single centered title underneath.
 
 Releasing Ctrl restores the layout, focuses the chosen window, and centers it
-in the viewport, subject to the canvas edges. Enter or clicking also confirms.
+in the viewport, subject to the canvas edges. Pinned windows open at their frame
+edge instead. Enter or clicking also confirms.
 Escape, an outside click, or losing browser focus restores the previous view,
 including focused view when it was active. Cycling holds the viewport still and
 leaves saved positions, sizes, and stacking unchanged. Browser-reserved shortcuts
@@ -147,8 +205,9 @@ require their key events to reach the page.
 ## Open apps and draw shortcuts
 
 The launcher offers a gallery, list, and search across eight app previews.
-**Ctrl/⌘ K** opens search; arrow keys and Enter select an app. Browser, Files,
-and Notes are preset favorites beside the launcher.
+Choose Apps to open it; arrow keys and Enter select an app. Browser, Files,
+and Notes are preset favorites beside the launcher. **Ctrl/⌘ K** opens the
+broader canvas search.
 
 Running apps show up to three dots for their window instances. Select an app
 to open its window list, bring an instance into view, or create another. Drag
@@ -172,7 +231,7 @@ The Settings sidebar collapses in small windows.
 | Displays   | Drag two numbered monitors, release to snap them together and recenter the pair, then select one to change its displayed resolution, scale, and refresh rate.                                                                     |
 | Gestures   | Manage the saved app assignments and drawn marks.                                                                                                                                                                                 |
 | AI         | Opt in to a four-second, 3 GB download preview. Turning enabled AI off asks for confirmation about deleting the model and downloading it again later.                                                                             |
-| System     | Choose whether the battery percentage appears beside its tray icon.                                                                                                                                                               |
+| System     | Choose whether the battery percentage appears beside its tray icon; allow hiding canvas tools or restore them.                                                                                                                    |
 
 **Gather similar windows** appears beside selected windows. AI starts off;
 enabling it makes this action available. Press it to show a one-second shimmer,
@@ -196,15 +255,17 @@ Prototype boundaries:
 
 - App launches create browser-rendered windows. They don't open host apps or
   files. The original Scratchpad is editable; the catalog apps use sample content.
-- Canvas search matches the playground's desktop items and open windows. It
+- Canvas search matches the playground's desktop items, windows, numbered
+  drawings, and built-in shell widgets. It
   doesn't index the host filesystem or search inside app content.
 - Overview's zoom buttons are placeholders. Display controls and tray values
   don't change the host system. Notifications have no external event source.
 - AI gathering doesn't download a model or inspect window contents. It uses a
-  local same-app rule to move windows after its brief delay. Desktop widgets
-  and editing favorites aren't implemented.
+  local same-app rule to move windows after its brief delay. Custom desktop
+  widgets, uninstalling apps, and editing favorites aren't implemented.
 
 The browser saves window layouts and stacking, desktop-item positions, drawings,
+frame attachments, canvas layers, hidden widgets, the tools-hiding preference,
 window list order, the scratchpad, tool choices, gesture assignments, appearance,
 background, battery-label preference, and completed AI opt-in. Panels,
 selections, unfinished pointer strokes, temporary search arrangements, viewport

@@ -9,14 +9,13 @@ This document explains how to extend that direction. The [feature list](features
 The guiding analogy is [a painting canvas inside a frame](canvas-and-frame.md).
 The canvas holds your work; the frame keeps chosen things within reach while
 you move across it. Its layers give work depth, and its four corners provide a
-starting arrangement. Configurable frame attachments and **Change layout** are
-being implemented. Where the current behavior below still uses fixed corners
-or drawing-specific layer controls, the canvas-and-frame document records the
-intended replacement.
+starting arrangement. **Change layout** lets the user place objects on either
+canvas layer or attach them to any frame edge. The canvas-and-frame document
+explains the shared placement and recovery rules behind these controls.
 
 ## Keep the canvas available for work
 
-The default background is a flat field of subtly tinted dots, spaced 28 pixels apart in both axes. Because those dots move with the canvas, even an empty area gives you a reference while panning. Desktop shortcuts, files, and folders belong to this background layer and always sit underneath windows. Every catalog app has a shortcut: you can decide where it belongs, while its continued presence makes the desktop a complete place to find apps.
+The default background is a flat field of subtly tinted dots, spaced 28 pixels apart in both axes. Because those dots move with the canvas, even an empty area gives you a reference while panning. Desktop shortcuts, files, and folders start on this background layer. Users can raise them or attach them to the frame through Change layout. Every catalog app has a shortcut: you can decide where it belongs, while its continued presence makes the desktop a complete place to find apps.
 
 Leave decorative taglines and branding off the canvas. Apps can have headings, status lines, or descriptions. Those belong to the work inside a window; they don't need to become permanent desktop furniture.
 
@@ -24,16 +23,20 @@ A photo can replace the dots. **Repeat with canvas** attaches native-size tiles 
 
 ## Give drawings a place
 
-Drawing adds content to the workspace. A sketch can sit below windows or be
-pinned above them; its position stays attached to the canvas. Several strokes
+Drawing adds content to the workspace. A sketch can sit on the canvas background,
+above windows, or on the frame. Several strokes
 make one object until the user finishes it, so moving a drawing keeps its parts
 together.
 
 Use the shared accent for ink and a simple outline for selection. Put the small
-pin, delete, and finish controls beside the selected drawing, within reach and
+Change layout, delete, and finish controls beside the selected drawing, within reach and
 clear of its strokes. Those controls need tooltips, not a heading or a permanent
 instruction. The cursor selects and moves drawings as it does other work on the
 canvas.
+
+Keep creation and placement separate. The pencil creates ink; Change layout
+handles its layer and frame attachment using the same interaction as other
+objects. A drawing doesn't need a separate set of pinning modes.
 
 Play belongs beside selected ink when saved app gestures make it useful. Keep
 launching deliberate: drawing a mark alone does not run it. On a match, let the
@@ -43,7 +46,7 @@ sketching available while giving the same content a possible action.
 
 ## Let search borrow the space
 
-Finding a window doesn't have to mean remembering where you left it. The Search cursor opens a field where you click the desktop, and the surrounding work moves aside to make room. Matching shortcuts, files, folders, and windows come into the viewport as you type. An empty query gathers all desktop items, making every app available from the canvas.
+Finding a window doesn't have to mean remembering where you left it. The Search cursor opens a field where you click the desktop, and the surrounding work moves aside to make room. Matching shortcuts, files, folders, windows, drawings, and shell widgets share one result arrangement. An empty query gathers desktop items, drawings, and available widgets, making every app and removed control reachable from the canvas.
 
 Keep the field near the click. Results appear below a field in the upper half of the screen and above one in the lower half, with room for the corner controls. This gives the chosen point a purpose instead of pulling every search toward the same part of the screen. The keyboard shortcut opens near the upper center when there is no pointer location to use.
 
@@ -53,34 +56,63 @@ query editable after recognition: a misread word should be something the user
 can correct. Loading and error text explain a current state; an idle pad does
 not need a permanent instruction paragraph.
 
-The arrangement is temporary. Drawings hide while search or the keyboard switcher uses the space. Closing search restores the workspace, and choosing a window takes you to its saved position. This distinction lets us be quite bold about moving things during search: the user can explore a different arrangement without having to rebuild the one they made.
+The arrangement is temporary. Search includes the user's actual ink alongside other results; drawings hide during the keyboard switcher. Closing search restores the workspace, and choosing a window takes you to its saved position or reveals its frame attachment. This distinction lets us be quite bold about moving things during search: the user can explore a different arrangement without having to rebuild the one they made.
 
 The keyboard switcher uses the same idea. Holding Ctrl+1 gathers the actual open windows into a grid and moves desktop items aside. Their contents and chrome remain recognizable as you cycle. The selected window receives an outline and one centered title underneath; there is no separate tray of app-icon proxies. Committing carries the chosen window directly into its centered position in the restored workspace. Canceling restores the previous view, including an app's focused view.
 
-Use the existing items and window surfaces as results. Scaled windows retain their content and chrome, and app shortcuts carry the same artwork seen elsewhere. A clear selection highlight identifies the next item to open. The search field needs its placeholder, a close control, and an empty-result message when relevant; it doesn't need another heading, result count, or instruction strip. The dock and launcher remain useful alongside this spatial route to the same apps.
+Use the existing items, drawings, and window surfaces as results. Scaled windows retain their content and chrome, and app shortcuts carry the same artwork seen elsewhere. Widget results identify the controls the user can restore, including controls with no current placement. A clear selection highlight identifies the next item to open. The search field needs its placeholder, a close control, and an empty-result message when relevant; it doesn't need another heading, result count, or instruction strip. The dock and launcher remain useful alongside this spatial route to the same apps while the user keeps them placed.
 
 ## Give the default corners an intention
 
 The default four corners provide stable places to look:
 
-| Corner       | Intention                         | Resting controls                                                   |
-| ------------ | --------------------------------- | ------------------------------------------------------------------ |
-| Top left     | Catch up on activity.             | Bell and one line of notification status.                          |
-| Top right    | Check or change the device.       | Clock, Wi-Fi, sound, and battery.                                  |
-| Bottom left  | Navigate and organize the canvas. | Background tool, window selection, drawing, Overview, and Arrange. |
-| Bottom right | Open apps and return to work.     | Favorites, running apps, and Apps.                                 |
+| Corner       | Intention                         | Resting controls                                                                  |
+| ------------ | --------------------------------- | --------------------------------------------------------------------------------- |
+| Top left     | Catch up on activity.             | Bell and one line of notification status.                                         |
+| Top right    | Check or change the device.       | Clock, Wi-Fi, sound, and battery.                                                 |
+| Bottom left  | Navigate and organize the canvas. | Background tool, window selection, drawing, Change layout, Overview, and Arrange. |
+| Bottom right | Open apps and return to work.     | Favorites, running apps, and Apps.                                                |
 
-Keep each corner to one row on desktop. The tray and clock have the same glass backing as the other corners, so their text and controls remain distinct from whatever passes underneath. Notifications stay left-aligned and take only the width their icon, status, and padding need. Apps share one continuous bar; each icon doesn't need another resting bubble.
+Keep each default corner to one row on desktop, flush with the screen boundary. Side attachments stack their controls vertically while leaving the icons upright. The tray and clock have the same glass backing as the other corners, so their text and controls remain distinct from whatever passes underneath. Notifications stay left-aligned and take only the width their icon, status, and padding need. Apps share one continuous bar; each icon doesn't need another resting bubble.
 
 The common surface is 54 pixels tall, with 4 pixels of padding, a 1-pixel border, and 44-pixel control targets. Buttons are transparent at rest. Hover adds a shared fill, active or expanded controls use the soft accent, and keyboard focus adds an inset outline. This treatment comes from [ShellControls.module.css](../src/components/ShellControls.module.css), including the tray's background.
 
-On screens 760 pixels wide or narrower, the top corners merge into one top bar and the bottom corners into one bottom bar. Notifications retain their full status text. Device icons and app icons can scroll horizontally within their own strips. Apps remain right-aligned; the canvas tool stays on the left. That tool becomes one selector with a flat menu containing the available tools and actions.
+On screens 760 pixels wide or narrower, the default top corners merge into one top bar and the default bottom corners into one bottom bar. Notifications retain their full status text. Device icons and app icons can scroll horizontally within their own strips. Apps remain right-aligned; the canvas tool stays on the left. That tool becomes one selector with a flat menu containing the available tools and actions. Custom attachments keep their chosen edge and position.
 
 These positions give the first session a clear arrangement, even when the
 available space changes. The configurable frame extends this to attachments on
 any edge. Users can move or remove controls, and can attach their own work. The
 shared surfaces and control states should keep that arrangement coherent even
 when the original corners are empty.
+
+Change layout shows frame guides while the user is arranging objects. Dragging
+to an edge attaches the object, with distinct animated corner targets providing
+alignment points. Keep
+edge placement direct; a list of edge buttons and a position slider would
+repeat what the drag already expresses. The editor offers Canvas,
+Background, and Frame, the selected object's name, removal when relevant, and
+Done. Frame chooses the nearest edge; dragging gives direct control over the
+attachment's position.
+
+The frame is the screen boundary. An attached object dropped in the interior
+returns to the nearest edge with a short animation. Detaching is an explicit
+Canvas or Background choice, or removal from the frame. Keep the outline,
+surface, and controls moving as one object, including when a toolbar changes
+between a horizontal row and a vertical stack. Change orientation during the
+drag when the toolbar enters a new edge area, retain it across the interior,
+and snap to the boundary on release. Animate both directions; the return trip
+should preserve the same sense of movement.
+
+Frame attachments should leave room for the work they surround. Pinned windows
+recede to a narrow strip. Hover brings a little more into view as a clue;
+clicking opens the whole window, and losing focus slides it back. Pinned desktop
+shortcuts become small glass tiles. These changes show that the object has a
+different relationship to the viewport without replacing its identity.
+
+Removal needs clear consequences. Taking an object off the frame returns it to
+the canvas; closing a pinned window separately asks whether to close and remove
+it. Default controls remain searchable after removal. Canvas tools require an
+explicit hide-able preference because they contain the layout tool itself.
 
 ## Make words earn their place
 
@@ -153,9 +185,9 @@ The monitor arrangement preview also has a bounded size. Two numbered monitors f
 
 ## Let interaction provide feedback
 
-Selected tools stay selected, including Search after its field closes. Escape dismisses a panel or clears selection without changing the canvas tool. On desktop, pressing an inactive expandable tool selects it; pressing it again opens its choices. The primary cursor dropdown remembers desktop selection, Pan, or Search. The pencil has its own above/below-window choices, with D selecting drawing directly. Each expansion indicator sits at the top right. Short-lived tooltips explain unfamiliar controls without remaining over the canvas after the user has moved on.
+Selected tools stay selected, including Search after its field closes. Escape dismisses a panel or clears selection without changing the canvas tool; Change layout is an editing session that ends with Done or Escape. On desktop, pressing an inactive expandable tool selects it; pressing it again opens its choices. The primary cursor dropdown remembers desktop selection, Pan, or Search. The pencil selects drawing directly, also available with D. Each expansion indicator sits at the top right. Short-lived tooltips explain unfamiliar controls without remaining over the canvas after the user has moved on.
 
-Use distinct icons for distinct actions. Apps and Arrange have different silhouettes; Arrange's uneven grid suggests separate, non-overlapping windows. A divider separates background, selection, and drawing tools from Overview and Arrange. **Gather similar windows** uses overlapping rectangles beside the selected windows, tying the action to its context.
+Use distinct icons for distinct actions. Apps and Arrange have different silhouettes; Arrange's uneven grid suggests separate, non-overlapping windows. A divider separates background, selection, drawing, and layout tools from Overview and Arrange. **Gather similar windows** uses overlapping rectangles beside the selected windows, tying the action to its context.
 
 Pointer, trackpad, touch, and keyboard should reach the same work. Controls retain usable targets and accessible names when visible labels are removed. Hover can explain an action, while direct activation and keyboard commands make it available without hover.
 
