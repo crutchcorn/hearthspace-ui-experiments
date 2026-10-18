@@ -1,0 +1,41 @@
+.anchor {
+  position: fixed;
+  z-index: 500;
+  width: max-content;
+}
+
+.anchor .surface {
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  width: max-content;
+  gap: 4px;
+}
+
+.button {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  padding: 0;
+  place-items: center;
+}
+
+.deleteButton:hover {
+  color: #c95050;
+}
+
+.tooltip {
+  position: absolute;
+  width: max-content;
+  max-width: min(230px, calc(100vw - 24px));
+  padding: 10px 12px;
+  border: 1px solid var(--chrome-border);
+  border-radius: var(--radius-control);
+  background: var(--chrome-raised);
+  box-shadow: var(--shadow-panel);
+  color: var(--chrome-text);
+  font-size: 11px;
+  line-height: 1.5;
+  pointer-events: none;
+}

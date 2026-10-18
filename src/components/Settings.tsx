@@ -10,7 +10,13 @@ import {
   Spline,
   Sun,
 } from 'lucide-react'
-import { useId, useRef, useState, type CSSProperties } from 'react'
+import {
+  useId,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+} from 'react'
 import { ACCENT_THEMES, type AccentThemeId, type ColorMode } from '../theme'
 import type { BackgroundFit, BackgroundPhoto } from '../useBackground'
 import type { AIControls } from '../useAI'
@@ -23,6 +29,7 @@ import GestureSettings from './GestureSettings'
 import styles from './Settings.module.css'
 
 interface SettingsProps {
+  navigation?: SettingsNavigationRequest
   ai: AIControls
   colorMode: ColorMode
   onColorModeChange: (mode: ColorMode) => void
@@ -88,7 +95,14 @@ const CATEGORIES = [
   },
 ] as const
 
+type SettingsCategory = (typeof CATEGORIES)[number]['id']
+export type SettingsNavigationRequest = {
+  id: string
+  category: SettingsCategory
+}
+
 export default function Settings({
+  navigation,
   ai,
   colorMode,
   onColorModeChange,
@@ -106,8 +120,10 @@ export default function Settings({
   onSaveGestureShortcut,
   onRemoveGestureShortcut,
 }: SettingsProps) {
-  const [category, setCategory] =
-    useState<(typeof CATEGORIES)[number]['id']>('appearance')
+  const [category, setCategory] = useState<SettingsCategory>(
+    navigation?.category ?? 'appearance',
+  )
+  const [lastNavigationId, setLastNavigationId] = useState(navigation?.id)
   const [navigationOpen, setNavigationOpen] = useState(false)
   const [displayLayout, setDisplayLayout] = useState(INITIAL_DISPLAY_LAYOUT)
   const [displayPreferences, setDisplayPreferences] = useState<
@@ -123,6 +139,16 @@ export default function Settings({
   const groupName = useId()
   const batterySettingId = useId()
   const activeCategory = CATEGORIES.find((item) => item.id === category)!
+
+  if (navigation && navigation.id !== lastNavigationId) {
+    setLastNavigationId(navigation.id)
+    setCategory(navigation.category)
+    setNavigationOpen(false)
+  }
+
+  useLayoutEffect(() => {
+    if (navigation) content.current?.scrollTo({ top: 0 })
+  }, [navigation])
 
   return (
     <section className={styles.settings} aria-label="Settings">
@@ -204,6 +230,7 @@ export default function Settings({
             )}
             {category === 'gestures' && (
               <GestureSettings
+                key={lastNavigationId}
                 gestureShortcuts={gestureShortcuts}
                 onSaveGestureShortcut={onSaveGestureShortcut}
                 onRemoveGestureShortcut={onRemoveGestureShortcut}

@@ -1,6 +1,6 @@
 # Visual language
 
-Hearthspace puts your work at the center of the desktop. Windows and desktop items occupy a continuous canvas; small controls stay at its edges. Warm orange, glass, and clear boundaries give the environment its character without needing a logo, a welcome message, or a label on every control.
+Hearthspace puts your work at the center of the desktop. Windows, desktop items, and drawings occupy a continuous canvas; small controls stay at its edges. Warm orange, glass, and clear boundaries give the environment its character without needing a logo, a welcome message, or a label on every control.
 
 The repeated direction across these experiments has been to remove visual explanation once the interaction can carry it. We still need to know which window is selected, where a tool lives, and what a setting changes. We can communicate much of that through placement, shape, and state, leaving text for the parts that need words.
 
@@ -14,13 +14,26 @@ Leave decorative taglines and branding off the canvas. The Workspace window can 
 
 A photo can replace the dots. **Repeat with canvas** attaches native-size tiles to the world. **Stretch**, **Contain**, and **Cover** keep the photo attached to the viewport while windows move over it. Contain exposes the theme's field color around the image. Photos retain their own colors, and **Use default background** restores the dots.
 
+## Give drawings a place
+
+Drawing adds content to the workspace. A sketch can sit below windows or be
+pinned above them; its position stays attached to the canvas. Several strokes
+make one object until the user finishes it, so moving a drawing keeps its parts
+together.
+
+Use the shared accent for ink and a simple outline for selection. Put the small
+pin, delete, and finish controls beside the selected drawing, within reach and
+clear of its strokes. Those controls need tooltips, not a heading or a permanent
+instruction. The cursor selects and moves drawings as it does other work on the
+canvas.
+
 ## Let search borrow the space
 
 Finding a window doesn't have to mean remembering where you left it. The Search cursor opens a field where you click the desktop, and the surrounding work moves aside to make room. Matching shortcuts, files, folders, and windows come into the viewport as you type. An empty query gathers all desktop items, making every app available from the canvas.
 
 Keep the field near the click. Results appear below a field in the upper half of the screen and above one in the lower half, with room for the corner controls. This gives the chosen point a purpose instead of pulling every search toward the same part of the screen. The keyboard shortcut opens near the upper center when there is no pointer location to use.
 
-The arrangement is temporary. Closing search restores the workspace, and choosing a window takes you to its saved position. This distinction lets us be quite bold about moving things during search: the user can explore a different arrangement without having to rebuild the one they made.
+The arrangement is temporary. Drawings hide while search or the keyboard switcher uses the space. Closing search restores the workspace, and choosing a window takes you to its saved position. This distinction lets us be quite bold about moving things during search: the user can explore a different arrangement without having to rebuild the one they made.
 
 The keyboard switcher uses the same idea. Holding Ctrl+1 gathers the actual open windows into a grid and moves desktop items aside. Their contents and chrome remain recognizable as you cycle. The selected window receives an outline and one centered title underneath; there is no separate tray of app-icon proxies. Committing carries the chosen window directly into its centered position in the restored workspace. Canceling restores the previous view, including an app's focused view.
 
@@ -30,12 +43,12 @@ Use the existing items and window surfaces as results. Scaled windows retain the
 
 The four corners provide stable places to look:
 
-| Corner       | Intention                         | Resting controls                                          |
-| ------------ | --------------------------------- | --------------------------------------------------------- |
-| Top left     | Catch up on activity.             | Bell and one line of notification status.                 |
-| Top right    | Check or change the device.       | Clock, Wi-Fi, sound, and battery.                         |
-| Bottom left  | Navigate and organize the canvas. | Background tool, window selection, Overview, and Arrange. |
-| Bottom right | Open apps and return to work.     | Favorites, running apps, and Apps.                        |
+| Corner       | Intention                         | Resting controls                                                   |
+| ------------ | --------------------------------- | ------------------------------------------------------------------ |
+| Top left     | Catch up on activity.             | Bell and one line of notification status.                          |
+| Top right    | Check or change the device.       | Clock, Wi-Fi, sound, and battery.                                  |
+| Bottom left  | Navigate and organize the canvas. | Background tool, window selection, drawing, Overview, and Arrange. |
+| Bottom right | Open apps and return to work.     | Favorites, running apps, and Apps.                                 |
 
 Keep each corner to one row on desktop. The tray and clock have the same glass backing as the other corners, so their text and controls remain distinct from whatever passes underneath. Notifications stay left-aligned and take only the width their icon, status, and padding need. Apps share one continuous bar; each icon doesn't need another resting bubble.
 
@@ -88,7 +101,7 @@ The previews include a tabbed browser, a file manager with rounded controls, cla
 
 ## Give color a consistent job
 
-Orange is the default accent, carrying the warmth associated with Hearthspace. Settings offers Orange, Rose, Violet, Blue, Teal, and Olive as coordinated palettes. One selection applies to the environment: controls, selections, window outlines, gesture strokes, and canvas tints. There are no per-component color choices or arbitrary color inputs.
+Orange is the default accent, carrying the warmth associated with Hearthspace. Settings offers Orange, Rose, Violet, Blue, Teal, and Olive as coordinated palettes. One selection applies to the environment: controls, selections, window outlines, canvas ink, gesture strokes, and canvas tints. There are no per-component color choices or arbitrary color inputs.
 
 Light and Dark are separate choices. Without a saved choice, the initial mode follows the operating system's preference. A chosen mode applies immediately and persists independently of the accent. App artwork and photos keep their colors.
 
@@ -116,13 +129,13 @@ The monitor arrangement preview also has a bounded size. Two numbered monitors f
 
 ## Let interaction provide feedback
 
-Selected tools stay selected, including Search after its field closes. Escape dismisses a panel or clears selection without changing the canvas tool. On desktop, pressing an inactive expandable tool selects it; pressing it again opens its choices. The primary cursor dropdown remembers desktop selection, Pan, or Search. The expansion indicator sits at the top right. Short-lived tooltips explain unfamiliar controls without remaining over the canvas after the user has moved on.
+Selected tools stay selected, including Search after its field closes. Escape dismisses a panel or clears selection without changing the canvas tool. On desktop, pressing an inactive expandable tool selects it; pressing it again opens its choices. The primary cursor dropdown remembers desktop selection, Pan, or Search. The pencil has its own above/below-window choices, with D selecting drawing directly. Each expansion indicator sits at the top right. Short-lived tooltips explain unfamiliar controls without remaining over the canvas after the user has moved on.
 
-Use distinct icons for distinct actions. Apps and Arrange have different silhouettes; Arrange's uneven grid suggests separate, non-overlapping windows. A divider separates background and selection tools from Overview and Arrange. **Gather similar windows** uses overlapping rectangles beside the selected windows, tying the action to its context.
+Use distinct icons for distinct actions. Apps and Arrange have different silhouettes; Arrange's uneven grid suggests separate, non-overlapping windows. A divider separates background, selection, and drawing tools from Overview and Arrange. **Gather similar windows** uses overlapping rectangles beside the selected windows, tying the action to its context.
 
 Pointer, trackpad, touch, and keyboard should reach the same work. Controls retain usable targets and accessible names when visible labels are removed. Hover can explain an action, while direct activation and keyboard commands make it available without hover.
 
-Dragging and resizing follow input immediately. Ordinary navigation pans to a chosen window after focus and stacking have updated. During Ctrl+1 switching, the viewport stays still while windows occupy temporary presentation positions. The saved workspace is untouched until the user chooses a window.
+Drawing, dragging, and resizing follow input immediately. Ordinary navigation pans to a chosen window after focus and stacking have updated. During Ctrl+1 switching, the viewport stays still while windows occupy temporary presentation positions. The saved workspace is untouched until the user chooses a window.
 
 Choosing a window from search or the switcher should read as one continuous movement. Animate the same window surface from its visible preview directly to its final centered position. Resolve the restored layout and viewport position together, so the window doesn't first travel home and then move again as the canvas pans. Other windows move continuously toward their restored positions, ending at the viewport edge when their destination is far away. Keep their identity through the movement without clones or a fade-out/reappearance. Reduced-motion preferences make this transition immediate.
 

@@ -10,12 +10,13 @@ import type { AccentThemeId, ColorMode } from '../theme'
 import type { BackgroundFit, BackgroundPhoto } from '../useBackground'
 import type { GestureShortcut } from '../gestures'
 import type { AIControls } from '../useAI'
-import Settings from './Settings'
+import Settings, { type SettingsNavigationRequest } from './Settings'
 import AppIcon from './AppIcon'
 import { APP_CATALOG } from './launcher-apps'
 import styles from './WindowContent.module.css'
 
 interface WindowContentProps {
+  settingsNavigation?: SettingsNavigationRequest
   ai: AIControls
   item: DesktopWindow
   workspace: Workspace
@@ -54,6 +55,7 @@ const bookmarks = [
 ]
 
 export default function WindowContent({
+  settingsNavigation,
   ai,
   item,
   workspace,
@@ -216,6 +218,7 @@ export default function WindowContent({
   if (item.appId === 'settings') {
     return (
       <Settings
+        navigation={settingsNavigation}
         ai={ai}
         colorMode={colorMode}
         onColorModeChange={onColorModeChange}

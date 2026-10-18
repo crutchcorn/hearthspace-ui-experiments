@@ -5,7 +5,7 @@
 }
 
 .dock {
-  width: 203px;
+  width: 251px;
 }
 
 .mobileDock {
@@ -14,7 +14,7 @@
 
 .toolGrid {
   display: grid;
-  grid-template-columns: repeat(2, 44px) 1px repeat(2, 44px);
+  grid-template-columns: repeat(3, 44px) 1px repeat(2, 44px);
   gap: 4px;
 }
 

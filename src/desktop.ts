@@ -1,7 +1,8 @@
 import { APP_CATALOG } from './components/launcher-apps'
+import { loadDrawings, type CanvasDrawing } from './drawings'
 
 export type Bounds = { x: number; y: number; width: number; height: number }
-export type CanvasTool = 'cursor' | 'pan' | 'select' | 'search'
+export type CanvasTool = 'cursor' | 'pan' | 'select' | 'search' | 'draw'
 export type WindowSelectionShape = 'rectangle' | 'freeform'
 export type DesktopItem = Bounds & {
   id: string
@@ -23,6 +24,7 @@ export type Workspace = {
   home: { x: number; y: number }
   windows: DesktopWindow[]
   items: DesktopItem[]
+  drawings: CanvasDrawing[]
   note: string
 }
 
@@ -35,7 +37,12 @@ export const MIN_HEIGHT = 200
 export function loadCanvasTool(): CanvasTool {
   try {
     const saved = localStorage.getItem(CANVAS_TOOL_STORAGE_KEY)
-    if (saved === 'pan' || saved === 'select' || saved === 'search')
+    if (
+      saved === 'pan' ||
+      saved === 'select' ||
+      saved === 'search' ||
+      saved === 'draw'
+    )
       return saved
     if (saved === 'lasso') return 'select'
   } catch {
@@ -127,6 +134,7 @@ function createWorkspace(): Workspace {
     home,
     note: INITIAL_NOTE,
     items: createDesktopItems(home),
+    drawings: [],
     windows: [
       {
         id: 'welcome',
@@ -270,6 +278,7 @@ export function loadWorkspace(): Workspace {
       home,
       windows,
       items: includeAppShortcuts(items, home, value),
+      drawings: loadDrawings(value.drawings, value),
     }
   } catch {
     return createWorkspace()

@@ -1,10 +1,4 @@
-import {
-  useEffect,
-  useImperativeHandle,
-  useRef,
-  useState,
-  type Ref,
-} from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   ArrowUpRight,
   Bell,
@@ -24,12 +18,7 @@ import styles from './NotificationInbox.module.css'
 
 export type NotificationTarget = 'notes' | 'files' | 'browser' | 'gestures'
 
-export interface NotificationInboxHandle {
-  showGestureSettings: () => void
-}
-
 interface NotificationInboxProps {
-  ref?: Ref<NotificationInboxHandle>
   open: boolean
   previewVisible: boolean
   onToggle: () => void
@@ -88,7 +77,6 @@ const INITIAL_NOTIFICATIONS: Notification[] = [
 ]
 
 export default function NotificationInbox({
-  ref,
   open,
   previewVisible,
   onToggle,
@@ -101,27 +89,6 @@ export default function NotificationInbox({
   const trigger = useRef<HTMLButtonElement>(null)
   const previewCount = useRef(0)
   const unreadCount = notifications.filter((item) => item.unread).length
-
-  useImperativeHandle(
-    ref,
-    () => ({
-      showGestureSettings() {
-        setNotifications((current) => [
-          {
-            id: 'gesture-settings',
-            target: 'gestures',
-            title: 'Customize gestures',
-            body: 'Choose an app and record its launch gesture.',
-            time: 'Just now',
-            unread: true,
-          },
-          ...current.filter((item) => item.id !== 'gesture-settings'),
-        ])
-        setToast(null)
-      },
-    }),
-    [],
-  )
 
   useEffect(() => {
     if (open) trigger.current?.focus({ preventScroll: true })

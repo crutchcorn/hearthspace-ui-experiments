@@ -22,16 +22,23 @@ import {
 } from 'lucide-react'
 import SystemBar, { type SystemPanel } from './components/SystemBar'
 import NotificationInbox, {
-  type NotificationInboxHandle,
   type NotificationTarget,
 } from './components/NotificationInbox'
 import Minimap from './components/Minimap'
 import CanvasTools from './components/CanvasTools'
 import DesktopItems from './components/DesktopItems'
+import DrawingLayer from './components/DrawingLayer'
+import DrawingActions from './components/DrawingActions'
+import {
+  addDrawingStroke,
+  MAX_DRAWING_STROKES,
+  type DrawingLayerName,
+} from './drawings'
 import AppLauncher from './components/AppLauncher'
 import LauncherDock from './components/LauncherDock'
 import AppIcon from './components/AppIcon'
 import WindowContent from './components/WindowContent'
+import type { SettingsNavigationRequest } from './components/Settings'
 import GatherWindows from './components/GatherWindows'
 import WindowSwitcher from './components/WindowSwitcher'
 import {
@@ -73,6 +80,7 @@ import {
   loadGestureShortcuts,
   saveGestureShortcuts,
   type GestureShortcut,
+  type GesturePoint,
 } from './gestures'
 import styles from './App.module.css'
 import shellStyles from './components/ShellControls.module.css'
@@ -91,7 +99,14 @@ import {
 type Gesture = {
   pointerId: number
   type:
-    'pan' | 'move' | 'resize' | 'window-select' | 'item-select' | 'item-move'
+    | 'pan'
+    | 'move'
+    | 'resize'
+    | 'window-select'
+    | 'item-select'
+    | 'item-move'
+    | 'draw'
+    | 'drawing-move'
   startX: number
   startY: number
   scrollX: number
@@ -105,6 +120,7 @@ type Gesture = {
   moved?: boolean
   selectionShape?: WindowSelectionShape
   points?: SelectionPoint[]
+  drawingLayer?: DrawingLayerName
 }
 
 const edges = ['n', 'e', 's', 'w', 'ne', 'se', 'sw', 'nw']
@@ -140,6 +156,17 @@ function App() {
   const [notificationsOpen, setNotificationsOpen] = useState(false)
   const [systemPanel, setSystemPanel] = useState<SystemPanel>(null)
   const [tool, setTool] = useState(loadCanvasTool)
+  const [drawingLayer, setDrawingLayer] = useState<DrawingLayerName>('above')
+  const [selectedDrawingId, setSelectedDrawingId] = useState<string | null>(
+    null,
+  )
+  const [drawingDraft, setDrawingDraft] = useState<{
+    points: GesturePoint[]
+    layer: DrawingLayerName
+  } | null>(null)
+  const selectedDrawing = workspace.drawings.find(
+    (item) => item.id === selectedDrawingId,
+  )
   const [switcherOrigin, setSwitcherOrigin] = useState({ x: view.x, y: view.y })
   const [canvasSearch, setCanvasSearch] = useState<{
     x: number
@@ -168,6 +195,10 @@ function App() {
   >(null)
   const [launcher, setLauncher] = useState<'apps' | 'gestures' | null>(null)
   const [editingGestures, setEditingGestures] = useState(false)
+  const [settingsNavigation, setSettingsNavigation] = useState<{
+    windowId: string
+    request: SettingsNavigationRequest
+  } | null>(null)
   const [dockAppId, setDockAppId] = useState<string | null>(null)
   const [revealRequest, setRevealRequest] = useState<{
     id: string
@@ -178,7 +209,6 @@ function App() {
   } | null>(null)
   const previewExiting = !!revealRequest?.preview
   const launcherTrigger = useRef<HTMLButtonElement>(null)
-  const notificationInbox = useRef<NotificationInboxHandle>(null)
   const windowElements = useRef(new Map<string, HTMLElement>())
   const viewport = useRef<HTMLDivElement>(null)
   const gesture = useRef<Gesture | null>(null)
@@ -228,6 +258,7 @@ function App() {
       setDragging(false)
       setSpaceHeld(false)
       setSelection(null)
+      setDrawingDraft(null)
     },
   })
   const switcherView = { ...view, ...switcherOrigin }
@@ -291,6 +322,8 @@ function App() {
       setSelection(null)
       setSelectedIds([])
       setSelectedItemIds([])
+      setDrawingDraft(null)
+      setSelectedDrawingId(null)
       setTool('search')
       setRevealRequest(null)
       const pointerId = gesture.current?.pointerId
@@ -333,6 +366,8 @@ function App() {
     setDragging(false)
     setSpaceHeld(false)
     setSelection(null)
+    setDrawingDraft(null)
+    setSelectedDrawingId(null)
     setSelectedIds([])
     setSelectedItemIds([])
     setShowMap(false)
@@ -447,9 +482,13 @@ function App() {
         setSelectedIds([])
         setSelectedItemIds([])
         setSelection(null)
+        setDrawingDraft(null)
+        setSelectedDrawingId(null)
         if (
           gesture.current?.type === 'window-select' ||
-          gesture.current?.type === 'item-select'
+          gesture.current?.type === 'item-select' ||
+          gesture.current?.type === 'draw' ||
+          gesture.current?.type === 'drawing-move'
         ) {
           const pointerId = gesture.current.pointerId
           gesture.current = null
@@ -502,6 +541,13 @@ function App() {
         setSelectedItemIds([])
         setShowMap(false)
       }
+      if (event.key.toLowerCase() === 'd') {
+        closePopovers()
+        setTool('draw')
+        setSelectedIds([])
+        setSelectedItemIds([])
+        setShowMap(false)
+      }
       if (event.key.toLowerCase() === 'm') {
         closePopovers()
         setShowMap((current) => !current)
@@ -537,6 +583,7 @@ function App() {
       if (gesture.current?.selectionShape === 'freeform') setSelectedIds([])
       gesture.current = null
       setSelection(null)
+      setDrawingDraft(null)
     }
     const keyup = (event: KeyboardEvent) => {
       if (event.code === 'Space') setSpaceHeld(false)
@@ -597,6 +644,40 @@ function App() {
         current.scrollX - clientX + current.startX,
         current.scrollY - clientY + current.startY,
       )
+      return
+    }
+    if (current.type === 'draw') {
+      const point = {
+        x: clamp(clientX + canvas.scrollLeft, 0, workspace.width),
+        y: clamp(clientY + canvas.scrollTop, 0, workspace.height),
+      }
+      const previous = current.points!.at(-1)!
+      if (Math.hypot(point.x - previous.x, point.y - previous.y) < 1) return
+      current.points!.push(point)
+      if (current.points!.length > 4096)
+        current.points = current.points!.filter((_, index) => index % 2 === 0)
+      setDrawingDraft({
+        points: [...current.points!],
+        layer: current.drawingLayer!,
+      })
+      return
+    }
+    if (current.type === 'drawing-move') {
+      const bounds = current.bounds!
+      const dx = clientX - current.startX + canvas.scrollLeft - current.scrollX
+      const dy = clientY - current.startY + canvas.scrollTop - current.scrollY
+      setWorkspace((previous) => ({
+        ...previous,
+        drawings: previous.drawings.map((item) =>
+          item.id !== current.id
+            ? item
+            : {
+                ...item,
+                x: clamp(bounds.x + dx, 0, previous.width - bounds.width),
+                y: clamp(bounds.y + dy, 0, previous.height - bounds.height),
+              },
+        ),
+      }))
       return
     }
     if (
@@ -762,6 +843,7 @@ function App() {
     if (
       canvas &&
       (gesture.current?.type === 'move' ||
+        gesture.current?.type === 'drawing-move' ||
         (gesture.current?.type === 'item-move' && gesture.current.moved))
     ) {
       const { x, y } = latestPointer.current
@@ -809,6 +891,7 @@ function App() {
     )
       return
     const canvas = viewport.current!
+    setSelectedDrawingId(null)
     event.preventDefault()
     event.stopPropagation()
     event.currentTarget.setPointerCapture(event.pointerId)
@@ -860,7 +943,73 @@ function App() {
     if (item) focusWindow(item.id)
   }
 
+  function startDrawing(event: ReactPointerEvent) {
+    if (event.button !== 0 || gesture.current) return
+    const canvas = viewport.current!
+    event.preventDefault()
+    event.stopPropagation()
+    canvas.focus({ preventScroll: true })
+    event.currentTarget.setPointerCapture(event.pointerId)
+    captureTarget.current = event.currentTarget
+    const points = [
+      {
+        x: clamp(canvas.scrollLeft + event.clientX, 0, workspace.width),
+        y: clamp(canvas.scrollTop + event.clientY, 0, workspace.height),
+      },
+    ]
+    const existing =
+      selectedDrawing && selectedDrawing.strokes.length < MAX_DRAWING_STROKES
+        ? selectedDrawing
+        : null
+    const layer = existing?.layer ?? drawingLayer
+    gesture.current = {
+      pointerId: event.pointerId,
+      type: 'draw',
+      startX: event.clientX,
+      startY: event.clientY,
+      scrollX: canvas.scrollLeft,
+      scrollY: canvas.scrollTop,
+      id: existing?.id,
+      points,
+      drawingLayer: layer,
+    }
+    setSelectedIds([])
+    setSelectedItemIds([])
+    setDrawingDraft({ points, layer })
+    closePopovers()
+  }
+
+  function selectDrawing(id: string) {
+    setSelectedDrawingId(id)
+    setSelectedIds([])
+    setSelectedItemIds([])
+    closePopovers()
+  }
+
+  function startDrawingMove(
+    event: ReactPointerEvent<SVGSVGElement>,
+    id: string,
+  ) {
+    const drawing = workspace.drawings.find((item) => item.id === id)
+    if (
+      !drawing ||
+      tool !== 'cursor' ||
+      event.button !== 0 ||
+      gesture.current ||
+      previewLayout ||
+      previewExiting ||
+      focusView
+    )
+      return
+    startGesture(event, 'drawing-move')
+    if (!gesture.current) return
+    gesture.current.id = id
+    gesture.current.bounds = drawing
+    selectDrawing(id)
+  }
+
   function selectDesktopItem(item: DesktopItem, additive: boolean) {
+    setSelectedDrawingId(null)
     setSelectedIds([])
     setSelectedItemIds((current) =>
       additive
@@ -910,6 +1059,30 @@ function App() {
 
   function endGesture(event: ReactPointerEvent) {
     if (gesture.current?.pointerId !== event.pointerId) return
+    if (gesture.current.type === 'draw') {
+      if (event.type === 'pointerup') {
+        applyGesture(event.clientX, event.clientY)
+        const current = gesture.current
+        const existing =
+          workspace.drawings.find((item) => item.id === current.id) ?? null
+        const drawing = addDrawingStroke(
+          existing,
+          current.points!,
+          current.drawingLayer!,
+          workspace,
+        )
+        setWorkspace((previous) => ({
+          ...previous,
+          drawings: existing
+            ? previous.drawings.map((item) =>
+                item.id === drawing.id ? drawing : item,
+              )
+            : [...previous.drawings, drawing],
+        }))
+        setSelectedDrawingId(drawing.id)
+      }
+      setDrawingDraft(null)
+    }
     if (
       gesture.current.type === 'window-select' &&
       gesture.current.selectionShape === 'freeform'
@@ -1065,6 +1238,7 @@ function App() {
       ],
     }))
     setActiveId(id)
+    return id
   }
 
   function toggleLauncher() {
@@ -1142,13 +1316,28 @@ function App() {
     }
   }
 
+  function openGestureSettings() {
+    const settings = workspace.windows.findLast(
+      (item) => item.appId === 'settings',
+    )
+    const id =
+      settings?.id ??
+      addWindow(APP_CATALOG.find((app) => app.id === 'settings')!)
+    setSettingsNavigation({
+      windowId: id,
+      request: { id: crypto.randomUUID(), category: 'gestures' },
+    })
+    if (settings) revealWindow(id, { center: true })
+    closePopovers()
+    setLauncher(null)
+    setEditingGestures(false)
+    setShowMap(false)
+    setSpaceHeld(false)
+  }
+
   function openNotificationTarget(target: NotificationTarget) {
     if (target === 'gestures') {
-      closePopovers()
-      setShowMap(false)
-      setSpaceHeld(false)
-      setEditingGestures(true)
-      setLauncher('gestures')
+      openGestureSettings()
       return
     }
     const item = workspace.windows.find(
@@ -1230,7 +1419,6 @@ function App() {
         inert={windowSwitcher.open}
       >
         <NotificationInbox
-          ref={notificationInbox}
           open={notificationsOpen}
           previewVisible={
             !previewLayout &&
@@ -1276,7 +1464,7 @@ function App() {
             ? `switcher-${windowSwitcher.selectedId}`
             : undefined
         }
-        className={`${styles.viewport} ${previewLayout || (!focusView && (tool === 'cursor' || tool === 'search')) ? styles.cursorReady : ''} ${!focusView && spaceHeld ? styles.panReady : ''} ${!focusView && dragging ? styles.dragging : ''} ${!focusView && !previewLayout && tool === 'select' && !spaceHeld ? styles.selecting : ''}`}
+        className={`${styles.viewport} ${previewLayout || (!focusView && (tool === 'cursor' || tool === 'search')) ? styles.cursorReady : ''} ${!focusView && spaceHeld ? styles.panReady : ''} ${!focusView && dragging ? styles.dragging : ''} ${!focusView && !previewLayout && (tool === 'select' || tool === 'draw') && !spaceHeld ? styles.selecting : ''}`}
         data-canvas-viewport
         onScroll={(event) => {
           const lockedView =
@@ -1319,6 +1507,7 @@ function App() {
           )
             return
           if (event.button === 1 || spaceHeld) startGesture(event, 'pan')
+          else if (tool === 'draw' && event.button === 0) startDrawing(event)
           else if (
             tool === 'select' &&
             !(event.target as Element).closest('[data-grouped="true"]')
@@ -1328,7 +1517,7 @@ function App() {
         onPointerDown={(event) => {
           if (
             !(event.target as HTMLElement).closest(
-              '[data-window-id], [data-desktop-item-id]',
+              '[data-window-id], [data-desktop-item-id], [data-drawing-id]',
             )
           ) {
             if (windowSwitcher.open) {
@@ -1393,6 +1582,19 @@ function App() {
               }}
             />
           </div>
+          {!previewLayout && !focusView && (
+            <div className={styles.drawingLayer} style={{ zIndex: 0 }}>
+              <DrawingLayer
+                drawings={workspace.drawings}
+                layer="below"
+                selectedId={selectedDrawingId}
+                draft={drawingDraft ?? undefined}
+                interactive={tool === 'cursor' && !previewExiting}
+                onPointerDown={startDrawingMove}
+                onSelect={selectDrawing}
+              />
+            </div>
+          )}
           {workspace.windows.map((item, index) => {
             const placement = previewLayout?.windows.get(item.id)
             const app = APP_CATALOG.find((entry) => entry.id === item.appId)
@@ -1536,6 +1738,11 @@ function App() {
                   )}
                   <WindowContent
                     item={item}
+                    settingsNavigation={
+                      settingsNavigation?.windowId === item.id
+                        ? settingsNavigation.request
+                        : undefined
+                    }
                     ai={ai}
                     workspace={workspace}
                     accentTheme={accentTheme}
@@ -1597,6 +1804,22 @@ function App() {
               </section>
             )
           })}
+          {!previewLayout && !focusView && (
+            <div
+              className={styles.drawingLayer}
+              style={{ zIndex: workspace.windows.length + 1 }}
+            >
+              <DrawingLayer
+                drawings={workspace.drawings}
+                layer="above"
+                selectedId={selectedDrawingId}
+                draft={drawingDraft ?? undefined}
+                interactive={tool === 'cursor' && !previewExiting}
+                onPointerDown={startDrawingMove}
+                onSelect={selectDrawing}
+              />
+            </div>
+          )}
           {selection?.points ? (
             <svg
               className={styles.freeformSelection}
@@ -1644,6 +1867,33 @@ function App() {
           )}
         </div>
       </div>
+      {!focusView && !previewLayout && selectedDrawing && !drawingDraft && (
+        <DrawingActions
+          key={selectedDrawing.id}
+          drawing={selectedDrawing}
+          view={view}
+          editing={tool === 'draw'}
+          onLayerChange={(layer) => {
+            setDrawingLayer(layer)
+            setWorkspace((current) => ({
+              ...current,
+              drawings: current.drawings.map((item) =>
+                item.id === selectedDrawing.id ? { ...item, layer } : item,
+              ),
+            }))
+          }}
+          onDelete={() => {
+            setWorkspace((current) => ({
+              ...current,
+              drawings: current.drawings.filter(
+                (item) => item.id !== selectedDrawing.id,
+              ),
+            }))
+            setSelectedDrawingId(null)
+          }}
+          onFinish={() => setSelectedDrawingId(null)}
+        />
+      )}
       {!focusView && !previewLayout && selectedWindows.length > 0 && (
         <GatherWindows
           key={`${ai.enabled}:${selectedIds.toSorted().join(',')}`}
@@ -1693,6 +1943,17 @@ function App() {
       >
         <CanvasTools
           mode={tool}
+          drawingLayer={drawingLayer}
+          onDrawingLayerChange={(layer) => {
+            closePopovers()
+            setDrawingLayer(layer)
+            setTool('draw')
+            setSelectedDrawingId(null)
+            setSelectedIds([])
+            setSelectedItemIds([])
+            setShowMap(false)
+            setLauncher(null)
+          }}
           selectionShape={selectionShape}
           onSelectionShapeChange={(shape) => {
             closePopovers()
@@ -1772,15 +2033,7 @@ function App() {
             setEditingGestures(false)
             setLauncher(mode)
           }}
-          onCustomizeGestures={() => {
-            closePopovers()
-            setLauncher(null)
-            setEditingGestures(false)
-            setShowMap(false)
-            setSpaceHeld(false)
-            notificationInbox.current?.showGestureSettings()
-            setNotificationsOpen(true)
-          }}
+          onCustomizeGestures={openGestureSettings}
           onClose={closeLauncher}
           onLaunch={launchApp}
         />

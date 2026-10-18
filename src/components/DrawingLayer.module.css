@@ -1,0 +1,56 @@
+.layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.drawing {
+  position: absolute;
+  overflow: visible;
+  color: var(--accent-strong);
+  outline: none;
+  pointer-events: none;
+  touch-action: none;
+}
+
+.stroke {
+  fill: none;
+  stroke: currentcolor;
+  stroke-width: 3px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+
+.stroke[data-dot] {
+  fill: currentcolor;
+  stroke: none;
+}
+
+.hitTarget {
+  fill: none;
+  stroke: transparent;
+  stroke-width: 20px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  cursor: grab;
+  pointer-events: stroke;
+}
+
+.hitTarget[data-dot] {
+  fill: transparent;
+  stroke: none;
+  pointer-events: all;
+}
+
+.selection {
+  fill: none;
+  stroke: var(--accent-border);
+  stroke-width: 1px;
+  stroke-dasharray: 4 4;
+  pointer-events: none;
+}
+
+.drawing:focus-visible .stroke {
+  filter: drop-shadow(0 0 3px var(--accent));
+}

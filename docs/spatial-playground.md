@@ -1,12 +1,12 @@
 # Spatial playground
 
-This experiment explores a desktop as a place to arrange icons, folders, and windows. It runs entirely in the browser, using React local state and CSS Modules. The current interaction has no server state or routing requirement.
+This experiment explores a desktop as a place to arrange icons, folders, drawings, and windows. It runs entirely in the browser, using React local state and CSS Modules. The current interaction has no server state or routing requirement.
 
 ## Canvas and coordinates
 
 A native scroll container fills the viewport and hides its scrollbars. Its world starts ten screens wide and ten screens tall. At creation, one screen is the browser’s initial viewport size, with a minimum of 960 × 720 pixels. Arranging windows can expand the world to fit the result. The saved world keeps its dimensions across reloads.
 
-The home viewport starts at 4.5 screen widths and heights into that world. Desktop items and windows use absolute world coordinates, so ordinary scroll movement also moves the dotted wallpaper. At desktop widths, fixed controls sit above the scrolling viewport in four corners: notifications at top left, device status at top right, canvas tools at bottom left, and the app launcher at bottom right. Device status combines the clock and three icon buttons in one compact glass row. At 760 pixels or less, the top corners join into one bar and the bottom corners join into another, preserving their left-to-right roles.
+The home viewport starts at 4.5 screen widths and heights into that world. Desktop items, drawings, and windows use absolute world coordinates, so ordinary scroll movement also moves the dotted wallpaper. At desktop widths, fixed controls sit above the scrolling viewport in four corners: notifications at top left, device status at top right, canvas tools at bottom left, and the app launcher at bottom right. Device status combines the clock and three icon buttons in one compact glass row. At 760 pixels or less, the top corners join into one bar and the bottom corners join into another, preserving their left-to-right roles.
 
 The minimap translates pointer positions into world coordinates. Grabbing its visible-area rectangle preserves the pointer’s offset within the viewport; pressing elsewhere centers the viewport there. Pointer capture keeps navigation continuous outside the map until release, and the native scroll container clamps travel at the world edges. The Overview panel contains the map without a window count, dragging hint, or Home button; the Home key still returns to the starting viewport. Icon-only zoom-out and zoom-in buttons sit beside its heading. They are presentational placeholders and do not change the map scale or canvas viewport.
 
@@ -34,6 +34,38 @@ Pan mode drags the canvas even when the drag starts on an item. The cursor is th
 
 Item positions persist with the workspace and remain independent of window geometry and stacking. Arrange only moves windows. Loading a workspace preserves existing desktop items and moved app shortcuts, removes duplicate shortcuts for an app, and adds any missing catalog shortcuts near home. A workspace without an item collection also receives the starter files and folders. Windows and edited scratchpad content remain intact.
 
+## Canvas drawings
+
+The pencil tool (D) draws directly on the canvas. Its dropdown chooses **Draw
+below windows** or **Draw above windows**, with above as the initial layer.
+Primary pointer input draws even over a window; Space-drag and middle-button
+drag retain temporary panning. Each completed stroke joins the selected drawing
+until the floating check finishes it. A later stroke then starts another drawing.
+Escape or pointer cancellation discards the unfinished stroke while preserving
+completed strokes.
+
+The cursor (V) selects a drawing by its ink and drags the whole object, with
+world-bound clamping and the same edge panning used for other canvas objects.
+Selection uses a dashed outline. A compact vertical toolbar sits beside the
+selected drawing, stays within the work area, and hides when the art is offscreen.
+It offers a layer toggle and delete; the finish check appears while drawing.
+Drawing, desktop-item, and window selections remain separate.
+
+`App` owns the active draft and selected drawing. `DrawingLayer` renders saved
+strokes in separate below-window and above-window layers, with pointer targets
+following the ink rather than filling each drawing's bounding box. The below
+layer remains underneath every window; the above layer sits above their stack.
+Search, window switching, and focused view hide both layers temporarily.
+Arrange leaves drawings in place.
+
+Each `workspace.drawings` entry has world-space bounds, an ID, an `above` or
+`below` layer, and strokes expressed in local coordinates within those bounds.
+`addDrawingStroke` recomputes the combined bounds and local points when a stroke
+is added. Completed strokes persist with the workspace; selection and the active
+pointer stroke do not. The drawing helpers validate finite coordinates, unique
+IDs, supported layers, world bounds, and bounded stroke and point counts when
+loading. Older workspaces start with no drawings.
+
 ## Canvas search
 
 Search is a primary canvas tool alongside desktop selection and Pan. Choosing it leaves the canvas in place until a background click opens search near that client-space point. The / shortcut selects Search and opens it near the upper center of the viewport. Starting search exits focused view, closes other panels, clears selections, and holds the viewport at its current scroll position.
@@ -58,9 +90,9 @@ Running Arrange leaves focused view, closes open panels, and clears selection wh
 
 ## Canvas tools and launcher
 
-At desktop widths, the fixed canvas dock at the bottom left contains separate dropdowns for background tools and window selection, followed by a divider and Map and Arrange. The first dropdown’s top-right indicator exposes **Select desktop items** (V), **Pan canvas** (H), and **Search canvas** (/); its icon reflects the remembered background tool. The second dropdown chooses **Rectangle select** (R) or **Freeform lasso** (L), with a square or lasso icon and its own top-right indicator. Pressing an inactive dropdown tool activates its remembered choice without opening the menu; pressing it again opens its choices. Up or Down on a focused tool opens its menu directly. Desktop-item selection always uses a rectangle, independent of the chosen window-selection shape. Canvas-tool hints appear on hover or focus and dismiss after 2.5 seconds, on pointer exit or blur, or when the control is activated. Arrange runs immediately; its hint identifies the action and A shortcut. Apps creates preview windows, and the Home key returns to the starting viewport.
+At desktop widths, the fixed canvas dock at the bottom left contains separate dropdowns for background tools, window selection, and drawing, followed by a divider and Map and Arrange. The first dropdown’s top-right indicator exposes **Select desktop items** (V), **Pan canvas** (H), and **Search canvas** (/); its icon reflects the remembered background tool. The second dropdown chooses **Rectangle select** (R) or **Freeform lasso** (L), with a square or lasso icon and its own top-right indicator. The pencil (D) has a third dropdown for drawing below or above windows. Pressing an inactive dropdown tool activates its remembered choice without opening the menu; pressing it again opens its choices. Up or Down on a focused tool opens its menu directly. Desktop-item selection always uses a rectangle, independent of the chosen window-selection shape. Canvas-tool hints appear on hover or focus and dismiss after 2.5 seconds, on pointer exit or blur, or when the control is activated. Arrange runs immediately; its hint identifies the action and A shortcut. Apps creates preview windows, and the Home key returns to the starting viewport.
 
-Desktop corner surfaces are 54 pixels high and sit 24 pixels from the viewport edges. At 760 pixels or less, two shared 54-pixel bars sit 12 pixels from the top, bottom, and side edges. The bottom bar contains one canvas-tool selector, the horizontally scrollable app strip, and the Apps launcher. The selector opens a single flat menu containing desktop-item selection, pan, search, rectangle select, freeform lasso, Overview, and Arrange windows, without submenus. Choosing a tool or action closes the menu.
+Desktop corner surfaces are 54 pixels high and sit 24 pixels from the viewport edges. At 760 pixels or less, two shared 54-pixel bars sit 12 pixels from the top, bottom, and side edges. The bottom bar contains one canvas-tool selector, the horizontally scrollable app strip, and the Apps launcher. The selector opens a single flat menu containing desktop-item selection, pan, search, rectangle select, freeform lasso, drawing below windows, drawing above windows, Overview, and Arrange windows, without submenus. Choosing a tool or action closes the menu.
 
 The notification trigger pairs a bell with a single-line unread status. Its contents remain left-aligned at their natural width, preserving the full label on narrow screens. The clock and network, sound, and battery buttons occupy the right side; the device-icon strip scrolls horizontally when space is limited. Enabling the battery percentage widens its button. The full date and simulated device values appear in hover titles and expanded panels.
 
@@ -79,6 +111,7 @@ The app strip scrolls horizontally when crowded, including within the shared mob
 | /            | Choose Search and open canvas search.             |
 | R            | Choose rectangular window selection.              |
 | L            | Choose freeform window lasso.                     |
+| D            | Choose canvas drawing.                            |
 | M            | Toggle the map.                                   |
 | A            | Arrange all windows near the current viewport.    |
 | G            | Open the dedicated gesture pad.                   |
@@ -114,21 +147,19 @@ Notifications open from the top-left bell or with N. The trigger shows an accent
 
 `NotificationInbox` owns three initial sample notifications, unread flags, dismissals, and an optional toast. Opening the inbox does not mark items read. Following an item’s action marks it read; **Mark all read** changes all unread flags, while a row’s dismiss button removes that item. Pointer input outside the inbox closes it. Escape closes the inbox and any active toast.
 
-The gesture pad’s cog asks `App` to close the launcher and open notifications. The `NotificationInbox` ref exposes `showGestureSettings()`, which moves a single **Customize gestures** item to the top, marks it unread, and clears any toast. Its `gestures` target reopens Draw in editing mode through `App`. Repeating the request does not create duplicate items.
-
 The separate prototype footer contains a quiet **Preview notification** button. It cycles through Notes, Files, and Browser examples, prepends a new unread item, closes the inbox, and shows a toast for six seconds. Toast actions use the same window navigation as inbox actions. Outside pointer input dismisses the toast, and opening another corner panel suppresses it so controls remain visible on narrow screens. Closing or timing out the toast leaves the item in the inbox. All notification content and relative timestamps are simulated, with no external event source.
 
 ## Gesture shortcuts
 
 The Draw view contains a dedicated pad so drawing does not compete with desktop panning or window selection. Its default view contains the pad and customization cog, without an app selector, saved-shortcut list, or manual launch action. A recognized stroke launches its assigned app and closes the launcher. Unrecognized marks remain available to retry. Settings has a separate **Gestures** category for viewing and managing assignments, initially populated with Browser, Terminal, and Notes examples.
 
-The pad’s cog opens the notification flow described above. Following **Customize gestures** opens the launcher editor, where **Open this app** uses the searchable app picker to select an assignment target. **Save shortcut** replaces that app’s mark while retaining other assignments and returns to preview mode. This launcher flow retains **Cancel**, which clears the unsaved stroke and returns without writing storage.
+The pad’s cog closes the launcher and opens Settings directly to Gestures. It reuses an existing Settings window when available, otherwise creating one. A fresh navigation request targets that window and returns its gesture editor to the assignment list.
 
 In Settings, **Add gesture** sits beside the Gestures heading and opens the same pad in editor mode. Choose an app, draw one continuous stroke, and save to add its assignment. The app picker shows icons and names and supports searching the catalog. Each saved row pairs a stroke preview with the app’s icon and name and offers editing and removal. Editing starts with the saved mark; **Retry** clears the pad for a replacement. Changing the target app moves the assignment and replaces any existing mark for that destination, keeping one mark per app. The editor’s back control discards the draft and returns to the list. Moving between the list and editor returns the content pane to the top. Removing all assignments leaves an empty list that remains empty after reload.
 
-`App` owns the saved assignments and passes them to each Settings window. Changes made in Settings or the launcher editor are immediately reflected in the other views. Draft strokes and the open editor belong to their current component and are not saved until **Save shortcut** is used.
+`App` owns the saved assignments and passes them to each Settings window. Changes made in Settings are immediately available in the launcher and other Settings windows. Draft strokes and the open editor belong to their current component and are not saved until **Save shortcut** is used.
 
-The app picker uses [React Aria’s ComboBox](https://react-aria.adobe.com/ComboBox) above the drawing pad. Its text input filters app names and descriptions in a popup list, with an icon and name for each choice and a check on the current selection. React Aria owns list navigation, selection, focus, and popup dismissal; app-specific CSS Modules supply the styling. Changing the selected app preserves the drawn mark. The picker is shared by Settings and the launcher editor.
+The app picker uses [React Aria’s ComboBox](https://react-aria.adobe.com/ComboBox) above the drawing pad. Its text input filters app names and descriptions in a popup list, with an icon and name for each choice and a check on the current selection. React Aria owns list navigation, selection, focus, and popup dismissal; app-specific CSS Modules supply the styling. Changing the selected app preserves the drawn mark. The Settings editor uses the shared picker and pad components.
 
 The picker popup portals into the themed desktop root, escaping window scrolling boundaries while retaining the selected accent, color mode, and app artwork. Its launcher containment marker keeps selecting a popup option from triggering the launcher's outside-pointer dismissal.
 
@@ -138,7 +169,7 @@ The normal pad uses the local $P geometric template matcher to compare a complet
 
 ## Settings
 
-The Settings app has sidebar navigation for **Appearance**, **Displays**, **Background**, **Gestures**, **AI**, and **System**, opening on Appearance. Its 160-pixel sidebar collapses behind a category toggle when the Settings content container is narrower than 560 pixels. Choosing a category closes the compact navigation and returns the content pane to its top. Navigation belongs to each Settings window; saved preferences and gesture assignments are shared across them. New Settings windows open up to 680 pixels wide, constrained by the viewport and ordinary minimum window size; existing saved window sizes remain intact.
+The Settings app has sidebar navigation for **Appearance**, **Displays**, **Background**, **Gestures**, **AI**, and **System**, ordinarily opening on Appearance. The gesture pad’s cog opens directly to Gestures. Its 160-pixel sidebar collapses behind a category toggle when the Settings content container is narrower than 560 pixels. Choosing a category closes the compact navigation and returns the content pane to its top. Navigation belongs to each Settings window; saved preferences and gesture assignments are shared across them. New Settings windows open up to 680 pixels wide, constrained by the viewport and ordinary minimum window size; existing saved window sizes remain intact.
 
 **Background** accepts a local photo and applies it beneath desktop items and windows. **Repeat with canvas** tiles the image at its native size on the scrolling world. **Stretch**, **Contain**, and **Cover** instead use a centered, viewport-sized background layer that stays still while the canvas moves. Stretch scales both axes independently, Contain preserves the whole image with the current theme’s field color around it, and Cover preserves proportions while cropping to fill the viewport. Cover is the initial fit; replacing a photo retains the existing fit. **Use default background** restores the accent-colored dot pattern without changing the other appearance preferences.
 
@@ -169,6 +200,7 @@ Each Settings window owns its mock layout and per-monitor values, retaining them
 | File                                                                                    | Responsibility                                                                                        |
 | --------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
 | [`src/desktop.ts`](../src/desktop.ts)                                                   | Workspace types, starter desktop items, storage validation, window resizing, and arrangement.         |
+| [`src/drawings.ts`](../src/drawings.ts)                                                 | Drawing types, stroke bounds, local coordinates, and saved-art validation.                            |
 | [`src/window-layout.ts`](../src/window-layout.ts)                                       | Responsive shell clearances and ordinary maximized window bounds.                                     |
 | [`src/canvas-search.ts`](../src/canvas-search.ts)                                       | Search matching and shared grid/parking layouts for canvas search and window switching.               |
 | [`src/preview-motion.ts`](../src/preview-motion.ts)                                     | Window measurements and continuous transitions from temporary previews to the restored viewport.      |
@@ -185,9 +217,11 @@ Each Settings window owns its mock layout and per-monitor values, retaining them
 | [`src/components/SystemBar.tsx`](../src/components/SystemBar.tsx)                       | Compact 24-hour clock and status row, popovers, and simulated controls.                               |
 | [`src/components/NotificationInbox.tsx`](../src/components/NotificationInbox.tsx)       | Notification trigger, inbox, unread/dismissal state, and sample toasts.                               |
 | [`src/components/Minimap.tsx`](../src/components/Minimap.tsx)                           | Map rendering and pointer capture for dragging the visible canvas area.                               |
-| [`src/components/CanvasTools.tsx`](../src/components/CanvasTools.tsx)                   | Background and window-selection dropdowns, plus map and arrangement actions.                          |
+| [`src/components/CanvasTools.tsx`](../src/components/CanvasTools.tsx)                   | Background, window-selection, and drawing dropdowns, plus map and arrangement actions.                |
 | [`src/components/CanvasSearch.tsx`](../src/components/CanvasSearch.tsx)                 | Positioned search field, query input, result navigation, and close/empty states.                      |
 | [`src/components/GatherWindows.tsx`](../src/components/GatherWindows.tsx)               | Floating selection action, viewport-aware placement, opt-in gating, and cancellable gather shimmer.   |
+| [`src/components/DrawingLayer.tsx`](../src/components/DrawingLayer.tsx)                 | Saved and draft stroke rendering, selection outlines, and ink hit targets.                            |
+| [`src/components/DrawingActions.tsx`](../src/components/DrawingActions.tsx)             | Side controls for changing a drawing’s layer, deleting, and finishing.                                |
 | [`src/components/DesktopItems.tsx`](../src/components/DesktopItems.tsx)                 | Desktop-item layer, item artwork, and selection/opening input.                                        |
 | [`src/components/WindowContent.tsx`](../src/components/WindowContent.tsx)               | Workspace overview, editable scratchpad, appearance settings, and simulated app interiors.            |
 | [`src/components/Settings.tsx`](../src/components/Settings.tsx)                         | Responsive category navigation, shared preferences, and simulated display settings.                   |
@@ -199,7 +233,7 @@ Each Settings window owns its mock layout and per-monitor values, retaining them
 | [`src/components/LauncherDock.tsx`](../src/components/LauncherDock.tsx)                 | Favorites, running-app groups, window instance picker, and the Apps trigger.                          |
 | [`src/components/WindowSwitcher.tsx`](../src/components/WindowSwitcher.tsx)             | Selected window's caption and initial focus for the canvas window-switching view.                     |
 | [`src/components/AppLauncher.tsx`](../src/components/AppLauncher.tsx)                   | App gallery/list, filtering, keyboard navigation, and launcher views.                                 |
-| [`src/components/GesturePad.tsx`](../src/components/GesturePad.tsx)                     | Shared pointer drawing and assignment editor, with placeholder launching only in launcher mode.       |
+| [`src/components/GesturePad.tsx`](../src/components/GesturePad.tsx)                     | Shared pointer pad and assignment editor, with local gesture matching in launcher mode.               |
 | [`src/components/AppPicker.tsx`](../src/components/AppPicker.tsx)                       | React Aria app combobox with catalog choices, shared icons, and custom styling.                       |
 | [`src/components/launcher-apps.ts`](../src/components/launcher-apps.ts)                 | Shared app catalog, icons, and descriptions.                                                          |
 | [`src/App.module.css`](../src/App.module.css)                                           | Canvas, windows, and navigation styling.                                                              |
@@ -211,9 +245,9 @@ Each Settings window owns its mock layout and per-monitor values, retaining them
 
 Photo backgrounds are stored in IndexedDB database `hearthspace-background-v1`, in the `background` store’s `photo` record. The record holds the original image Blob, filename, and allowed fit value, independently of the workspace and other appearance settings. The image is decoded before use and is not sent to a server. Resetting deletes this record. If saving or deleting fails, the current session still shows the selected background and Settings explains that the change could not be saved. An unavailable or unreadable saved photo falls back to the default dots.
 
-The workspace is stored in `localStorage` under `hearthspace-playground-v1`. It contains world dimensions, home coordinates, desktop items and their positions, window geometry and stacking, optional dock list ordering, app IDs for launched preview windows, and the scratchpad note. Loading validates the stored shape and constrains window and desktop-item bounds. Desktop items require unique IDs, a supported kind, and a known preview app. Workspaces without an item collection receive the starter items. Every loaded workspace gains any missing catalog app shortcuts; a saved empty collection therefore receives app shortcuts, while files and folders remain absent. Existing app-shortcut positions are preserved and duplicate app shortcuts are removed. Maximized windows return to their saved restore bounds on reload. The visual refresh renames the original demo titles and converts its generic starter window into a Files preview. Only the exact original sample note is replaced; edited notes and saved geometry remain intact.
+The workspace is stored in `localStorage` under `hearthspace-playground-v1`. It contains world dimensions, home coordinates, desktop items and their positions, drawings with their bounds, layers, and local strokes, window geometry and stacking, optional dock list ordering, app IDs for launched preview windows, and the scratchpad note. Loading validates the stored shape, constrains window and desktop-item bounds, and validates drawings. Missing drawing collections become empty; invalid entries are discarded without replacing the rest of the workspace. Desktop items require unique IDs, a supported kind, and a known preview app. Workspaces without an item collection receive the starter items. Every loaded workspace gains any missing catalog app shortcuts; a saved empty collection therefore receives app shortcuts, while files and folders remain absent. Existing app-shortcut positions are preserved and duplicate app shortcuts are removed. Maximized windows return to their saved restore bounds on reload. The visual refresh renames the original demo titles and converts its generic starter window into a Files preview. Only the exact original sample note is replaced; edited notes and saved geometry remain intact.
 
-Gesture shortcuts are stored separately under `hearthspace-gesture-shortcuts-v1`, preserving previously saved assignments. Loading accepts known catalog app IDs, unique assignments, and finite points within the pad bounds. Missing or invalid storage uses the default examples; a saved empty array stays empty. Invalid entries are filtered when valid assignments remain. `App` retains changes for the current session if storage fails, including across closed and reopened Settings or launcher editors; those changes will not survive a reload.
+Gesture shortcuts are stored separately under `hearthspace-gesture-shortcuts-v1`, preserving previously saved assignments. Loading accepts known catalog app IDs, unique assignments, and finite points within the pad bounds. Missing or invalid storage uses the default examples; a saved empty array stays empty. Invalid entries are filtered when valid assignments remain. `App` retains changes for the current session if storage fails, including across closed and reopened Settings windows; those changes will not survive a reload.
 
 The color mode is stored separately under `hearthspace-color-mode-v1`. Only `light` and `dark` are accepted. Missing, invalid, or unavailable storage uses the operating system's `prefers-color-scheme` preference on load; an explicit choice takes precedence on later loads. Changes remain usable in the current session if saving fails. The mode is independent of the accent, workspace, and photo background.
 
@@ -221,7 +255,7 @@ The accent is stored separately under `hearthspace-accent-v1` as an allowed them
 
 App appearance is fixed to Realistic and has no saved preference. Values left under the legacy `hearthspace-app-presentation-v1` key are ignored. Existing workspace geometry, content, and other preferences remain intact.
 
-The selected canvas tool is stored under `hearthspace-canvas-tool-v1`. Loading accepts `cursor`, `pan`, `search`, or `select`; the earlier `lasso` value migrates to `select`. Missing, invalid, or unavailable storage defaults to the cursor. Explicit tool changes remain active through Escape, arrangement, app launches, and window navigation. Temporary panning does not change the saved tool. Remembering Search restores the tool on reload, with its field closed.
+The selected canvas tool is stored under `hearthspace-canvas-tool-v1`. Loading accepts `cursor`, `pan`, `search`, `select`, or `draw`; the earlier `lasso` value migrates to `select`. Missing, invalid, or unavailable storage defaults to the cursor. Explicit tool changes remain active through Escape, arrangement, app launches, and window navigation. Temporary panning does not change the saved tool. Remembering Search restores the tool on reload, with its field closed.
 
 The window-selection shape is stored separately under `hearthspace-window-selection-v1` as `rectangle` or `freeform`. Missing, invalid, or unavailable storage defaults to rectangle. Changing the shape activates window selection; choosing another tool leaves the shape remembered for later use and reloads.
 
@@ -229,4 +263,4 @@ Battery-percentage visibility is stored under `hearthspace-battery-percentage-v1
 
 AI opt-in is stored under `hearthspace-ai-enabled-v1`. Only the literal string `true` enables it; missing, invalid, or unavailable storage defaults to off. Confirming opt-out or canceling an active download saves `false` immediately. Opting in saves `true` only after the simulated download completes, so an interrupted download does not enable the feature on reload. Download progress is temporary and no model file is stored. The shared session remains usable when preference storage fails.
 
-Viewport travel, selection, open panels, temporary window-switcher layouts, search text and result arrangements, list/grid choice, notifications, and simulated device-control values remain temporary. Search and switching never write their presentation coordinates to workspace storage. Notification read/dismissal state and preview items reset to the initial samples on reload. If storage is unavailable, the current desktop session remains usable without persistence.
+Viewport travel, selection, unfinished drawing strokes, open panels, temporary window-switcher layouts, search text and result arrangements, list/grid choice, notifications, and simulated device-control values remain temporary. Search and switching never write their presentation coordinates to workspace storage. Notification read/dismissal state and preview items reset to the initial samples on reload. If storage is unavailable, the current desktop session remains usable without persistence.

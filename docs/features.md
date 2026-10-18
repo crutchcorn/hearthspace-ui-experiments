@@ -3,7 +3,7 @@
 Move windows apart, travel across the canvas, then bring one back with the dock
 or keyboard switcher. Windows have a place, even outside the current view.
 
-Window movement, selection, navigation, settings, and local saving work in the
+Window movement, selection, drawing, navigation, settings, and local saving work in the
 browser; app contents and device services are previews. See the
 [README](../README.md) to get started, the
 [visual language](visual-language.md) for design decisions, and the
@@ -13,12 +13,12 @@ browser; app contents and device services are previews. See the
 
 Each corner has a job:
 
-| Corner       | What lives there                                                                    |
-| ------------ | ----------------------------------------------------------------------------------- |
-| Top left     | Notifications and a short unread status.                                            |
-| Top right    | Local clock, calendar, Wi-Fi, sound, and battery.                                   |
-| Bottom left  | Desktop selection, panning, canvas search, window selection, Overview, and Arrange. |
-| Bottom right | Favorite apps, running apps, window instances, and the launcher.                    |
+| Corner       | What lives there                                                                             |
+| ------------ | -------------------------------------------------------------------------------------------- |
+| Top left     | Notifications and a short unread status.                                                     |
+| Top right    | Local clock, calendar, Wi-Fi, sound, and battery.                                            |
+| Bottom left  | Desktop selection, panning, canvas search, window selection, drawing, Overview, and Arrange. |
+| Bottom right | Favorite apps, running apps, window instances, and the launcher.                             |
 
 On narrow screens, the corners join into a top bar and bottom bar. Apps and
 tray icons scroll horizontally when needed, while the notification label stays
@@ -48,6 +48,20 @@ add backgrounds; the notification status tells you when something needs attentio
 - **Arrange everything.** Arrange places every open window in a grid near the
   current viewport, preserving ordinary window sizes. The grid can extend
   offscreen and expand the world.
+
+## Draw on the canvas
+
+Choose the pencil or press **D** to draw. Press the active pencil again to
+choose **Draw below windows** or **Draw above windows**. On mobile, both choices
+appear directly in the tool menu.
+
+Each stroke joins the current drawing until you press its floating check to
+finish. Use the cursor (**V**) to select the ink and drag the whole drawing.
+The compact controls beside it switch its layer or delete it. Drawings move
+with the canvas and keep their strokes, position, and layer after reload.
+
+Search, window switching, and focused view temporarily hide drawings, leaving
+them in place for your return. Arrange moves windows without moving your art.
 
 ## Bring work to you with search
 
@@ -109,8 +123,7 @@ its assigned app; unknown or ambiguous marks show **No match found**. Matching
 uses local geometry, without a model or a network request.
 In **Settings → Gestures**, you can add, edit, and remove saved
 marks using a searchable app picker. The editor is a separate screen with a back
-button. The pad's cog offers another customization route through notifications.
-Saved marks don't yet drive gesture recognition.
+button. The pad's cog opens Settings directly to Gestures.
 
 ## Change the environment
 
@@ -155,10 +168,10 @@ Prototype boundaries:
   local same-app rule to move windows after its brief delay. Desktop widgets
   and editing favorites aren't implemented.
 
-The browser saves window layouts and stacking, desktop-item positions, window
-list order, the scratchpad, tool choices, gesture assignments, appearance,
+The browser saves window layouts and stacking, desktop-item positions, drawings,
+window list order, the scratchpad, tool choices, gesture assignments, appearance,
 background, battery-label preference, and completed AI opt-in. Panels,
-selections, temporary search arrangements, viewport travel, notifications, and
-mock display settings reset.
+selections, unfinished pointer strokes, temporary search arrangements, viewport
+travel, notifications, and mock display settings reset.
 Storage stays local to that browser; if it's unavailable, the current session
 remains usable without saving.
