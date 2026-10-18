@@ -185,6 +185,31 @@ test('edge attachment maps each position along the usable viewport span', () => 
   )
 })
 
+test('padded controls align their corner and edge spacing on desktop and mobile', () => {
+  for (const { viewport, inset } of [
+    { viewport: { width: 1000, height: 800 }, inset: 24 },
+    { viewport: { width: 390, height: 844 }, inset: 12 },
+  ]) {
+    for (const edge of ['top', 'right', 'bottom', 'left'] as const) {
+      const bounds = getFrameBounds(
+        { surface: 'frame', edge, position: 0 },
+        54,
+        54,
+        viewport,
+        'padded',
+      )
+      assert.equal(
+        bounds.x,
+        edge === 'right' ? viewport.width - 54 - inset : inset,
+      )
+      assert.equal(
+        bounds.y,
+        edge === 'bottom' ? viewport.height - 54 - inset : inset,
+      )
+    }
+  }
+})
+
 test('attachments fit inside a smaller viewport without losing their edge', () => {
   assert.deepEqual(
     getFrameBounds(

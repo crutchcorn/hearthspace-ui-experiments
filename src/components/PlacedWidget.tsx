@@ -93,7 +93,7 @@ export default function PlacedWidget({
   }, [edge, merged])
 
   const bounds = onFrame
-    ? getFrameBounds(placement, size.width, size.height, view)
+    ? getFrameBounds(placement, size.width, size.height, view, 'padded')
     : {
         x:
           (placement.surface !== 'hidden' ? placement.x : undefined) ??

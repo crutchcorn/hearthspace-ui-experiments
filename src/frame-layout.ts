@@ -208,6 +208,7 @@ export function getFrameBounds(
   width: number,
   height: number,
   viewport: { width: number; height: number },
+  edgeSpacing: 'flush' | 'padded' = 'flush',
 ): Bounds {
   const margin = viewport.width <= 760 ? 12 : 24
   const insetX = Math.min(margin, viewport.width / 2)
@@ -225,12 +226,18 @@ export function getFrameBounds(
     x: horizontal
       ? insetX + availableX * position
       : placement.edge === 'right'
-        ? viewport.width - fittedWidth
-        : 0,
+        ? viewport.width - fittedWidth - (edgeSpacing === 'padded' ? insetX : 0)
+        : edgeSpacing === 'padded'
+          ? insetX
+          : 0,
     y: horizontal
       ? placement.edge === 'bottom'
-        ? viewport.height - fittedHeight
-        : 0
+        ? viewport.height -
+          fittedHeight -
+          (edgeSpacing === 'padded' ? insetY : 0)
+        : edgeSpacing === 'padded'
+          ? insetY
+          : 0
       : insetY + availableY * position,
     width: fittedWidth,
     height: fittedHeight,

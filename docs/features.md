@@ -46,7 +46,8 @@ attachments stay horizontal. While dragging, entering a new edge area animates
 the surface, outline, and contents into that orientation together. The toolbar
 keeps its orientation while crossing the interior until it reaches another
 edge area, then snaps into place on release. The animation works in either
-direction. The default mobile bars also sit flush with the screen edges.
+direction. Icons and toolbars use the same screen inset along every edge,
+including the default mobile bars. Windows and drawings stay flush with the edge.
 
 The default Notifications, System tray, Canvas tools, and Apps groups are
 movable shell widgets. They can also live on the canvas or its background.

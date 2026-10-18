@@ -1057,20 +1057,20 @@
     position: fixed;
     z-index: 1100;
     display: flex;
-    left: 0;
-    right: 0;
+    left: 12px;
+    right: 12px;
     align-items: center;
     gap: 4px;
     pointer-events: auto;
   }
 
   .topbar[data-merged] {
-    top: 0;
+    top: 12px;
     bottom: auto;
   }
 
   .docks[data-merged] {
     top: auto;
-    bottom: 0;
+    bottom: 12px;
   }
 }

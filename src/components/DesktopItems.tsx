@@ -45,7 +45,9 @@ export default function DesktopItems({
           : { surface: 'background' as const }
         const framed =
           !placements && layout.surface === 'frame' && view && frameHost
-        const bounds = framed ? getFrameBounds(layout, 54, 54, view) : item
+        const bounds = framed
+          ? getFrameBounds(layout, 54, 54, view, 'padded')
+          : item
         const element = (
           <button
             key={item.id}

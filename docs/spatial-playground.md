@@ -101,7 +101,9 @@ including default corners and search metadata. `PlacedWidget` measures the
 control's contents, positions it relative to the viewport or world, and keeps
 its popovers within the available screen space. On mobile, each pair merges
 into its shared bar only while both widgets retain their default placements.
-Frame bounds align attachments flush with the screen boundary. Side toolbars
+Frame bounds inset widgets and desktop items by 24 pixels on desktop and
+12 pixels on mobile, matching corner and side spacing. Windows and drawings
+remain flush with the screen boundary. Side toolbars
 stack controls vertically, with upright icons; top and bottom toolbars remain
 horizontal. During a drag, entering a new edge area changes the orientation;
 crossing the interior retains the last orientation until another edge area is
@@ -264,7 +266,7 @@ Running Arrange leaves focused view, closes open panels, and clears selection wh
 
 At desktop widths, canvas tools start at the bottom left, with dropdowns for background tools and window selection, direct Draw and Change layout buttons, then a divider and Map and Arrange. The first dropdown’s top-right indicator exposes **Select desktop items** (V), **Pan canvas** (H), and **Search canvas** (/); its icon reflects the remembered background tool. The second dropdown chooses **Rectangle select** (R) or **Freeform lasso** (L), with a square or lasso icon and its own top-right indicator. The pencil (D) selects drawing; Change layout handles placement across object types. Pressing an inactive dropdown tool activates its remembered choice without opening the menu; pressing it again opens its choices. Up or Down on a focused tool opens its menu directly. Desktop-item selection always uses a rectangle, independent of the chosen window-selection shape. Canvas-tool hints appear on hover or focus and dismiss after 2.5 seconds, on pointer exit or blur, or when the control is activated. Arrange runs immediately; its hint identifies the action and A shortcut. Apps creates preview windows, and the Home key returns to the starting viewport.
 
-Default horizontal corner surfaces are 54 pixels high and sit flush with the viewport edges. At 760 pixels or less, unchanged default attachments form two shared 54-pixel bars at the top and bottom boundaries. Customized attachments keep their chosen edge and position. The bottom bar contains one canvas-tool selector, the horizontally scrollable app strip, and the Apps launcher. The selector opens a single flat menu containing desktop-item selection, pan, search, rectangle select, freeform lasso, Draw, Change layout, Overview, and Arrange windows, without submenus. Choosing a tool or action closes the menu.
+Default horizontal corner surfaces are 54 pixels high and sit 24 pixels inside the viewport edges. At 760 pixels or less, unchanged default attachments form two shared 54-pixel bars with a 12-pixel screen inset. Customized attachments keep their chosen edge and position with the same inset. The bottom bar contains one canvas-tool selector, the horizontally scrollable app strip, and the Apps launcher. The selector opens a single flat menu containing desktop-item selection, pan, search, rectangle select, freeform lasso, Draw, Change layout, Overview, and Arrange windows, without submenus. Choosing a tool or action closes the menu.
 
 The notification trigger pairs a bell with a single-line unread status. Its contents remain left-aligned at their natural width, preserving the full label on narrow screens. The clock and network, sound, and battery buttons occupy the right side; the device-icon strip scrolls horizontally when space is limited. Enabling the battery percentage widens its button. The full date and simulated device values appear in hover titles and expanded panels.
 

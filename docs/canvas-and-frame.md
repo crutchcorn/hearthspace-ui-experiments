@@ -21,8 +21,9 @@ drawings, and widgets can occupy it together. The current widgets are the four
 built-in control groups; future widgets can follow the same placement rules. Panning changes which part
 you see without changing where those objects belong.
 
-The frame follows the viewport. An attached item sits flush with the chosen
-screen edge while the canvas moves. A system tray is an obvious candidate, but the same placement
+The frame follows the viewport. An attached item stays along the chosen
+screen edge while the canvas moves. Icons and toolbars share the corner controls'
+screen inset; windows and drawings sit flush with the edge. A system tray is an obvious candidate, but the same placement
 should work for a file you keep referring to, a drawing, a widget, or a window.
 The object keeps its identity and purpose when its placement changes.
 
