@@ -151,9 +151,11 @@ Drawing, dragging, and resizing follow input immediately. Ordinary navigation pa
 
 Overlap should leave a clue that other work is there. Allow complete coverage
 during a drag, then slide fully hidden windows, desktop icons, and background
-drawings toward the nearest opening when the drag ends. A small exposed piece
-is enough; leave partly visible work where it is. Background objects keep their
-place underneath windows and slide home once their original space is clear.
+drawings toward the nearest opening when the drag ends. Opening a new window
+does the same, keeping that window where it launched while covered work moves
+into view. A small exposed piece is enough; leave partly visible work where it
+is. Background objects keep their place underneath windows and slide home once
+their original space is clear.
 This temporary movement keeps a shortcut or piece of art from losing the place
 the user chose for it. Moving or editing it intentionally establishes a new
 home, while windows keep their adjusted positions. The movement itself explains

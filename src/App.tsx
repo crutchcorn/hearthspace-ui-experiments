@@ -1284,7 +1284,11 @@ function App() {
     )
   }
 
-  function addWindow(app?: LauncherApp, center?: { x: number; y: number }) {
+  function addWindow(
+    app?: LauncherApp,
+    center?: { x: number; y: number },
+    consumedDrawingId?: string,
+  ) {
     leaveFocusView()
     const canvas = viewport.current!
     const id = crypto.randomUUID()
@@ -1297,40 +1301,55 @@ function App() {
           )
         : 360
     const height = app?.id === 'settings' ? 500 : 260
-    setWorkspace((current) => ({
-      ...current,
-      windows: [
-        ...current.windows,
-        {
-          id,
-          title:
-            app?.name ??
-            `Untitled window ${current.windows.filter((item) => item.kind === 'empty').length + 1}`,
-          kind: 'empty',
-          appId: app?.id,
-          x: clamp(
-            center
-              ? center.x - width / 2
-              : canvas.scrollLeft +
-                  Math.max(20, (view.width - width) / 2) +
-                  offset,
-            0,
-            current.width - width,
-          ),
-          y: clamp(
-            center
-              ? center.y - height / 2
-              : canvas.scrollTop +
-                  Math.max(80, (view.height - height) / 2) +
-                  offset,
-            0,
-            current.height - height,
-          ),
-          width,
-          height,
-        },
-      ],
-    }))
+    preparePeekMotion({ excludedWindowId: focusView?.id })
+    setWorkspace((current) => {
+      const fadingDrawings = new Set(consumingDrawingIds)
+      if (consumedDrawingId) fadingDrawings.add(consumedDrawingId)
+      const settled = settleCoveredItems({
+        ...current,
+        drawings: current.drawings.filter(
+          (drawing) => !fadingDrawings.has(drawing.id),
+        ),
+        windows: [
+          ...current.windows,
+          {
+            id,
+            title:
+              app?.name ??
+              `Untitled window ${current.windows.filter((item) => item.kind === 'empty').length + 1}`,
+            kind: 'empty',
+            appId: app?.id,
+            x: clamp(
+              center
+                ? center.x - width / 2
+                : canvas.scrollLeft +
+                    Math.max(20, (view.width - width) / 2) +
+                    offset,
+              0,
+              current.width - width,
+            ),
+            y: clamp(
+              center
+                ? center.y - height / 2
+                : canvas.scrollTop +
+                    Math.max(80, (view.height - height) / 2) +
+                    offset,
+              0,
+              current.height - height,
+            ),
+            width,
+            height,
+          },
+        ],
+      })
+      if (!fadingDrawings.size) return settled
+      // A played gesture fades at its launch point instead of peeking away.
+      const drawings = new Map(settled.drawings.map((item) => [item.id, item]))
+      return {
+        ...settled,
+        drawings: current.drawings.map((item) => drawings.get(item.id) ?? item),
+      }
+    })
     setActiveId(id)
     return id
   }
@@ -1342,10 +1361,14 @@ function App() {
     const app = APP_CATALOG.find((item) => item.id === match?.appId)
     if (!app) return false
     const drawingId = selectedDrawing.id
-    const windowId = addWindow(app, {
-      x: selectedDrawing.x + selectedDrawing.width / 2,
-      y: selectedDrawing.y + selectedDrawing.height / 2,
-    })
+    const windowId = addWindow(
+      app,
+      {
+        x: selectedDrawing.x + selectedDrawing.width / 2,
+        y: selectedDrawing.y + selectedDrawing.height / 2,
+      },
+      drawingId,
+    )
     setDrawingLaunchId(windowId)
     setConsumingDrawingIds((current) => [...current, drawingId])
     setSelectedDrawingId(null)

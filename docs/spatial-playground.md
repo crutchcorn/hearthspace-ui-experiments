@@ -13,9 +13,11 @@ The minimap translates pointer positions into world coordinates. Grabbing its vi
 Dragging a window’s title bar combines pointer movement with changes in scroll position. This keeps a grabbed window under the pointer while edge scrolling carries it farther across the world. Shell-owned windows join a glass title bar and opaque content in one frame, with a 44-pixel header increasing to 50 pixels for coarse pointers. External app previews use their own Realistic frame styles while retaining the same window interactions. The body scrolls in the remaining space. Eight resize handles constrain windows to the world bounds and a minimum size of 280 × 200 pixels.
 
 Windows may cover one another completely during a drag or resize. Releasing a
-moved window or background object checks for fully covered work, including
-coverage shared by several higher windows. Hidden windows move to the nearest
-available opening with a 24-pixel patch exposed. Desktop icons follow the same
+moved window or background object, or opening a new window, checks for fully
+covered work, including coverage shared by several higher windows. A newly
+opened window stays at its launch position, above the existing windows. Hidden
+windows move to the nearest available opening with a 24-pixel patch exposed.
+Desktop icons follow the same
 rule below every window, exposing 32 pixels of their artwork. Drawings below
 windows also peek out when their ink is fully covered; empty space inside a
 drawing's bounds doesn't count as visible art. Drawings above windows keep their
@@ -43,7 +45,8 @@ Both the peek position and its origin persist with the workspace, so a reload
 doesn't forget the intended placement. A short slide reveals where hidden work
 went and brings background objects home without slowing direct dragging;
 reduced motion makes the change immediate. Canceled gestures, simple clicks,
-search, and keyboard switching do not rearrange the saved layout this way.
+search previews, and navigation to existing windows do not rearrange the saved
+layout this way. Launching a new app from search does reveal covered work.
 Ordinary header double-click maximization and restore also reveal covered work.
 Entering or leaving focused view with the maximize control does not.
 

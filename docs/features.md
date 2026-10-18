@@ -37,8 +37,9 @@ add backgrounds; the notification status tells you when something needs attentio
 - **Place windows.** Drag their headers, resize, and close them. Dragging toward
   the viewport edge carries a window farther across the canvas.
 - **Leave covered work in sight.** Windows can overlap completely while you
-  drag. On release, fully hidden windows, desktop icons, and drawings below
-  windows slide toward the nearest opening until a small part peeks out.
+  drag. On release or when a new window opens, fully hidden windows, desktop
+  icons, and drawings below windows slide toward the nearest opening until a
+  small part peeks out. A new window stays where it opened.
   Icons and background drawings slide home once nothing overlaps their original
   space. Moving or editing one yourself gives it a new home; windows keep their
   adjusted positions. Partly visible items stay put. Header double-click
