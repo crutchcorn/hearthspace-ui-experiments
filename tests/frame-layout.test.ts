@@ -3,7 +3,9 @@ import { after, before, test } from 'node:test'
 import {
   FRAME_LAYOUT_STORAGE_KEY,
   getFrameBounds,
+  getFrameDropTarget,
   getPlacement,
+  getPinnedWindowOffset,
   loadFrameLayout,
   saveFrameLayout,
   setAllowHideTools,
@@ -198,5 +200,124 @@ test('attachments fit inside a smaller viewport without losing their edge', () =
       height: 200,
     }),
     { x: 12, y: 12, width: 366, height: 176 },
+  )
+})
+
+test('collapsed pinned windows expose a 42px strip on their attached edge', () => {
+  const viewport = { width: 1000, height: 800 }
+  const bounds = { x: 24, y: 24, width: 400, height: 300 }
+  const left = getPinnedWindowOffset(bounds, 'left', viewport, false)
+  assert.deepEqual(left, { x: -382, y: 0 })
+  assert.equal(bounds.x + left.x + bounds.width, 42)
+
+  const right = getPinnedWindowOffset(bounds, 'right', viewport, false)
+  assert.deepEqual(right, { x: 934, y: 0 })
+  assert.equal(viewport.width - (bounds.x + right.x), 42)
+
+  const top = getPinnedWindowOffset(bounds, 'top', viewport, false)
+  assert.deepEqual(top, { x: 0, y: -282 })
+  assert.equal(bounds.y + top.y + bounds.height, 42)
+
+  const bottom = getPinnedWindowOffset(bounds, 'bottom', viewport, false)
+  assert.deepEqual(bottom, { x: 0, y: 734 })
+  assert.equal(viewport.height - (bounds.y + bottom.y), 42)
+})
+
+test('opening a pinned window restores its fitted frame bounds on every edge', () => {
+  const viewport = { width: 1000, height: 800 }
+  for (const edge of ['top', 'right', 'bottom', 'left'] as const) {
+    const bounds = getFrameBounds(
+      { surface: 'frame', edge, position: 0.5 },
+      400,
+      300,
+      viewport,
+    )
+    assert.deepEqual(getPinnedWindowOffset(bounds, edge, viewport, true), {
+      x: 0,
+      y: 0,
+    })
+  }
+})
+
+test('hovering can expose more of a pinned window without opening it fully', () => {
+  const bounds = { x: 24, y: 24, width: 400, height: 300 }
+  const viewport = { width: 1000, height: 800 }
+  const preview = getPinnedWindowOffset(bounds, 'left', viewport, false, 100)
+  assert.equal(bounds.x + preview.x + bounds.width, 100)
+  assert.ok(bounds.x + preview.x < 0)
+  assert.deepEqual(getPinnedWindowOffset(bounds, 'left', viewport, true, 100), {
+    x: 0,
+    y: 0,
+  })
+})
+
+test('peek distance never exposes more than the attached window dimension', () => {
+  const bounds = { x: 24, y: 24, width: 80, height: 60 }
+  const viewport = { width: 1000, height: 800 }
+  const right = getPinnedWindowOffset(bounds, 'right', viewport, false, 100)
+  assert.equal(viewport.width - bounds.x - right.x, bounds.width)
+  const bottom = getPinnedWindowOffset(bounds, 'bottom', viewport, false, 100)
+  assert.equal(viewport.height - bounds.y - bottom.y, bounds.height)
+})
+
+test('the dragged object can reach the frame while the pointer stays far from it', () => {
+  assert.deepEqual(
+    getFrameDropTarget(
+      { x: 310, y: 450, width: 500, height: 300 },
+      { width: 1000, height: 800 },
+    ),
+    {
+      surface: 'frame',
+      edge: 'bottom',
+      position: (310 - 24) / (1000 - 48 - 500),
+    },
+  )
+  assert.equal(
+    getFrameDropTarget(
+      { x: 200, y: 200, width: 200, height: 200 },
+      { width: 1000, height: 800 },
+    ),
+    null,
+  )
+})
+
+test('frame drops prefer the closest object edge and snap near the corners', () => {
+  assert.deepEqual(
+    getFrameDropTarget(
+      { x: 100, y: 35, width: 200, height: 150 },
+      { width: 1000, height: 800 },
+    ),
+    { surface: 'frame', edge: 'top', position: 0 },
+  )
+  assert.deepEqual(
+    getFrameDropTarget(
+      { x: 730, y: 35, width: 200, height: 150 },
+      { width: 1000, height: 800 },
+    ),
+    { surface: 'frame', edge: 'top', position: 1 },
+  )
+  assert.deepEqual(
+    getFrameDropTarget(
+      { x: -20, y: 120, width: 200, height: 150 },
+      { width: 1000, height: 800 },
+    ),
+    { surface: 'frame', edge: 'left', position: (120 - 24) / (800 - 48 - 150) },
+  )
+  assert.deepEqual(
+    getFrameDropTarget(
+      { x: 790, y: 560, width: 200, height: 150 },
+      { width: 1000, height: 800 },
+    ),
+    { surface: 'frame', edge: 'right', position: 1 },
+  )
+})
+
+test('full-width mobile attachments produce a finite centered drop position', () => {
+  assert.deepEqual(
+    getFrameDropTarget(
+      { x: 12, y: -10, width: 366, height: 54 },
+      { width: 390, height: 844 },
+    ),
+    { surface: 'frame', edge: 'top', position: 0.5 },
   )
 })

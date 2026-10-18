@@ -3,13 +3,13 @@ import {
   type Bounds,
   type DesktopWindow,
   type Workspace,
-} from './desktop'
-import { APP_CATALOG } from './components/launcher-apps'
-import { getWindowClearance } from './window-layout'
+} from './desktop.ts'
+import { APP_CATALOG } from './components/launcher-apps.ts'
+import { getWindowClearance } from './window-layout.ts'
 
 export interface CanvasSearchResult {
   id: string
-  kind: 'item' | 'window'
+  kind: 'item' | 'window' | 'drawing' | 'widget'
 }
 
 export interface SearchPlacement {
@@ -125,6 +125,14 @@ export function getCanvasSearchLayout(
   anchor: { x: number; y: number },
   query: string,
   handwritingOpen = false,
+  extra?: {
+    widgets: readonly {
+      id: string
+      title: string
+      description: string
+      keywords: readonly string[]
+    }[]
+  },
 ) {
   const words = query.trim().toLocaleLowerCase().split(/\s+/).filter(Boolean)
   const matches = (text: string) =>
@@ -140,9 +148,20 @@ export function getCanvasSearchLayout(
         )
       })
     : []
+  const drawings = workspace.drawings.filter((_drawing, index) =>
+    matches(`Drawing ${index + 1} ink sketch`),
+  )
+  const allWidgets = extra?.widgets ?? []
+  const widgets = allWidgets.filter((widget) =>
+    matches(
+      `${widget.title} ${widget.description} ${widget.keywords.join(' ')} widget`,
+    ),
+  )
   const results: CanvasSearchResult[] = [
     ...items.map(({ id }) => ({ id, kind: 'item' as const })),
     ...windows.map(({ id }) => ({ id, kind: 'window' as const })),
+    ...drawings.map(({ id }) => ({ id, kind: 'drawing' as const })),
+    ...widgets.map(({ id }) => ({ id, kind: 'widget' as const })),
   ]
   const clearance = getWindowClearance(view.width)
   const fieldWidth = Math.min(420, view.width - clearance.side * 2)
@@ -199,7 +218,7 @@ export function getCanvasSearchLayout(
     results.length,
     availableWidth,
     availableHeight,
-    windows.length > 0,
+    windows.length > 0 || drawings.length > 0 || widgets.length > 0,
   )
   const resultTop = resultsAbove
     ? position.y - 24 - grid.height - handwritingHeight
@@ -211,6 +230,18 @@ export function getCanvasSearchLayout(
   const itemIndexes = new Map(items.map((item, index) => [item.id, index]))
   const windowIndexes = new Map(
     windows.map((item, index) => [item.id, items.length + index]),
+  )
+  const drawingIndexes = new Map(
+    drawings.map((item, index) => [
+      item.id,
+      items.length + windows.length + index,
+    ]),
+  )
+  const widgetIndexes = new Map(
+    widgets.map((item, index) => [
+      item.id,
+      items.length + windows.length + drawings.length + index,
+    ]),
   )
   return {
     position,
@@ -236,6 +267,29 @@ export function getCanvasSearchLayout(
           index === undefined
             ? parkOutsideView(item, view)
             : placeInGrid(item, index, grid, origin),
+        ]
+      }),
+    ),
+    drawings: new Map(
+      workspace.drawings.map((drawing) => {
+        const index = drawingIndexes.get(drawing.id)
+        return [
+          drawing.id,
+          index === undefined
+            ? parkOutsideView(drawing, view)
+            : placeInGrid(drawing, index, grid, origin),
+        ]
+      }),
+    ),
+    widgets: new Map(
+      allWidgets.map((widget) => {
+        const index = widgetIndexes.get(widget.id)
+        const bounds = { x: view.x, y: view.y, width: 240, height: 72 }
+        return [
+          widget.id,
+          index === undefined
+            ? parkOutsideView(bounds, view)
+            : placeInGrid(bounds, index, grid, origin),
         ]
       }),
     ),
@@ -266,6 +320,8 @@ export function getWindowSwitcherLayout(
   }
   const indexes = new Map(orderedWindows.map((item, index) => [item.id, index]))
   return {
+    drawings: new Map<string, SearchPlacement>(),
+    widgets: new Map<string, SearchPlacement>(),
     items: new Map(
       workspace.items.map((item) => [item.id, parkOutsideView(item, view)]),
     ),

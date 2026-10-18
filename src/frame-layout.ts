@@ -233,3 +233,66 @@ export function getFrameBounds(
     height: fittedHeight,
   }
 }
+
+export function getPinnedWindowOffset(
+  bounds: Bounds,
+  edge: FrameEdge,
+  viewport: { width: number; height: number },
+  expanded: boolean,
+  exposedSize = 42,
+): { x: number; y: number } {
+  if (expanded) return { x: 0, y: 0 }
+  const visibleWidth = Math.max(0, Math.min(exposedSize, bounds.width))
+  const visibleHeight = Math.max(0, Math.min(exposedSize, bounds.height))
+  return {
+    x:
+      edge === 'left'
+        ? -(bounds.x + bounds.width - visibleWidth)
+        : edge === 'right'
+          ? viewport.width - bounds.x - visibleWidth
+          : 0,
+    y:
+      edge === 'top'
+        ? -(bounds.y + bounds.height - visibleHeight)
+        : edge === 'bottom'
+          ? viewport.height - bounds.y - visibleHeight
+          : 0,
+  }
+}
+
+export function getFrameDropTarget(
+  bounds: Bounds,
+  viewport: { width: number; height: number },
+): Extract<ObjectPlacement, { surface: 'frame' }> | null {
+  const distances: { edge: FrameEdge; distance: number }[] = [
+    { edge: 'top', distance: bounds.y },
+    { edge: 'right', distance: viewport.width - bounds.x - bounds.width },
+    { edge: 'bottom', distance: viewport.height - bounds.y - bounds.height },
+    { edge: 'left', distance: bounds.x },
+  ]
+  const closest = distances.reduce((nearest, candidate) =>
+    candidate.distance < nearest.distance ? candidate : nearest,
+  )
+  if (closest.distance > 72) return null
+  const horizontal = closest.edge === 'top' || closest.edge === 'bottom'
+  const margin = viewport.width <= 760 ? 12 : 24
+  const extent = horizontal ? viewport.width : viewport.height
+  const size = Math.min(
+    horizontal ? bounds.width : bounds.height,
+    Math.max(0, extent - margin * 2),
+  )
+  const start = horizontal ? bounds.x : bounds.y
+  const originalSize = horizontal ? bounds.width : bounds.height
+  const center = start + originalSize / 2
+  const span = extent - margin * 2 - size
+  const offset = center - margin - size / 2
+  const position =
+    span <= 0
+      ? 0.5
+      : offset <= 80
+        ? 0
+        : span - offset <= 80
+          ? 1
+          : Math.max(0, Math.min(offset / span, 1))
+  return { surface: 'frame', edge: closest.edge, position }
+}

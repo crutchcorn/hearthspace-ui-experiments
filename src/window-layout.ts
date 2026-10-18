@@ -1,4 +1,4 @@
-import { clamp, MIN_HEIGHT, MIN_WIDTH, type Bounds } from './desktop'
+import { clamp, MIN_HEIGHT, MIN_WIDTH, type Bounds } from './desktop.ts'
 
 export function getWindowClearance(viewportWidth: number) {
   return viewportWidth <= 760
