@@ -51,6 +51,17 @@ selected drawing, stays within the work area, and hides when the art is offscree
 It offers a layer toggle and delete; the finish check appears while drawing.
 Drawing, desktop-item, and window selections remain separate.
 
+When saved gesture assignments exist, the side toolbar also offers Play.
+`recognizeGesture` compares the selected drawing's complete stroke collection
+with the same templates used by the launcher pad. A match opens a new instance
+of the assigned app, centered on the drawing's world-space bounds and clamped
+to the world edges. The canvas stays in place. The ink fades out as the app
+appears, then the drawing is removed from the workspace. Success clears the
+selection and selects the cursor so the new window is ready to use. A failed
+or ambiguous match shows **No match found** briefly and leaves the drawing
+unchanged. Without saved assignments, Play is absent. Reduced motion makes
+the visual change immediate. Simply drawing does not trigger recognition.
+
 `App` owns the active draft and selected drawing. `DrawingLayer` renders saved
 strokes in separate below-window and above-window layers, with pointer targets
 following the ink rather than filling each drawing's bounding box. The below
@@ -102,7 +113,7 @@ One continuous glass dock at the bottom right contains preset Browser, Files, an
 
 The app strip scrolls horizontally when crowded, including within the shared mobile bottom bar. On mobile, its icons stay aligned to the right beside Apps when they fit, and the strip shrinks to scroll when needed. The app icons keep their 44-pixel targets inside the 54-pixel surface, and Apps remains beside them. Panels reserve space for that bar. The launcher panel sits above the dock and stays within the viewport. Canvas tools and dock apps use icon-only buttons with accessible names; desktop toolbar hints and dock hover titles identify their actions. Their targets remain at least 44 × 44 pixels across input types. Names remain visible in the app gallery and window picker.
 
-`App` owns the active canvas mode, selection, and panel visibility, including notifications, device popovers, and the window picker. Opening a panel dismisses panels from the other control groups. Window and desktop-item selection use drawn outlines and highlights for feedback, without persistent selection instructions or counts. Pointer input outside the launcher or device popover closes it. Escape closes open panels; on the canvas, it clears selection and cancels an active selection gesture without changing tools. Arranging windows, launching apps, and revealing existing windows also preserve the chosen tool.
+`App` owns the active canvas mode, selection, and panel visibility, including notifications, device popovers, and the window picker. Opening a panel dismisses panels from the other control groups. Window and desktop-item selection use drawn outlines and highlights for feedback, without persistent selection instructions or counts. Pointer input outside the launcher or device popover closes it. Escape closes open panels; on the canvas, it clears selection and cancels an active selection gesture without changing tools. Arranging windows, ordinary app launches, and revealing existing windows also preserve the chosen tool. Successfully playing a canvas drawing switches to the cursor.
 
 | Shortcut     | Action                                            |
 | ------------ | ------------------------------------------------- |
@@ -129,7 +140,7 @@ Selecting a running app opens a popover listing its window instances, even when 
 
 Drag a row’s handle with a pointer or touch to preview a different order; release saves the change, while cancellation restores the previous order. Up and Down on a focused handle move its window one place. Reordering changes only the picker order, leaving canvas positions, stacking, and the active window unchanged. Each window’s optional `dockOrder` stores this order in the existing workspace state. New instances follow the ordered windows; closing an instance removes its row normally.
 
-Launching from a non-running favorite, **New window**, an app result, or the gesture pad creates an ordinary movable, resizable preview window with the catalog app’s title, icon, and description. Each uses the same launch action in `App`. There is no operating-system launch integration, favorite-editing UI, or separate running-app persistence; the dock derives its groups from workspace windows.
+Launching from a non-running favorite, **New window**, an app result, the gesture pad, or a matching canvas drawing creates an ordinary movable, resizable preview window with the catalog app’s title, icon, and description. Each uses the same launch action in `App`. There is no operating-system launch integration, favorite-editing UI, or separate running-app persistence; the dock derives its groups from workspace windows.
 
 ## Keyboard window switcher
 
@@ -221,7 +232,7 @@ Each Settings window owns its mock layout and per-monitor values, retaining them
 | [`src/components/CanvasSearch.tsx`](../src/components/CanvasSearch.tsx)                 | Positioned search field, query input, result navigation, and close/empty states.                      |
 | [`src/components/GatherWindows.tsx`](../src/components/GatherWindows.tsx)               | Floating selection action, viewport-aware placement, opt-in gating, and cancellable gather shimmer.   |
 | [`src/components/DrawingLayer.tsx`](../src/components/DrawingLayer.tsx)                 | Saved and draft stroke rendering, selection outlines, and ink hit targets.                            |
-| [`src/components/DrawingActions.tsx`](../src/components/DrawingActions.tsx)             | Side controls for changing a drawing’s layer, deleting, and finishing.                                |
+| [`src/components/DrawingActions.tsx`](../src/components/DrawingActions.tsx)             | Side controls for changing a drawing’s layer, playing a gesture, deleting, and finishing.             |
 | [`src/components/DesktopItems.tsx`](../src/components/DesktopItems.tsx)                 | Desktop-item layer, item artwork, and selection/opening input.                                        |
 | [`src/components/WindowContent.tsx`](../src/components/WindowContent.tsx)               | Workspace overview, editable scratchpad, appearance settings, and simulated app interiors.            |
 | [`src/components/Settings.tsx`](../src/components/Settings.tsx)                         | Responsive category navigation, shared preferences, and simulated display settings.                   |
@@ -255,7 +266,7 @@ The accent is stored separately under `hearthspace-accent-v1` as an allowed them
 
 App appearance is fixed to Realistic and has no saved preference. Values left under the legacy `hearthspace-app-presentation-v1` key are ignored. Existing workspace geometry, content, and other preferences remain intact.
 
-The selected canvas tool is stored under `hearthspace-canvas-tool-v1`. Loading accepts `cursor`, `pan`, `search`, `select`, or `draw`; the earlier `lasso` value migrates to `select`. Missing, invalid, or unavailable storage defaults to the cursor. Explicit tool changes remain active through Escape, arrangement, app launches, and window navigation. Temporary panning does not change the saved tool. Remembering Search restores the tool on reload, with its field closed.
+The selected canvas tool is stored under `hearthspace-canvas-tool-v1`. Loading accepts `cursor`, `pan`, `search`, `select`, or `draw`; the earlier `lasso` value migrates to `select`. Missing, invalid, or unavailable storage defaults to the cursor. Explicit tool changes remain active through Escape, arrangement, ordinary app launches, and window navigation; a successful canvas-drawing launch selects the cursor. Temporary panning does not change the saved tool. Remembering Search restores the tool on reload, with its field closed.
 
 The window-selection shape is stored separately under `hearthspace-window-selection-v1` as `rectangle` or `freeform`. Missing, invalid, or unavailable storage defaults to rectangle. Changing the shape activates window selection; choosing another tool leaves the shape remembered for later use and reloads.
 

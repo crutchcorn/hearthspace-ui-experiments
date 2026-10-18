@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState } from 'react'
-import { Check, Pin, PinOff, Trash2 } from 'lucide-react'
+import { Check, Pin, PinOff, Play, Trash2 } from 'lucide-react'
 import { clamp, type Bounds } from '../desktop'
 import type { CanvasDrawing, DrawingLayerName } from '../drawings'
 import { getWindowClearance } from '../window-layout'
@@ -13,9 +13,10 @@ interface DrawingActionsProps {
   onLayerChange: (layer: DrawingLayerName) => void
   onDelete: () => void
   onFinish: () => void
+  onPlay?: () => boolean
 }
 
-type Action = 'layer' | 'delete' | 'finish'
+type Action = 'layer' | 'delete' | 'finish' | 'play' | 'no-match'
 
 export default function DrawingActions({
   drawing,
@@ -24,6 +25,7 @@ export default function DrawingActions({
   onLayerChange,
   onDelete,
   onFinish,
+  onPlay,
 }: DrawingActionsProps) {
   const [hint, setHint] = useState<Action | null>(null)
   const hintId = useId()
@@ -41,7 +43,7 @@ export default function DrawingActions({
 
   const clearance = getWindowClearance(view.width)
   const width = 54
-  const height = editing ? 150 : 102
+  const height = 102 + (editing ? 48 : 0) + (onPlay ? 48 : 0)
   const gap = 14
   const right = drawing.x - view.x + drawing.width + gap
   const left = drawing.x - view.x - width - gap
@@ -61,6 +63,8 @@ export default function DrawingActions({
     layer: pinned ? 'Move drawing below windows' : 'Keep drawing above windows',
     delete: 'Delete drawing',
     finish: 'Finish drawing',
+    play: 'Launch matching app',
+    'no-match': 'No match found',
   }
 
   function showHint(action: Action) {
@@ -103,6 +107,29 @@ export default function DrawingActions({
         >
           <PinIcon size={18} aria-hidden="true" />
         </button>
+        {onPlay && (
+          <button
+            type="button"
+            className={`${styles.button} ${shellStyles.control}`}
+            aria-label={labels.play}
+            aria-describedby={
+              hint === 'play' || hint === 'no-match' ? hintId : undefined
+            }
+            onPointerEnter={() => showHint('play')}
+            onPointerLeave={() => {
+              if (hint !== 'no-match') hideHint()
+            }}
+            onFocus={() => showHint('play')}
+            onBlur={() => {
+              if (hint !== 'no-match') hideHint()
+            }}
+            onClick={() => {
+              if (!onPlay()) showHint('no-match')
+            }}
+          >
+            <Play size={18} aria-hidden="true" />
+          </button>
+        )}
         <button
           type="button"
           className={`${styles.button} ${styles.deleteButton} ${shellStyles.control}`}

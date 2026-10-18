@@ -60,6 +60,12 @@ finish. Use the cursor (**V**) to select the ink and drag the whole drawing.
 The compact controls beside it switch its layer or delete it. Drawings move
 with the canvas and keep their strokes, position, and layer after reload.
 
+When at least one gesture is saved in Settings, the selected drawing also
+shows a **Play** button. It compares all of the drawing's strokes with those
+assignments. A match fades out and removes the drawing, opens the assigned app
+centered over it, and returns to the cursor. **No match found** leaves the art
+in place to edit or try again. Drawing alone never launches an app.
+
 Search, window switching, and focused view temporarily hide drawings, leaving
 them in place for your return. Arrange moves windows without moving your art.
 

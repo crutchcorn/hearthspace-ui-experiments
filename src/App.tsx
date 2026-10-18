@@ -29,6 +29,7 @@ import CanvasTools from './components/CanvasTools'
 import DesktopItems from './components/DesktopItems'
 import DrawingLayer from './components/DrawingLayer'
 import DrawingActions from './components/DrawingActions'
+import { recognizeGesture } from './gesture-recognition'
 import {
   addDrawingStroke,
   MAX_DRAWING_STROKES,
@@ -164,6 +165,13 @@ function App() {
     points: GesturePoint[]
     layer: DrawingLayerName
   } | null>(null)
+  const [consumingDrawingIds, setConsumingDrawingIds] = useState<string[]>([])
+  const [drawingLaunchId, setDrawingLaunchId] = useState<string | null>(null)
+  const drawingLaunchTimers = useRef(new Set<number>())
+  useEffect(() => {
+    const timers = drawingLaunchTimers.current
+    return () => timers.forEach((timer) => window.clearTimeout(timer))
+  }, [])
   const selectedDrawing = workspace.drawings.find(
     (item) => item.id === selectedDrawingId,
   )
@@ -210,6 +218,12 @@ function App() {
   const previewExiting = !!revealRequest?.preview
   const launcherTrigger = useRef<HTMLButtonElement>(null)
   const windowElements = useRef(new Map<string, HTMLElement>())
+  useLayoutEffect(() => {
+    if (drawingLaunchId)
+      windowElements.current
+        .get(drawingLaunchId)
+        ?.focus({ preventScroll: true })
+  }, [drawingLaunchId])
   const viewport = useRef<HTMLDivElement>(null)
   const gesture = useRef<Gesture | null>(null)
   const captureTarget = useRef<Element | null>(null)
@@ -1197,7 +1211,7 @@ function App() {
     }))
   }
 
-  function addWindow(app?: LauncherApp) {
+  function addWindow(app?: LauncherApp, center?: { x: number; y: number }) {
     leaveFocusView()
     const canvas = viewport.current!
     const id = crypto.randomUUID()
@@ -1222,14 +1236,20 @@ function App() {
           kind: 'empty',
           appId: app?.id,
           x: clamp(
-            canvas.scrollLeft + Math.max(20, (view.width - width) / 2) + offset,
+            center
+              ? center.x - width / 2
+              : canvas.scrollLeft +
+                  Math.max(20, (view.width - width) / 2) +
+                  offset,
             0,
             current.width - width,
           ),
           y: clamp(
-            canvas.scrollTop +
-              Math.max(80, (view.height - height) / 2) +
-              offset,
+            center
+              ? center.y - height / 2
+              : canvas.scrollTop +
+                  Math.max(80, (view.height - height) / 2) +
+                  offset,
             0,
             current.height - height,
           ),
@@ -1240,6 +1260,36 @@ function App() {
     }))
     setActiveId(id)
     return id
+  }
+
+  function playDrawing() {
+    if (!selectedDrawing || consumingDrawingIds.includes(selectedDrawing.id))
+      return false
+    const match = recognizeGesture(selectedDrawing.strokes, gestureShortcuts)
+    const app = APP_CATALOG.find((item) => item.id === match?.appId)
+    if (!app) return false
+    const drawingId = selectedDrawing.id
+    const windowId = addWindow(app, {
+      x: selectedDrawing.x + selectedDrawing.width / 2,
+      y: selectedDrawing.y + selectedDrawing.height / 2,
+    })
+    setDrawingLaunchId(windowId)
+    setConsumingDrawingIds((current) => [...current, drawingId])
+    setSelectedDrawingId(null)
+    setTool('cursor')
+    const timer = window.setTimeout(() => {
+      setWorkspace((current) => ({
+        ...current,
+        drawings: current.drawings.filter((item) => item.id !== drawingId),
+      }))
+      setConsumingDrawingIds((current) =>
+        current.filter((id) => id !== drawingId),
+      )
+      setDrawingLaunchId((current) => (current === windowId ? null : current))
+      drawingLaunchTimers.current.delete(timer)
+    }, 300)
+    drawingLaunchTimers.current.add(timer)
+    return true
   }
 
   function toggleLauncher() {
@@ -1589,6 +1639,7 @@ function App() {
                 drawings={workspace.drawings}
                 layer="below"
                 selectedId={selectedDrawingId}
+                consumingIds={consumingDrawingIds}
                 draft={drawingDraft ?? undefined}
                 interactive={tool === 'cursor' && !previewExiting}
                 onPointerDown={startDrawingMove}
@@ -1619,6 +1670,11 @@ function App() {
                 aria-label={item.title}
                 data-window-id={item.id}
                 data-app-id={appId}
+                data-drawing-launch={
+                  !previewLayout &&
+                  !previewExiting &&
+                  drawingLaunchId === item.id
+                }
                 data-external={
                   appId !== 'settings' && !appId.startsWith('workspace-')
                 }
@@ -1814,6 +1870,7 @@ function App() {
                 drawings={workspace.drawings}
                 layer="above"
                 selectedId={selectedDrawingId}
+                consumingIds={consumingDrawingIds}
                 draft={drawingDraft ?? undefined}
                 interactive={tool === 'cursor' && !previewExiting}
                 onPointerDown={startDrawingMove}
@@ -1874,6 +1931,7 @@ function App() {
           drawing={selectedDrawing}
           view={view}
           editing={tool === 'draw'}
+          onPlay={gestureShortcuts.length > 0 ? playDrawing : undefined}
           onLayerChange={(layer) => {
             setDrawingLayer(layer)
             setWorkspace((current) => ({

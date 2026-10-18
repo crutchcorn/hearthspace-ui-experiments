@@ -27,6 +27,12 @@ clear of its strokes. Those controls need tooltips, not a heading or a permanent
 instruction. The cursor selects and moves drawings as it does other work on the
 canvas.
 
+Play belongs beside selected ink when saved app gestures make it useful. Keep
+launching deliberate: drawing a mark alone does not run it. On a match, let the
+ink fade into an app window centered over that place, then remove the drawing.
+An unmatched mark remains intact with a brief tooltip. This keeps ordinary
+sketching available while giving the same content a possible action.
+
 ## Let search borrow the space
 
 Finding a window doesn't have to mean remembering where you left it. The Search cursor opens a field where you click the desktop, and the surrounding work moves aside to make room. Matching shortcuts, files, folders, and windows come into the viewport as you type. An empty query gathers all desktop items, making every app available from the canvas.
@@ -143,7 +149,7 @@ The maximize button enters focused view, keeping window chrome while the corners
 
 ## Keep the prototype boundary clear
 
-The UI is a playground for OS interactions. Launcher strokes are compared locally with saved gesture assignments; unknown or ambiguous shapes remain visible with a brief no-match message. AI opt-in simulates a 3 GB download and a delete confirmation. Gathering shows a brief shimmer, then moves other windows from the selected applications into view using app identity alone; no model runs or inspects their contents. Display and device controls also stay inside the prototype.
+The UI is a playground for OS interactions. Launcher strokes and explicitly played canvas drawings are compared locally with saved gesture assignments; unknown or ambiguous shapes remain visible with a brief no-match message. AI opt-in simulates a 3 GB download and a delete confirmation. Gathering shows a brief shimmer, then moves other windows from the selected applications into view using app identity alone; no model runs or inspects their contents. Display and device controls also stay inside the prototype.
 
 Keep those limits explicit in the [feature list](features.md) and usage documentation. Inside the interface, explanations should help with the interaction being tried. The quiet **Preview notification** footer button is a useful example: it makes sample activity available without adding a permanent “simulated notifications” banner to the inbox.
 

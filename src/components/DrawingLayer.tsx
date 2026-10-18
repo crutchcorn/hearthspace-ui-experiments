@@ -7,6 +7,7 @@ interface DrawingLayerProps {
   drawings: CanvasDrawing[]
   layer: DrawingLayerName
   selectedId: string | null
+  consumingIds?: string[]
   draft?: { points: GesturePoint[]; layer: DrawingLayerName }
   interactive: boolean
   onPointerDown: (event: PointerEvent<SVGSVGElement>, id: string) => void
@@ -43,6 +44,7 @@ export default function DrawingLayer({
   drawings,
   layer,
   selectedId,
+  consumingIds = [],
   draft,
   interactive,
   onPointerDown,
@@ -66,57 +68,64 @@ export default function DrawingLayer({
     <div className={styles.layer} data-drawing-layer={layer}>
       {drawings
         .filter((drawing) => drawing.layer === layer)
-        .map((drawing, index) => (
-          <svg
-            key={drawing.id}
-            className={styles.drawing}
-            data-drawing-id={drawing.id}
-            data-selected={selectedId === drawing.id}
-            data-interactive={interactive}
-            role={interactive ? 'button' : 'img'}
-            aria-label={`Drawing ${index + 1}`}
-            aria-pressed={interactive ? selectedId === drawing.id : undefined}
-            tabIndex={interactive ? 0 : undefined}
-            viewBox={`0 0 ${drawing.width} ${drawing.height}`}
-            style={{
-              left: drawing.x,
-              top: drawing.y,
-              width: drawing.width,
-              height: drawing.height,
-            }}
-            onPointerDown={
-              interactive
-                ? (event) => onPointerDown(event, drawing.id)
-                : undefined
-            }
-            onKeyDown={(event) => {
-              if (!interactive || !onSelect) return
-              if (event.key !== 'Enter' && event.key !== ' ') return
-              event.preventDefault()
-              event.stopPropagation()
-              onSelect(drawing.id)
-            }}
-          >
-            {selectedId === drawing.id && (
-              <rect
-                className={styles.selection}
-                x={-7}
-                y={-7}
-                width={drawing.width + 14}
-                height={drawing.height + 14}
-                rx={6}
-                vectorEffect="non-scaling-stroke"
-              />
-            )}
-            {drawing.strokes.map((points, strokeIndex) => (
-              <Stroke key={strokeIndex} points={points} />
-            ))}
-            {interactive &&
-              drawing.strokes.map((points, strokeIndex) => (
-                <Stroke key={strokeIndex} points={points} hitTarget />
+        .map((drawing, index) => {
+          const drawingInteractive =
+            interactive && !consumingIds.includes(drawing.id)
+          return (
+            <svg
+              key={drawing.id}
+              className={styles.drawing}
+              data-drawing-id={drawing.id}
+              data-selected={selectedId === drawing.id}
+              data-consuming={consumingIds.includes(drawing.id)}
+              data-interactive={drawingInteractive}
+              role={drawingInteractive ? 'button' : 'img'}
+              aria-label={`Drawing ${index + 1}`}
+              aria-pressed={
+                drawingInteractive ? selectedId === drawing.id : undefined
+              }
+              tabIndex={drawingInteractive ? 0 : undefined}
+              viewBox={`0 0 ${drawing.width} ${drawing.height}`}
+              style={{
+                left: drawing.x,
+                top: drawing.y,
+                width: drawing.width,
+                height: drawing.height,
+              }}
+              onPointerDown={
+                drawingInteractive
+                  ? (event) => onPointerDown(event, drawing.id)
+                  : undefined
+              }
+              onKeyDown={(event) => {
+                if (!drawingInteractive || !onSelect) return
+                if (event.key !== 'Enter' && event.key !== ' ') return
+                event.preventDefault()
+                event.stopPropagation()
+                onSelect(drawing.id)
+              }}
+            >
+              {selectedId === drawing.id && (
+                <rect
+                  className={styles.selection}
+                  x={-7}
+                  y={-7}
+                  width={drawing.width + 14}
+                  height={drawing.height + 14}
+                  rx={6}
+                  vectorEffect="non-scaling-stroke"
+                />
+              )}
+              {drawing.strokes.map((points, strokeIndex) => (
+                <Stroke key={strokeIndex} points={points} />
               ))}
-          </svg>
-        ))}
+              {drawingInteractive &&
+                drawing.strokes.map((points, strokeIndex) => (
+                  <Stroke key={strokeIndex} points={points} hitTarget />
+                ))}
+            </svg>
+          )
+        })}
       {draftPoints.length > 0 && (
         <svg
           className={styles.drawing}

@@ -54,3 +54,19 @@
 .drawing:focus-visible .stroke {
   filter: drop-shadow(0 0 3px var(--accent));
 }
+
+.drawing[data-consuming='true'] {
+  opacity: 0;
+  transition: opacity 240ms ease-out;
+  pointer-events: none;
+}
+
+.drawing[data-consuming='true'] .hitTarget {
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drawing[data-consuming='true'] {
+    transition: none;
+  }
+}

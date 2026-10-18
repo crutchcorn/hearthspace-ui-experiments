@@ -2,6 +2,13 @@
 
 App gestures use a TypeScript adaptation of the [$P point-cloud recognizer](https://depts.washington.edu/acelab/proj/dollar/pdollar.html). It compares geometric templates locally. Saved assignments supply the templates; changing a shortcut changes what can launch.
 
+The dedicated launcher pad matches a completed stroke automatically. Canvas
+drawings use the same matcher only when the user presses Play beside a selected
+drawing. Play appears when saved assignments exist and compares all strokes in
+the drawing without connecting the gaps. A match consumes that drawing and
+opens the assigned app over its bounds; a failed or ambiguous match preserves
+it and shows a brief **No match found** tooltip.
+
 The matcher compares 64 evenly spaced points along real stroke segments, without depending on stroke order or direction. It normalizes position and proportions before sampling, so a wider N or a taller Z can still match its saved mark. Nearly straight gestures keep their narrow axis, preventing a small hand wobble from becoming a full-width shape. Pen-up gaps are never treated as ink.
 
 Matching also tries small rotations up to 20 degrees in either direction. This accommodates a tilted hand while keeping a sideways gesture distinct. The distance and coverage checks allow uneven strokes, small tails, and partly unfinished endpoints; they still reject tiny marks, unrelated shapes, missing major strokes, and assignments too close to distinguish. These checks are calibrated against explicit rough B/N/Z examples and custom line gestures, not a broad handwriting dataset. Similar custom symbols may need clearer differences, especially when they differ only in proportions.
