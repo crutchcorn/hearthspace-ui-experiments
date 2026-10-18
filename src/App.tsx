@@ -1859,7 +1859,9 @@ function App() {
                 </header>
                 <div
                   className={styles.windowBody}
-                  inert={previewLayout !== null}
+                  inert={
+                    previewLayout !== null || (!focusView && tool === 'select')
+                  }
                 >
                   {appId === 'notes' && (
                     <div className={styles.nativeMenu} aria-hidden="true">
