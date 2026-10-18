@@ -36,6 +36,11 @@ add backgrounds; the notification status tells you when something needs attentio
   around the map or click to move somewhere.
 - **Place windows.** Drag their headers, resize, and close them. Dragging toward
   the viewport edge carries a window farther across the canvas.
+- **Align with the dots.** Hold **Alt** while dragging a window, desktop item,
+  or drawing to snap the top-left of its bounds to the wallpaper dots. Release
+  Alt to move freely again. Selected groups keep their spacing, using the
+  grabbed window or item as the anchor. The same hidden grid works with a
+  photo background and with drawings on either layer.
 - **Leave covered work in sight.** Windows can overlap completely while you
   drag. On release or when a new window opens, fully hidden windows, desktop
   icons, and drawings below windows slide toward the nearest opening until a

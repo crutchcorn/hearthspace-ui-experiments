@@ -12,6 +12,18 @@ The minimap translates pointer positions into world coordinates. Grabbing its vi
 
 Dragging a window’s title bar combines pointer movement with changes in scroll position. This keeps a grabbed window under the pointer while edge scrolling carries it farther across the world. Shell-owned windows join a glass title bar and opaque content in one frame, with a 44-pixel header increasing to 50 pixels for coarse pointers. External app previews use their own Realistic frame styles while retaining the same window interactions. The body scrolls in the remaining space. Eight resize handles constrain windows to the world bounds and a minimum size of 280 × 200 pixels.
 
+Holding Alt while dragging a window header, desktop item, or drawing snaps the
+top-left of its bounds to the nearest wallpaper dot. The hidden grid shares the
+wallpaper's 28-pixel spacing, with dot centers at `14 + 28n` on each world axis,
+so panning doesn't shift the alignment. Pressing or releasing Alt updates the
+placement during the drag; releasing it resumes free movement immediately.
+Selected windows or desktop items preserve their offsets and use the grabbed
+object as the anchor. Placement stays within the world bounds; if a group has
+no valid dot position on an axis, the boundary takes precedence. The grid remains
+available with a photo background and applies to drawings on either layer.
+Deliberate moves still clear a background object's `peekOrigin`. Resizing,
+Arrange, launches, and automatic peeking do not use this snap behavior.
+
 Windows may cover one another completely during a drag or resize. Releasing a
 moved window or background object, or opening a new window, checks for fully
 covered work, including coverage shared by several higher windows. A newly
@@ -173,24 +185,25 @@ The app strip scrolls horizontally when crowded, including within the shared mob
 
 `App` owns the active canvas mode, selection, and panel visibility, including notifications, device popovers, and the window picker. Opening a panel dismisses panels from the other control groups. Window and desktop-item selection use drawn outlines and highlights for feedback, without persistent selection instructions or counts. Pointer input outside the launcher or device popover closes it. Escape closes open panels; on the canvas, it clears selection and cancels an active selection gesture without changing tools. Arranging windows, ordinary app launches, and revealing existing windows also preserve the chosen tool. Successfully playing a canvas drawing switches to the cursor.
 
-| Shortcut     | Action                                            |
-| ------------ | ------------------------------------------------- |
-| H            | Choose Pan mode and clear selection.              |
-| V            | Choose desktop-item selection.                    |
-| /            | Choose Search and open canvas search.             |
-| R            | Choose rectangular window selection.              |
-| L            | Choose freeform window lasso.                     |
-| D            | Choose canvas drawing.                            |
-| M            | Toggle the map.                                   |
-| A            | Arrange all windows near the current viewport.    |
-| G            | Open the dedicated gesture pad.                   |
-| N            | Toggle notifications.                             |
-| Ctrl/⌘ K     | Open app search, or close it when already open.   |
-| Ctrl+1       | Cycle open windows; release Ctrl to switch.       |
-| Ctrl+Shift+1 | Cycle open windows backward.                      |
-| Space + drag | Temporarily pan over desktop items or windows.    |
-| Home         | Return to the starting viewport.                  |
-| Escape       | Close a panel, or clear selection; keep the tool. |
+| Shortcut     | Action                                                 |
+| ------------ | ------------------------------------------------------ |
+| H            | Choose Pan mode and clear selection.                   |
+| V            | Choose desktop-item selection.                         |
+| /            | Choose Search and open canvas search.                  |
+| R            | Choose rectangular window selection.                   |
+| L            | Choose freeform window lasso.                          |
+| D            | Choose canvas drawing.                                 |
+| M            | Toggle the map.                                        |
+| A            | Arrange all windows near the current viewport.         |
+| G            | Open the dedicated gesture pad.                        |
+| N            | Toggle notifications.                                  |
+| Ctrl/⌘ K     | Open app search, or close it when already open.        |
+| Ctrl+1       | Cycle open windows; release Ctrl to switch.            |
+| Ctrl+Shift+1 | Cycle open windows backward.                           |
+| Alt + drag   | Align the grabbed object's bounds with wallpaper dots. |
+| Space + drag | Temporarily pan over desktop items or windows.         |
+| Home         | Return to the starting viewport.                       |
+| Escape       | Close a panel, or clear selection; keep the tool.      |
 
 Single-letter shortcuts and / are suspended while the launcher is open or a text input is active. The launcher filters a local catalog by app name and description, supports a four-column app gallery and a single-column list, and presents search results as a list. Within the launcher, only search results show a count. Arrow keys navigate apps and Enter launches the selection. Up and Down move four entries in the gallery and one entry in list and search views. Fine-pointer devices focus search when the Apps view opens; coarse-pointer devices avoid automatically opening the software keyboard.
 
@@ -271,6 +284,7 @@ Each Settings window owns its mock layout and per-monitor values, retaining them
 | [`src/desktop.ts`](../src/desktop.ts)                                                   | Workspace types, starter desktop items, storage validation, window resizing, and arrangement.         |
 | [`src/drawings.ts`](../src/drawings.ts)                                                 | Drawing types, stroke bounds, local coordinates, and saved-art validation.                            |
 | [`src/window-layout.ts`](../src/window-layout.ts)                                       | Responsive shell clearances and ordinary maximized window bounds.                                     |
+| [`src/canvas-grid.ts`](../src/canvas-grid.ts)                                           | Bounded movement and dot snapping shared by windows, desktop items, and drawings.                     |
 | [`src/peek-layout.ts`](../src/peek-layout.ts)                                           | Covered-window placement, temporary background peeking, and return-home positions.                    |
 | [`src/usePeekMotion.ts`](../src/usePeekMotion.ts)                                       | Short slide animations for peeking objects and background objects returning home.                     |
 | [`src/canvas-search.ts`](../src/canvas-search.ts)                                       | Search matching and shared grid/parking layouts for canvas search and window switching.               |

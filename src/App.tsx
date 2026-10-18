@@ -56,6 +56,7 @@ import {
 import { APP_CATALOG, type LauncherApp } from './components/launcher-apps'
 import {
   arrangeWindows,
+  CANVAS_GRID_SIZE,
   CANVAS_TOOL_STORAGE_KEY,
   clamp,
   loadCanvasTool,
@@ -83,6 +84,7 @@ import {
 } from './peek-layout'
 import { gatherRelatedWindows } from './gather-windows'
 import { getMaximizedBounds, getWindowClearance } from './window-layout'
+import { getCanvasMoveDelta } from './canvas-grid'
 import {
   loadGestureShortcuts,
   saveGestureShortcuts,
@@ -238,7 +240,7 @@ function App() {
   const viewport = useRef<HTMLDivElement>(null)
   const gesture = useRef<Gesture | null>(null)
   const captureTarget = useRef<Element | null>(null)
-  const latestPointer = useRef({ x: 0, y: 0 })
+  const latestPointer = useRef({ x: 0, y: 0, altKey: false })
   const home = workspace.home
   const windowClearance = getWindowClearance(view.width)
   const shellPeek = useShellPeek(
@@ -710,6 +712,13 @@ function App() {
       const dy = clientY - current.startY + canvas.scrollTop - current.scrollY
       if (!current.moved && Math.hypot(dx, dy) < 4) return
       current.moved = true
+      const delta = getCanvasMoveDelta(
+        [bounds],
+        bounds,
+        { x: dx, y: dy },
+        workspace,
+        latestPointer.current.altKey,
+      )
       setWorkspace((previous) => ({
         ...previous,
         drawings: previous.drawings.map((item) =>
@@ -718,8 +727,8 @@ function App() {
             : {
                 ...item,
                 peekOrigin: undefined,
-                x: clamp(bounds.x + dx, 0, previous.width - bounds.width),
-                y: clamp(bounds.y + dy, 0, previous.height - bounds.height),
+                x: bounds.x + delta.x,
+                y: bounds.y + delta.y,
               },
         ),
       }))
@@ -795,16 +804,12 @@ function App() {
       if (!current.moved && Math.hypot(dx, dy) < 4) return
       current.moved = true
       const items = current.items!
-      const moveX = clamp(
-        dx,
-        -Math.min(...items.map((item) => item.x)),
-        workspace.width - Math.max(...items.map((item) => item.x + item.width)),
-      )
-      const moveY = clamp(
-        dy,
-        -Math.min(...items.map((item) => item.y)),
-        workspace.height -
-          Math.max(...items.map((item) => item.y + item.height)),
+      const { x: moveX, y: moveY } = getCanvasMoveDelta(
+        items,
+        current.bounds!,
+        { x: dx, y: dy },
+        workspace,
+        latestPointer.current.altKey,
       )
       const origins = new Map(items.map((item) => [item.id, item]))
       setWorkspace((previous) => ({
@@ -828,20 +833,16 @@ function App() {
       Math.hypot(dx, dy) > 0.5
     )
       current.moved = true
-    if (current.type === 'move' && current.windows) {
+    if (current.type === 'move') {
+      if (!current.moved) return
       // Apply one bounded delta so selected windows keep their spacing.
-      const windows = current.windows
-      const moveX = clamp(
-        dx,
-        -Math.min(...windows.map((item) => item.x)),
-        workspace.width -
-          Math.max(...windows.map((item) => item.x + item.width)),
-      )
-      const moveY = clamp(
-        dy,
-        -Math.min(...windows.map((item) => item.y)),
-        workspace.height -
-          Math.max(...windows.map((item) => item.y + item.height)),
+      const windows = current.windows!
+      const { x: moveX, y: moveY } = getCanvasMoveDelta(
+        windows,
+        current.bounds!,
+        { x: dx, y: dy },
+        workspace,
+        latestPointer.current.altKey,
       )
       const origins = new Map(windows.map((item) => [item.id, item]))
       setWorkspace((previous) => ({
@@ -881,16 +882,32 @@ function App() {
           ? item
           : {
               ...item,
-              ...(current.type === 'move'
-                ? {
-                    x: clamp(bounds.x + dx, 0, previous.width - bounds.width),
-                    y: clamp(bounds.y + dy, 0, previous.height - bounds.height),
-                  }
-                : resizeBounds(bounds, current.edge!, dx, dy, previous)),
+              ...resizeBounds(bounds, current.edge!, dx, dy, previous),
             },
       ),
     }))
   }
+
+  const updateDragModifier = useEffectEvent((event: KeyboardEvent) => {
+    const pointer = latestPointer.current
+    if (
+      !gesture.current ||
+      !['move', 'item-move', 'drawing-move'].includes(gesture.current.type) ||
+      pointer.altKey === event.altKey
+    )
+      return
+    pointer.altKey = event.altKey
+    applyGesture(pointer.x, pointer.y)
+  })
+
+  useEffect(() => {
+    window.addEventListener('keydown', updateDragModifier)
+    window.addEventListener('keyup', updateDragModifier)
+    return () => {
+      window.removeEventListener('keydown', updateDragModifier)
+      window.removeEventListener('keyup', updateDragModifier)
+    }
+  }, [])
 
   const panAtEdge = useEffectEvent(() => {
     if (focusView) return
@@ -952,7 +969,11 @@ function App() {
     event.stopPropagation()
     event.currentTarget.setPointerCapture(event.pointerId)
     captureTarget.current = event.currentTarget
-    latestPointer.current = { x: event.clientX, y: event.clientY }
+    latestPointer.current = {
+      x: event.clientX,
+      y: event.clientY,
+      altKey: event.altKey,
+    }
     gesture.current = {
       pointerId: event.pointerId,
       type,
@@ -962,7 +983,7 @@ function App() {
       scrollY: canvas.scrollTop,
       id: item?.id,
       bounds: item,
-      windows: group,
+      windows: group ?? (type === 'move' && item ? [item] : undefined),
       edge,
       selectionShape: type === 'window-select' ? selectionShape : undefined,
       points:
@@ -1109,14 +1130,16 @@ function App() {
       event.stopPropagation()
       return
     }
-    startGesture(event, 'item-move')
-    gesture.current!.items = workspace.items.filter((entry) =>
-      ids.includes(entry.id),
-    )
+    const current = startGesture(event, 'item-move')
+    if (!current) return
+    current.id = item.id
+    current.bounds = item
+    current.items = workspace.items.filter((entry) => ids.includes(entry.id))
   }
 
   function endGesture(event: ReactPointerEvent) {
     if (gesture.current?.pointerId !== event.pointerId) return
+    latestPointer.current.altKey = event.altKey
     const completed = gesture.current
     if (
       event.type === 'pointerup' &&
@@ -1690,7 +1713,11 @@ function App() {
         }}
         onPointerMove={(event) => {
           if (gesture.current?.pointerId !== event.pointerId) return
-          latestPointer.current = { x: event.clientX, y: event.clientY }
+          latestPointer.current = {
+            x: event.clientX,
+            y: event.clientY,
+            altKey: event.altKey,
+          }
           applyGesture(event.clientX, event.clientY)
         }}
         onPointerUp={endGesture}
@@ -1703,14 +1730,17 @@ function App() {
           data-background-fit={
             background.photo?.fit === 'repeat' ? 'repeat' : undefined
           }
-          style={{
-            width: workspace.width,
-            height: workspace.height,
-            backgroundImage:
-              background.photo?.fit === 'repeat'
-                ? `url("${background.photo.url}")`
-                : undefined,
-          }}
+          style={
+            {
+              '--canvas-grid-size': `${CANVAS_GRID_SIZE}px`,
+              width: workspace.width,
+              height: workspace.height,
+              backgroundImage:
+                background.photo?.fit === 'repeat'
+                  ? `url("${background.photo.url}")`
+                  : undefined,
+            } as CSSProperties
+          }
         >
           <div inert={focusView !== null || windowSwitcher.open}>
             <DesktopItems

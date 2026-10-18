@@ -34,6 +34,7 @@ export const CANVAS_TOOL_STORAGE_KEY = 'hearthspace-canvas-tool-v1'
 export const WINDOW_SELECTION_STORAGE_KEY = 'hearthspace-window-selection-v1'
 export const MIN_WIDTH = 280
 export const MIN_HEIGHT = 200
+export const CANVAS_GRID_SIZE = 28
 
 export function loadCanvasTool(): CanvasTool {
   try {

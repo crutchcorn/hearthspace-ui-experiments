@@ -48,7 +48,7 @@
   position: relative;
   background-color: var(--field);
   background-image: radial-gradient(var(--field-dot) 1px, transparent 1.2px);
-  background-size: 28px 28px;
+  background-size: var(--canvas-grid-size) var(--canvas-grid-size);
 }
 
 .customBackground {
