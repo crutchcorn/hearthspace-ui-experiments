@@ -184,8 +184,6 @@
 
 .window[data-active='true'] .windowAppIcon {
   color: var(--accent-strong);
-  background: var(--accent-wash);
-  box-shadow: 0 0 18px color-mix(in srgb, var(--accent) 14%, transparent);
 }
 
 .windowName {
