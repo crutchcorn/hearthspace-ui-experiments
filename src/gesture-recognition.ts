@@ -5,7 +5,7 @@ import type { GesturePoint, GestureShortcut } from './gestures'
 
 const sampleCount = 64
 // A nearest template alone isn't enough: weak or competing matches don't launch.
-const maximumDistance = 0.075
+const maximumDistance = 0.095
 const ambiguityMargin = 0.02
 
 type Segment = {
@@ -15,14 +15,16 @@ type Segment = {
   end: number
 }
 
-function pointCloud(strokes: GesturePoint[][]): GesturePoint[] | null {
-  const segments: Segment[] = []
-  let length = 0
+function pointCloud(
+  strokes: GesturePoint[][],
+  angle = 0,
+): GesturePoint[] | null {
+  const rawSegments: { from: GesturePoint; to: GesturePoint }[] = []
+  let rawLength = 0
   let minX = Infinity
   let minY = Infinity
   let maxX = -Infinity
   let maxY = -Infinity
-
   for (const stroke of strokes) {
     for (let index = 0; index < stroke.length; index++) {
       const point = stroke[index]
@@ -31,20 +33,68 @@ function pointCloud(strokes: GesturePoint[][]): GesturePoint[] | null {
       if (!previous) continue
       const distance = Math.hypot(point.x - previous.x, point.y - previous.y)
       if (!Number.isFinite(distance)) return null
-      if (distance === 0) continue
-      const end = length + distance
-      if (end === length) continue
-      segments.push({ from: previous, to: point, start: length, end })
-      length = end
+      if (!distance) continue
+      rawSegments.push({ from: previous, to: point })
+      rawLength += distance
       minX = Math.min(minX, previous.x, point.x)
       minY = Math.min(minY, previous.y, point.y)
       maxX = Math.max(maxX, previous.x, point.x)
       maxY = Math.max(maxY, previous.y, point.y)
     }
   }
-
   const size = Math.max(maxX - minX, maxY - minY)
-  if (!Number.isFinite(length) || length < 24 || size < 16) return null
+  if (
+    !Number.isFinite(rawLength) ||
+    !Number.isFinite(size) ||
+    rawLength < 24 ||
+    size < 16
+  )
+    return null
+
+  const cosine = Math.cos(angle)
+  const sine = Math.sin(angle)
+  const rotate = (point: GesturePoint) => {
+    const x = (point.x - minX) / size
+    const y = (point.y - minY) / size
+    return { x: x * cosine - y * sine, y: x * sine + y * cosine }
+  }
+  const rotated = rawSegments.map(({ from, to }) => ({
+    from: rotate(from),
+    to: rotate(to),
+  }))
+  minX = Infinity
+  minY = Infinity
+  maxX = -Infinity
+  maxY = -Infinity
+  for (const { from, to } of rotated) {
+    minX = Math.min(minX, from.x, to.x)
+    minY = Math.min(minY, from.y, to.y)
+    maxX = Math.max(maxX, from.x, to.x)
+    maxY = Math.max(maxY, from.y, to.y)
+  }
+  const width = maxX - minX
+  const height = maxY - minY
+  const extent = Math.max(width, height)
+  // Normalize proportions before resampling. Nearly straight marks retain their
+  // narrow axis so a small hand wobble doesn't expand into a different glyph.
+  const lineLike =
+    Math.min(width, height) / extent < 0.3 && rawLength / size < 1.7
+  const scaleX = lineLike || width / extent < 0.05 ? extent : width
+  const scaleY = lineLike || height / extent < 0.05 ? extent : height
+  const normalize = (point: GesturePoint) => ({
+    x: (point.x - minX) / scaleX,
+    y: (point.y - minY) / scaleY,
+  })
+  const segments: Segment[] = []
+  let length = 0
+  for (const segment of rotated) {
+    const from = normalize(segment.from)
+    const to = normalize(segment.to)
+    const end = length + Math.hypot(to.x - from.x, to.y - from.y)
+    if (end === length) continue
+    segments.push({ from, to, start: length, end })
+    length = end
+  }
 
   // Fixed sample targets avoid inserting into the input or joining pen-up gaps.
   const points: GesturePoint[] = []
@@ -62,12 +112,8 @@ function pointCloud(strokes: GesturePoint[][]): GesturePoint[] | null {
       (target - segment.start) / (segment.end - segment.start),
     )
     points.push({
-      x:
-        (segment.from.x - minX + (segment.to.x - segment.from.x) * fraction) /
-        size,
-      y:
-        (segment.from.y - minY + (segment.to.y - segment.from.y) * fraction) /
-        size,
+      x: segment.from.x + (segment.to.x - segment.from.x) * fraction,
+      y: segment.from.y + (segment.to.y - segment.from.y) * fraction,
     })
   }
   const center = points.reduce(
@@ -125,10 +171,10 @@ function coversCloud(a: GesturePoint[], b: GesturePoint[]) {
         nearest,
         Math.hypot(point.x - other.x, point.y - other.y),
       )
-    if (nearest > 0.16) uncovered++
+    if (nearest > 0.18) uncovered++
   }
   // Weighted matching can favor a partial glyph; most of both shapes must exist.
-  return uncovered <= sampleCount * 0.1
+  return uncovered <= sampleCount * 0.15
 }
 
 export function recognizeGesture(
@@ -137,13 +183,23 @@ export function recognizeGesture(
 ): { appId: string; score: number } | null {
   const candidate = pointCloud(strokes)
   if (!candidate) return null
+  const candidates = [
+    candidate,
+    ...[-20, -10, 10, 20].map((degrees) =>
+      pointCloud(strokes, (degrees * Math.PI) / 180)!,
+    ),
+  ]
   const distances = new Map<string, number>()
   for (const shortcut of shortcuts) {
     const template = pointCloud([shortcut.points])
     if (!template) continue
-    if (!coversCloud(candidate, template) || !coversCloud(template, candidate))
-      continue
-    const distance = matchClouds(candidate, template)
+    const distance = Math.min(
+      ...candidates.map((cloud) =>
+        coversCloud(cloud, template) && coversCloud(template, cloud)
+          ? matchClouds(cloud, template)
+          : Infinity,
+      ),
+    )
     distances.set(
       shortcut.appId,
       Math.min(distances.get(shortcut.appId) ?? Infinity, distance),
