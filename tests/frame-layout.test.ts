@@ -153,7 +153,7 @@ test('edge attachment maps each position along the usable viewport span', () => 
       100,
       viewport,
     ),
-    { x: 24, y: 24, width: 200, height: 100 },
+    { x: 24, y: 0, width: 200, height: 100 },
   )
   assert.deepEqual(
     getFrameBounds(
@@ -162,7 +162,7 @@ test('edge attachment maps each position along the usable viewport span', () => 
       100,
       viewport,
     ),
-    { x: 776, y: 676, width: 200, height: 100 },
+    { x: 776, y: 700, width: 200, height: 100 },
   )
   assert.deepEqual(
     getFrameBounds(
@@ -171,7 +171,7 @@ test('edge attachment maps each position along the usable viewport span', () => 
       100,
       viewport,
     ),
-    { x: 24, y: 350, width: 200, height: 100 },
+    { x: 0, y: 350, width: 200, height: 100 },
   )
   assert.deepEqual(
     getFrameBounds(
@@ -180,7 +180,7 @@ test('edge attachment maps each position along the usable viewport span', () => 
       100,
       viewport,
     ),
-    { x: 776, y: 350, width: 200, height: 100 },
+    { x: 800, y: 350, width: 200, height: 100 },
   )
 })
 
@@ -192,14 +192,14 @@ test('attachments fit inside a smaller viewport without losing their edge', () =
       300,
       { width: 390, height: 844 },
     ),
-    { x: 12, y: 532, width: 366, height: 300 },
+    { x: 12, y: 544, width: 366, height: 300 },
   )
   assert.deepEqual(
     getFrameBounds({ surface: 'frame', edge: 'right', position: 0 }, 480, 300, {
       width: 390,
       height: 200,
     }),
-    { x: 12, y: 12, width: 366, height: 176 },
+    { x: 24, y: 12, width: 366, height: 176 },
   )
 })
 
@@ -320,4 +320,15 @@ test('full-width mobile attachments produce a finite centered drop position', ()
     ),
     { surface: 'frame', edge: 'top', position: 0.5 },
   )
+})
+
+test('the Frame action finds the nearest edge even outside the drag attachment distance', () => {
+  const bounds = { x: 260, y: 240, width: 200, height: 160 }
+  const viewport = { width: 1000, height: 800 }
+  assert.equal(getFrameDropTarget(bounds, viewport), null)
+  assert.deepEqual(getFrameDropTarget(bounds, viewport, Infinity), {
+    surface: 'frame',
+    edge: 'top',
+    position: (260 - 24) / (1000 - 48 - 200),
+  })
 })

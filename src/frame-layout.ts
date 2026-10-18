@@ -222,13 +222,16 @@ export function getFrameBounds(
   const position = Math.max(0, Math.min(placement.position, 1))
   const horizontal = placement.edge === 'top' || placement.edge === 'bottom'
   return {
-    x:
-      insetX +
-      availableX * (horizontal ? position : placement.edge === 'right' ? 1 : 0),
-    y:
-      insetY +
-      availableY *
-        (horizontal ? (placement.edge === 'bottom' ? 1 : 0) : position),
+    x: horizontal
+      ? insetX + availableX * position
+      : placement.edge === 'right'
+        ? viewport.width - fittedWidth
+        : 0,
+    y: horizontal
+      ? placement.edge === 'bottom'
+        ? viewport.height - fittedHeight
+        : 0
+      : insetY + availableY * position,
     width: fittedWidth,
     height: fittedHeight,
   }
@@ -263,6 +266,7 @@ export function getPinnedWindowOffset(
 export function getFrameDropTarget(
   bounds: Bounds,
   viewport: { width: number; height: number },
+  maximumDistance = 72,
 ): Extract<ObjectPlacement, { surface: 'frame' }> | null {
   const distances: { edge: FrameEdge; distance: number }[] = [
     { edge: 'top', distance: bounds.y },
@@ -273,7 +277,7 @@ export function getFrameDropTarget(
   const closest = distances.reduce((nearest, candidate) =>
     candidate.distance < nearest.distance ? candidate : nearest,
   )
-  if (closest.distance > 72) return null
+  if (closest.distance > maximumDistance) return null
   const horizontal = closest.edge === 'top' || closest.edge === 'bottom'
   const margin = viewport.width <= 760 ? 12 : 24
   const extent = horizontal ? viewport.width : viewport.height
