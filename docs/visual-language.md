@@ -6,6 +6,14 @@ The repeated direction across these experiments has been to remove visual explan
 
 This document explains how to extend that direction. The [feature list](features.md) describes what you can try today, including the simulated parts. [Spatial playground](spatial-playground.md) covers the implementation and saved state.
 
+The guiding analogy is [a painting canvas inside a frame](canvas-and-frame.md).
+The canvas holds your work; the frame keeps chosen things within reach while
+you move across it. Its layers give work depth, and its four corners provide a
+starting arrangement. Configurable frame attachments and **Change layout** are
+being implemented. Where the current behavior below still uses fixed corners
+or drawing-specific layer controls, the canvas-and-frame document records the
+intended replacement.
+
 ## Keep the canvas available for work
 
 The default background is a flat field of subtly tinted dots, spaced 28 pixels apart in both axes. Because those dots move with the canvas, even an empty area gives you a reference while panning. Desktop shortcuts, files, and folders belong to this background layer and always sit underneath windows. Every catalog app has a shortcut: you can decide where it belongs, while its continued presence makes the desktop a complete place to find apps.
@@ -51,9 +59,9 @@ The keyboard switcher uses the same idea. Holding Ctrl+1 gathers the actual open
 
 Use the existing items and window surfaces as results. Scaled windows retain their content and chrome, and app shortcuts carry the same artwork seen elsewhere. A clear selection highlight identifies the next item to open. The search field needs its placeholder, a close control, and an empty-result message when relevant; it doesn't need another heading, result count, or instruction strip. The dock and launcher remain useful alongside this spatial route to the same apps.
 
-## Give each corner an intention
+## Give the default corners an intention
 
-The four corners provide stable places to look:
+The default four corners provide stable places to look:
 
 | Corner       | Intention                         | Resting controls                                                   |
 | ------------ | --------------------------------- | ------------------------------------------------------------------ |
@@ -68,7 +76,11 @@ The common surface is 54 pixels tall, with 4 pixels of padding, a 1-pixel border
 
 On screens 760 pixels wide or narrower, the top corners merge into one top bar and the bottom corners into one bottom bar. Notifications retain their full status text. Device icons and app icons can scroll horizontally within their own strips. Apps remain right-aligned; the canvas tool stays on the left. That tool becomes one selector with a flat menu containing the available tools and actions.
 
-The positions still tell us where to go, even when the available space changes.
+These positions give the first session a clear arrangement, even when the
+available space changes. The configurable frame extends this to attachments on
+any edge. Users can move or remove controls, and can attach their own work. The
+shared surfaces and control states should keep that arrangement coherent even
+when the original corners are empty.
 
 ## Make words earn their place
 
