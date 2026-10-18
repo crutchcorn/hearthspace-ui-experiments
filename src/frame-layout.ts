@@ -300,3 +300,22 @@ export function getFrameDropTarget(
           : Math.max(0, Math.min(offset / span, 1))
   return { surface: 'frame', edge: closest.edge, position }
 }
+
+export function getWidgetFrameDropTarget(
+  bounds: Bounds,
+  viewport: { width: number; height: number },
+  maximumDistance = 72,
+): Extract<ObjectPlacement, { surface: 'frame' }> | null {
+  // Turning a toolbar must not change its edge target and turn it back again.
+  const size = Math.min(bounds.width, bounds.height)
+  return getFrameDropTarget(
+    {
+      x: bounds.x + (bounds.width - size) / 2,
+      y: bounds.y + (bounds.height - size) / 2,
+      width: size,
+      height: size,
+    },
+    viewport,
+    maximumDistance,
+  )
+}

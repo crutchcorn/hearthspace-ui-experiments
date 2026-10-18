@@ -1,7 +1,9 @@
 import type { PointerEvent } from 'react'
+import { createPortal } from 'react-dom'
 import { FileText, Folder, Globe } from 'lucide-react'
-import type { DesktopItem } from '../desktop'
+import type { Bounds, DesktopItem } from '../desktop'
 import type { SearchPlacement } from '../canvas-search'
+import { getFrameBounds, getPlacement, type FrameLayout } from '../frame-layout'
 import AppIcon from './AppIcon'
 import { APP_CATALOG } from './launcher-apps'
 import styles from './DesktopItems.module.css'
@@ -10,6 +12,9 @@ interface DesktopItemsProps {
   items: DesktopItem[]
   selectedIds: string[]
   placements?: Map<string, SearchPlacement>
+  frameLayout?: FrameLayout
+  view?: Bounds
+  frameHost?: HTMLElement | null
   previewSelectedId?: string
   onPointerDown: (
     event: PointerEvent<HTMLButtonElement>,
@@ -23,6 +28,9 @@ export default function DesktopItems({
   items,
   selectedIds,
   placements,
+  frameLayout,
+  view,
+  frameHost,
   previewSelectedId,
   onPointerDown,
   onOpen,
@@ -32,25 +40,36 @@ export default function DesktopItems({
     <div className={styles.layer} role="group" aria-label="Desktop items">
       {items.map((item) => {
         const placement = placements?.get(item.id)
-        return (
+        const layout = frameLayout
+          ? getPlacement(frameLayout, { kind: 'item', id: item.id })
+          : { surface: 'background' as const }
+        const framed =
+          !placements && layout.surface === 'frame' && view && frameHost
+        const bounds = framed ? getFrameBounds(layout, 54, 54, view) : item
+        const element = (
           <button
             key={item.id}
             type="button"
             className={styles.item}
             data-desktop-item-id={item.id}
             data-item-kind={item.kind}
+            data-surface={placements ? 'canvas' : layout.surface}
+            data-frame-attached={Boolean(framed)}
             data-preview-match={placement?.matches}
             data-preview-selected={
               placement ? previewSelectedId === item.id : undefined
             }
             inert={placement?.matches === false}
             aria-label={item.title}
+            title={framed ? item.title : undefined}
             aria-pressed={selectedIds.includes(item.id)}
             style={{
-              left: item.x,
-              top: item.y,
-              width: item.width,
-              height: item.height,
+              position: framed ? 'fixed' : undefined,
+              left: bounds.x,
+              top: bounds.y,
+              width: bounds.width,
+              height: bounds.height,
+              zIndex: layout.surface === 'canvas' ? 500 : 0,
               transform: placement
                 ? `translate(${placement.x - item.x}px, ${placement.y - item.y}px) scale(${placement.scale})`
                 : 'translate(0px, 0px) scale(1)',
@@ -77,9 +96,9 @@ export default function DesktopItems({
           >
             <span className={styles.icon} aria-hidden="true">
               {item.kind === 'folder' ? (
-                <Folder size={46} strokeWidth={1.2} />
+                <Folder size={framed ? 32 : 46} strokeWidth={1.2} />
               ) : item.kind === 'file' ? (
-                <FileText size={42} strokeWidth={1.2} />
+                <FileText size={framed ? 30 : 42} strokeWidth={1.2} />
               ) : (
                 <AppIcon
                   appId={item.appId}
@@ -87,7 +106,7 @@ export default function DesktopItems({
                     APP_CATALOG.find((app) => app.id === item.appId)?.icon ??
                     Globe
                   }
-                  size={38}
+                  size={framed ? 32 : 38}
                   strokeWidth={1.4}
                 />
               )}
@@ -95,6 +114,7 @@ export default function DesktopItems({
             <span className={styles.title}>{item.title}</span>
           </button>
         )
+        return framed ? createPortal(element, frameHost, item.id) : element
       })}
     </div>
   )

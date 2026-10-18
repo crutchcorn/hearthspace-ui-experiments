@@ -1,0 +1,46 @@
+.dialog {
+  width: min(420px, calc(100vw - 48px));
+  padding: 24px;
+  border: 1px solid var(--chrome-border);
+  border-radius: var(--radius-panel);
+  background: var(--app-surface, var(--field));
+  color: var(--ink);
+  box-shadow: var(--shadow-panel);
+}
+
+.dialog::backdrop {
+  background: #0006;
+  backdrop-filter: blur(5px);
+}
+
+.dialog h2 {
+  margin: 0 0 12px;
+  font-size: 19px;
+}
+
+.dialog p {
+  margin: 0 0 24px;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.dialog > div {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.dialog button {
+  border: 0;
+  padding: 10px 14px;
+  border-radius: var(--radius-control);
+  color: var(--ink);
+  background: var(--chrome-hover);
+  cursor: pointer;
+}
+
+.dialog button[data-destructive='true'] {
+  color: white;
+  background: #ba3b32;
+}

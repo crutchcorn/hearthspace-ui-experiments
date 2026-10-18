@@ -302,6 +302,31 @@
   outline-offset: 3px;
 }
 
+.restoreTools {
+  display: flex;
+  min-height: 36px;
+  align-items: center;
+  gap: 7px;
+  margin-top: 8px;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--muted);
+  font-size: 10px;
+  cursor: pointer;
+}
+
+.restoreTools:hover {
+  background: var(--chrome-hover);
+  color: var(--ink);
+}
+
+.restoreTools:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
 @container settings-content (width < 380px) {
   .page {
     padding: 21px 18px 23px;

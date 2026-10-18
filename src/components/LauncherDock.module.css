@@ -475,3 +475,115 @@
     animation: none;
   }
 }
+
+:global([data-layout-widget]) .dock {
+  position: relative;
+  inset: auto;
+  max-width: 100%;
+}
+
+:global([data-layout-widget]) .windowPopover {
+  position: absolute;
+  inset: var(--widget-popover-top) auto var(--widget-popover-bottom)
+    clamp(
+      calc(12px - var(--widget-popover-x)),
+      0px,
+      calc(100vw - var(--widget-popover-x) - min(370px, 100vw - 24px) - 12px)
+    );
+  max-height: var(--widget-popover-height);
+}
+
+@media (width <= 760px) {
+  :global([data-layout-widget]) .dock {
+    height: 54px;
+    flex: none;
+  }
+
+  :global([data-layout-widget]) .dock .bar {
+    height: 54px;
+    padding: var(--shell-padding);
+    border: var(--shell-border-width) solid var(--chrome-border);
+    border-radius: var(--radius-panel);
+    background: var(--chrome);
+    box-shadow: var(--shadow-panel), var(--glass-edge);
+    backdrop-filter: var(--glass-blur);
+  }
+}
+
+@media (width <= 760px) {
+  :global([data-layout-widget][data-merged]) .dock {
+    width: 100%;
+    height: 44px;
+  }
+
+  :global([data-layout-widget][data-merged]) .dock .bar {
+    height: 44px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+    backdrop-filter: none;
+  }
+}
+
+:global(
+    [data-layout-widget]:is([data-frame-edge='left'], [data-frame-edge='right'])
+  )
+  .dock {
+  width: 54px;
+  height: auto;
+  max-height: 100dvh;
+}
+
+:global(
+    [data-layout-widget]:is([data-frame-edge='left'], [data-frame-edge='right'])
+  )
+  .dock
+  .bar {
+  height: auto;
+  max-height: 100dvh;
+  flex-direction: column;
+}
+
+:global(
+    [data-layout-widget]:is([data-frame-edge='left'], [data-frame-edge='right'])
+  )
+  .appStrip {
+  width: 44px;
+  min-height: 0;
+  max-height: calc(100dvh - 63px);
+  flex-direction: column;
+  margin-left: 0;
+  overflow: hidden auto;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+}
+
+:global(
+    [data-layout-widget]:is([data-frame-edge='left'], [data-frame-edge='right'])
+  )
+  .divider {
+  width: 24px;
+  height: 1px;
+}
+
+:global(
+    [data-layout-widget]:is([data-frame-edge='left'], [data-frame-edge='right'])
+  )
+  .windowPopover {
+  inset: var(--widget-side-top) auto var(--widget-side-bottom)
+    clamp(
+      calc(12px - var(--widget-x)),
+      calc(100% + 12px),
+      calc(100vw - var(--widget-x) - min(370px, 100vw - 24px) - 12px)
+    );
+  max-height: var(--widget-side-height);
+}
+
+:global([data-layout-widget][data-frame-edge='right']) .windowPopover {
+  left: clamp(
+    calc(12px - var(--widget-x)),
+    calc(-1 * (min(370px, 100vw - 24px) + 12px)),
+    calc(100vw - var(--widget-x) - min(370px, 100vw - 24px) - 12px)
+  );
+}

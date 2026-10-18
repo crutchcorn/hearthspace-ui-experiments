@@ -8,6 +8,19 @@ import {
   type CSSProperties,
   type PointerEvent as ReactPointerEvent,
 } from 'react'
+import { createPortal } from 'react-dom'
+import { transformCanvasWorkspace } from './layout-workspace'
+import useObjectLayout from './useObjectLayout'
+import {
+  FRAME_WIDGETS,
+  getFrameBounds,
+  loadFrameLayout,
+  getPinnedWindowOffset,
+} from './frame-layout'
+import PlacedWidget from './components/PlacedWidget'
+import LayoutEditor from './components/LayoutEditor'
+import FrameGuides from './components/FrameGuides'
+import LayoutConfirm from './components/LayoutConfirm'
 import {
   ArrowDownRight,
   ChevronLeft,
@@ -77,9 +90,9 @@ import useShellPeek from './useShellPeek'
 import useWindowSwitcher from './useWindowSwitcher'
 import usePeekMotion from './usePeekMotion'
 import {
-  restoreBackgroundItems,
-  settleBackgroundItems,
-  settleCoveredItems,
+  restoreBackgroundItems as restoreCanvasBackground,
+  settleBackgroundItems as settleCanvasBackground,
+  settleCoveredItems as settleCanvasCovered,
 } from './peek-layout'
 import { gatherRelatedWindows } from './gather-windows'
 import { getMaximizedBounds, getWindowClearance } from './window-layout'
@@ -145,7 +158,11 @@ function App() {
   const accent =
     ACCENT_THEMES.find((theme) => theme.id === accentTheme) ?? ACCENT_THEMES[0]
   const [workspace, setWorkspace] = useState(() =>
-    restoreBackgroundItems(loadWorkspace()),
+    transformCanvasWorkspace(
+      loadWorkspace(),
+      loadFrameLayout(),
+      restoreCanvasBackground,
+    ),
   )
   const [view, setView] = useState(() => ({
     ...workspace.home,
@@ -166,7 +183,11 @@ function App() {
   const [notificationsOpen, setNotificationsOpen] = useState(false)
   const [systemPanel, setSystemPanel] = useState<SystemPanel>(null)
   const [tool, setTool] = useState(loadCanvasTool)
-  const [drawingLayer, setDrawingLayer] = useState<DrawingLayerName>('above')
+  const drawingLayer: DrawingLayerName = 'above'
+  const [frameHost, setFrameHost] = useState<HTMLDivElement | null>(null)
+  const [expandedPinnedId, setExpandedPinnedId] = useState<string | null>(null)
+  const [hoveredPinnedId, setHoveredPinnedId] = useState<string | null>(null)
+  const [closingPinnedId, setClosingPinnedId] = useState<string | null>(null)
   const [selectedDrawingId, setSelectedDrawingId] = useState<string | null>(
     null,
   )
@@ -201,14 +222,12 @@ function App() {
         canvasSearch.anchor,
         canvasSearch.query,
         canvasSearch.handwriting,
+        { widgets: FRAME_WIDGETS },
       )
     : null
   const searchResult = searchLayout?.results[canvasSearch?.selected ?? 0]
   const [selectionShape, setSelectionShape] = useState(loadWindowSelectionShape)
   const [selectedIds, setSelectedIds] = useState<string[]>([])
-  const selectedWindows = workspace.windows.filter((item) =>
-    selectedIds.includes(item.id),
-  )
   const [selectedItemIds, setSelectedItemIds] = useState<string[]>([])
   const [selection, setSelection] = useState<
     (Bounds & { target: 'windows' | 'items'; points?: SelectionPoint[] }) | null
@@ -294,6 +313,40 @@ function App() {
   const previewLayout = switcherLayout ?? searchLayout
   const { cancel: cancelPeekMotion, prepare: preparePeekMotion } =
     usePeekMotion(viewport, !previewLayout && !focusView)
+  const objectLayout = useObjectLayout(
+    workspace,
+    setWorkspace,
+    view,
+    tool === 'layout',
+    (target) =>
+      preparePeekMotion({
+        excludedWindowId: target.kind === 'window' ? target.id : undefined,
+      }),
+  )
+  const restoreBackgroundItems = useCallback(
+    (current: typeof workspace) =>
+      transformCanvasWorkspace(
+        current,
+        objectLayout.layout,
+        restoreCanvasBackground,
+      ),
+    [objectLayout.layout],
+  )
+  const settleBackgroundItems = (current: typeof workspace) =>
+    transformCanvasWorkspace(
+      current,
+      objectLayout.layout,
+      settleCanvasBackground,
+    )
+  const settleCoveredItems = (current: typeof workspace) =>
+    transformCanvasWorkspace(current, objectLayout.layout, settleCanvasCovered)
+  const onCanvas = (kind: 'window' | 'item', id: string) => {
+    const surface = objectLayout.placement({ kind, id }).surface
+    return surface === 'canvas' || surface === 'background'
+  }
+  const selectedWindows = workspace.windows.filter(
+    (item) => selectedIds.includes(item.id) && onCanvas('window', item.id),
+  )
   const previewWindowId = windowSwitcher.open
     ? windowSwitcher.selectedId
     : searchResult?.kind === 'window'
@@ -413,12 +466,18 @@ function App() {
     closePopovers()
     preparePeekMotion({ backgroundOnly: true })
     setWorkspace((current) =>
-      restoreBackgroundItems(arrangeWindows(current, origin)),
+      restoreBackgroundItems(
+        transformCanvasWorkspace(current, objectLayout.layout, (canvas) =>
+          arrangeWindows(canvas, origin),
+        ),
+      ),
     )
   }, [
     closePopovers,
     cancelPeekMotion,
     preparePeekMotion,
+    objectLayout.layout,
+    restoreBackgroundItems,
     leaveFocusView,
     setLauncher,
     setSelectedIds,
@@ -505,15 +564,14 @@ function App() {
     const keydown = (event: KeyboardEvent) => {
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
         event.preventDefault()
-        setLauncher(launcher === 'apps' ? null : 'apps')
-        setEditingGestures(false)
-        if (launcher === 'apps')
-          launcherTrigger.current?.focus({ preventScroll: true })
-        setShowMap(false)
-        closePopovers()
+        openCanvasSearch({
+          x: window.innerWidth / 2,
+          y: window.innerHeight / 3,
+        })
         return
       }
       if (event.key === 'Escape') {
+        if (tool === 'layout') setTool('cursor')
         if (canvasSearch) {
           event.preventDefault()
           setCanvasSearch(null)
@@ -644,6 +702,7 @@ function App() {
   }, [
     home.x,
     home.y,
+    tool,
     launcher,
     closePopovers,
     arrangeAllWindows,
@@ -668,6 +727,11 @@ function App() {
   function focusWindow(id: string) {
     if (focusView && focusView.id !== id) leaveFocusView()
     setActiveId(id)
+    setExpandedPinnedId(
+      objectLayout.placement({ kind: 'window', id }).surface === 'frame'
+        ? id
+        : null,
+    )
     setWorkspace((current) => {
       const item = current.windows.find((entry) => entry.id === id)
       if (!item || current.windows.at(-1)?.id === id) return current
@@ -761,7 +825,11 @@ function App() {
       })
       setSelectedIds(
         workspace.windows
-          .filter((item) => polygonIntersectsBounds(points, item))
+          .filter(
+            (item) =>
+              onCanvas('window', item.id) &&
+              polygonIntersectsBounds(points, item),
+          )
           .map((item) => item.id),
       )
       return
@@ -785,6 +853,7 @@ function App() {
       const ids = (isDesktopSelection ? workspace.items : workspace.windows)
         .filter(
           (item) =>
+            onCanvas(isDesktopSelection ? 'item' : 'window', item.id) &&
             item.x < area.x + area.width &&
             item.x + item.width > area.x &&
             item.y < area.y + area.height &&
@@ -1079,6 +1148,11 @@ function App() {
     id: string,
   ) {
     const drawing = workspace.drawings.find((item) => item.id === id)
+    if (objectLayout.placement({ kind: 'drawing', id }).surface === 'frame') {
+      event.stopPropagation()
+      selectDrawing(id)
+      return
+    }
     if (
       !drawing ||
       tool !== 'cursor' ||
@@ -1112,6 +1186,14 @@ function App() {
     event: ReactPointerEvent<HTMLButtonElement>,
     item: DesktopItem,
   ) {
+    if (
+      !previewLayout &&
+      objectLayout.placement({ kind: 'item', id: item.id }).surface === 'frame'
+    ) {
+      event.stopPropagation()
+      selectDesktopItem(item, false)
+      return
+    }
     if (previewLayout || previewExiting) {
       event.preventDefault()
       event.stopPropagation()
@@ -1143,7 +1225,9 @@ function App() {
     if (!current) return
     current.id = item.id
     current.bounds = item
-    current.items = workspace.items.filter((entry) => ids.includes(entry.id))
+    current.items = workspace.items.filter(
+      (entry) => ids.includes(entry.id) && onCanvas('item', entry.id),
+    )
   }
 
   function endGesture(event: ReactPointerEvent) {
@@ -1211,6 +1295,13 @@ function App() {
   }
 
   function maximize(item: DesktopWindow) {
+    if (
+      objectLayout.placement({ kind: 'window', id: item.id }).surface ===
+      'frame'
+    ) {
+      setExpandedPinnedId((current) => (current === item.id ? null : item.id))
+      return
+    }
     setRevealRequest(null)
     if (focusView?.id === item.id) {
       preparePeekMotion({ excludedWindowId: item.id })
@@ -1253,6 +1344,13 @@ function App() {
   }
 
   function toggleFocusView(item: DesktopWindow) {
+    if (
+      objectLayout.placement({ kind: 'window', id: item.id }).surface ===
+      'frame'
+    ) {
+      setExpandedPinnedId((current) => (current === item.id ? null : item.id))
+      return
+    }
     cancelPeekMotion()
     if (focusView?.id === item.id) {
       leaveFocusView()
@@ -1304,7 +1402,17 @@ function App() {
     windowElements.current.get(item.id)?.focus({ preventScroll: true })
   }
 
-  function closeWindow(id: string) {
+  function closeWindow(id: string, confirmed = false) {
+    if (
+      !confirmed &&
+      objectLayout.placement({ kind: 'window', id }).surface === 'frame'
+    ) {
+      setClosingPinnedId(id)
+      return
+    }
+    if (confirmed)
+      objectLayout.place({ kind: 'window', id }, { surface: 'canvas' })
+    setClosingPinnedId(null)
     setRevealRequest(null)
     if (focusView?.id === id) setFocusView(null)
     preparePeekMotion({ backgroundOnly: true })
@@ -1383,6 +1491,11 @@ function App() {
       }
     })
     setActiveId(id)
+    setExpandedPinnedId(
+      objectLayout.placement({ kind: 'window', id }).surface === 'frame'
+        ? id
+        : null,
+    )
     return id
   }
 
@@ -1393,11 +1506,26 @@ function App() {
     const app = APP_CATALOG.find((item) => item.id === match?.appId)
     if (!app) return false
     const drawingId = selectedDrawing.id
+    const drawingPlacement = objectLayout.placement({
+      kind: 'drawing',
+      id: drawingId,
+    })
+    const drawingBounds =
+      drawingPlacement.surface === 'frame'
+        ? getFrameBounds(
+            drawingPlacement,
+            selectedDrawing.width,
+            selectedDrawing.height,
+            view,
+          )
+        : selectedDrawing
+    const drawingOffset =
+      drawingPlacement.surface === 'frame' ? view : { x: 0, y: 0 }
     const windowId = addWindow(
       app,
       {
-        x: selectedDrawing.x + selectedDrawing.width / 2,
-        y: selectedDrawing.y + selectedDrawing.height / 2,
+        x: drawingBounds.x + drawingBounds.width / 2 + drawingOffset.x,
+        y: drawingBounds.y + drawingBounds.height / 2 + drawingOffset.y,
       },
       drawingId,
     )
@@ -1451,6 +1579,13 @@ function App() {
   function revealWindow(id: string, options?: { center: boolean }) {
     const item = workspace.windows.find((entry) => entry.id === id)
     if (!item) return
+    if (objectLayout.placement({ kind: 'window', id }).surface === 'frame') {
+      closePopovers()
+      focusWindow(id)
+      setCanvasSearch(null)
+      setLauncher(null)
+      return
+    }
     const preview =
       previewLayout &&
       !window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -1491,14 +1626,36 @@ function App() {
     if (!result) return
     setCanvasSearch(null)
     if (result.kind === 'window') revealWindow(result.id, { center: true })
-    else {
+    else if (result.kind === 'widget') {
+      const target = { kind: 'widget' as const, id: result.id }
+      const widget = FRAME_WIDGETS.find((entry) => entry.id === result.id)!
+      objectLayout.place(target, widget.defaultPlacement)
+      objectLayout.setSelected(target)
+      setTool('layout')
+    } else if (result.kind === 'drawing') {
+      const drawing = workspace.drawings.find((entry) => entry.id === result.id)
+      setTool('cursor')
+      setSelectedDrawingId(result.id)
+      if (
+        drawing &&
+        objectLayout.placement({ kind: 'drawing', id: result.id }).surface !==
+          'frame'
+      )
+        viewport.current?.scrollTo({
+          left: drawing.x - (view.width - drawing.width) / 2,
+          top: drawing.y - (view.height - drawing.height) / 2,
+          behavior: 'smooth',
+        })
+    } else {
       const item = workspace.items.find((entry) => entry.id === result.id)
       const app = APP_CATALOG.find((entry) => entry.id === item?.appId)
       if (app) launchApp(app)
     }
   }
 
-  function openGestureSettings() {
+  function openGestureSettings(
+    category: SettingsNavigationRequest['category'] = 'gestures',
+  ) {
     const settings = workspace.windows.findLast(
       (item) => item.appId === 'settings',
     )
@@ -1507,7 +1664,7 @@ function App() {
       addWindow(APP_CATALOG.find((app) => app.id === 'settings')!)
     setSettingsNavigation({
       windowId: id,
-      request: { id: crypto.randomUUID(), category: 'gestures' },
+      request: { id: crypto.randomUUID(), category },
     })
     if (settings) revealWindow(id, { center: true })
     closePopovers()
@@ -1569,9 +1726,58 @@ function App() {
     saveShowBatteryPercentage(show)
   }
 
+  const isDefaultWidget = (id: string) => {
+    const current = objectLayout.placement({ kind: 'widget', id })
+    const initial = FRAME_WIDGETS.find(
+      (widget) => widget.id === id,
+    )!.defaultPlacement
+    return (
+      current.surface === 'frame' &&
+      current.edge === initial.edge &&
+      current.position === initial.position
+    )
+  }
+  const mergedTop =
+    isDefaultWidget('notifications') && isDefaultWidget('system')
+  const mergedBottom = isDefaultWidget('tools') && isDefaultWidget('apps')
+
   return (
     <main
       className={styles.desktop}
+      data-layout-editing={tool === 'layout'}
+      onPointerDownCapture={(event) => {
+        objectLayout.events.onPointerDownCapture(event)
+        if (
+          tool !== 'layout' &&
+          expandedPinnedId &&
+          !(event.target as Element).closest(
+            `[data-window-id="${expandedPinnedId}"], [data-layout-editor]`,
+          )
+        )
+          setExpandedPinnedId(null)
+      }}
+      onFocusCapture={(event) => {
+        if (
+          expandedPinnedId &&
+          !(event.target as Element).closest(
+            `[data-window-id="${expandedPinnedId}"], [data-layout-editor]`,
+          )
+        )
+          setExpandedPinnedId(null)
+      }}
+      onPointerMove={objectLayout.events.onPointerMove}
+      onPointerUp={objectLayout.events.onPointerUp}
+      onPointerCancel={objectLayout.events.onPointerCancel}
+      onLostPointerCapture={objectLayout.events.onLostPointerCapture}
+      onClickCapture={(event) => {
+        if (
+          tool === 'layout' &&
+          !(event.target as Element).closest('[data-layout-editor]')
+        ) {
+          event.preventDefault()
+          event.stopPropagation()
+        }
+      }}
       data-accent={accentTheme}
       data-color-mode={colorMode}
       data-presentation="realistic"
@@ -1581,6 +1787,58 @@ function App() {
       data-shell-peek={!renderedFocusView || shellPeek}
       style={{ '--accent-base': accent.color } as CSSProperties}
     >
+      <div
+        ref={setFrameHost}
+        className={styles.frameHost}
+        data-shell-controls
+      />
+      {tool === 'layout' && (
+        <>
+          <LayoutEditor
+            target={objectLayout.selected}
+            title={objectLayout.title}
+            placement={
+              objectLayout.selected
+                ? objectLayout.placement(objectLayout.selected)
+                : null
+            }
+            onPlacementChange={(next) => {
+              if (objectLayout.selected)
+                objectLayout.place(objectLayout.selected, next)
+            }}
+            onFrame={objectLayout.attachSelected}
+            onRemove={objectLayout.remove}
+            onDone={() => setTool('cursor')}
+          />
+        </>
+      )}
+      {objectLayout.warning && (
+        <LayoutConfirm
+          title="Keep a way back to your canvas"
+          confirmLabel="Open settings"
+          onCancel={() => objectLayout.setWarning(false)}
+          onConfirm={() => {
+            objectLayout.setWarning(false)
+            setTool('cursor')
+            openGestureSettings('system')
+          }}
+        >
+          Canvas tools can be removed after you enable “Make canvas tools
+          hide-able” in Settings. You can find them again with / or Ctrl+K
+          search, or restore them from Settings.
+        </LayoutConfirm>
+      )}
+      {closingPinnedId && (
+        <LayoutConfirm
+          title="Close and remove from pinned?"
+          confirmLabel="Close and remove"
+          destructive
+          onCancel={() => setClosingPinnedId(null)}
+          onConfirm={() => closeWindow(closingPinnedId, true)}
+        >
+          This closes the window and removes it from the frame.
+        </LayoutConfirm>
+      )}
       {background.photo && background.photo.fit !== 'repeat' && (
         <div
           className={styles.photoBackground}
@@ -1595,47 +1853,6 @@ function App() {
           }}
         />
       )}
-      <div
-        className={`${styles.topbar} ${shellStyles.mobileSurface}`}
-        data-shell-controls
-        inert={windowSwitcher.open}
-      >
-        <NotificationInbox
-          open={notificationsOpen}
-          previewVisible={
-            !previewLayout &&
-            !systemPanel &&
-            !launcher &&
-            !showMap &&
-            !dockAppId
-          }
-          onToggle={() => {
-            setCanvasSearch(null)
-            setNotificationsOpen(!notificationsOpen)
-            setDockAppId(null)
-            setSystemPanel(null)
-            setLauncher(null)
-            setShowMap(false)
-            setSpaceHeld(false)
-          }}
-          onClose={() => setNotificationsOpen(false)}
-          onNavigate={openNotificationTarget}
-        />
-        <SystemBar
-          showBatteryPercentage={showBatteryPercentage}
-          openPanel={systemPanel}
-          onPanelChange={(panel) => {
-            setCanvasSearch(null)
-            setSystemPanel(panel)
-            if (panel) {
-              setDockAppId(null)
-              setNotificationsOpen(false)
-              setLauncher(null)
-              setShowMap(false)
-            }
-          }}
-        />
-      </div>
       <div
         ref={viewport}
         tabIndex={-1}
@@ -1751,9 +1968,15 @@ function App() {
             } as CSSProperties
           }
         >
+          {tool === 'layout' && (
+            <FrameGuides target={objectLayout.dropTarget} />
+          )}
           <div inert={focusView !== null || windowSwitcher.open}>
             <DesktopItems
               items={workspace.items}
+              frameLayout={objectLayout.layout}
+              frameHost={frameHost}
+              view={view}
               selectedIds={selectedItemIds}
               placements={previewLayout?.items}
               previewSelectedId={
@@ -1771,15 +1994,27 @@ function App() {
               }}
             />
           </div>
-          {!previewLayout && !focusView && (
+          {!windowSwitcher.open && !focusView && (
             <div className={styles.drawingLayer} style={{ zIndex: 0 }}>
               <DrawingLayer
                 drawings={workspace.drawings}
+                frameLayout={objectLayout.layout}
+                frameHost={frameHost}
+                view={view}
+                placements={searchLayout?.drawings}
+                onOpen={(id) => activateSearchResult({ kind: 'drawing', id })}
                 layer="below"
-                selectedId={selectedDrawingId}
+                selectedId={
+                  searchResult?.kind === 'drawing'
+                    ? searchResult.id
+                    : selectedDrawingId
+                }
                 consumingIds={consumingDrawingIds}
                 draft={drawingDraft ?? undefined}
-                interactive={tool === 'cursor' && !previewExiting}
+                interactive={
+                  (tool === 'cursor' || tool === 'layout' || !!searchLayout) &&
+                  !previewExiting
+                }
                 onPointerDown={startDrawingMove}
                 onSelect={selectDrawing}
               />
@@ -1787,12 +2022,31 @@ function App() {
           )}
           {workspace.windows.map((item, index) => {
             const placement = previewLayout?.windows.get(item.id)
+            const objectPlacement = objectLayout.placement({
+              kind: 'window',
+              id: item.id,
+            })
+            const attached =
+              !previewLayout && objectPlacement.surface === 'frame'
+            const frameBounds = attached
+              ? getFrameBounds(objectPlacement, item.width, item.height, view)
+              : null
+            const expanded = expandedPinnedId === item.id || tool === 'layout'
+            const offset = attached
+              ? getPinnedWindowOffset(
+                  frameBounds!,
+                  objectPlacement.edge,
+                  view,
+                  expanded,
+                  hoveredPinnedId === item.id ? 100 : 42,
+                )
+              : { x: 0, y: 0 }
             const app = APP_CATALOG.find((entry) => entry.id === item.appId)
             const appId =
               app?.id ?? (item.kind === 'notes' ? 'notes' : 'workspace-windows')
             const Icon =
               app?.icon ?? (item.kind === 'notes' ? StickyNote : PanelsTopLeft)
-            return (
+            const content = (
               <section
                 key={item.id}
                 ref={(element) => {
@@ -1803,6 +2057,21 @@ function App() {
                 aria-label={item.title}
                 data-window-id={item.id}
                 data-app-id={appId}
+                data-surface={objectPlacement.surface}
+                data-frame-edge={attached ? objectPlacement.edge : undefined}
+                data-pinned-collapsed={attached && !expanded}
+                onPointerEnter={(event) => {
+                  if (attached && event.pointerType !== 'touch')
+                    setHoveredPinnedId(item.id)
+                }}
+                onPointerLeave={() => {
+                  if (attached) setHoveredPinnedId(null)
+                }}
+                data-layout-selected={
+                  tool === 'layout' &&
+                  objectLayout.selected?.kind === 'window' &&
+                  objectLayout.selected.id === item.id
+                }
                 data-drawing-launch={
                   !previewLayout &&
                   !previewExiting &&
@@ -1829,22 +2098,36 @@ function App() {
                 className={styles.window}
                 style={{
                   position:
-                    renderedFocusView?.id === item.id ? 'fixed' : undefined,
-                  left: renderedFocusView?.id === item.id ? 0 : item.x,
-                  top: renderedFocusView?.id === item.id ? 0 : item.y,
+                    renderedFocusView?.id === item.id || attached
+                      ? 'fixed'
+                      : undefined,
+                  left:
+                    renderedFocusView?.id === item.id
+                      ? 0
+                      : (frameBounds?.x ?? item.x),
+                  top:
+                    renderedFocusView?.id === item.id
+                      ? 0
+                      : (frameBounds?.y ?? item.y),
                   width:
-                    renderedFocusView?.id === item.id ? view.width : item.width,
+                    renderedFocusView?.id === item.id
+                      ? view.width
+                      : (frameBounds?.width ?? item.width),
                   height:
                     renderedFocusView?.id === item.id
                       ? view.height
-                      : item.height,
+                      : (frameBounds?.height ?? item.height),
                   transform: placement
                     ? `translate(${placement.x - item.x}px, ${placement.y - item.y}px) scale(${placement.scale})`
-                    : 'translate(0px, 0px) scale(1)',
+                    : `translate(${offset.x}px, ${offset.y}px) scale(1)`,
                   zIndex:
                     renderedFocusView?.id === item.id
                       ? workspace.windows.length + 1
-                      : index + 1,
+                      : attached
+                        ? 1100 + index
+                        : objectPlacement.surface === 'background'
+                          ? 1
+                          : index + 10,
                 }}
                 onFocusCapture={() => {
                   if (!previewLayout) focusWindow(item.id)
@@ -1858,10 +2141,13 @@ function App() {
                 }}
               >
                 <header
-                  inert={previewLayout !== null}
+                  inert={previewLayout !== null || (attached && !expanded)}
                   className={styles.titlebar}
                   onPointerDown={(event) => {
-                    if (!(event.target as HTMLElement).closest('button'))
+                    if (
+                      !attached &&
+                      !(event.target as HTMLElement).closest('button')
+                    )
                       startGesture(event, 'move', item)
                   }}
                   onDoubleClick={(event) => {
@@ -1892,14 +2178,16 @@ function App() {
                   <div className={styles.windowActions}>
                     <button
                       title={
-                        focusView?.id === item.id
-                          ? 'Leave focused view'
-                          : 'Maximize window'
+                        attached
+                          ? 'Tuck into frame'
+                          : focusView?.id === item.id
+                            ? 'Leave focused view'
+                            : 'Maximize window'
                       }
-                      aria-label={`${focusView?.id === item.id ? 'Leave focused view for' : 'Maximize'} ${item.title}`}
+                      aria-label={`${attached ? 'Tuck into frame' : focusView?.id === item.id ? 'Leave focused view for' : 'Maximize'} ${item.title}`}
                       onClick={() => toggleFocusView(item)}
                     >
-                      {focusView?.id === item.id ? (
+                      {attached || focusView?.id === item.id ? (
                         <Minimize2 size={12} />
                       ) : (
                         <Maximize2 size={12} />
@@ -1917,7 +2205,9 @@ function App() {
                 <div
                   className={styles.windowBody}
                   inert={
-                    previewLayout !== null || (!focusView && tool === 'select')
+                    previewLayout !== null ||
+                    (attached && !expanded) ||
+                    (!focusView && (tool === 'select' || tool === 'layout'))
                   }
                 >
                   {appId === 'notes' && (
@@ -1935,6 +2225,9 @@ function App() {
                         ? settingsNavigation.request
                         : undefined
                     }
+                    allowHideTools={objectLayout.layout.allowHideTools}
+                    onAllowHideToolsChange={objectLayout.setAllowHideTools}
+                    onRestoreCanvasTools={objectLayout.restoreTools}
                     ai={ai}
                     workspace={workspace}
                     accentTheme={accentTheme}
@@ -1958,6 +2251,7 @@ function App() {
                   />
                 </div>
                 {!previewLayout &&
+                  !attached &&
                   !item.restore &&
                   edges.map((edge) => (
                     <div
@@ -1969,7 +2263,7 @@ function App() {
                       }
                     />
                   ))}
-                {!previewLayout && !item.restore && (
+                {!previewLayout && !attached && !item.restore && (
                   <ArrowDownRight className={styles.resizeHint} size={12} />
                 )}
                 {placement?.matches && (
@@ -1993,26 +2287,81 @@ function App() {
                     }
                   />
                 )}
+                {attached && !expanded && (
+                  <button
+                    className={styles.pinnedReveal}
+                    aria-label={`Open pinned ${item.title}`}
+                    onClick={() => focusWindow(item.id)}
+                  >
+                    <span>
+                      <Icon size={18} />
+                      <span>{item.title}</span>
+                    </span>
+                  </button>
+                )}
               </section>
             )
+            return attached && frameHost
+              ? createPortal(content, frameHost, item.id)
+              : content
           })}
-          {!previewLayout && !focusView && (
+          {!windowSwitcher.open && !focusView && (
             <div
               className={styles.drawingLayer}
               style={{ zIndex: workspace.windows.length + 1 }}
             >
               <DrawingLayer
                 drawings={workspace.drawings}
+                frameLayout={objectLayout.layout}
+                frameHost={frameHost}
+                view={view}
+                placements={searchLayout?.drawings}
+                onOpen={(id) => activateSearchResult({ kind: 'drawing', id })}
                 layer="above"
-                selectedId={selectedDrawingId}
+                selectedId={
+                  searchResult?.kind === 'drawing'
+                    ? searchResult.id
+                    : selectedDrawingId
+                }
                 consumingIds={consumingDrawingIds}
                 draft={drawingDraft ?? undefined}
-                interactive={tool === 'cursor' && !previewExiting}
+                interactive={
+                  (tool === 'cursor' || tool === 'layout' || !!searchLayout) &&
+                  !previewExiting
+                }
                 onPointerDown={startDrawingMove}
                 onSelect={selectDrawing}
               />
             </div>
           )}
+          {searchLayout &&
+            FRAME_WIDGETS.map((widget) => {
+              const place = searchLayout.widgets.get(widget.id)
+              if (!place?.matches) return null
+              return (
+                <button
+                  key={widget.id}
+                  className={styles.widgetResult}
+                  data-preview-selected={
+                    searchResult?.kind === 'widget' &&
+                    searchResult.id === widget.id
+                  }
+                  style={{
+                    left: place.x,
+                    top: place.y,
+                    width: 240,
+                    height: 72,
+                    transform: `scale(${place.scale})`,
+                  }}
+                  onClick={() =>
+                    activateSearchResult({ kind: 'widget', id: widget.id })
+                  }
+                >
+                  <PanelsTopLeft size={23} />
+                  <span>{widget.title}</span>
+                </button>
+              )
+            })}
           {selection?.points ? (
             <svg
               className={styles.freeformSelection}
@@ -2060,174 +2409,295 @@ function App() {
           )}
         </div>
       </div>
-      {!focusView && !previewLayout && selectedDrawing && !drawingDraft && (
-        <DrawingActions
-          key={selectedDrawing.id}
-          drawing={selectedDrawing}
-          view={view}
-          editing={tool === 'draw'}
-          onPlay={gestureShortcuts.length > 0 ? playDrawing : undefined}
-          onLayerChange={(layer) => {
-            setDrawingLayer(layer)
-            preparePeekMotion({ backgroundOnly: true })
-            setWorkspace((current) =>
-              settleBackgroundItems({
-                ...current,
-                drawings: current.drawings.map((item) =>
-                  item.id === selectedDrawing.id
-                    ? { ...item, layer, peekOrigin: undefined }
-                    : item,
-                ),
-              }),
-            )
-          }}
-          onDelete={() => {
-            preparePeekMotion({ backgroundOnly: true })
-            setWorkspace((current) =>
-              restoreBackgroundItems({
-                ...current,
-                drawings: current.drawings.filter(
-                  (item) => item.id !== selectedDrawing.id,
-                ),
-              }),
-            )
-            setSelectedDrawingId(null)
-          }}
-          onFinish={() => setSelectedDrawingId(null)}
-        />
-      )}
-      {!focusView && !previewLayout && selectedWindows.length > 0 && (
-        <GatherWindows
-          key={`${ai.enabled}:${selectedIds.toSorted().join(',')}`}
-          windows={selectedWindows}
-          view={view}
-          enabled={ai.enabled}
-          downloading={ai.downloading}
-          onGather={() => {
-            const canvas = viewport.current
-            if (!ai.enabled || !canvas) return
-            const currentView = {
-              x: canvas.scrollLeft,
-              y: canvas.scrollTop,
-              width: canvas.clientWidth,
-              height: canvas.clientHeight,
-            }
-            const next = gatherRelatedWindows(
-              workspace,
-              selectedIds,
-              currentView,
-            )
-            if (next === workspace) return
-            const preview = window.matchMedia(
-              '(prefers-reduced-motion: reduce)',
-            ).matches
-              ? undefined
-              : captureWindowPreview(windowElements.current)
-            preparePeekMotion({ backgroundOnly: true })
-            setWorkspace(restoreBackgroundItems(next))
-            setRevealRequest(
-              preview
-                ? {
-                    id: selectedIds[0],
-                    left: currentView.x,
-                    top: currentView.y,
-                    preview,
-                    focus: false,
-                  }
-                : null,
-            )
-          }}
-        />
-      )}
       <div
-        className={`${styles.docks} ${shellStyles.mobileSurface}`}
+        className={`${styles.topbar} ${mergedTop ? shellStyles.mobileSurface : ''}`}
+        data-merged={mergedTop ? 'top' : undefined}
         data-shell-controls
         inert={windowSwitcher.open}
       >
-        <CanvasTools
-          mode={tool}
-          drawingLayer={drawingLayer}
-          onDrawingLayerChange={(layer) => {
-            closePopovers()
-            setDrawingLayer(layer)
-            setTool('draw')
-            setSelectedDrawingId(null)
-            setSelectedIds([])
-            setSelectedItemIds([])
-            setShowMap(false)
-            setLauncher(null)
-          }}
-          selectionShape={selectionShape}
-          onSelectionShapeChange={(shape) => {
-            closePopovers()
-            setSelectionShape(shape)
-            setTool('select')
-            setSelectedIds([])
-            setSelectedItemIds([])
-            setShowMap(false)
-            setLauncher(null)
-          }}
-          menusAllowed={
-            !previewLayout &&
-            !showMap &&
-            !launcher &&
-            !notificationsOpen &&
-            !systemPanel &&
-            !dockAppId
+        <PlacedWidget
+          draggingWidget={objectLayout.draggingWidget}
+          id="notifications"
+          merged={mergedTop ? 'top' : undefined}
+          placement={objectLayout.placement({
+            kind: 'widget',
+            id: 'notifications',
+          })}
+          view={view}
+          editing={tool === 'layout'}
+          selected={
+            objectLayout.selected?.kind === 'widget' &&
+            objectLayout.selected.id === 'notifications'
           }
-          onModeChange={(mode) => {
-            closePopovers()
-            setTool(mode)
-            if (mode !== 'select') setSelectedIds([])
-            if (mode !== 'cursor') setSelectedItemIds([])
-            setShowMap(false)
-            setLauncher(null)
-          }}
-          onOpenToolMenu={() => {
-            closePopovers()
-            setShowMap(false)
-            setLauncher(null)
-          }}
-          mapOpen={showMap}
-          onToggleMap={() => {
-            closePopovers()
-            setShowMap(!showMap)
-            setLauncher(null)
-          }}
-          onArrange={arrangeAllWindows}
-          windowCount={workspace.windows.length}
-        />
-        <span className={styles.dockDivider} aria-hidden="true" />
-        <LauncherDock
-          open={launcher !== null}
-          triggerRef={launcherTrigger}
-          onToggle={toggleLauncher}
-          onLaunch={launchApp}
-          windows={workspace.windows}
-          activeWindowId={focusedWindowId}
-          selectedAppId={dockAppId}
-          onSelectApp={(id) => {
-            closePopovers()
-            setDockAppId(id)
-            setLauncher(null)
-            setShowMap(false)
-            setSpaceHeld(false)
-          }}
-          onFocusWindow={revealWindow}
-          onReorderWindows={(orderedIds) => {
-            const order = new Map(orderedIds.map((id, index) => [id, index]))
-            setWorkspace((current) => ({
-              ...current,
-              windows: current.windows.map((item) => {
-                const dockOrder = order.get(item.id)
-                return dockOrder === undefined ? item : { ...item, dockOrder }
-              }),
-            }))
-          }}
-        />
+          hidden={!!previewLayout}
+        >
+          <NotificationInbox
+            open={notificationsOpen}
+            previewVisible={
+              !previewLayout &&
+              !systemPanel &&
+              !launcher &&
+              !showMap &&
+              !dockAppId
+            }
+            onToggle={() => {
+              setCanvasSearch(null)
+              setNotificationsOpen(!notificationsOpen)
+              setDockAppId(null)
+              setSystemPanel(null)
+              setLauncher(null)
+              setShowMap(false)
+              setSpaceHeld(false)
+            }}
+            onClose={() => setNotificationsOpen(false)}
+            onNavigate={openNotificationTarget}
+          />
+        </PlacedWidget>
+        <PlacedWidget
+          draggingWidget={objectLayout.draggingWidget}
+          id="system"
+          merged={mergedTop ? 'top' : undefined}
+          placement={objectLayout.placement({ kind: 'widget', id: 'system' })}
+          view={view}
+          editing={tool === 'layout'}
+          selected={
+            objectLayout.selected?.kind === 'widget' &&
+            objectLayout.selected.id === 'system'
+          }
+          hidden={!!previewLayout}
+        >
+          <SystemBar
+            showBatteryPercentage={showBatteryPercentage}
+            openPanel={systemPanel}
+            onPanelChange={(panel) => {
+              setCanvasSearch(null)
+              setSystemPanel(panel)
+              if (panel) {
+                setDockAppId(null)
+                setNotificationsOpen(false)
+                setLauncher(null)
+                setShowMap(false)
+              }
+            }}
+          />
+        </PlacedWidget>
+      </div>
+      {!focusView &&
+        !previewLayout &&
+        tool !== 'layout' &&
+        selectedDrawing &&
+        !drawingDraft && (
+          <DrawingActions
+            key={selectedDrawing.id}
+            drawing={
+              objectLayout.placement({
+                kind: 'drawing',
+                id: selectedDrawing.id,
+              }).surface === 'frame'
+                ? {
+                    ...selectedDrawing,
+                    ...(() => {
+                      const placement = objectLayout.placement({
+                        kind: 'drawing',
+                        id: selectedDrawing.id,
+                      })
+                      const b =
+                        placement.surface === 'frame'
+                          ? getFrameBounds(
+                              placement,
+                              selectedDrawing.width,
+                              selectedDrawing.height,
+                              view,
+                            )
+                          : selectedDrawing
+                      return { ...b, x: b.x + view.x, y: b.y + view.y }
+                    })(),
+                  }
+                : selectedDrawing
+            }
+            view={view}
+            editing={tool === 'draw'}
+            onPlay={gestureShortcuts.length > 0 ? playDrawing : undefined}
+            onChangeLayout={() => {
+              objectLayout.setSelected({
+                kind: 'drawing',
+                id: selectedDrawing.id,
+              })
+              setTool('layout')
+            }}
+            onDelete={() => {
+              preparePeekMotion({ backgroundOnly: true })
+              setWorkspace((current) =>
+                restoreBackgroundItems({
+                  ...current,
+                  drawings: current.drawings.filter(
+                    (item) => item.id !== selectedDrawing.id,
+                  ),
+                }),
+              )
+              setSelectedDrawingId(null)
+            }}
+            onFinish={() => setSelectedDrawingId(null)}
+          />
+        )}
+      {!focusView &&
+        !previewLayout &&
+        tool !== 'layout' &&
+        selectedWindows.length > 0 && (
+          <GatherWindows
+            key={`${ai.enabled}:${selectedIds.toSorted().join(',')}`}
+            windows={selectedWindows}
+            view={view}
+            enabled={ai.enabled}
+            downloading={ai.downloading}
+            onGather={() => {
+              const canvas = viewport.current
+              if (!ai.enabled || !canvas) return
+              const currentView = {
+                x: canvas.scrollLeft,
+                y: canvas.scrollTop,
+                width: canvas.clientWidth,
+                height: canvas.clientHeight,
+              }
+              const next = transformCanvasWorkspace(
+                workspace,
+                objectLayout.layout,
+                (canvas) =>
+                  gatherRelatedWindows(canvas, selectedIds, currentView),
+              )
+              if (next === workspace) return
+              const preview = window.matchMedia(
+                '(prefers-reduced-motion: reduce)',
+              ).matches
+                ? undefined
+                : captureWindowPreview(windowElements.current)
+              preparePeekMotion({ backgroundOnly: true })
+              setWorkspace(restoreBackgroundItems(next))
+              setRevealRequest(
+                preview
+                  ? {
+                      id: selectedIds[0],
+                      left: currentView.x,
+                      top: currentView.y,
+                      preview,
+                      focus: false,
+                    }
+                  : null,
+              )
+            }}
+          />
+        )}
+      <div
+        className={`${styles.docks} ${mergedBottom ? shellStyles.mobileSurface : ''}`}
+        data-merged={mergedBottom ? 'bottom' : undefined}
+        data-shell-controls
+        inert={windowSwitcher.open}
+      >
+        <PlacedWidget
+          draggingWidget={objectLayout.draggingWidget}
+          id="tools"
+          merged={mergedBottom ? 'bottom' : undefined}
+          placement={objectLayout.placement({ kind: 'widget', id: 'tools' })}
+          view={view}
+          editing={tool === 'layout'}
+          selected={
+            objectLayout.selected?.kind === 'widget' &&
+            objectLayout.selected.id === 'tools'
+          }
+          hidden={!!previewLayout}
+        >
+          <CanvasTools
+            mode={tool}
+            selectionShape={selectionShape}
+            onSelectionShapeChange={(shape) => {
+              closePopovers()
+              setSelectionShape(shape)
+              setTool('select')
+              setSelectedIds([])
+              setSelectedItemIds([])
+              setShowMap(false)
+              setLauncher(null)
+            }}
+            menusAllowed={
+              !previewLayout &&
+              !showMap &&
+              !launcher &&
+              !notificationsOpen &&
+              !systemPanel &&
+              !dockAppId
+            }
+            onModeChange={(mode) => {
+              if (mode === 'layout') {
+                leaveFocusView()
+                objectLayout.setSelected(null)
+              }
+              closePopovers()
+              setTool(mode)
+              if (mode !== 'select') setSelectedIds([])
+              if (mode !== 'cursor') setSelectedItemIds([])
+              setShowMap(false)
+              setLauncher(null)
+            }}
+            onOpenToolMenu={() => {
+              closePopovers()
+              setShowMap(false)
+              setLauncher(null)
+            }}
+            mapOpen={showMap}
+            onToggleMap={() => {
+              closePopovers()
+              setShowMap(!showMap)
+              setLauncher(null)
+            }}
+            onArrange={arrangeAllWindows}
+            windowCount={workspace.windows.length}
+          />
+        </PlacedWidget>
+        <PlacedWidget
+          draggingWidget={objectLayout.draggingWidget}
+          id="apps"
+          merged={mergedBottom ? 'bottom' : undefined}
+          placement={objectLayout.placement({ kind: 'widget', id: 'apps' })}
+          view={view}
+          editing={tool === 'layout'}
+          selected={
+            objectLayout.selected?.kind === 'widget' &&
+            objectLayout.selected.id === 'apps'
+          }
+          hidden={!!previewLayout}
+        >
+          <LauncherDock
+            open={launcher !== null}
+            triggerRef={launcherTrigger}
+            onToggle={toggleLauncher}
+            onLaunch={launchApp}
+            windows={workspace.windows}
+            activeWindowId={focusedWindowId}
+            selectedAppId={dockAppId}
+            onSelectApp={(id) => {
+              closePopovers()
+              setDockAppId(id)
+              setLauncher(null)
+              setShowMap(false)
+              setSpaceHeld(false)
+            }}
+            onFocusWindow={revealWindow}
+            onReorderWindows={(orderedIds) => {
+              const order = new Map(orderedIds.map((id, index) => [id, index]))
+              setWorkspace((current) => ({
+                ...current,
+                windows: current.windows.map((item) => {
+                  const dockOrder = order.get(item.id)
+                  return dockOrder === undefined ? item : { ...item, dockOrder }
+                }),
+              }))
+            }}
+          />
+        </PlacedWidget>
       </div>
       {launcher && (
         <AppLauncher
+          anchorRef={launcherTrigger}
           gestureShortcuts={gestureShortcuts}
           mode={launcher}
           editingGestures={editingGestures}
@@ -2236,7 +2706,7 @@ function App() {
             setEditingGestures(false)
             setLauncher(mode)
           }}
-          onCustomizeGestures={openGestureSettings}
+          onCustomizeGestures={() => openGestureSettings()}
           onClose={closeLauncher}
           onLaunch={launchApp}
         />

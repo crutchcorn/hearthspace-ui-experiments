@@ -1,6 +1,10 @@
 import type { PointerEvent } from 'react'
+import { createPortal } from 'react-dom'
+import type { Bounds } from '../desktop'
+import type { SearchPlacement } from '../canvas-search'
 import type { CanvasDrawing, DrawingLayerName } from '../drawings'
 import type { GesturePoint } from '../gestures'
+import { getFrameBounds, targetKey, type FrameLayout } from '../frame-layout'
 import styles from './DrawingLayer.module.css'
 
 interface DrawingLayerProps {
@@ -8,10 +12,15 @@ interface DrawingLayerProps {
   layer: DrawingLayerName
   selectedId: string | null
   consumingIds?: string[]
+  placements?: Map<string, SearchPlacement>
+  frameLayout?: FrameLayout
+  view?: Bounds
+  frameHost?: HTMLElement | null
   draft?: { points: GesturePoint[]; layer: DrawingLayerName }
   interactive: boolean
   onPointerDown: (event: PointerEvent<SVGSVGElement>, id: string) => void
   onSelect?: (id: string) => void
+  onOpen?: (id: string) => void
 }
 
 function Stroke({
@@ -45,10 +54,15 @@ export default function DrawingLayer({
   layer,
   selectedId,
   consumingIds = [],
+  placements,
+  frameLayout,
+  view,
+  frameHost,
   draft,
   interactive,
   onPointerDown,
   onSelect,
+  onOpen,
 }: DrawingLayerProps) {
   const draftPoints = draft?.layer === layer ? draft.points : []
   const draftX = draftPoints.length
@@ -66,66 +80,113 @@ export default function DrawingLayer({
 
   return (
     <div className={styles.layer} data-drawing-layer={layer}>
-      {drawings
-        .filter((drawing) => drawing.layer === layer)
-        .map((drawing, index) => {
-          const drawingInteractive =
-            interactive && !consumingIds.includes(drawing.id)
-          return (
-            <svg
-              key={drawing.id}
-              className={styles.drawing}
-              data-drawing-id={drawing.id}
-              data-selected={selectedId === drawing.id}
-              data-consuming={consumingIds.includes(drawing.id)}
-              data-interactive={drawingInteractive}
-              role={drawingInteractive ? 'button' : 'img'}
-              aria-label={`Drawing ${index + 1}`}
-              aria-pressed={
-                drawingInteractive ? selectedId === drawing.id : undefined
-              }
-              tabIndex={drawingInteractive ? 0 : undefined}
-              viewBox={`0 0 ${drawing.width} ${drawing.height}`}
-              style={{
-                left: drawing.x,
-                top: drawing.y,
-                width: drawing.width,
-                height: drawing.height,
-              }}
-              onPointerDown={
-                drawingInteractive
-                  ? (event) => onPointerDown(event, drawing.id)
-                  : undefined
-              }
-              onKeyDown={(event) => {
-                if (!drawingInteractive || !onSelect) return
-                if (event.key !== 'Enter' && event.key !== ' ') return
-                event.preventDefault()
-                event.stopPropagation()
-                onSelect(drawing.id)
-              }}
-            >
-              {selectedId === drawing.id && (
-                <rect
-                  className={styles.selection}
-                  x={-7}
-                  y={-7}
-                  width={drawing.width + 14}
-                  height={drawing.height + 14}
-                  rx={6}
-                  vectorEffect="non-scaling-stroke"
-                />
-              )}
-              {drawing.strokes.map((points, strokeIndex) => (
-                <Stroke key={strokeIndex} points={points} />
+      {drawings.map((drawing, index) => {
+        const placement = placements?.get(drawing.id)
+        const layout = frameLayout?.placements[
+          targetKey({ kind: 'drawing', id: drawing.id })
+        ] ?? {
+          surface: drawing.layer === 'below' ? 'background' : 'canvas',
+        }
+        const effectiveLayer = placements
+          ? 'above'
+          : layout.surface === 'background'
+            ? 'below'
+            : 'above'
+        if (effectiveLayer !== layer || (placements && !placement)) return null
+        const framed =
+          !placements && layout.surface === 'frame' && view && frameHost
+        const bounds = framed
+          ? getFrameBounds(layout, drawing.width, drawing.height, view)
+          : drawing
+        const drawingInteractive =
+          !consumingIds.includes(drawing.id) &&
+          (placements ? placement?.matches === true : interactive)
+        const element = (
+          <svg
+            key={drawing.id}
+            className={styles.drawing}
+            data-drawing-id={drawing.id}
+            data-surface={placements ? 'canvas' : layout.surface}
+            data-preview-match={placement?.matches}
+            data-preview-selected={
+              placement ? selectedId === drawing.id : undefined
+            }
+            data-selected={selectedId === drawing.id}
+            data-consuming={consumingIds.includes(drawing.id)}
+            data-interactive={drawingInteractive}
+            role={drawingInteractive ? 'button' : 'img'}
+            aria-label={`Drawing ${index + 1}`}
+            aria-pressed={
+              drawingInteractive ? selectedId === drawing.id : undefined
+            }
+            tabIndex={drawingInteractive ? 0 : undefined}
+            viewBox={`0 0 ${drawing.width} ${drawing.height}`}
+            style={{
+              position: framed ? 'fixed' : undefined,
+              left: bounds.x,
+              top: bounds.y,
+              width: bounds.width,
+              height: bounds.height,
+              pointerEvents: framed && drawingInteractive ? 'auto' : undefined,
+              transform: placement
+                ? `translate(${placement.x - drawing.x}px, ${placement.y - drawing.y}px) scale(${placement.scale})`
+                : 'translate(0px, 0px) scale(1)',
+            }}
+            onPointerDown={
+              drawingInteractive
+                ? (event) => {
+                    if (placements) event.stopPropagation()
+                    else onPointerDown(event, drawing.id)
+                  }
+                : undefined
+            }
+            onClick={
+              placement?.matches
+                ? (event) => {
+                    event.stopPropagation()
+                    onOpen?.(drawing.id)
+                  }
+                : undefined
+            }
+            onKeyDown={(event) => {
+              const activate = placements ? onOpen : onSelect
+              if (!drawingInteractive || !activate) return
+              if (event.key !== 'Enter' && event.key !== ' ') return
+              event.preventDefault()
+              event.stopPropagation()
+              activate(drawing.id)
+            }}
+          >
+            {placement?.matches && (
+              <rect
+                className={styles.previewHitTarget}
+                width={drawing.width}
+                height={drawing.height}
+                rx={6}
+              />
+            )}
+            {selectedId === drawing.id && (
+              <rect
+                className={styles.selection}
+                x={-7}
+                y={-7}
+                width={drawing.width + 14}
+                height={drawing.height + 14}
+                rx={6}
+                vectorEffect="non-scaling-stroke"
+              />
+            )}
+            {drawing.strokes.map((points, strokeIndex) => (
+              <Stroke key={strokeIndex} points={points} />
+            ))}
+            {drawingInteractive &&
+              drawing.strokes.map((points, strokeIndex) => (
+                <Stroke key={strokeIndex} points={points} hitTarget />
               ))}
-              {drawingInteractive &&
-                drawing.strokes.map((points, strokeIndex) => (
-                  <Stroke key={strokeIndex} points={points} hitTarget />
-                ))}
-            </svg>
-          )
-        })}
+          </svg>
+        )
+        return framed ? createPortal(element, frameHost, drawing.id) : element
+      })}
       {draftPoints.length > 0 && (
         <svg
           className={styles.drawing}

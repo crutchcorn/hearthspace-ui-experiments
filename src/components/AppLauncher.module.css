@@ -1,6 +1,6 @@
 .launcher {
   position: fixed;
-  z-index: 800;
+  z-index: 1200;
   right: 24px;
   bottom: 90px;
   width: 650px;
@@ -332,11 +332,6 @@
   gap: 6px;
 }
 
-.footer kbd {
-  font-family: var(--mono);
-  font-size: 9px;
-}
-
 .gesturePanel {
   min-width: 0;
   padding: 14px 20px 16px;
@@ -421,7 +416,7 @@
 @keyframes surface-in {
   from {
     opacity: 0;
-    transform: translateY(8px) scale(0.985);
+    transform: translateY(var(--launcher-enter-y, 8px)) scale(0.985);
   }
 }
 

@@ -6,6 +6,7 @@ import {
   getFrameDropTarget,
   getPlacement,
   getPinnedWindowOffset,
+  getWidgetFrameDropTarget,
   loadFrameLayout,
   saveFrameLayout,
   setAllowHideTools,
@@ -331,4 +332,60 @@ test('the Frame action finds the nearest edge even outside the drag attachment d
     edge: 'top',
     position: (260 - 24) / (1000 - 48 - 200),
   })
+})
+
+test('turning a widget near the left edge does not switch its target to the top edge', () => {
+  const viewport = { width: 1000, height: 800 }
+  const horizontal = {
+    x: 90 - 299 / 2,
+    y: 160 - 54 / 2,
+    width: 299,
+    height: 54,
+  }
+  const vertical = { x: 90 - 54 / 2, y: 160 - 299 / 2, width: 54, height: 299 }
+  const target = getWidgetFrameDropTarget(horizontal, viewport)
+  assert.equal(target?.edge, 'left')
+  assert.deepEqual(getWidgetFrameDropTarget(vertical, viewport), target)
+})
+
+test('turning a widget near the top edge does not switch its target to the left edge', () => {
+  const viewport = { width: 1000, height: 800 }
+  const horizontal = {
+    x: 160 - 299 / 2,
+    y: 90 - 54 / 2,
+    width: 299,
+    height: 54,
+  }
+  const vertical = { x: 160 - 54 / 2, y: 90 - 299 / 2, width: 54, height: 299 }
+  const target = getWidgetFrameDropTarget(horizontal, viewport)
+  assert.equal(target?.edge, 'top')
+  assert.deepEqual(getWidgetFrameDropTarget(vertical, viewport), target)
+})
+
+test('a widget keeps its corner snap through an orientation change', () => {
+  const viewport = { width: 1000, height: 800 }
+  const horizontal = { x: 90 - 299 / 2, y: 90 - 54 / 2, width: 299, height: 54 }
+  const vertical = { x: 90 - 54 / 2, y: 90 - 299 / 2, width: 54, height: 299 }
+  const target = { surface: 'frame', edge: 'top', position: 0 }
+  assert.deepEqual(getWidgetFrameDropTarget(horizontal, viewport), target)
+  assert.deepEqual(getWidgetFrameDropTarget(vertical, viewport), target)
+})
+
+test('interior widgets remain untargeted until a final nearest-edge attachment is requested', () => {
+  const viewport = { width: 1000, height: 800 }
+  const horizontal = {
+    x: 250 - 299 / 2,
+    y: 350 - 54 / 2,
+    width: 299,
+    height: 54,
+  }
+  const vertical = { x: 250 - 54 / 2, y: 350 - 299 / 2, width: 54, height: 299 }
+  assert.equal(getWidgetFrameDropTarget(horizontal, viewport), null)
+  assert.equal(getWidgetFrameDropTarget(vertical, viewport), null)
+  const target = getWidgetFrameDropTarget(horizontal, viewport, Infinity)
+  assert.equal(target?.edge, 'left')
+  assert.deepEqual(
+    getWidgetFrameDropTarget(vertical, viewport, Infinity),
+    target,
+  )
 })

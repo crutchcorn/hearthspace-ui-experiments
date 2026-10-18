@@ -2,7 +2,8 @@ import { APP_CATALOG } from './components/launcher-apps.ts'
 import { loadDrawings, type CanvasDrawing } from './drawings.ts'
 
 export type Bounds = { x: number; y: number; width: number; height: number }
-export type CanvasTool = 'cursor' | 'pan' | 'select' | 'search' | 'draw'
+export type CanvasTool =
+  'cursor' | 'pan' | 'select' | 'search' | 'draw' | 'layout'
 export type WindowSelectionShape = 'rectangle' | 'freeform'
 export type DesktopItem = Bounds & {
   id: string

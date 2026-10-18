@@ -1,4 +1,11 @@
-import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
+import {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type KeyboardEvent,
+  type RefObject,
+} from 'react'
 import {
   ArrowUpRight,
   CornerDownLeft,
@@ -15,6 +22,7 @@ import { APP_CATALOG, type LauncherApp } from './launcher-apps'
 import styles from './AppLauncher.module.css'
 
 interface AppLauncherProps {
+  anchorRef?: RefObject<HTMLButtonElement | null>
   mode: 'apps' | 'gestures'
   onModeChange: (mode: 'apps' | 'gestures') => void
   onClose: () => void
@@ -26,6 +34,7 @@ interface AppLauncherProps {
 }
 
 export default function AppLauncher({
+  anchorRef,
   mode,
   onModeChange,
   onClose,
@@ -35,6 +44,7 @@ export default function AppLauncher({
   gestureShortcuts,
   editingGestures = false,
 }: AppLauncherProps) {
+  const launcherRef = useRef<HTMLElement>(null)
   const [query, setQuery] = useState('')
   const [view, setView] = useState<'grid' | 'list'>('grid')
   const [selectedId, setSelectedId] = useState<string | null>(null)
@@ -49,6 +59,64 @@ export default function AppLauncher({
     0,
     apps.findIndex((app) => app.id === selectedId),
   )
+
+  useLayoutEffect(() => {
+    const anchor = anchorRef?.current
+    const launcher = launcherRef.current
+    if (!anchor || !launcher) return
+
+    function positionLauncher() {
+      if (!anchor || !launcher || !anchor.getClientRects().length) return
+      const margin = 12
+      const gap = 12
+      const width = window.innerWidth
+      const height = window.innerHeight
+      const bounds = anchor.getBoundingClientRect()
+      const anchorTop = Math.max(margin, Math.min(bounds.top, height - margin))
+      const anchorBottom = Math.max(
+        margin,
+        Math.min(bounds.bottom, height - margin),
+      )
+      const spaceAbove = Math.max(0, anchorTop - gap - margin)
+      const spaceBelow = Math.max(0, height - anchorBottom - gap - margin)
+      const openBelow = spaceBelow >= spaceAbove
+      const left = Math.max(
+        margin,
+        Math.min(
+          bounds.right - launcher.offsetWidth,
+          width - launcher.offsetWidth - margin,
+        ),
+      )
+      launcher.style.left = `${left}px`
+      launcher.style.right = 'auto'
+      launcher.style.top = openBelow ? `${anchorBottom + gap}px` : 'auto'
+      launcher.style.bottom = openBelow
+        ? 'auto'
+        : `${height - anchorTop + gap}px`
+      launcher.style.maxHeight = `${openBelow ? spaceBelow : spaceAbove}px`
+      launcher.style.setProperty(
+        '--launcher-enter-y',
+        openBelow ? '-8px' : '8px',
+      )
+    }
+
+    positionLauncher()
+    const observer = new ResizeObserver(positionLauncher)
+    observer.observe(anchor)
+    window.addEventListener('resize', positionLauncher)
+    window.addEventListener('scroll', positionLauncher, true)
+    return () => {
+      observer.disconnect()
+      window.removeEventListener('resize', positionLauncher)
+      window.removeEventListener('scroll', positionLauncher, true)
+      launcher.style.removeProperty('left')
+      launcher.style.removeProperty('right')
+      launcher.style.removeProperty('top')
+      launcher.style.removeProperty('bottom')
+      launcher.style.removeProperty('max-height')
+      launcher.style.removeProperty('--launcher-enter-y')
+    }
+  }, [anchorRef])
 
   useEffect(() => {
     if (mode !== 'apps' || !window.matchMedia('(pointer: fine)').matches) return
@@ -100,6 +168,7 @@ export default function AppLauncher({
 
   return (
     <section
+      ref={launcherRef}
       className={styles.launcher}
       aria-label="App launcher"
       data-launcher-root
@@ -251,7 +320,6 @@ export default function AppLauncher({
             <span>
               <CornerDownLeft size={14} /> Enter to open
             </span>
-            <kbd>Ctrl / ⌘ K</kbd>
           </footer>
         </div>
       ) : (

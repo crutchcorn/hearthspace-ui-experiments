@@ -25,6 +25,9 @@ interface WindowContentProps {
   onColorModeChange: (mode: ColorMode) => void
   accentTheme: AccentThemeId
   onAccentThemeChange: (theme: AccentThemeId) => void
+  allowHideTools: boolean
+  onAllowHideToolsChange: (allow: boolean) => void
+  onRestoreCanvasTools: () => void
   showBatteryPercentage: boolean
   onShowBatteryPercentageChange: (show: boolean) => void
   background: BackgroundPhoto | null
@@ -64,6 +67,9 @@ export default function WindowContent({
   onColorModeChange,
   accentTheme,
   onAccentThemeChange,
+  allowHideTools,
+  onAllowHideToolsChange,
+  onRestoreCanvasTools,
   showBatteryPercentage,
   onShowBatteryPercentageChange,
   background,
@@ -190,6 +196,9 @@ export default function WindowContent({
         onColorModeChange={onColorModeChange}
         accentTheme={accentTheme}
         onAccentThemeChange={onAccentThemeChange}
+        allowHideTools={allowHideTools}
+        onAllowHideToolsChange={onAllowHideToolsChange}
+        onRestoreCanvasTools={onRestoreCanvasTools}
         showBatteryPercentage={showBatteryPercentage}
         onShowBatteryPercentageChange={onShowBatteryPercentageChange}
         background={background}

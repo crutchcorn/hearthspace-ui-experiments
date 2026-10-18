@@ -6,6 +6,7 @@ import {
   Moon,
   Palette,
   PanelLeft,
+  RotateCcw,
   SlidersHorizontal,
   Spline,
   Sun,
@@ -35,6 +36,9 @@ interface SettingsProps {
   onColorModeChange: (mode: ColorMode) => void
   accentTheme: AccentThemeId
   onAccentThemeChange: (theme: AccentThemeId) => void
+  allowHideTools: boolean
+  onAllowHideToolsChange: (allow: boolean) => void
+  onRestoreCanvasTools: () => void
   showBatteryPercentage: boolean
   onShowBatteryPercentageChange: (show: boolean) => void
   background: BackgroundPhoto | null
@@ -90,7 +94,7 @@ const CATEGORIES = [
   {
     id: 'system',
     label: 'System',
-    description: 'What appears in your system tray.',
+    description: 'Your system tray and canvas controls.',
     icon: SlidersHorizontal,
   },
 ] as const
@@ -108,6 +112,9 @@ export default function Settings({
   onColorModeChange,
   accentTheme,
   onAccentThemeChange,
+  allowHideTools,
+  onAllowHideToolsChange,
+  onRestoreCanvasTools,
   showBatteryPercentage,
   onShowBatteryPercentageChange,
   background,
@@ -138,6 +145,7 @@ export default function Settings({
   const colorModeGroupName = useId()
   const groupName = useId()
   const batterySettingId = useId()
+  const canvasToolsSettingId = useId()
   const activeCategory = CATEGORIES.find((item) => item.id === category)!
 
   if (navigation && navigation.id !== lastNavigationId) {
@@ -313,30 +321,65 @@ export default function Settings({
               </>
             )}
             {category === 'system' && (
-              <fieldset className={styles.palette}>
-                <legend>System tray</legend>
-                <label className={styles.toggleRow}>
-                  <span className={styles.toggleCopy}>
-                    <strong id={`${batterySettingId}-label`}>
-                      Show battery percentage
-                    </strong>
-                    <span id={`${batterySettingId}-description`}>
-                      Display the charge beside the battery icon.
+              <>
+                <fieldset className={styles.palette}>
+                  <legend>System tray</legend>
+                  <label className={styles.toggleRow}>
+                    <span className={styles.toggleCopy}>
+                      <strong id={`${batterySettingId}-label`}>
+                        Show battery percentage
+                      </strong>
+                      <span id={`${batterySettingId}-description`}>
+                        Display the charge beside the battery icon.
+                      </span>
                     </span>
-                  </span>
-                  <input
-                    className={styles.toggle}
-                    type="checkbox"
-                    role="switch"
-                    aria-labelledby={`${batterySettingId}-label`}
-                    aria-describedby={`${batterySettingId}-description`}
-                    checked={showBatteryPercentage}
-                    onChange={(event) =>
-                      onShowBatteryPercentageChange(event.target.checked)
-                    }
-                  />
-                </label>
-              </fieldset>
+                    <input
+                      className={styles.toggle}
+                      type="checkbox"
+                      role="switch"
+                      aria-labelledby={`${batterySettingId}-label`}
+                      aria-describedby={`${batterySettingId}-description`}
+                      checked={showBatteryPercentage}
+                      onChange={(event) =>
+                        onShowBatteryPercentageChange(event.target.checked)
+                      }
+                    />
+                  </label>
+                </fieldset>
+                <fieldset className={styles.palette}>
+                  <legend>Canvas tools</legend>
+                  <label className={styles.toggleRow}>
+                    <span className={styles.toggleCopy}>
+                      <strong id={`${canvasToolsSettingId}-label`}>
+                        Make canvas tools hide-able
+                      </strong>
+                      <span id={`${canvasToolsSettingId}-description`}>
+                        Removing canvas tools hides their buttons. Press / or
+                        Ctrl+K to find and restore them with search.
+                      </span>
+                    </span>
+                    <input
+                      className={styles.toggle}
+                      type="checkbox"
+                      role="switch"
+                      aria-labelledby={`${canvasToolsSettingId}-label`}
+                      aria-describedby={`${canvasToolsSettingId}-description`}
+                      checked={allowHideTools}
+                      onChange={(event) =>
+                        onAllowHideToolsChange(event.target.checked)
+                      }
+                    />
+                  </label>
+                  <button
+                    type="button"
+                    className={styles.restoreTools}
+                    onClick={onRestoreCanvasTools}
+                  >
+                    <RotateCcw size={12} aria-hidden="true" />
+                    Restore canvas tools
+                  </button>
+                </fieldset>
+              </>
             )}
           </div>
         </div>

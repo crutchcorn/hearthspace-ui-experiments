@@ -941,3 +941,136 @@
     animation: none;
   }
 }
+
+/* Placement containers do not create a stacking context around canvas widgets. */
+.topbar,
+.docks {
+  display: contents;
+}
+
+.frameHost {
+  position: fixed;
+  z-index: 1000;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.frameHost > * {
+  pointer-events: auto;
+}
+
+.desktop[data-layout-editing='true']
+  :is([data-window-id], [data-desktop-item-id], [data-drawing-id]) {
+  cursor: move;
+  outline: 1px dashed var(--accent-border);
+  outline-offset: 3px;
+}
+
+.desktop[data-layout-editing='true'] [data-layout-selected='true'] {
+  outline: 2px solid var(--accent);
+}
+
+.pinnedReveal {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: inherit;
+  background: var(--chrome);
+  color: var(--chrome-text);
+  cursor: pointer;
+}
+
+.pinnedReveal > span {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  height: 40px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.window[data-frame-edge='left'] .pinnedReveal > span {
+  right: 0;
+  top: 0;
+  width: 40px;
+  height: 100%;
+  writing-mode: vertical-rl;
+}
+
+.window[data-frame-edge='right'] .pinnedReveal > span {
+  left: 0;
+  top: 0;
+  width: 40px;
+  height: 100%;
+  writing-mode: vertical-rl;
+}
+
+.window[data-frame-edge='top'] .pinnedReveal > span {
+  bottom: 0;
+  left: 0;
+  width: 100%;
+}
+
+.window[data-frame-edge='bottom'] .pinnedReveal > span {
+  top: 0;
+  left: 0;
+  width: 100%;
+}
+
+.widgetResult {
+  position: absolute;
+  z-index: 600;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid var(--chrome-border);
+  border-radius: var(--radius-panel);
+  background: var(--chrome);
+  color: var(--chrome-text);
+  box-shadow: var(--shadow-panel);
+  transform-origin: top left;
+  cursor: pointer;
+}
+
+.widgetResult[data-preview-selected='true'] {
+  outline: 2px solid var(--accent);
+}
+
+.desktop[data-focus-mode='true'][data-shell-peek='false']
+  :is(.frameHost, [data-layout-widget]) {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.desktop[data-focus-mode='true'][data-shell-peek='false'] .frameHost > * {
+  pointer-events: none;
+}
+
+@media (width <= 760px) {
+  .topbar[data-merged],
+  .docks[data-merged] {
+    position: fixed;
+    z-index: 1100;
+    display: flex;
+    left: 0;
+    right: 0;
+    align-items: center;
+    gap: 4px;
+    pointer-events: auto;
+  }
+
+  .topbar[data-merged] {
+    top: 0;
+    bottom: auto;
+  }
+
+  .docks[data-merged] {
+    top: auto;
+    bottom: 0;
+  }
+}

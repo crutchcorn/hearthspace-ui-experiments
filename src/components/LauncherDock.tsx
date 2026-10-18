@@ -391,7 +391,7 @@ export default function LauncherDock({
           className={`${shellStyles.control} ${styles.launcher}`}
           aria-label="Open app launcher"
           aria-expanded={open}
-          title="Open app launcher (⌘/Ctrl K)"
+          title="Open app launcher"
           onClick={onToggle}
         >
           <LayoutGrid size={22} aria-hidden="true" />

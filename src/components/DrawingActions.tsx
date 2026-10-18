@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react'
-import { Check, Pin, PinOff, Play, Trash2 } from 'lucide-react'
+import { Check, PanelsTopLeft, Play, Trash2 } from 'lucide-react'
 import { clamp, type Bounds } from '../desktop'
-import type { CanvasDrawing, DrawingLayerName } from '../drawings'
+import type { CanvasDrawing } from '../drawings'
 import { getWindowClearance } from '../window-layout'
 import styles from './DrawingActions.module.css'
 import shellStyles from './ShellControls.module.css'
@@ -10,19 +10,19 @@ interface DrawingActionsProps {
   drawing: CanvasDrawing
   view: Bounds
   editing: boolean
-  onLayerChange: (layer: DrawingLayerName) => void
+  onChangeLayout: () => void
   onDelete: () => void
   onFinish: () => void
   onPlay?: () => boolean
 }
 
-type Action = 'layer' | 'delete' | 'finish' | 'play' | 'no-match'
+type Action = 'layout' | 'delete' | 'finish' | 'play' | 'no-match'
 
 export default function DrawingActions({
   drawing,
   view,
   editing,
-  onLayerChange,
+  onChangeLayout,
   onDelete,
   onFinish,
   onPlay,
@@ -57,10 +57,8 @@ export default function DrawingActions({
     clearance.top,
     Math.max(clearance.top, view.height - clearance.bottom - height),
   )
-  const pinned = drawing.layer === 'above'
-  const PinIcon = pinned ? PinOff : Pin
   const labels = {
-    layer: pinned ? 'Move drawing below windows' : 'Keep drawing above windows',
+    layout: 'Change layout',
     delete: 'Delete drawing',
     finish: 'Finish drawing',
     play: 'Launch matching app',
@@ -93,19 +91,18 @@ export default function DrawingActions({
         <button
           type="button"
           className={`${styles.button} ${shellStyles.control}`}
-          aria-pressed={pinned}
-          aria-label={labels.layer}
-          aria-describedby={hint === 'layer' ? hintId : undefined}
-          onPointerEnter={() => showHint('layer')}
+          aria-label={labels.layout}
+          aria-describedby={hint === 'layout' ? hintId : undefined}
+          onPointerEnter={() => showHint('layout')}
           onPointerLeave={hideHint}
-          onFocus={() => showHint('layer')}
+          onFocus={() => showHint('layout')}
           onBlur={hideHint}
           onClick={() => {
             hideHint()
-            onLayerChange(pinned ? 'below' : 'above')
+            onChangeLayout()
           }}
         >
-          <PinIcon size={18} aria-hidden="true" />
+          <PanelsTopLeft size={18} aria-hidden="true" />
         </button>
         {onPlay && (
           <button

@@ -1,0 +1,84 @@
+.anchor {
+  position: fixed;
+  z-index: 1200;
+  top: 90px;
+  left: 50%;
+  width: min(260px, calc(100vw - 24px));
+  transform: translateX(-50%);
+}
+
+.anchor .editor {
+  height: auto;
+  max-height: calc(100dvh - 180px);
+  overflow: auto;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.title {
+  min-width: 0;
+  overflow: hidden;
+  padding-left: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.placements {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4px;
+  padding-top: 4px;
+  border-top: 1px solid var(--chrome-border);
+}
+
+.button {
+  display: grid;
+  flex-shrink: 0;
+  padding: 0;
+  place-items: center;
+}
+
+.remove {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.tooltip {
+  position: absolute;
+  z-index: 1;
+  top: 100%;
+  left: 50%;
+  width: max-content;
+  max-width: calc(100vw - 24px);
+  margin-top: 8px;
+  padding: 8px 12px;
+  border: 1px solid var(--chrome-border);
+  border-radius: var(--radius-control);
+  background: var(--chrome-raised);
+  box-shadow: var(--shadow-panel);
+  color: var(--chrome-text);
+  font-size: 11px;
+  pointer-events: none;
+  transform: translateX(-50%);
+}
+
+@media (width <= 760px) {
+  .anchor {
+    top: 78px;
+  }
+
+  .anchor .editor {
+    max-height: calc(100dvh - 156px);
+  }
+}

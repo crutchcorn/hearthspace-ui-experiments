@@ -5,7 +5,7 @@
 }
 
 .dock {
-  width: 251px;
+  width: 299px;
 }
 
 .mobileDock {
@@ -14,7 +14,7 @@
 
 .toolGrid {
   display: grid;
-  grid-template-columns: repeat(3, 44px) 1px repeat(2, 44px);
+  grid-template-columns: repeat(4, 44px) 1px repeat(2, 44px);
   gap: 4px;
 }
 
@@ -162,4 +162,79 @@
     overflow-y: auto;
     overscroll-behavior: contain;
   }
+}
+
+:global([data-layout-widget]) .toolMenu {
+  position: absolute;
+  inset: var(--widget-popover-top) auto var(--widget-popover-bottom)
+    clamp(
+      calc(12px - var(--widget-popover-x)),
+      0px,
+      calc(100vw - var(--widget-popover-x) - min(260px, 100vw - 24px) - 12px)
+    );
+  max-height: var(--widget-popover-height);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+:global([data-layout-widget]) .tooltip {
+  top: var(--widget-popover-top);
+  bottom: var(--widget-popover-bottom);
+  max-width: calc(100vw - 24px);
+}
+
+:global(
+    [data-layout-widget]:is([data-frame-edge='left'], [data-frame-edge='right'])
+  )
+  .dock {
+  width: 54px;
+  height: auto;
+}
+
+:global(
+    [data-layout-widget]:is([data-frame-edge='left'], [data-frame-edge='right'])
+  )
+  .toolGrid {
+  grid-template-columns: 44px;
+  grid-template-rows: repeat(4, 44px) 1px repeat(2, 44px);
+}
+
+:global(
+    [data-layout-widget]:is([data-frame-edge='left'], [data-frame-edge='right'])
+  )
+  .divider {
+  width: 24px;
+  height: 1px;
+  justify-self: center;
+}
+
+:global(
+    [data-layout-widget]:is([data-frame-edge='left'], [data-frame-edge='right'])
+  )
+  .toolMenu {
+  inset: var(--widget-side-top) auto var(--widget-side-bottom)
+    clamp(
+      calc(12px - var(--widget-x)),
+      calc(100% + 12px),
+      calc(100vw - var(--widget-x) - min(260px, 100vw - 24px) - 12px)
+    );
+  max-height: var(--widget-side-height);
+}
+
+:global([data-layout-widget][data-frame-edge='right']) .toolMenu {
+  left: clamp(
+    calc(12px - var(--widget-x)),
+    calc(-1 * (min(260px, 100vw - 24px) + 12px)),
+    calc(100vw - var(--widget-x) - min(260px, 100vw - 24px) - 12px)
+  );
+}
+
+:global([data-layout-widget][data-frame-edge='left']) .tooltip {
+  inset: var(--widget-side-top) auto var(--widget-side-bottom) calc(100% + 12px);
+  max-width: calc(100vw - 78px);
+}
+
+:global([data-layout-widget][data-frame-edge='right']) .tooltip {
+  inset: var(--widget-side-top) calc(100% + 12px) var(--widget-side-bottom) auto;
+  max-width: calc(100vw - 78px);
 }

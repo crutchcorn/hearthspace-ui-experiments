@@ -11,6 +11,32 @@
   outline: none;
   pointer-events: none;
   touch-action: none;
+  transform-origin: top left;
+  transition:
+    transform 360ms cubic-bezier(0.2, 0.7, 0.1, 1),
+    opacity 220ms ease;
+}
+
+.drawing[data-preview-match='false'] {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.drawing[data-preview-match='false'] .hitTarget {
+  pointer-events: none;
+}
+
+.previewHitTarget {
+  fill: transparent;
+  stroke: transparent;
+  stroke-width: 1px;
+  cursor: pointer;
+  pointer-events: all;
+}
+
+.drawing[data-preview-selected='true'] .previewHitTarget {
+  fill: var(--accent-soft);
+  stroke: var(--accent-border);
 }
 
 .stroke {
@@ -66,6 +92,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .drawing,
   .drawing[data-consuming='true'] {
     transition: none;
   }
