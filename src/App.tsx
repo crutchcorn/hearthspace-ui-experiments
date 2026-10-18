@@ -177,10 +177,12 @@ function App() {
   )
   const [switcherOrigin, setSwitcherOrigin] = useState({ x: view.x, y: view.y })
   const [canvasSearch, setCanvasSearch] = useState<{
+    sessionId: string
     x: number
     y: number
     anchor: { x: number; y: number }
     query: string
+    handwriting: boolean
     selected: number
   } | null>(null)
   const searchLayout = canvasSearch
@@ -189,6 +191,7 @@ function App() {
         { ...view, x: canvasSearch.x, y: canvasSearch.y },
         canvasSearch.anchor,
         canvasSearch.query,
+        canvasSearch.handwriting,
       )
     : null
   const searchResult = searchLayout?.results[canvasSearch?.selected ?? 0]
@@ -351,7 +354,14 @@ function App() {
       setDragging(false)
       const origin = { x: canvas.scrollLeft, y: canvas.scrollTop }
       canvas.scrollTo({ left: origin.x, top: origin.y, behavior: 'instant' })
-      setCanvasSearch({ ...origin, anchor, query: '', selected: 0 })
+      setCanvasSearch({
+        ...origin,
+        sessionId: crypto.randomUUID(),
+        anchor,
+        query: '',
+        handwriting: false,
+        selected: 0,
+      })
     },
     [
       closePopovers,
@@ -2148,6 +2158,14 @@ function App() {
       )}
       {canvasSearch && searchLayout && (
         <CanvasSearch
+          key={canvasSearch.sessionId}
+          handwritingOpen={canvasSearch.handwriting}
+          onHandwritingOpenChange={(handwriting) =>
+            setCanvasSearch((current) =>
+              current ? { ...current, handwriting } : null,
+            )
+          }
+          handwritingHeight={searchLayout.handwritingHeight}
           position={searchLayout.position}
           resultsAbove={searchLayout.resultsAbove}
           query={canvasSearch.query}

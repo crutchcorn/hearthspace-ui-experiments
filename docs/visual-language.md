@@ -39,6 +39,12 @@ Finding a window doesn't have to mean remembering where you left it. The Search 
 
 Keep the field near the click. Results appear below a field in the upper half of the screen and above one in the lower half, with room for the corner controls. This gives the chosen point a purpose instead of pulling every search toward the same part of the screen. The keyboard shortcut opens near the upper center when there is no pointer location to use.
 
+Handwriting is another way to enter the same query. The search field's pencil
+opens a small pad next to that field, with clear and read controls. Keep the
+query editable after recognition: a misread word should be something the user
+can correct. Loading and error text explain a current state; an idle pad does
+not need a permanent instruction paragraph.
+
 The arrangement is temporary. Drawings hide while search or the keyboard switcher uses the space. Closing search restores the workspace, and choosing a window takes you to its saved position. This distinction lets us be quite bold about moving things during search: the user can explore a different arrangement without having to rebuild the one they made.
 
 The keyboard switcher uses the same idea. Holding Ctrl+1 gathers the actual open windows into a grid and moves desktop items aside. Their contents and chrome remain recognizable as you cycle. The selected window receives an outline and one centered title underneath; there is no separate tray of app-icon proxies. Committing carries the chosen window directly into its centered position in the restored workspace. Canceling restores the previous view, including an app's focused view.
@@ -149,7 +155,7 @@ The maximize button enters focused view, keeping window chrome while the corners
 
 ## Keep the prototype boundary clear
 
-The UI is a playground for OS interactions. Launcher strokes and explicitly played canvas drawings are compared locally with saved gesture assignments; unknown or ambiguous shapes remain visible with a brief no-match message. AI opt-in simulates a 3 GB download and a delete confirmation. Gathering shows a brief shimmer, then moves other windows from the selected applications into view using app identity alone; no model runs or inspects their contents. Display and device controls also stay inside the prototype.
+The UI is a playground for OS interactions. Launcher strokes and explicitly played canvas drawings are compared locally with saved gesture assignments; unknown or ambiguous shapes remain visible with a brief no-match message. Handwriting search runs a real local OCR model after downloading its assets and can misread text. AI gathering’s opt-in separately simulates a 3 GB download and a delete confirmation. Gathering shows a brief shimmer, then moves other windows from the selected applications into view using app identity alone; no model runs or inspects their contents. Display and device controls also stay inside the prototype.
 
 Keep those limits explicit in the [feature list](features.md) and usage documentation. Inside the interface, explanations should help with the interaction being tried. The quiet **Preview notification** footer button is a useful example: it makes sample activity available without adding a permanent “simulated notifications” banner to the inbox.
 

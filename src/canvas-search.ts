@@ -124,6 +124,7 @@ export function getCanvasSearchLayout(
   view: Bounds,
   anchor: { x: number; y: number },
   query: string,
+  handwritingOpen = false,
 ) {
   const words = query.trim().toLocaleLowerCase().split(/\s+/).filter(Boolean)
   const matches = (text: string) =>
@@ -146,6 +147,15 @@ export function getCanvasSearchLayout(
   const clearance = getWindowClearance(view.width)
   const fieldWidth = Math.min(420, view.width - clearance.side * 2)
   const fieldHeight = 54
+  const handwritingHeight = handwritingOpen
+    ? Math.min(
+        145,
+        Math.max(
+          64,
+          view.height - clearance.top - clearance.bottom - fieldHeight - 2,
+        ),
+      )
+    : 0
   const position = {
     x: clamp(
       anchor.x - fieldWidth / 2,
@@ -162,12 +172,28 @@ export function getCanvasSearchLayout(
   const resultsAbove =
     position.y + fieldHeight / 2 >
     (clearance.top + view.height - clearance.bottom) / 2
+  position.y = clamp(
+    position.y,
+    clearance.top + (resultsAbove ? handwritingHeight : 0),
+    Math.max(
+      clearance.top + (resultsAbove ? handwritingHeight : 0),
+      view.height -
+        clearance.bottom -
+        fieldHeight -
+        (resultsAbove ? 0 : handwritingHeight),
+    ),
+  )
   const availableWidth = Math.max(1, view.width - clearance.side * 2)
   const availableHeight = Math.max(
     1,
     resultsAbove
-      ? position.y - 24 - clearance.top
-      : view.height - clearance.bottom - position.y - fieldHeight - 24,
+      ? position.y - 24 - clearance.top - handwritingHeight
+      : view.height -
+          clearance.bottom -
+          position.y -
+          fieldHeight -
+          24 -
+          handwritingHeight,
   )
   const grid = fitSpatialGrid(
     results.length,
@@ -176,8 +202,8 @@ export function getCanvasSearchLayout(
     windows.length > 0,
   )
   const resultTop = resultsAbove
-    ? position.y - 24 - grid.height
-    : position.y + fieldHeight + 24
+    ? position.y - 24 - grid.height - handwritingHeight
+    : position.y + fieldHeight + 24 + handwritingHeight
   const origin = {
     x: view.x + (view.width - grid.width) / 2,
     y: view.y + resultTop,
@@ -188,6 +214,7 @@ export function getCanvasSearchLayout(
   )
   return {
     position,
+    handwritingHeight,
     resultsAbove,
     results,
     items: new Map(

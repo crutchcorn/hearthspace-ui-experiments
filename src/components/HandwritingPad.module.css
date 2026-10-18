@@ -1,0 +1,124 @@
+.handwriting {
+  display: grid;
+  height: var(--handwriting-pad-height, 144px);
+  box-sizing: border-box;
+  padding: 8px;
+  grid-template-rows: minmax(28px, 1fr) 32px;
+  gap: 2px;
+}
+
+.padRow {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr) 40px;
+  gap: 6px;
+}
+
+.surface {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: calc(var(--radius-panel) - 9px);
+  background:
+    linear-gradient(
+      to bottom,
+      transparent calc(74% - 0.5px),
+      var(--line) calc(74% - 0.5px),
+      var(--line) calc(74% + 0.5px),
+      transparent calc(74% + 0.5px)
+    ),
+    var(--surface-control);
+  color: var(--accent);
+  cursor: crosshair;
+  touch-action: none;
+  user-select: none;
+}
+
+.controls {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+}
+
+.controls button {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  place-items: center;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--chrome-muted);
+  touch-action: manipulation;
+}
+
+.controls button:hover:not(:disabled) {
+  background: var(--chrome-hover);
+  color: var(--chrome-text);
+}
+
+.controls button:disabled {
+  opacity: 0.45;
+}
+
+.controls button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.status {
+  min-width: 0;
+  padding: 0 4px;
+  color: var(--chrome-muted);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.status[data-error='true'] {
+  color: var(--chrome-text);
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation: none;
+  }
+}
+
+@media (height <= 400px) {
+  .handwriting {
+    padding: 4px;
+    grid-template-rows: minmax(0, 1fr) 16px;
+    gap: 0;
+  }
+
+  .padRow {
+    grid-template-columns: minmax(0, 1fr) 80px;
+  }
+
+  .controls {
+    flex-direction: row;
+    align-items: center;
+    gap: 0;
+  }
+
+  .status {
+    overflow: hidden;
+    font-size: 10px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}

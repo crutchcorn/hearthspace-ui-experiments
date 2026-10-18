@@ -87,6 +87,22 @@ The field stays near the clicked point, clamped to leave the shell controls avai
 
 Results place desktop items first, then matching windows in front-to-back order. Up and Down change the selected result, wrapping at either end; Left and Right retain normal text-cursor behavior. Enter or clicking a result closes search, then opens the item's associated preview or focuses and centers the existing window. Escape, the field's close button, empty-canvas input, or another shell or tool action also closes search. Dismissing it preserves the Search tool, ready for another background click. The field has no result count or instruction footer; a query without matches displays **No matches**.
 
+The search field's pencil opens a one-line handwriting pad beside the query,
+on the same side as its results. The result layout reserves room for the pad.
+`HandwritingPad` keeps separate pointer strokes, submits after an 800-millisecond
+pause or its check button, and appends recognized text to the editable query.
+Clear discards the ink. Errors retain it for retry; a successful result clears
+the pad. New ink, edits to the typed query, closing the pad, or leaving search
+cancel pending results so old recognition cannot overwrite newer input.
+
+Handwriting uses a lazily created module worker with a quantized TrOCR model.
+The first recognition downloads real model and runtime assets; subsequent work
+reuses the worker and available browser cache. The worker processes ink locally,
+uses deterministic greedy decoding, and returns text without matching it to the
+app catalog. Recognition can be wrong. [Drawing recognition](recognition.md)
+records the model, download boundary, cancellation behavior, and ownership.
+This path is independent of the simulated AI-gathering preference.
+
 Canvas search uses the playground's local item and window metadata. It doesn't inspect app contents or the host filesystem. The regular launcher search and dock continue to provide their existing routes to apps and window instances.
 
 ## Arranging windows
@@ -229,7 +245,12 @@ Each Settings window owns its mock layout and per-monitor values, retaining them
 | [`src/components/NotificationInbox.tsx`](../src/components/NotificationInbox.tsx)       | Notification trigger, inbox, unread/dismissal state, and sample toasts.                               |
 | [`src/components/Minimap.tsx`](../src/components/Minimap.tsx)                           | Map rendering and pointer capture for dragging the visible canvas area.                               |
 | [`src/components/CanvasTools.tsx`](../src/components/CanvasTools.tsx)                   | Background, window-selection, and drawing dropdowns, plus map and arrangement actions.                |
-| [`src/components/CanvasSearch.tsx`](../src/components/CanvasSearch.tsx)                 | Positioned search field, query input, result navigation, and close/empty states.                      |
+| [`src/components/CanvasSearch.tsx`](../src/components/CanvasSearch.tsx)                 | Positioned search field, typed/handwritten query input, result navigation, and close/empty states.    |
+| [`src/components/HandwritingPad.tsx`](../src/components/HandwritingPad.tsx)             | One-line ink input, pause/check submission, progress, clear, and retry controls.                      |
+| [`src/handwriting.ts`](../src/handwriting.ts)                                           | Lazy worker lifetime, recognition requests, cancellation, and recovery.                               |
+| [`src/handwriting.worker.ts`](../src/handwriting.worker.ts)                             | Quantized local TrOCR loading, serialized inference, and raw recognized text.                         |
+| [`src/handwriting-image.ts`](../src/handwriting-image.ts)                               | Cropped black-on-white rasterization of handwriting strokes.                                          |
+| [`src/handwriting-protocol.ts`](../src/handwriting-protocol.ts)                         | Narrow worker request, response, progress, and PNG input contract.                                    |
 | [`src/components/GatherWindows.tsx`](../src/components/GatherWindows.tsx)               | Floating selection action, viewport-aware placement, opt-in gating, and cancellable gather shimmer.   |
 | [`src/components/DrawingLayer.tsx`](../src/components/DrawingLayer.tsx)                 | Saved and draft stroke rendering, selection outlines, and ink hit targets.                            |
 | [`src/components/DrawingActions.tsx`](../src/components/DrawingActions.tsx)             | Side controls for changing a drawing’s layer, playing a gesture, deleting, and finishing.             |
@@ -253,6 +274,8 @@ Each Settings window owns its mock layout and per-monitor values, retaining them
 | [`src/index.css`](../src/index.css)                                                     | Shared visual tokens, Light/Dark and accent palettes, typography, viewport, and element defaults.     |
 
 ## Saved state
+
+Handwriting model assets use the browser cache when available, separately from workspace and preference storage. Search ink and recognized query text are temporary. Turning off simulated AI gathering does not unload or delete the handwriting model; the two features do not share a model lifecycle.
 
 Photo backgrounds are stored in IndexedDB database `hearthspace-background-v1`, in the `background` store’s `photo` record. The record holds the original image Blob, filename, and allowed fit value, independently of the workspace and other appearance settings. The image is decoded before use and is not sent to a server. Resetting deletes this record. If saving or deleting fails, the current session still shows the selected background and Settings explains that the change could not be saved. An unavailable or unreadable saved photo falls back to the default dots.
 

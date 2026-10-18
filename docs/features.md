@@ -83,6 +83,18 @@ Try **Notes** to see its app shortcut, Notes.txt, and matching open windows
 together. Names and item types are searchable; window matches also include app
 names. Matching windows retain their contents and chrome, scaled to fit.
 
+The field's pencil opens a one-line handwriting pad. Write with a mouse, pen,
+or touch, then pause for 800 milliseconds or press the check to read it. The
+recognized words append to the query, where you can edit them normally. Clear
+removes the pad's ink; a failed recognition keeps it available to retry.
+Changing the typed query or closing the pad cancels a pending result.
+
+The first recognition downloads about 64 MB of model weights plus its runtime.
+Recognition runs in the browser without uploading the ink, and downloaded assets
+use the browser cache when available. It can misread a word; the app inserts the
+recognized text without replacing it with a likely app name. This real download
+is independent of the simulated 3 GB download in **Settings → AI**.
+
 Use **Up/Down** to choose a result and **Enter** to open it, or click the result.
 An item opens its app preview; a window becomes active and the canvas centers on
 it. **Escape**, the close button, clicking empty canvas, or using another shell
@@ -170,7 +182,7 @@ Prototype boundaries:
   doesn't index the host filesystem or search inside app content.
 - Overview's zoom buttons are placeholders. Display controls and tray values
   don't change the host system. Notifications have no external event source.
-- AI doesn't download a model or inspect window contents. Gathering uses a
+- AI gathering doesn't download a model or inspect window contents. It uses a
   local same-app rule to move windows after its brief delay. Desktop widgets
   and editing favorites aren't implemented.
 
