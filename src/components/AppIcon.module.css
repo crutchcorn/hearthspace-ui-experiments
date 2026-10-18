@@ -169,10 +169,13 @@
 }
 
 .identity[data-app-icon='calendar'] .realistic::before {
-  inset: 9% 7% 3%;
-  border: 1px solid #c1a9a6;
-  border-radius: 2px;
-  background: linear-gradient(#c75455 0 25%, #fff9f0 26% 100%);
+  /* Match the 3–21 bounds of CalendarDays inside its centered 90% SVG. */
+  inset: 16.25%;
+  border-radius: calc(100% / 9);
+  background: linear-gradient(
+    #c75455 0 calc(100% / 3),
+    #fff9f0 calc(100% / 3) 100%
+  );
 }
 
 .identity[data-app-icon='calendar'] .realistic > svg {
