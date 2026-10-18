@@ -941,6 +941,7 @@ function App() {
       })
     }
     if (item) focusWindow(item.id)
+    return gesture.current
   }
 
   function startDrawing(event: ReactPointerEvent) {
@@ -1001,10 +1002,10 @@ function App() {
       focusView
     )
       return
-    startGesture(event, 'drawing-move')
-    if (!gesture.current) return
-    gesture.current.id = id
-    gesture.current.bounds = drawing
+    const current = startGesture(event, 'drawing-move')
+    if (!current) return
+    current.id = id
+    current.bounds = drawing
     selectDrawing(id)
   }
 
