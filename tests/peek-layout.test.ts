@@ -300,6 +300,83 @@ test('returning icons clear chained homes in the same settlement', () => {
   assert.equal(settleCoveredItems(result), result)
 })
 
+test('folders return together when their displaced positions block each other’s homes', () => {
+  const originals = [
+    icon('projects', { kind: 'folder', appId: 'files' }),
+    icon('pictures', { kind: 'folder', appId: 'files', y: 204 }),
+  ]
+  const before = workspace(
+    [],
+    [
+      { ...originals[0], y: 236, peekOrigin: { x: 100, y: 100 } },
+      { ...originals[1], y: 172, peekOrigin: { x: 100, y: 204 } },
+    ],
+  )
+  const result = restoreBackgroundItems(before)
+  assert.deepEqual(result.items, originals)
+  assert.equal(settleCoveredItems(result), result)
+})
+
+test('the starter desktop grid returns after a covering window is removed', () => {
+  const items = Array.from({ length: 11 }, (_, index) =>
+    icon(`item-${index}`, {
+      kind: index < 2 ? 'folder' : index === 2 ? 'file' : 'app',
+      x: 28 + 104 * Math.floor(index / 4),
+      y: 112 + 104 * (index % 4),
+    }),
+  )
+  const before = workspace(
+    [window('cover', { x: 75, y: 36, width: 538, height: 476 })],
+    items,
+  )
+  const peeked = settleCoveredItems(before)
+  assert.ok(peeked.items.some((item) => item.peekOrigin))
+  const result = restoreBackgroundItems({ ...peeked, windows: [] })
+  assert.deepEqual(result.items, items)
+  assert.equal(settleCoveredItems(result), result)
+})
+
+test('a stationary icon prevents a blocked restoration cycle from returning', () => {
+  const before = workspace(
+    [],
+    [
+      icon('projects', {
+        kind: 'folder',
+        y: 236,
+        peekOrigin: { x: 100, y: 100 },
+      }),
+      icon('pictures', {
+        kind: 'folder',
+        y: 172,
+        peekOrigin: { x: 100, y: 204 },
+      }),
+      icon('stationary'),
+    ],
+  )
+  assert.equal(restoreBackgroundItems(before), before)
+})
+
+test('folders with overlapping original homes remain displaced', () => {
+  const before = workspace(
+    [],
+    [
+      icon('projects', {
+        kind: 'folder',
+        x: 300,
+        peekOrigin: { x: 100, y: 100 },
+      }),
+      icon('pictures', {
+        kind: 'folder',
+        x: 500,
+        peekOrigin: { x: 100, y: 100 },
+      }),
+    ],
+  )
+  const result = restoreBackgroundItems(before)
+  assert.ok(result.items.some((item) => item.peekOrigin))
+  assert.equal(settleCoveredItems(result), result)
+})
+
 test('icons hidden by peers remain settled rather than repeatedly returning and peeking', () => {
   const peeked = settleCoveredItems(workspace([], [icon('one'), icon('two')]))
   assert.deepEqual(peeked.items[0].peekOrigin, { x: 100, y: 100 })

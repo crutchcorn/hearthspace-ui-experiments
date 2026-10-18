@@ -213,6 +213,42 @@ export function restoreBackgroundItems(workspace: Workspace): Workspace {
   let restored: boolean
   do {
     restored = false
+    const homes = items.map((item) =>
+      item.peekOrigin ? { ...item, ...item.peekOrigin } : item,
+    )
+    const returning = new Set(
+      items.flatMap((item, index) => (item.peekOrigin ? [index] : [])),
+    )
+    let blocked: boolean
+    do {
+      blocked = false
+      for (const index of returning) {
+        const blockers = [
+          ...workspace.windows,
+          ...items.flatMap((item, other) =>
+            other === index
+              ? []
+              : [iconBody(returning.has(other) ? homes[other] : item)],
+          ),
+        ]
+        if (blockers.some((other) => intersect(homes[index], other))) {
+          returning.delete(index)
+          blocked = true
+        }
+      }
+      // A blocked peer stays at its current spot, which can block another
+      // return. Remove those dependencies before moving anyone.
+    } while (blocked)
+    for (const index of returning) {
+      const home = { ...homes[index] }
+      delete home.peekOrigin
+      items[index] = home
+      restored = true
+      changed = true
+    }
+    // Peers temporarily occupying one another's homes can now move together.
+    // Also allow individual returns if their homes conflict with a peer's
+    // intended home but are clear of that peer's actual position.
     for (let index = items.length - 1; index >= 0; index--) {
       const item = items[index]
       if (!item.peekOrigin) continue

@@ -33,6 +33,9 @@ or editing a background object deliberately establishes a new home.
 Returning checks the object's full original bounds against windows and other
 desktop icons' artwork. Touching edges is allowed. Drawings don't act as opaque
 blockers, so empty space around their ink cannot hold another object away.
+Displaced icons can return together when they temporarily occupy each other's
+homes. Their intended destinations must be clear; a window or stationary icon
+still blocks the affected returns.
 
 Closing or arranging windows, gathering related windows, and removing a
 background drawing also check whether displaced background objects can return.
