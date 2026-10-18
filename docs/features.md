@@ -36,6 +36,11 @@ add backgrounds; the notification status tells you when something needs attentio
   around the map or click to move somewhere.
 - **Place windows.** Drag their headers, resize, and close them. Dragging toward
   the viewport edge carries a window farther across the canvas.
+- **Leave covered work in sight.** Windows can overlap completely while you
+  drag. On release, fully hidden windows and desktop icons slide toward the
+  nearest opening until a small part peeks out. Partly visible items stay put.
+  Header double-click maximization does the same; the maximize button's focused
+  view leaves the underlying layout alone.
 - **Keep desktop items underneath.** Every catalog app has a permanent, movable
   shortcut beside the starter folders and document. Items remain below every
   window. The default cursor tool selects them;

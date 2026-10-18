@@ -75,6 +75,8 @@ import useBackground from './useBackground'
 import useAI from './useAI'
 import useShellPeek from './useShellPeek'
 import useWindowSwitcher from './useWindowSwitcher'
+import usePeekMotion from './usePeekMotion'
+import { settleCoveredItems } from './peek-layout'
 import { gatherRelatedWindows } from './gather-windows'
 import { getMaximizedBounds, getWindowClearance } from './window-layout'
 import {
@@ -283,6 +285,8 @@ function App() {
     ? getWindowSwitcherLayout(workspace, switcherView, windowSwitcher.windows)
     : null
   const previewLayout = switcherLayout ?? searchLayout
+  const { cancel: cancelPeekMotion, prepare: preparePeekMotion } =
+    usePeekMotion(viewport, !previewLayout && !previewExiting && !focusView)
   const previewWindowId = windowSwitcher.open
     ? windowSwitcher.selectedId
     : searchResult?.kind === 'window'
@@ -331,6 +335,7 @@ function App() {
     (anchor: { x: number; y: number }) => {
       const canvas = viewport.current
       if (!canvas || document.querySelector(':modal')) return
+      cancelPeekMotion()
       leaveFocusView()
       closePopovers()
       setLauncher(null)
@@ -365,6 +370,7 @@ function App() {
     },
     [
       closePopovers,
+      cancelPeekMotion,
       leaveFocusView,
       setLauncher,
       setSelectedIds,
@@ -373,6 +379,7 @@ function App() {
   )
 
   const arrangeAllWindows = useCallback(() => {
+    cancelPeekMotion()
     setRevealRequest(null)
     const canvas = viewport.current
     if (!canvas) return
@@ -400,6 +407,7 @@ function App() {
     setWorkspace((current) => arrangeWindows(current, origin))
   }, [
     closePopovers,
+    cancelPeekMotion,
     leaveFocusView,
     setLauncher,
     setSelectedIds,
@@ -797,6 +805,11 @@ function App() {
       }))
       return
     }
+    if (
+      (current.type === 'move' || current.type === 'resize') &&
+      Math.hypot(dx, dy) > 0.5
+    )
+      current.moved = true
     if (current.type === 'move' && current.windows) {
       // Apply one bounded delta so selected windows keep their spacing.
       const windows = current.windows
@@ -914,6 +927,7 @@ function App() {
       (item?.restore && type !== 'pan' && !group)
     )
       return
+    cancelPeekMotion()
     const canvas = viewport.current!
     setSelectedDrawingId(null)
     event.preventDefault()
@@ -970,6 +984,7 @@ function App() {
 
   function startDrawing(event: ReactPointerEvent) {
     if (event.button !== 0 || gesture.current) return
+    cancelPeekMotion()
     const canvas = viewport.current!
     event.preventDefault()
     event.stopPropagation()
@@ -1084,6 +1099,21 @@ function App() {
 
   function endGesture(event: ReactPointerEvent) {
     if (gesture.current?.pointerId !== event.pointerId) return
+    const completed = gesture.current
+    if (
+      event.type === 'pointerup' &&
+      (completed.type === 'move' ||
+        completed.type === 'resize' ||
+        completed.type === 'item-move')
+    ) {
+      applyGesture(event.clientX, event.clientY)
+      if (completed.moved) {
+        preparePeekMotion(
+          completed.type === 'item-move' ? undefined : completed.id,
+        )
+        setWorkspace(settleCoveredItems)
+      }
+    }
     if (gesture.current.type === 'draw') {
       if (event.type === 'pointerup') {
         applyGesture(event.clientX, event.clientY)
@@ -1126,7 +1156,9 @@ function App() {
   function maximize(item: DesktopWindow) {
     setRevealRequest(null)
     if (focusView?.id === item.id) {
+      preparePeekMotion(item.id)
       leaveFocusView()
+      setWorkspace(settleCoveredItems)
       return
     }
     const canvas = viewport.current!
@@ -1159,9 +1191,12 @@ function App() {
       }),
     }))
     focusWindow(item.id)
+    preparePeekMotion(item.id)
+    setWorkspace(settleCoveredItems)
   }
 
   function toggleFocusView(item: DesktopWindow) {
+    cancelPeekMotion()
     if (focusView?.id === item.id) {
       leaveFocusView()
       return

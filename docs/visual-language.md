@@ -149,6 +149,15 @@ Pointer, trackpad, touch, and keyboard should reach the same work. Controls reta
 
 Drawing, dragging, and resizing follow input immediately. Ordinary navigation pans to a chosen window after focus and stacking have updated. During Ctrl+1 switching, the viewport stays still while windows occupy temporary presentation positions. The saved workspace is untouched until the user chooses a window.
 
+Overlap should leave a clue that other work is there. Allow complete coverage
+during a drag, then slide fully hidden windows and desktop icons toward the
+nearest opening when the drag ends. A small exposed piece is enough; leave
+partly visible work where it is. Icons stay beneath windows while participating
+in the same behavior. The movement itself explains the change, without a badge
+or caption. Ordinary header double-click maximization follows this rule;
+focused view leaves the surrounding arrangement alone. Reduced motion reveals
+the final positions immediately.
+
 Choosing a window from search or the switcher should read as one continuous movement. Animate the same window surface from its visible preview directly to its final centered position. Resolve the restored layout and viewport position together, so the window doesn't first travel home and then move again as the canvas pans. Other windows move continuously toward their restored positions, ending at the viewport edge when their destination is far away. Keep their identity through the movement without clones or a fade-out/reappearance. Reduced-motion preferences make this transition immediate.
 
 The maximize button enters focused view, keeping window chrome while the corners recede and canvas movement stops. Approaching any corner reveals all four together. Choosing a different window restores room for the shell and canvas navigation, including another instance of the same app; choosing the same window keeps focused view. Double-clicking the header toggles ordinary maximization, with the shell remaining available. These behaviors let the controls step back without changing where the user expects to find them.

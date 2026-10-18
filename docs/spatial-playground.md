@@ -12,6 +12,21 @@ The minimap translates pointer positions into world coordinates. Grabbing its vi
 
 Dragging a window’s title bar combines pointer movement with changes in scroll position. This keeps a grabbed window under the pointer while edge scrolling carries it farther across the world. Shell-owned windows join a glass title bar and opaque content in one frame, with a 44-pixel header increasing to 50 pixels for coarse pointers. External app previews use their own Realistic frame styles while retaining the same window interactions. The body scrolls in the remaining space. Eight resize handles constrain windows to the world bounds and a minimum size of 280 × 200 pixels.
 
+Windows may cover one another completely during a drag or resize. Releasing a
+moved window or desktop item checks for fully covered work, including coverage
+shared by several higher windows. Hidden windows move to the nearest available
+opening with a 24-pixel patch exposed. Desktop icons follow the same rule below
+every window, exposing 32 pixels of their artwork. Partly visible items stay
+put; sizes and stacking order stay intact. The canvas edges constrain movement,
+so an item stays in place when no opening is possible. Drawings are excluded.
+
+These position changes persist with the workspace. A short slide reveals where
+the hidden work went without slowing direct dragging; reduced motion makes the
+change immediate. Canceled gestures, simple clicks, search, and keyboard
+switching do not rearrange the saved layout this way. Ordinary header
+double-click maximization and restore also reveal covered work. Entering or
+leaving focused view with the maximize control does not.
+
 Double-clicking a window header toggles ordinary maximization, using the current viewport with clearance for the shell controls while retaining previous bounds for restore. The shared `windowClearance` uses 24-pixel side margins, 96 pixels above, and 96 below at desktop widths; at 760 pixels or less, these become 12, 78, and 78 pixels. Revealing a maximized window uses the same offsets; ordinary windows are centered with the top and side clearances as minimums. The same minimum window dimensions still apply on small viewports.
 
 The header’s maximize button instead enters a focused view. The window fills the viewport while keeping its title bar and app content; shell controls hide and canvas navigation stops. The app’s own scrolling and controls remain usable. Ordinary maximized bounds are retained underneath this temporary presentation, preserving the original restore bounds.
@@ -32,7 +47,7 @@ Projects and Pictures folders, a Notes.txt document, and a shortcut for every ap
 
 Pan mode drags the canvas even when the drag starts on an item. The cursor is the default tool and selects desktop items. Dragging the background draws a rectangle in world coordinates and selects intersecting items without selecting windows. Clicking an item selects it; Shift, Ctrl, or ⌘ toggles individual items or adds a rectangle’s matches to the selection. Space selects a focused item. Dragging a selected item moves the selected group together, keeping it within the world bounds. Double-click or Enter on a focused item opens its associated simulated app preview without changing the canvas tool. Window and desktop-item selections have separate IDs. Desktop selection is shown through item highlights and the dragged rectangle, without a text hint or count.
 
-Item positions persist with the workspace and remain independent of window geometry and stacking. Arrange only moves windows. Loading a workspace preserves existing desktop items and moved app shortcuts, removes duplicate shortcuts for an app, and adds any missing catalog shortcuts near home. A workspace without an item collection also receives the starter files and folders. Windows and edited scratchpad content remain intact.
+Item positions persist with the workspace. Covered icons can move aside when a drag ends or a window header is double-clicked, while their layer remains pinned beneath windows. Arrange only moves windows. Loading a workspace preserves existing desktop items and moved app shortcuts, removes duplicate shortcuts for an app, and adds any missing catalog shortcuts near home. A workspace without an item collection also receives the starter files and folders. Windows and edited scratchpad content remain intact.
 
 ## Canvas drawings
 
@@ -229,6 +244,8 @@ Each Settings window owns its mock layout and per-monitor values, retaining them
 | [`src/desktop.ts`](../src/desktop.ts)                                                   | Workspace types, starter desktop items, storage validation, window resizing, and arrangement.         |
 | [`src/drawings.ts`](../src/drawings.ts)                                                 | Drawing types, stroke bounds, local coordinates, and saved-art validation.                            |
 | [`src/window-layout.ts`](../src/window-layout.ts)                                       | Responsive shell clearances and ordinary maximized window bounds.                                     |
+| [`src/peek-layout.ts`](../src/peek-layout.ts)                                           | Placement of fully covered windows and desktop icons at the nearest visible opening.                  |
+| [`src/usePeekMotion.ts`](../src/usePeekMotion.ts)                                       | Short reveal animations after a drop, resize, or header double-click.                                 |
 | [`src/canvas-search.ts`](../src/canvas-search.ts)                                       | Search matching and shared grid/parking layouts for canvas search and window switching.               |
 | [`src/preview-motion.ts`](../src/preview-motion.ts)                                     | Window measurements and continuous transitions from temporary previews to the restored viewport.      |
 | [`src/gather-windows.ts`](../src/gather-windows.ts)                                     | Same-app window matching and placement near the selection within the current viewport.                |
