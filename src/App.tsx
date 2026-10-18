@@ -67,6 +67,7 @@ import useBackground from './useBackground'
 import useAI from './useAI'
 import useShellPeek from './useShellPeek'
 import useWindowSwitcher from './useWindowSwitcher'
+import { gatherRelatedWindows } from './gather-windows'
 import { getMaximizedBounds, getWindowClearance } from './window-layout'
 import {
   loadGestureShortcuts,
@@ -173,6 +174,7 @@ function App() {
     left: number
     top: number
     preview?: PreviewSnapshot
+    focus?: boolean
   } | null>(null)
   const previewExiting = !!revealRequest?.preview
   const launcherTrigger = useRef<HTMLButtonElement>(null)
@@ -355,7 +357,10 @@ function App() {
       '(prefers-reduced-motion: reduce)',
     ).matches
     // Focus after restacking so React's focus restoration cannot cancel the pan.
-    windowElements.current.get(revealRequest.id)?.focus({ preventScroll: true })
+    if (revealRequest.focus !== false)
+      windowElements.current
+        .get(revealRequest.id)
+        ?.focus({ preventScroll: true })
     viewport.current?.scrollTo({
       left: revealRequest.left,
       top: revealRequest.top,
@@ -1641,10 +1646,44 @@ function App() {
       </div>
       {!focusView && !previewLayout && selectedWindows.length > 0 && (
         <GatherWindows
+          key={`${ai.enabled}:${selectedIds.toSorted().join(',')}`}
           windows={selectedWindows}
           view={view}
           enabled={ai.enabled}
           downloading={ai.downloading}
+          onGather={() => {
+            const canvas = viewport.current
+            if (!ai.enabled || !canvas) return
+            const currentView = {
+              x: canvas.scrollLeft,
+              y: canvas.scrollTop,
+              width: canvas.clientWidth,
+              height: canvas.clientHeight,
+            }
+            const next = gatherRelatedWindows(
+              workspace,
+              selectedIds,
+              currentView,
+            )
+            if (next === workspace) return
+            const preview = window.matchMedia(
+              '(prefers-reduced-motion: reduce)',
+            ).matches
+              ? undefined
+              : captureWindowPreview(windowElements.current)
+            setWorkspace(next)
+            setRevealRequest(
+              preview
+                ? {
+                    id: selectedIds[0],
+                    left: currentView.x,
+                    top: currentView.y,
+                    preview,
+                    focus: false,
+                  }
+                : null,
+            )
+          }}
         />
       )}
       <div

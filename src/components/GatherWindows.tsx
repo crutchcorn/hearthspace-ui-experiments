@@ -10,6 +10,7 @@ interface GatherWindowsProps {
   view: Bounds
   enabled: boolean
   downloading: boolean
+  onGather: () => void
 }
 
 export default function GatherWindows({
@@ -17,12 +18,26 @@ export default function GatherWindows({
   view,
   enabled,
   downloading,
+  onGather,
 }: GatherWindowsProps) {
-  const [hint, setHint] = useState<'label' | 'preview' | null>(null)
+  const [hint, setHint] = useState(false)
+  const [gathering, setGathering] = useState(false)
   const hintId = useId()
-  const timeout = useRef<number | undefined>(undefined)
+  const hintTimeout = useRef<number | undefined>(undefined)
+  const gatherTimeout = useRef<number | undefined>(undefined)
+  const completeGather = useRef(onGather)
 
-  useEffect(() => () => window.clearTimeout(timeout.current), [])
+  useEffect(() => {
+    completeGather.current = onGather
+  }, [onGather])
+
+  useEffect(
+    () => () => {
+      window.clearTimeout(hintTimeout.current)
+      window.clearTimeout(gatherTimeout.current)
+    },
+    [],
+  )
 
   if (
     !windows.some(
@@ -58,31 +73,47 @@ export default function GatherWindows({
     Math.max(clearance.top, view.height - clearance.bottom - size),
   )
 
-  function showHint(nextHint: 'label' | 'preview') {
-    window.clearTimeout(timeout.current)
-    setHint(nextHint)
-    timeout.current = window.setTimeout(() => setHint(null), 2500)
+  function showHint() {
+    window.clearTimeout(hintTimeout.current)
+    setHint(true)
+    hintTimeout.current = window.setTimeout(() => setHint(false), 2500)
   }
 
   function hideHint() {
-    window.clearTimeout(timeout.current)
-    setHint(null)
+    window.clearTimeout(hintTimeout.current)
+    setHint(false)
+  }
+
+  function gather() {
+    showHint()
+    if (!enabled || gatherTimeout.current !== undefined) return
+    setGathering(true)
+    gatherTimeout.current = window.setTimeout(() => {
+      gatherTimeout.current = undefined
+      setGathering(false)
+      hideHint()
+      completeGather.current()
+    }, 1000)
   }
 
   return (
     <div className={styles.anchor} style={{ left: x, top: y }}>
-      <div className={`${styles.surface} ${shellStyles.surface}`}>
+      <div
+        className={`${styles.surface} ${shellStyles.surface}`}
+        data-gathering={gathering}
+      >
         <button
           type="button"
           className={`${styles.button} ${shellStyles.control}`}
           aria-label="Gather similar windows"
-          aria-disabled={!enabled}
+          aria-disabled={!enabled || gathering}
+          aria-busy={gathering}
           aria-describedby={hint ? hintId : undefined}
-          onPointerEnter={() => showHint('label')}
+          onPointerEnter={showHint}
           onPointerLeave={hideHint}
-          onFocus={() => showHint('label')}
+          onFocus={showHint}
           onBlur={hideHint}
-          onClick={() => showHint(enabled ? 'preview' : 'label')}
+          onClick={gather}
         >
           <svg
             width={22}
@@ -120,9 +151,9 @@ export default function GatherWindows({
               ? downloading
                 ? 'Available when the AI download finishes.'
                 : 'Enable in Settings → AI.'
-              : hint === 'preview'
-                ? 'Preview only. Your windows stay where they are.'
-                : 'Bring related windows into view.'}
+              : gathering
+                ? 'Gathering…'
+                : 'Bring windows from the same app into view.'}
           </span>
         </div>
       )}

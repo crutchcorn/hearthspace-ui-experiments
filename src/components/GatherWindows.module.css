@@ -4,7 +4,30 @@
 }
 
 .surface {
+  position: relative;
   width: 54px;
+  overflow: hidden;
+}
+
+.surface[data-gathering='true'] {
+  background: var(--accent-soft);
+}
+
+.surface[data-gathering='true']::after {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    110deg,
+    transparent 20%,
+    var(--accent-soft) 40%,
+    var(--accent-border) 50%,
+    var(--accent-soft) 60%,
+    transparent 80%
+  );
+  transform: translateX(-100%);
+  animation: gather-shimmer 750ms ease-in-out infinite;
+  content: '';
+  pointer-events: none;
 }
 
 .button {
@@ -17,6 +40,24 @@
 
 .button[aria-disabled='true'] {
   color: var(--chrome-muted);
+}
+
+.button[aria-busy='true'] {
+  color: var(--accent);
+  cursor: progress;
+}
+
+@keyframes gather-shimmer {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .surface[data-gathering='true']::after {
+    transform: none;
+    animation: none;
+  }
 }
 
 .tooltip {

@@ -124,8 +124,16 @@ The Settings sidebar collapses in small windows.
 | System     | Choose whether the battery percentage appears beside its tray icon.                                                                                                                                                               |
 
 **Gather similar windows** appears beside selected windows. AI starts off;
-enabling it makes this action available. Expandable explanations describe the
-intended on-device processing and gathering behavior.
+enabling it makes this action available. Press it to show a one-second shimmer,
+then bring other windows from the selected applications into the viewport near
+your selection. Selected and unrelated windows stay where they are. Large
+windows shrink to fit the available area; crowded results cascade.
+
+This preview uses app identity to decide what belongs together. It doesn't
+analyze window contents or run a model. Changing the selection, entering search,
+switching windows, entering focused view, or disabling AI cancels a pending
+gather. Expandable settings explanations describe the intended on-device AI
+design.
 
 ## Notifications, previews, and saving
 
@@ -141,9 +149,9 @@ Prototype boundaries:
   doesn't index the host filesystem or search inside app content.
 - Overview's zoom buttons are placeholders. Display controls and tray values
   don't change the host system. Notifications have no external event source.
-- AI doesn't download a model, inspect windows, or move related windows. The
-  gathering button previews feedback after opt-in. Desktop widgets and editing
-  favorites aren't implemented.
+- AI doesn't download a model or inspect window contents. Gathering uses a
+  local same-app rule to move windows after its brief delay. Desktop widgets
+  and editing favorites aren't implemented.
 
 The browser saves window layouts and stacking, desktop-item positions, window
 list order, the scratchpad, tool choices, gesture assignments, appearance,
