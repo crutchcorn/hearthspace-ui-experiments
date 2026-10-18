@@ -62,8 +62,8 @@
   --accent-border: color-mix(in srgb, var(--accent) 45%, #fff8f0);
   --accent-soft: color-mix(in srgb, var(--accent) 17%, #fff8f0);
   --accent-wash: color-mix(in srgb, var(--accent) 7%, #fff8f0);
-  --field: color-mix(in srgb, var(--accent) 3%, #eeeae5);
-  --field-dot: color-mix(in srgb, var(--accent) 25%, #94877c73);
+  --field: color-mix(in srgb, var(--accent-base) 8%, #eee);
+  --field-dot: color-mix(in srgb, var(--accent-base) 25%, #88888873);
 }
 
 [data-accent='orange'] {
@@ -76,6 +76,18 @@
   --accent-wash: #fff3e4;
   --field: #eee8e1;
   --field-dot: #ad836b73;
+}
+
+[data-accent]:not([data-accent='orange']) {
+  --surface-tint: color-mix(in srgb, var(--accent-base) 4%, white);
+  --chrome: color-mix(in srgb, var(--surface-tint) 68%, transparent);
+  --chrome-raised: color-mix(in srgb, var(--surface-tint) 90%, transparent);
+  --paper: color-mix(in srgb, var(--accent-base) 2%, white);
+  --panel-wash: linear-gradient(
+    135deg,
+    #ffffff6b,
+    color-mix(in srgb, var(--surface-tint) 18%, transparent)
+  );
 }
 
 [data-color-mode='light'] {
@@ -115,6 +127,20 @@
   --field-dot: color-mix(in srgb, var(--accent-base) 20%, #94877c73);
 
   color-scheme: dark;
+}
+
+[data-accent]:not([data-accent='orange'])[data-color-mode='dark'] {
+  --surface-tint: color-mix(in srgb, var(--accent-base) 9%, #242424);
+  --chrome: color-mix(in srgb, var(--surface-tint) 88%, transparent);
+  --chrome-raised: color-mix(
+    in srgb,
+    color-mix(in srgb, var(--accent-base) 9%, #2d2d2d) 96%,
+    transparent
+  );
+  --paper: color-mix(in srgb, var(--accent-base) 6%, #242424);
+  --panel-wash: linear-gradient(135deg, #ffffff05, #fff0);
+  --field: color-mix(in srgb, var(--accent-base) 8%, #181818);
+  --field-dot: color-mix(in srgb, var(--accent-base) 20%, #88888873);
 }
 
 * {
