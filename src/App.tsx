@@ -1289,14 +1289,17 @@ function App() {
     const canvas = viewport.current!
     const id = crypto.randomUUID()
     const offset = (workspace.windows.length % 5) * 24
+    const isWorkspace = app?.id === 'workspace-welcome'
     const width =
       app?.id === 'settings'
         ? Math.max(
             MIN_WIDTH,
             Math.min(680, view.width - windowClearance.side * 2),
           )
-        : 360
-    const height = app?.id === 'settings' ? 500 : 260
+        : isWorkspace
+          ? 460
+          : 360
+    const height = app?.id === 'settings' ? 500 : isWorkspace ? 350 : 260
     setWorkspace((current) => ({
       ...current,
       windows: [
@@ -1306,8 +1309,8 @@ function App() {
           title:
             app?.name ??
             `Untitled window ${current.windows.filter((item) => item.kind === 'empty').length + 1}`,
-          kind: 'empty',
-          appId: app?.id,
+          kind: isWorkspace ? 'welcome' : 'empty',
+          appId: isWorkspace ? undefined : app?.id,
           x: clamp(
             center
               ? center.x - width / 2

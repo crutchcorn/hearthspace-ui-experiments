@@ -291,9 +291,10 @@ export default function LauncherDock({
     ({ app, windows: instances }) =>
       app.id === selectedAppId && instances.length > 0,
   )
-  const selectedCatalogApp = APP_CATALOG.find(
-    (app) => app.id === selectedGroup?.app.id,
-  )
+  const selectedLaunchableApp =
+    selectedGroup?.app.id === 'workspace-welcome'
+      ? selectedGroup.app
+      : APP_CATALOG.find((app) => app.id === selectedGroup?.app.id)
 
   useEffect(() => {
     if (!selectedAppId) return
@@ -436,15 +437,17 @@ export default function LauncherDock({
             onFocusWindow={onFocusWindow}
             onReorderWindows={onReorderWindows}
           />
-          {selectedCatalogApp && (
+          {selectedLaunchableApp && (
             <footer className={styles.popoverFooter}>
               <button
                 type="button"
                 className={styles.newWindow}
-                onClick={() => onLaunch(selectedCatalogApp)}
+                onClick={() => onLaunch(selectedLaunchableApp)}
               >
                 <Plus size={16} aria-hidden="true" />
-                New window
+                {selectedLaunchableApp.id === 'workspace-welcome'
+                  ? 'New workspace'
+                  : 'New window'}
               </button>
             </footer>
           )}
