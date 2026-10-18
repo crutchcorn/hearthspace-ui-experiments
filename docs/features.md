@@ -37,10 +37,13 @@ add backgrounds; the notification status tells you when something needs attentio
 - **Place windows.** Drag their headers, resize, and close them. Dragging toward
   the viewport edge carries a window farther across the canvas.
 - **Leave covered work in sight.** Windows can overlap completely while you
-  drag. On release, fully hidden windows and desktop icons slide toward the
-  nearest opening until a small part peeks out. Partly visible items stay put.
-  Header double-click maximization does the same; the maximize button's focused
-  view leaves the underlying layout alone.
+  drag. On release, fully hidden windows, desktop icons, and drawings below
+  windows slide toward the nearest opening until a small part peeks out.
+  Icons and background drawings slide home once nothing overlaps their original
+  space. Moving or editing one yourself gives it a new home; windows keep their
+  adjusted positions. Partly visible items stay put. Header double-click
+  maximization does the same; the maximize button's focused view leaves the
+  underlying layout alone.
 - **Keep desktop items underneath.** Every catalog app has a permanent, movable
   shortcut beside the starter folders and document. Items remain below every
   window. The default cursor tool selects them;
@@ -72,7 +75,8 @@ centered over it, and returns to the cursor. **No match found** leaves the art
 in place to edit or try again. Drawing alone never launches an app.
 
 Search, window switching, and focused view temporarily hide drawings, leaving
-them in place for your return. Arrange moves windows without moving your art.
+them in place for your return. Arrange preserves your art's placement; a drawing
+that had peeked out can return home when the rearranged windows clear its space.
 
 ## Bring work to you with search
 

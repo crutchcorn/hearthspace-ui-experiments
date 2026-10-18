@@ -6,6 +6,7 @@ export type CanvasDrawing = Bounds & {
   id: string
   strokes: GesturePoint[][]
   layer: DrawingLayerName
+  peekOrigin?: Pick<Bounds, 'x' | 'y'>
 }
 
 export const MAX_DRAWING_STROKES = 64
@@ -84,6 +85,20 @@ export function loadDrawings(value: unknown, world: World): CanvasDrawing[] {
       strokes.push(points)
     }
     if (strokes.length !== item.strokes.length) continue
+    const origin = item.peekOrigin
+    const peekOrigin =
+      item.layer === 'below' &&
+      record(origin) &&
+      typeof origin.x === 'number' &&
+      typeof origin.y === 'number' &&
+      Number.isFinite(origin.x) &&
+      Number.isFinite(origin.y) &&
+      origin.x >= 0 &&
+      origin.y >= 0 &&
+      origin.x + width <= world.width &&
+      origin.y + height <= world.height
+        ? { x: origin.x, y: origin.y }
+        : undefined
     ids.add(item.id)
     drawings.push({
       id: item.id,
@@ -93,6 +108,7 @@ export function loadDrawings(value: unknown, world: World): CanvasDrawing[] {
       width,
       height,
       strokes,
+      ...(peekOrigin ? { peekOrigin } : {}),
     })
   }
   return drawings

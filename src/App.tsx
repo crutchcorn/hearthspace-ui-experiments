@@ -76,7 +76,11 @@ import useAI from './useAI'
 import useShellPeek from './useShellPeek'
 import useWindowSwitcher from './useWindowSwitcher'
 import usePeekMotion from './usePeekMotion'
-import { settleCoveredItems } from './peek-layout'
+import {
+  restoreBackgroundItems,
+  settleBackgroundItems,
+  settleCoveredItems,
+} from './peek-layout'
 import { gatherRelatedWindows } from './gather-windows'
 import { getMaximizedBounds, getWindowClearance } from './window-layout'
 import {
@@ -139,7 +143,9 @@ function App() {
   )
   const accent =
     ACCENT_THEMES.find((theme) => theme.id === accentTheme) ?? ACCENT_THEMES[0]
-  const [workspace, setWorkspace] = useState(loadWorkspace)
+  const [workspace, setWorkspace] = useState(() =>
+    restoreBackgroundItems(loadWorkspace()),
+  )
   const [view, setView] = useState(() => ({
     ...workspace.home,
     width: window.innerWidth,
@@ -286,7 +292,7 @@ function App() {
     : null
   const previewLayout = switcherLayout ?? searchLayout
   const { cancel: cancelPeekMotion, prepare: preparePeekMotion } =
-    usePeekMotion(viewport, !previewLayout && !previewExiting && !focusView)
+    usePeekMotion(viewport, !previewLayout && !focusView)
   const previewWindowId = windowSwitcher.open
     ? windowSwitcher.selectedId
     : searchResult?.kind === 'window'
@@ -404,10 +410,14 @@ function App() {
     setShowMap(false)
     setLauncher(null)
     closePopovers()
-    setWorkspace((current) => arrangeWindows(current, origin))
+    preparePeekMotion({ backgroundOnly: true })
+    setWorkspace((current) =>
+      restoreBackgroundItems(arrangeWindows(current, origin)),
+    )
   }, [
     closePopovers,
     cancelPeekMotion,
+    preparePeekMotion,
     leaveFocusView,
     setLauncher,
     setSelectedIds,
@@ -698,6 +708,8 @@ function App() {
       const bounds = current.bounds!
       const dx = clientX - current.startX + canvas.scrollLeft - current.scrollX
       const dy = clientY - current.startY + canvas.scrollTop - current.scrollY
+      if (!current.moved && Math.hypot(dx, dy) < 4) return
+      current.moved = true
       setWorkspace((previous) => ({
         ...previous,
         drawings: previous.drawings.map((item) =>
@@ -705,6 +717,7 @@ function App() {
             ? item
             : {
                 ...item,
+                peekOrigin: undefined,
                 x: clamp(bounds.x + dx, 0, previous.width - bounds.width),
                 y: clamp(bounds.y + dy, 0, previous.height - bounds.height),
               },
@@ -799,7 +812,12 @@ function App() {
         items: previous.items.map((item) => {
           const origin = origins.get(item.id)
           return origin
-            ? { ...item, x: origin.x + moveX, y: origin.y + moveY }
+            ? {
+                ...item,
+                peekOrigin: undefined,
+                x: origin.x + moveX,
+                y: origin.y + moveY,
+              }
             : item
         }),
       }))
@@ -1104,13 +1122,17 @@ function App() {
       event.type === 'pointerup' &&
       (completed.type === 'move' ||
         completed.type === 'resize' ||
-        completed.type === 'item-move')
+        completed.type === 'item-move' ||
+        completed.type === 'drawing-move')
     ) {
       applyGesture(event.clientX, event.clientY)
       if (completed.moved) {
-        preparePeekMotion(
-          completed.type === 'item-move' ? undefined : completed.id,
-        )
+        preparePeekMotion({
+          excludedWindowId:
+            completed.type === 'move' || completed.type === 'resize'
+              ? completed.id
+              : undefined,
+        })
         setWorkspace(settleCoveredItems)
       }
     }
@@ -1126,14 +1148,17 @@ function App() {
           current.drawingLayer!,
           workspace,
         )
-        setWorkspace((previous) => ({
-          ...previous,
-          drawings: existing
-            ? previous.drawings.map((item) =>
-                item.id === drawing.id ? drawing : item,
-              )
-            : [...previous.drawings, drawing],
-        }))
+        preparePeekMotion({ backgroundOnly: true, drawingOrigin: drawing })
+        setWorkspace((previous) =>
+          settleBackgroundItems({
+            ...previous,
+            drawings: existing
+              ? previous.drawings.map((item) =>
+                  item.id === drawing.id ? drawing : item,
+                )
+              : [...previous.drawings, drawing],
+          }),
+        )
         setSelectedDrawingId(drawing.id)
       }
       setDrawingDraft(null)
@@ -1156,7 +1181,7 @@ function App() {
   function maximize(item: DesktopWindow) {
     setRevealRequest(null)
     if (focusView?.id === item.id) {
-      preparePeekMotion(item.id)
+      preparePeekMotion({ excludedWindowId: item.id })
       leaveFocusView()
       setWorkspace(settleCoveredItems)
       return
@@ -1191,7 +1216,7 @@ function App() {
       }),
     }))
     focusWindow(item.id)
-    preparePeekMotion(item.id)
+    preparePeekMotion({ excludedWindowId: item.id })
     setWorkspace(settleCoveredItems)
   }
 
@@ -1250,10 +1275,13 @@ function App() {
   function closeWindow(id: string) {
     setRevealRequest(null)
     if (focusView?.id === id) setFocusView(null)
-    setWorkspace((current) => ({
-      ...current,
-      windows: current.windows.filter((entry) => entry.id !== id),
-    }))
+    preparePeekMotion({ backgroundOnly: true })
+    setWorkspace((current) =>
+      restoreBackgroundItems({
+        ...current,
+        windows: current.windows.filter((entry) => entry.id !== id),
+      }),
+    )
   }
 
   function addWindow(app?: LauncherApp, center?: { x: number; y: number }) {
@@ -1323,10 +1351,13 @@ function App() {
     setSelectedDrawingId(null)
     setTool('cursor')
     const timer = window.setTimeout(() => {
-      setWorkspace((current) => ({
-        ...current,
-        drawings: current.drawings.filter((item) => item.id !== drawingId),
-      }))
+      preparePeekMotion({ backgroundOnly: true })
+      setWorkspace((current) =>
+        restoreBackgroundItems({
+          ...current,
+          drawings: current.drawings.filter((item) => item.id !== drawingId),
+        }),
+      )
       setConsumingDrawingIds((current) =>
         current.filter((id) => id !== drawingId),
       )
@@ -1979,20 +2010,28 @@ function App() {
           onPlay={gestureShortcuts.length > 0 ? playDrawing : undefined}
           onLayerChange={(layer) => {
             setDrawingLayer(layer)
-            setWorkspace((current) => ({
-              ...current,
-              drawings: current.drawings.map((item) =>
-                item.id === selectedDrawing.id ? { ...item, layer } : item,
-              ),
-            }))
+            preparePeekMotion({ backgroundOnly: true })
+            setWorkspace((current) =>
+              settleBackgroundItems({
+                ...current,
+                drawings: current.drawings.map((item) =>
+                  item.id === selectedDrawing.id
+                    ? { ...item, layer, peekOrigin: undefined }
+                    : item,
+                ),
+              }),
+            )
           }}
           onDelete={() => {
-            setWorkspace((current) => ({
-              ...current,
-              drawings: current.drawings.filter(
-                (item) => item.id !== selectedDrawing.id,
-              ),
-            }))
+            preparePeekMotion({ backgroundOnly: true })
+            setWorkspace((current) =>
+              restoreBackgroundItems({
+                ...current,
+                drawings: current.drawings.filter(
+                  (item) => item.id !== selectedDrawing.id,
+                ),
+              }),
+            )
             setSelectedDrawingId(null)
           }}
           onFinish={() => setSelectedDrawingId(null)}
@@ -2025,7 +2064,8 @@ function App() {
             ).matches
               ? undefined
               : captureWindowPreview(windowElements.current)
-            setWorkspace(next)
+            preparePeekMotion({ backgroundOnly: true })
+            setWorkspace(restoreBackgroundItems(next))
             setRevealRequest(
               preview
                 ? {

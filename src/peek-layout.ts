@@ -1,7 +1,10 @@
 import type { Bounds, DesktopItem, DesktopWindow, Workspace } from './desktop'
+import type { CanvasDrawing } from './drawings'
+import type { GesturePoint } from './gestures'
 
 const windowPeek = 24
 const iconPeek = 32
+const drawingPeek = 16
 const epsilon = 0.000001
 const clamp = (value: number, min: number, max: number) =>
   Math.max(min, Math.min(max, value))
@@ -177,10 +180,209 @@ function moveWindow(
   }
 }
 
+type BackgroundItem = DesktopItem | CanvasDrawing
+
+function moveBackground<T extends BackgroundItem>(
+  item: T,
+  position: GesturePoint,
+): T {
+  if (position.x === item.x && position.y === item.y) return item
+  return {
+    ...item,
+    ...position,
+    peekOrigin: item.peekOrigin ?? { x: item.x, y: item.y },
+  }
+}
+
+function restoreBackground<T extends BackgroundItem>(
+  item: T,
+  blockers: Bounds[],
+): T {
+  if (!item.peekOrigin) return item
+  const home = { ...item, ...item.peekOrigin }
+  if (blockers.some((other) => intersect(home, other))) return item
+  const restored = { ...home }
+  delete restored.peekOrigin
+  return restored
+}
+
+/** Return displaced background objects only when their entire home is clear. */
+export function restoreBackgroundItems(workspace: Workspace): Workspace {
+  const items = [...workspace.items]
+  let changed = false
+  let restored: boolean
+  do {
+    restored = false
+    for (let index = items.length - 1; index >= 0; index--) {
+      const item = items[index]
+      if (!item.peekOrigin) continue
+      const blockers = [
+        ...workspace.windows,
+        ...items.filter((_, other) => other !== index).map(iconBody),
+      ]
+      items[index] = restoreBackground(item, blockers)
+      if (items[index] !== item) {
+        restored = true
+        changed = true
+      }
+    }
+    // Returning one icon can clear another icon's home. An origin is removed
+    // at most once, so this converges without making peers trade positions.
+  } while (restored)
+  const blockers = [...workspace.windows, ...items.map(iconBody)]
+  const drawings = workspace.drawings.map((drawing) => {
+    if (drawing.layer !== 'below') return drawing
+    const result = restoreBackground(drawing, blockers)
+    changed ||= result !== drawing
+    return result
+  })
+  return changed ? { ...workspace, items, drawings } : workspace
+}
+
+function segmentCovered(
+  start: GesturePoint,
+  end: GesturePoint,
+  higher: Bounds[],
+): boolean {
+  const intervals: Interval[] = []
+  for (const other of higher) {
+    let from = 0
+    let to = 1
+    for (const axis of ['x', 'y'] as const) {
+      const size = axis === 'x' ? other.width : other.height
+      const delta = end[axis] - start[axis]
+      if (Math.abs(delta) <= epsilon) {
+        if (start[axis] < other[axis] || start[axis] > other[axis] + size) {
+          to = -1
+          break
+        }
+      } else {
+        const first = (other[axis] - start[axis]) / delta
+        const last = (other[axis] + size - start[axis]) / delta
+        from = Math.max(from, Math.min(first, last))
+        to = Math.min(to, Math.max(first, last))
+      }
+    }
+    if (from <= to) intervals.push({ start: from, end: to })
+  }
+  let coveredTo = 0
+  for (const interval of intervals.sort((a, b) => a.start - b.start)) {
+    if (interval.start > coveredTo + epsilon) return false
+    coveredTo = Math.max(coveredTo, interval.end)
+  }
+  return coveredTo >= 1 - epsilon
+}
+
+function drawingCovered(drawing: CanvasDrawing, higher: Bounds[]): boolean {
+  return (
+    drawing.strokes.length > 0 &&
+    drawing.strokes.every((stroke) =>
+      stroke.every((point, index) => {
+        const next = stroke[index + 1] ?? point
+        const start = { x: drawing.x + point.x, y: drawing.y + point.y }
+        return (
+          fullyCovered(
+            { x: start.x - 1.5, y: start.y - 1.5, width: 3, height: 3 },
+            higher,
+          ) &&
+          segmentCovered(
+            start,
+            { x: drawing.x + next.x, y: drawing.y + next.y },
+            higher,
+          )
+        )
+      }),
+    )
+  )
+}
+
+function revealDrawing(
+  drawing: CanvasDrawing,
+  higher: Bounds[],
+  world: Workspace,
+): GesturePoint | null {
+  const points = drawing.strokes.flat()
+  if (!points.length) return null
+  // A bounded set of actual ink points keeps large drawings inexpensive.
+  // Requiring clearance around a point reveals ink, rather than an empty
+  // corner of a drawing's transparent bounding box.
+  const candidates = Array.from(
+    { length: Math.min(32, points.length) },
+    (_, i) =>
+      points[
+        Math.round(
+          (i * (points.length - 1)) /
+            Math.max(1, Math.min(32, points.length) - 1),
+        )
+      ],
+  )
+  const blockers = higher.map((other) => ({
+    x: other.x - drawingPeek,
+    y: other.y - drawingPeek,
+    width: other.width + drawingPeek * 2,
+    height: other.height + drawingPeek * 2,
+  }))
+  let best: GesturePoint | null = null
+  let bestDistance = Infinity
+  for (const point of candidates) {
+    const body = {
+      x: drawing.x + point.x - 1,
+      y: drawing.y + point.y - 1,
+      width: 2,
+      height: 2,
+    }
+    const position = revealPosition(drawing, body, blockers, world, 2)
+    if (!position) continue
+    const distance =
+      (position.x - drawing.x) ** 2 + (position.y - drawing.y) ** 2
+    if (
+      distance < bestDistance - epsilon ||
+      (Math.abs(distance - bestDistance) <= epsilon &&
+        (!best ||
+          position.y < best.y ||
+          (position.y === best.y && position.x < best.x)))
+    ) {
+      best = position
+      bestDistance = distance
+    }
+  }
+  return best
+}
+
+/** Restore and reveal background objects without rearranging any windows. */
+export function settleBackgroundItems(workspace: Workspace): Workspace {
+  const restored = restoreBackgroundItems(workspace)
+  const items = [...restored.items]
+  const higher: Bounds[] = [...restored.windows]
+  let changed = false
+  // Desktop items always live below every window, including a dropped item.
+  for (let index = items.length - 1; index >= 0; index--) {
+    const item = items[index]
+    const body = iconBody(item)
+    if (fullyCovered(body, higher)) {
+      const position = revealPosition(item, body, higher, restored, iconPeek)
+      if (position) {
+        items[index] = moveBackground(item, position)
+        changed ||= items[index] !== item
+      }
+    }
+    higher.push(iconBody(items[index]))
+  }
+  const drawings = restored.drawings.map((drawing) => {
+    if (drawing.layer !== 'below' || !drawingCovered(drawing, higher))
+      return drawing
+    const position = revealDrawing(drawing, higher, restored)
+    if (!position) return drawing
+    const moved = moveBackground(drawing, position)
+    changed ||= moved !== drawing
+    return moved
+  })
+  return changed ? { ...restored, items, drawings } : restored
+}
+
 /** Reveal fully covered bodies without changing their size or stacking order. */
 export function settleCoveredItems(workspace: Workspace): Workspace {
   const windows = [...workspace.windows]
-  const items = [...workspace.items]
   const higher: Bounds[] = []
   let changed = false
   for (let index = windows.length - 1; index >= 0; index--) {
@@ -194,18 +396,5 @@ export function settleCoveredItems(workspace: Workspace): Workspace {
     }
     higher.push(windows[index])
   }
-  // Desktop items always live below every window, including a dropped item.
-  for (let index = items.length - 1; index >= 0; index--) {
-    const item = items[index]
-    const body = iconBody(item)
-    if (fullyCovered(body, higher)) {
-      const position = revealPosition(item, body, higher, workspace, iconPeek)
-      if (position && (position.x !== item.x || position.y !== item.y)) {
-        items[index] = { ...item, ...position }
-        changed = true
-      }
-    }
-    higher.push(iconBody(items[index]))
-  }
-  return changed ? { ...workspace, windows, items } : workspace
+  return settleBackgroundItems(changed ? { ...workspace, windows } : workspace)
 }

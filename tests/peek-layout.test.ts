@@ -1,7 +1,12 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import type { DesktopItem, DesktopWindow, Workspace } from '../src/desktop.ts'
-import { settleCoveredItems } from '../src/peek-layout.ts'
+import type { CanvasDrawing } from '../src/drawings.ts'
+import {
+  restoreBackgroundItems,
+  settleBackgroundItems,
+  settleCoveredItems,
+} from '../src/peek-layout.ts'
 
 function window(
   id: string,
@@ -22,6 +27,7 @@ function window(
 function workspace(
   windows: DesktopWindow[],
   items: DesktopItem[] = [],
+  drawings: CanvasDrawing[] = [],
 ): Workspace {
   return {
     width: 1000,
@@ -29,8 +35,40 @@ function workspace(
     home: { x: 0, y: 0 },
     windows,
     items,
-    drawings: [],
+    drawings,
     note: '',
+  }
+}
+
+function icon(id = 'icon', bounds: Partial<DesktopItem> = {}): DesktopItem {
+  return {
+    id,
+    title: 'Notes',
+    kind: 'app',
+    appId: 'notes',
+    x: 100,
+    y: 100,
+    width: 88,
+    height: 96,
+    ...bounds,
+  }
+}
+
+function drawing(overrides: Partial<CanvasDrawing> = {}): CanvasDrawing {
+  return {
+    id: 'drawing',
+    x: 100,
+    y: 100,
+    width: 100,
+    height: 100,
+    layer: 'below',
+    strokes: [
+      [
+        { x: 4, y: 4 },
+        { x: 96, y: 96 },
+      ],
+    ],
+    ...overrides,
   }
 }
 
@@ -195,4 +233,212 @@ test('restore bounds remain on the canvas when a reveal reaches an edge', () => 
     width: 150,
     height: 140,
   })
+})
+
+test('desktop icons remember their home and return when its window moves away', () => {
+  const before = workspace([window('front')], [icon()])
+  const peeked = settleCoveredItems(before)
+  assert.deepEqual(peeked.items[0].peekOrigin, { x: 100, y: 100 })
+  const moved = {
+    ...peeked,
+    windows: [window('front', { x: 500 })],
+  }
+  const result = settleCoveredItems(moved)
+  assert.deepEqual(result.items[0], before.items[0])
+  assert.equal(settleCoveredItems(result), result)
+})
+
+test('any overlap with the original icon bounds keeps it displaced', () => {
+  const peeked = settleCoveredItems(workspace([window('front')], [icon()]))
+  const partial = {
+    ...peeked,
+    // Only the original label/padding is overlapped; the glyph would be clear.
+    windows: [window('front', { y: 195 })],
+  }
+  assert.equal(restoreBackgroundItems(partial), partial)
+  assert.equal(settleCoveredItems(partial), partial)
+})
+
+test('further peeks retain the first home rather than the latest displaced spot', () => {
+  const before = workspace([window('front')], [icon()])
+  const first = settleCoveredItems(before)
+  const second = settleCoveredItems({
+    ...first,
+    windows: [window('front', { y: 0 })],
+  })
+  assert.notDeepEqual(
+    { x: second.items[0].x, y: second.items[0].y },
+    { x: first.items[0].x, y: first.items[0].y },
+  )
+  assert.deepEqual(second.items[0].peekOrigin, { x: 100, y: 100 })
+  const restored = restoreBackgroundItems({ ...second, windows: [] })
+  assert.deepEqual(restored.items[0], before.items[0])
+})
+
+test('an icon does not restore over another icon, even a lower peer', () => {
+  const before = workspace(
+    [],
+    [icon('lower'), icon('upper', { x: 400, peekOrigin: { x: 100, y: 100 } })],
+  )
+  assert.equal(restoreBackgroundItems(before), before)
+  assert.equal(settleCoveredItems(before), before)
+})
+
+test('returning icons clear chained homes in the same settlement', () => {
+  const before = workspace(
+    [],
+    [
+      icon('one', { peekOrigin: { x: 300, y: 100 } }),
+      icon('two', { y: 58, peekOrigin: { x: 100, y: 100 } }),
+    ],
+  )
+  const result = restoreBackgroundItems(before)
+  assert.equal(result.items[0].x, 300)
+  assert.equal(result.items[1].y, 100)
+  assert.equal(result.items[0].peekOrigin, undefined)
+  assert.equal(result.items[1].peekOrigin, undefined)
+  assert.equal(settleCoveredItems(result), result)
+})
+
+test('icons hidden by peers remain settled rather than repeatedly returning and peeking', () => {
+  const peeked = settleCoveredItems(workspace([], [icon('one'), icon('two')]))
+  assert.deepEqual(peeked.items[0].peekOrigin, { x: 100, y: 100 })
+  assert.equal(restoreBackgroundItems(peeked), peeked)
+  assert.equal(settleCoveredItems(peeked), peeked)
+  const result = restoreBackgroundItems({
+    ...peeked,
+    items: [peeked.items[0], { ...peeked.items[1], x: 300 }],
+  })
+  assert.equal(result.items[0].y, 100)
+  assert.equal(result.items[0].peekOrigin, undefined)
+})
+
+test('background restoration does not add peeks or undo permanent window movement', () => {
+  const before = workspace([window('back'), window('front')], [icon()])
+  assert.equal(restoreBackgroundItems(before), before)
+  const peeked = settleCoveredItems(before)
+  const result = restoreBackgroundItems({
+    ...peeked,
+    windows: [peeked.windows[0]],
+  })
+  assert.equal(result.windows[0], peeked.windows[0])
+  assert.equal(result.windows[0].y, 76)
+})
+
+test('background-only settlement leaves overlapping windows untouched', () => {
+  const before = workspace([window('back'), window('front')], [icon()])
+  const result = settleBackgroundItems(before)
+  assert.equal(result.windows, before.windows)
+  assert.deepEqual(result.items[0].peekOrigin, { x: 100, y: 100 })
+})
+
+test('below drawings expose ink and return home when the blocker is removed', () => {
+  const before = workspace([window('front')], [], [drawing()])
+  const peeked = settleCoveredItems(before)
+  assert.deepEqual(peeked.drawings[0].peekOrigin, { x: 100, y: 100 })
+  assert.ok(peeked.drawings[0].y + 4 < 100 - 16)
+  assert.equal(settleCoveredItems(peeked), peeked)
+  assert.equal(peeked.drawings[0].strokes, before.drawings[0].strokes)
+  const restored = restoreBackgroundItems({ ...peeked, windows: [] })
+  assert.deepEqual(restored.drawings[0], before.drawings[0])
+})
+
+test('drawings remain displaced until their entire original bounds are clear', () => {
+  const peeked = settleCoveredItems(
+    workspace([window('front')], [], [drawing()]),
+  )
+  const partial = { ...peeked, windows: [window('front', { y: 199 })] }
+  assert.equal(restoreBackgroundItems(partial), partial)
+})
+
+test('an empty exposed drawing corner does not hide the fact that all ink is covered', () => {
+  const before = workspace(
+    [window('front', { x: 190, y: 190, width: 20, height: 20 })],
+    [],
+    [drawing({ width: 200, height: 200, strokes: [[{ x: 100, y: 100 }]] })],
+  )
+  const result = settleCoveredItems(before)
+  assert.notEqual(result.drawings[0], before.drawings[0])
+  const point = result.drawings[0].strokes[0][0]
+  assert.ok(result.drawings[0].y + point.y < 190 - 16)
+})
+
+test('a visible stroke segment between covered endpoints prevents a drawing peek', () => {
+  const before = workspace(
+    [
+      window('left', { width: 20, height: 100 }),
+      window('right', { x: 180, width: 20, height: 100 }),
+    ],
+    [],
+    [
+      drawing({
+        strokes: [
+          [
+            { x: 4, y: 50 },
+            { x: 96, y: 50 },
+          ],
+        ],
+      }),
+    ],
+  )
+  assert.equal(settleCoveredItems(before), before)
+})
+
+test('above drawings never peek or act as opaque blockers for desktop icons', () => {
+  const above = drawing({ layer: 'above', width: 200, height: 200 })
+  const withWindow = workspace([window('front')], [], [above])
+  assert.equal(settleCoveredItems(withWindow), withWindow)
+  const withIcon = workspace([], [icon()], [above])
+  assert.equal(settleCoveredItems(withIcon), withIcon)
+})
+
+test('a stroke whose thickness is already visible along a window edge stays put', () => {
+  const before = workspace(
+    [window('front', { x: 104 })],
+    [],
+    [
+      drawing({
+        strokes: [
+          [
+            { x: 4, y: 4 },
+            { x: 4, y: 96 },
+          ],
+        ],
+      }),
+    ],
+  )
+  assert.equal(settleCoveredItems(before), before)
+})
+
+test('below drawings do not displace icons or other drawings with their empty bounds', () => {
+  const before = workspace(
+    [],
+    [icon()],
+    [
+      drawing({ strokes: [[{ x: 96, y: 96 }]] }),
+      drawing({ id: 'other', strokes: [[{ x: 96, y: 96 }]] }),
+    ],
+  )
+  assert.equal(settleCoveredItems(before), before)
+})
+
+test('desktop icon glyphs can cover a below drawing without losing its home', () => {
+  const before = workspace(
+    [],
+    [icon()],
+    [
+      drawing({
+        x: 120,
+        y: 120,
+        width: 16,
+        height: 16,
+        strokes: [[{ x: 8, y: 8 }]],
+      }),
+    ],
+  )
+  const result = settleCoveredItems(before)
+  assert.deepEqual(result.drawings[0].peekOrigin, { x: 120, y: 120 })
+  assert.equal(settleCoveredItems(result), result)
+  const restored = restoreBackgroundItems({ ...result, items: [] })
+  assert.deepEqual(restored.drawings[0], before.drawings[0])
 })

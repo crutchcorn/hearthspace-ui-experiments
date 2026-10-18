@@ -13,19 +13,36 @@ The minimap translates pointer positions into world coordinates. Grabbing its vi
 Dragging a window’s title bar combines pointer movement with changes in scroll position. This keeps a grabbed window under the pointer while edge scrolling carries it farther across the world. Shell-owned windows join a glass title bar and opaque content in one frame, with a 44-pixel header increasing to 50 pixels for coarse pointers. External app previews use their own Realistic frame styles while retaining the same window interactions. The body scrolls in the remaining space. Eight resize handles constrain windows to the world bounds and a minimum size of 280 × 200 pixels.
 
 Windows may cover one another completely during a drag or resize. Releasing a
-moved window or desktop item checks for fully covered work, including coverage
-shared by several higher windows. Hidden windows move to the nearest available
-opening with a 24-pixel patch exposed. Desktop icons follow the same rule below
-every window, exposing 32 pixels of their artwork. Partly visible items stay
-put; sizes and stacking order stay intact. The canvas edges constrain movement,
-so an item stays in place when no opening is possible. Drawings are excluded.
+moved window or background object checks for fully covered work, including
+coverage shared by several higher windows. Hidden windows move to the nearest
+available opening with a 24-pixel patch exposed. Desktop icons follow the same
+rule below every window, exposing 32 pixels of their artwork. Drawings below
+windows also peek out when their ink is fully covered; empty space inside a
+drawing's bounds doesn't count as visible art. Drawings above windows keep their
+placement. Partly visible objects stay put; sizes and stacking order stay
+intact. The canvas edges constrain movement, so an object stays in place when
+no opening is possible.
 
-These position changes persist with the workspace. A short slide reveals where
-the hidden work went without slowing direct dragging; reduced motion makes the
-change immediate. Canceled gestures, simple clicks, search, and keyboard
-switching do not rearrange the saved layout this way. Ordinary header
-double-click maximization and restore also reveal covered work. Entering or
-leaving focused view with the maximize control does not.
+Windows keep these adjusted positions. Desktop items and background drawings
+instead retain a `peekOrigin` for the position before their first automatic
+move. Further peeks preserve that origin. Once the original space is completely
+clear, they return there and discard the origin. A partial overlap keeps them
+away, even when moving home would leave some of the object visible. Dragging
+or editing a background object deliberately establishes a new home.
+
+Returning checks the object's full original bounds against windows and other
+desktop icons' artwork. Touching edges is allowed. Drawings don't act as opaque
+blockers, so empty space around their ink cannot hold another object away.
+
+Closing or arranging windows, gathering related windows, and removing a
+background drawing also check whether displaced background objects can return.
+Both the peek position and its origin persist with the workspace, so a reload
+doesn't forget the intended placement. A short slide reveals where hidden work
+went and brings background objects home without slowing direct dragging;
+reduced motion makes the change immediate. Canceled gestures, simple clicks,
+search, and keyboard switching do not rearrange the saved layout this way.
+Ordinary header double-click maximization and restore also reveal covered work.
+Entering or leaving focused view with the maximize control does not.
 
 Double-clicking a window header toggles ordinary maximization, using the current viewport with clearance for the shell controls while retaining previous bounds for restore. The shared `windowClearance` uses 24-pixel side margins, 96 pixels above, and 96 below at desktop widths; at 760 pixels or less, these become 12, 78, and 78 pixels. Revealing a maximized window uses the same offsets; ordinary windows are centered with the top and side clearances as minimums. The same minimum window dimensions still apply on small viewports.
 
@@ -47,7 +64,7 @@ Projects and Pictures folders, a Notes.txt document, and a shortcut for every ap
 
 Pan mode drags the canvas even when the drag starts on an item. The cursor is the default tool and selects desktop items. Dragging the background draws a rectangle in world coordinates and selects intersecting items without selecting windows. Clicking an item selects it; Shift, Ctrl, or ⌘ toggles individual items or adds a rectangle’s matches to the selection. Space selects a focused item. Dragging a selected item moves the selected group together, keeping it within the world bounds. Double-click or Enter on a focused item opens its associated simulated app preview without changing the canvas tool. Window and desktop-item selections have separate IDs. Desktop selection is shown through item highlights and the dragged rectangle, without a text hint or count.
 
-Item positions persist with the workspace. Covered icons can move aside when a drag ends or a window header is double-clicked, while their layer remains pinned beneath windows. Arrange only moves windows. Loading a workspace preserves existing desktop items and moved app shortcuts, removes duplicate shortcuts for an app, and adds any missing catalog shortcuts near home. A workspace without an item collection also receives the starter files and folders. Windows and edited scratchpad content remain intact.
+Item positions persist with the workspace. Covered icons can move aside when a drag ends or a window header is double-clicked, while their layer remains pinned beneath windows. They retain their original positions and slide back once those spaces are clear. Dragging a displaced icon yourself replaces that original position. Arrange moves windows and lets displaced icons return if their spaces become clear. Loading a workspace preserves existing desktop items and moved app shortcuts, removes duplicate shortcuts for an app, and adds any missing catalog shortcuts near home. A workspace without an item collection also receives the starter files and folders. Windows and edited scratchpad content remain intact.
 
 ## Canvas drawings
 
@@ -82,15 +99,19 @@ strokes in separate below-window and above-window layers, with pointer targets
 following the ink rather than filling each drawing's bounding box. The below
 layer remains underneath every window; the above layer sits above their stack.
 Search, window switching, and focused view hide both layers temporarily.
-Arrange leaves drawings in place.
+Covered drawings in the below layer can peek out and return home when their
+original space is clear. Arrange preserves the chosen placement of drawings,
+while allowing displaced background drawings to return home.
 
 Each `workspace.drawings` entry has world-space bounds, an ID, an `above` or
 `below` layer, and strokes expressed in local coordinates within those bounds.
 `addDrawingStroke` recomputes the combined bounds and local points when a stroke
-is added. Completed strokes persist with the workspace; selection and the active
-pointer stroke do not. The drawing helpers validate finite coordinates, unique
-IDs, supported layers, world bounds, and bounded stroke and point counts when
-loading. Older workspaces start with no drawings.
+is added. Moving a drawing, adding a stroke, or changing its layer discards any
+previous peek origin, making the edited position its new home. Completed strokes
+and an optional background peek origin persist with the workspace; selection
+and the active pointer stroke do not. The drawing helpers validate finite
+coordinates, unique IDs, supported layers, world bounds, and bounded stroke and
+point counts when loading. Older workspaces start with no drawings.
 
 ## Canvas search
 
@@ -244,8 +265,8 @@ Each Settings window owns its mock layout and per-monitor values, retaining them
 | [`src/desktop.ts`](../src/desktop.ts)                                                   | Workspace types, starter desktop items, storage validation, window resizing, and arrangement.         |
 | [`src/drawings.ts`](../src/drawings.ts)                                                 | Drawing types, stroke bounds, local coordinates, and saved-art validation.                            |
 | [`src/window-layout.ts`](../src/window-layout.ts)                                       | Responsive shell clearances and ordinary maximized window bounds.                                     |
-| [`src/peek-layout.ts`](../src/peek-layout.ts)                                           | Placement of fully covered windows and desktop icons at the nearest visible opening.                  |
-| [`src/usePeekMotion.ts`](../src/usePeekMotion.ts)                                       | Short reveal animations after a drop, resize, or header double-click.                                 |
+| [`src/peek-layout.ts`](../src/peek-layout.ts)                                           | Covered-window placement, temporary background peeking, and return-home positions.                    |
+| [`src/usePeekMotion.ts`](../src/usePeekMotion.ts)                                       | Short slide animations for peeking objects and background objects returning home.                     |
 | [`src/canvas-search.ts`](../src/canvas-search.ts)                                       | Search matching and shared grid/parking layouts for canvas search and window switching.               |
 | [`src/preview-motion.ts`](../src/preview-motion.ts)                                     | Window measurements and continuous transitions from temporary previews to the restored viewport.      |
 | [`src/gather-windows.ts`](../src/gather-windows.ts)                                     | Same-app window matching and placement near the selection within the current viewport.                |
@@ -297,6 +318,11 @@ Handwriting model assets use the browser cache when available, separately from w
 Photo backgrounds are stored in IndexedDB database `hearthspace-background-v1`, in the `background` store’s `photo` record. The record holds the original image Blob, filename, and allowed fit value, independently of the workspace and other appearance settings. The image is decoded before use and is not sent to a server. Resetting deletes this record. If saving or deleting fails, the current session still shows the selected background and Settings explains that the change could not be saved. An unavailable or unreadable saved photo falls back to the default dots.
 
 The workspace is stored in `localStorage` under `hearthspace-playground-v1`. It contains world dimensions, home coordinates, desktop items and their positions, drawings with their bounds, layers, and local strokes, window geometry and stacking, optional dock list ordering, app IDs for launched preview windows, and the scratchpad note. Loading validates the stored shape, constrains window and desktop-item bounds, and validates drawings. Missing drawing collections become empty; invalid entries are discarded without replacing the rest of the workspace. Desktop items require unique IDs, a supported kind, and a known preview app. Workspaces without an item collection receive the starter items. Every loaded workspace gains any missing catalog app shortcuts; a saved empty collection therefore receives app shortcuts, while files and folders remain absent. Existing app-shortcut positions are preserved and duplicate app shortcuts are removed. Maximized windows return to their saved restore bounds on reload. The visual refresh renames the original demo titles and converts its generic starter window into a Files preview. Only the exact original sample note is replaced; edited notes and saved geometry remain intact.
+
+Desktop items and drawings below windows can also store a `peekOrigin`. It
+preserves the intended position while an object temporarily peeks out. Loading
+validates this optional origin independently, discarding an invalid origin
+without losing the object. Older workspaces without it use their saved positions.
 
 Gesture shortcuts are stored separately under `hearthspace-gesture-shortcuts-v1`, preserving previously saved assignments. Loading accepts known catalog app IDs, unique assignments, and finite points within the pad bounds. Missing or invalid storage uses the default examples; a saved empty array stays empty. Invalid entries are filtered when valid assignments remain. `App` retains changes for the current session if storage fails, including across closed and reopened Settings windows; those changes will not survive a reload.
 

@@ -40,6 +40,45 @@ test('loads both drawing layers and preserves local marks and their placement', 
   assert.deepEqual(loadDrawings([drawing, above], world), [drawing, above])
 })
 
+test('retains a background drawing’s home position across saving and loading', () => {
+  const peeking = { ...drawing, peekOrigin: { x: 300, y: 400 } }
+  const saved = JSON.parse(JSON.stringify([peeking]))
+  assert.deepEqual(loadDrawings(saved, world), [peeking])
+})
+
+test('discards invalid drawing home positions without losing the artwork', () => {
+  const origins = [
+    null,
+    '100,200',
+    {},
+    { x: 100, y: '200' },
+    { x: Infinity, y: 200 },
+    { x: 100, y: NaN },
+    { x: -1, y: 200 },
+    { x: 100, y: -1 },
+    { x: 901, y: 200 },
+    { x: 100, y: 721 },
+  ]
+  for (const peekOrigin of origins) {
+    assert.deepEqual(loadDrawings([{ ...drawing, peekOrigin }], world), [
+      drawing,
+    ])
+  }
+  const above = { ...drawing, layer: 'above' as const }
+  assert.deepEqual(
+    loadDrawings([{ ...above, peekOrigin: { x: 300, y: 400 } }], world),
+    [above],
+  )
+})
+
+test('drawing a new stroke makes a peeked position the intentional placement', () => {
+  const peeking = { ...drawing, peekOrigin: { x: 300, y: 400 } }
+  const stroke = [{ x: 250, y: 300 }]
+  const edited = addDrawingStroke(peeking, stroke, 'below', world)
+  assert.equal(edited.peekOrigin, undefined)
+  assert.deepEqual(worldStrokes(edited), [...worldStrokes(peeking), stroke])
+})
+
 test('rejects invalid drawings without discarding neighboring valid drawings', () => {
   const invalid = [
     { ...drawing, id: 'bad-position', x: NaN },

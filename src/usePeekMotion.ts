@@ -7,13 +7,14 @@ import {
 } from 'react'
 
 type Position = { x: number; y: number }
+type Surface = HTMLElement | SVGSVGElement
 
 export default function usePeekMotion(
   viewport: RefObject<HTMLDivElement | null>,
   enabled: boolean,
 ) {
   const [request, setRequest] = useState(0)
-  const origins = useRef(new Map<HTMLElement, Position>())
+  const origins = useRef(new Map<Surface, Position>())
   const animations = useRef<Animation[]>([])
 
   const cancel = useCallback(() => {
@@ -23,14 +24,29 @@ export default function usePeekMotion(
   }, [])
 
   const prepare = useCallback(
-    (excludedWindowId?: string) => {
+    ({
+      excludedWindowId,
+      backgroundOnly = false,
+      drawingOrigin,
+    }: {
+      excludedWindowId?: string
+      backgroundOnly?: boolean
+      drawingOrigin?: Position & { id: string }
+    } = {}) => {
       cancel()
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
-      for (const element of viewport.current?.querySelectorAll<HTMLElement>(
-        '[data-window-id], [data-desktop-item-id]',
+      for (const element of viewport.current?.querySelectorAll<Surface>(
+        backgroundOnly
+          ? '[data-desktop-item-id], [data-drawing-layer="below"] [data-drawing-id]'
+          : '[data-window-id], [data-desktop-item-id], [data-drawing-layer="below"] [data-drawing-id]',
       ) ?? []) {
         if (element.dataset.windowId === excludedWindowId && excludedWindowId)
           continue
+        // Extending ink can rebase its SVG bounds without moving the artwork.
+        if (drawingOrigin && element.dataset.drawingId === drawingOrigin.id) {
+          origins.current.set(element, drawingOrigin)
+          continue
+        }
         const style = getComputedStyle(element)
         origins.current.set(element, {
           x: Number.parseFloat(style.left),

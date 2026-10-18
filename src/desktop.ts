@@ -1,5 +1,5 @@
-import { APP_CATALOG } from './components/launcher-apps'
-import { loadDrawings, type CanvasDrawing } from './drawings'
+import { APP_CATALOG } from './components/launcher-apps.ts'
+import { loadDrawings, type CanvasDrawing } from './drawings.ts'
 
 export type Bounds = { x: number; y: number; width: number; height: number }
 export type CanvasTool = 'cursor' | 'pan' | 'select' | 'search' | 'draw'
@@ -9,6 +9,7 @@ export type DesktopItem = Bounds & {
   title: string
   kind: 'folder' | 'file' | 'app'
   appId: string
+  peekOrigin?: Pick<Bounds, 'x' | 'y'>
 }
 export type DesktopWindow = Bounds & {
   id: string
@@ -260,6 +261,17 @@ export function loadWorkspace(): Workspace {
           .map((item) => {
             const width = clamp(item.width, 48, value.width)
             const height = clamp(item.height, 64, value.height)
+            const origin = item.peekOrigin
+            const peekOrigin =
+              origin &&
+              Number.isFinite(origin.x) &&
+              Number.isFinite(origin.y) &&
+              origin.x >= 0 &&
+              origin.y >= 0 &&
+              origin.x + width <= value.width &&
+              origin.y + height <= value.height
+                ? { x: origin.x, y: origin.y }
+                : undefined
             return {
               id: item.id,
               title: item.title,
@@ -269,6 +281,7 @@ export function loadWorkspace(): Workspace {
               height,
               x: clamp(item.x, 0, value.width - width),
               y: clamp(item.y, 0, value.height - height),
+              ...(peekOrigin ? { peekOrigin } : {}),
             }
           })
       : createDesktopItems(home)
