@@ -15,13 +15,9 @@ import shellStyles from './ShellControls.module.css'
 import styles from './LauncherDock.module.css'
 
 const FAVORITE_IDS = ['browser', 'files', 'notes']
-const WORKSPACE_APPS: LauncherApp[] = [
-  {
-    id: 'workspace-welcome',
-    name: 'Workspace',
-    description: 'Workspace overview',
-    icon: PanelsTopLeft,
-  },
+const DOCK_APPS: LauncherApp[] = [
+  ...APP_CATALOG.filter((app) => FAVORITE_IDS.includes(app.id)),
+  ...APP_CATALOG.filter((app) => !FAVORITE_IDS.includes(app.id)),
   {
     id: 'workspace-windows',
     name: 'Windows',
@@ -29,16 +25,10 @@ const WORKSPACE_APPS: LauncherApp[] = [
     icon: PanelsTopLeft,
   },
 ]
-const DOCK_APPS = [
-  ...APP_CATALOG.filter((app) => FAVORITE_IDS.includes(app.id)),
-  ...APP_CATALOG.filter((app) => !FAVORITE_IDS.includes(app.id)),
-  ...WORKSPACE_APPS,
-]
 
 function windowAppId(item: DesktopWindow) {
   if (APP_CATALOG.some((app) => app.id === item.appId)) return item.appId
   if (!item.appId && item.kind === 'notes') return 'notes'
-  if (!item.appId && item.kind === 'welcome') return 'workspace-welcome'
   return 'workspace-windows'
 }
 
@@ -291,10 +281,9 @@ export default function LauncherDock({
     ({ app, windows: instances }) =>
       app.id === selectedAppId && instances.length > 0,
   )
-  const selectedLaunchableApp =
-    selectedGroup?.app.id === 'workspace-welcome'
-      ? selectedGroup.app
-      : APP_CATALOG.find((app) => app.id === selectedGroup?.app.id)
+  const selectedCatalogApp = APP_CATALOG.find(
+    (app) => app.id === selectedGroup?.app.id,
+  )
 
   useEffect(() => {
     if (!selectedAppId) return
@@ -437,17 +426,15 @@ export default function LauncherDock({
             onFocusWindow={onFocusWindow}
             onReorderWindows={onReorderWindows}
           />
-          {selectedLaunchableApp && (
+          {selectedCatalogApp && (
             <footer className={styles.popoverFooter}>
               <button
                 type="button"
                 className={styles.newWindow}
-                onClick={() => onLaunch(selectedLaunchableApp)}
+                onClick={() => onLaunch(selectedCatalogApp)}
               >
                 <Plus size={16} aria-hidden="true" />
-                {selectedLaunchableApp.id === 'workspace-welcome'
-                  ? 'New workspace'
-                  : 'New window'}
+                New window
               </button>
             </footer>
           )}

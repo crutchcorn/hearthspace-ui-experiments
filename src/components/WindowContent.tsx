@@ -76,40 +76,6 @@ export default function WindowContent({
   onSaveGestureShortcut,
   onRemoveGestureShortcut,
 }: WindowContentProps) {
-  if (item.kind === 'welcome') {
-    return (
-      <div className={styles.overview}>
-        <header className={styles.spaceHeader}>
-          <span className={styles.eyebrow}>Workspace</span>
-          <h2>Your space</h2>
-        </header>
-        <div className={styles.spaceSummary}>
-          <div className={styles.spaceOrbit}>
-            <span className={styles.orbitTrack} aria-hidden="true" />
-            <span className={styles.orbitTrack} aria-hidden="true" />
-            <span className={styles.orbitLight} aria-hidden="true" />
-            <strong>{workspace.windows.length}</strong>
-            <span className={styles.orbitCaption}>open windows</span>
-          </div>
-          <dl className={styles.stats}>
-            <div>
-              <dt>Canvas</dt>
-              <dd>Continuous</dd>
-            </div>
-            <div>
-              <dt>Dimensions</dt>
-              <dd>
-                {Math.round(workspace.width).toLocaleString()} ×{' '}
-                {Math.round(workspace.height).toLocaleString()}
-                <span> px</span>
-              </dd>
-            </div>
-          </dl>
-        </div>
-      </div>
-    )
-  }
-
   if (item.kind === 'notes') {
     const wordCount = workspace.note.trim()
       ? workspace.note.trim().split(/\s+/).length

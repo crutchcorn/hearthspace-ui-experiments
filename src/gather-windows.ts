@@ -12,7 +12,6 @@ function appIdentity(item: DesktopWindow) {
   if (typeof item.appId === 'string' && item.appId.trim())
     return `app:${item.appId}`
   if (item.kind === 'notes') return 'app:notes'
-  if (item.kind === 'welcome') return 'workspace:welcome'
   return null
 }
 

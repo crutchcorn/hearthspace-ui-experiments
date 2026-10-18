@@ -14,7 +14,7 @@ export type DesktopItem = Bounds & {
 export type DesktopWindow = Bounds & {
   id: string
   title: string
-  kind: 'welcome' | 'notes' | 'empty'
+  kind: 'notes' | 'empty'
   appId?: string
   dockOrder?: number
   restore?: Bounds
@@ -67,7 +67,6 @@ const INITIAL_NOTE =
 const LEGACY_NOTE =
   'What if a desktop felt a little more like a place?\n\nA place to leave a thought.\nTo spread things out.\nTo pick up right where you left off.\n\nLess switching. More space.'
 const DEMO_TITLES = new Map([
-  ['welcome', { previous: 'Welcome home', current: 'Workspace' }],
   ['notes', { previous: 'A few thoughts', current: 'Scratchpad' }],
   ['canvas', { previous: 'Room for something new', current: 'Files' }],
 ])
@@ -138,15 +137,6 @@ function createWorkspace(): Workspace {
     drawings: [],
     windows: [
       {
-        id: 'welcome',
-        title: 'Workspace',
-        kind: 'welcome',
-        x: home.x + width * 0.1,
-        y: home.y + height * 0.19,
-        width: 460,
-        height: 350,
-      },
-      {
         id: 'notes',
         title: 'Scratchpad',
         kind: 'notes',
@@ -194,7 +184,8 @@ export function loadWorkspace(): Workspace {
           typeof item.id !== 'string' ||
           ids.has(item.id) ||
           typeof item.title !== 'string' ||
-          !['welcome', 'notes', 'empty'].includes(item.kind) ||
+          !['notes', 'empty'].includes(item.kind) ||
+          item.appId === 'workspace-welcome' ||
           ![item.x, item.y, item.width, item.height].every(Number.isFinite)
         )
           return false

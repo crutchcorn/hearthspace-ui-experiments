@@ -103,3 +103,86 @@ test('home positions may touch the edge when the complete item remains in bounds
     peeking,
   )
 })
+
+test('removing the Workspace app preserves other saved work', () => {
+  const windows = [
+    {
+      id: 'notes',
+      title: 'Scratchpad',
+      kind: 'notes',
+      appId: 'notes',
+      dockOrder: 0,
+      x: 700,
+      y: 500,
+      width: 350,
+      height: 360,
+    },
+    {
+      id: 'files',
+      title: 'Workspace',
+      kind: 'empty',
+      appId: 'files',
+      dockOrder: 1,
+      x: 1200,
+      y: 900,
+      width: 480,
+      height: 280,
+    },
+  ]
+  const removed = {
+    id: 'welcome',
+    title: 'Workspace',
+    kind: 'welcome',
+    x: 400,
+    y: 300,
+    width: 460,
+    height: 350,
+  }
+  const drawings = [
+    {
+      id: 'sketch',
+      layer: 'below',
+      x: 2000,
+      y: 2000,
+      width: 100,
+      height: 80,
+      strokes: [
+        [
+          { x: 4, y: 4 },
+          { x: 96, y: 76 },
+        ],
+      ],
+    },
+  ]
+  storage.set(
+    STORAGE_KEY,
+    JSON.stringify({
+      ...workspace,
+      note: 'Keep my edited note.',
+      drawings,
+      windows: [
+        removed,
+        ...windows,
+        { ...removed, id: 'additional-workspace' },
+        {
+          ...removed,
+          id: 'legacy-workspace',
+          kind: 'empty',
+          appId: 'workspace-welcome',
+        },
+      ],
+    }),
+  )
+
+  const loaded = loadWorkspace()
+  assert.deepEqual(loaded.windows, windows)
+  assert.equal(loaded.note, 'Keep my edited note.')
+  assert.deepEqual(loaded.drawings, drawings)
+  assert.deepEqual(
+    loaded.items.find((saved) => saved.id === item.id),
+    item,
+  )
+  assert.deepEqual(loaded.home, workspace.home)
+  assert.equal(loaded.width, workspace.width)
+  assert.equal(loaded.height, workspace.height)
+})

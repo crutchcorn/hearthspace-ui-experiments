@@ -1289,17 +1289,14 @@ function App() {
     const canvas = viewport.current!
     const id = crypto.randomUUID()
     const offset = (workspace.windows.length % 5) * 24
-    const isWorkspace = app?.id === 'workspace-welcome'
     const width =
       app?.id === 'settings'
         ? Math.max(
             MIN_WIDTH,
             Math.min(680, view.width - windowClearance.side * 2),
           )
-        : isWorkspace
-          ? 460
-          : 360
-    const height = app?.id === 'settings' ? 500 : isWorkspace ? 350 : 260
+        : 360
+    const height = app?.id === 'settings' ? 500 : 260
     setWorkspace((current) => ({
       ...current,
       windows: [
@@ -1309,8 +1306,8 @@ function App() {
           title:
             app?.name ??
             `Untitled window ${current.windows.filter((item) => item.kind === 'empty').length + 1}`,
-          kind: isWorkspace ? 'welcome' : 'empty',
-          appId: isWorkspace ? undefined : app?.id,
+          kind: 'empty',
+          appId: app?.id,
           x: clamp(
             center
               ? center.x - width / 2
@@ -1730,12 +1727,7 @@ function App() {
             const placement = previewLayout?.windows.get(item.id)
             const app = APP_CATALOG.find((entry) => entry.id === item.appId)
             const appId =
-              app?.id ??
-              (item.kind === 'notes'
-                ? 'notes'
-                : item.kind === 'welcome'
-                  ? 'workspace-welcome'
-                  : 'workspace-windows')
+              app?.id ?? (item.kind === 'notes' ? 'notes' : 'workspace-windows')
             const Icon =
               app?.icon ?? (item.kind === 'notes' ? StickyNote : PanelsTopLeft)
             return (

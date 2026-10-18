@@ -10,7 +10,7 @@ This document explains how to extend that direction. The [feature list](features
 
 The default background is a flat field of subtly tinted dots, spaced 28 pixels apart in both axes. Because those dots move with the canvas, even an empty area gives you a reference while panning. Desktop shortcuts, files, and folders belong to this background layer and always sit underneath windows. Every catalog app has a shortcut: you can decide where it belongs, while its continued presence makes the desktop a complete place to find apps.
 
-Leave decorative taglines and branding off the canvas. The Workspace window can show its own content, and apps can have headings, status lines, or descriptions. Those belong to the work inside a window; they don't need to become permanent desktop furniture.
+Leave decorative taglines and branding off the canvas. Apps can have headings, status lines, or descriptions. Those belong to the work inside a window; they don't need to become permanent desktop furniture.
 
 A photo can replace the dots. **Repeat with canvas** attaches native-size tiles to the world. **Stretch**, **Contain**, and **Cover** keep the photo attached to the viewport while windows move over it. Contain exposes the theme's field color around the image. Photos retain their own colors, and **Use default background** restores the dots.
 
@@ -101,7 +101,7 @@ Glass provides depth for the shell, window headers, and navigation. Bright edges
 
 Join a window's title bar and contents into one frame. Its border, shadow, and active or selected outline belong to the whole window. The header needs its own surface behind the drag controls and title, with a fine divider between header and body. A gap between them makes one window look like two unrelated pieces.
 
-Workspace and Settings follow this shell treatment. Settings keeps an opaque content pane beside its translucent sidebar. App-specific frames can use different materials while retaining the same movement, resizing, and window-state cues.
+Settings follows this shell treatment, with an opaque content pane beside its translucent sidebar. App-specific frames can use different materials while retaining the same movement, resizing, and window-state cues.
 
 ## Expect apps to look different
 
@@ -109,7 +109,7 @@ The playground now always uses the varied Linux-style app presentation. There is
 
 Give that artwork a consistent amount of space. The shared dock surface and target sizes provide order around it. Carry the same app identity through desktop shortcuts, canvas search, the launcher, window picker, switcher, and notification actions. Running dots and active-window highlights belong to the shell, so app artwork doesn't have to encode desktop state.
 
-The previews include a tabbed browser, a file manager with rounded controls, classic Notes menus, and an angular terminal. These illustrate different app conventions without claiming to reproduce a particular toolkit. App-specific light and dark palettes preserve those structures; Terminal, Music, and Photos retain their dark interiors in either mode. Workspace and Settings continue to use the shared shell palette.
+The previews include a tabbed browser, a file manager with rounded controls, classic Notes menus, and an angular terminal. These illustrate different app conventions without claiming to reproduce a particular toolkit. App-specific light and dark palettes preserve those structures; Terminal, Music, and Photos retain their dark interiors in either mode. Settings continues to use the shared shell palette.
 
 ## Give color a consistent job
 
