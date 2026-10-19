@@ -15,15 +15,22 @@ colored Lucide artwork. Folder and file objects use Hearthspace's local glyphs.
 This is why **Projects** and the **Files app** can look different even though
 both open the Files preview. See [icons](icons.md) for that boundary.
 
-With an [uploaded background](background.md), labels have a small translucent
-backing so they stay readable across bright and dark parts of the image.
-Native file, folder, and Settings glyphs also get a blurred raised plate;
-simulated third-party app artwork keeps its existing treatment. These supports
-use the current color mode and disappear on the default dotted canvas.
+With an [uploaded background](background.md), labels use white text and a
+restrained dark shadow in both color modes. The inner text keeps its two-line
+limit; an unclipped outer wrapper paints the shadow so it can extend past the
+letters instead of ending at a hard rectangular edge.
+
+Native folder, file, and Settings icons use the local set's filled variants in white,
+with a dark shadow that follows their shapes. These variants have their own
+solid geometry; the desktop doesn't fill or thicken outline paths with CSS.
+Simulated third-party app artwork keeps its existing treatment. The icons and
+labels remain directly on the image.
+Restoring the default dotted canvas also restores their usual colors and shadows.
 
 Frame attachments and group members already share a material surface, so they
-don't add photo-specific label backings or icon plates. Hover and selection
-still apply to the item around its artwork.
+keep their outline glyphs and normal label treatment, as do toolbars and the
+default dotted desktop. Hover and selection still apply to the item around its
+artwork. See [icons](icons.md) for the variant API.
 
 ## Selecting and moving
 

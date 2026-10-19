@@ -9,7 +9,7 @@ import {
   Terminal,
   type LucideIcon,
 } from 'lucide-react'
-import type { IconComponent } from '../icons'
+import type { IconComponent, IconVariant } from '../icons'
 import styles from './AppIcon.module.css'
 
 interface AppIconProps {
@@ -17,6 +17,7 @@ interface AppIconProps {
   icon: IconComponent | LucideIcon
   size?: number
   strokeWidth?: number
+  variant?: IconVariant
 }
 
 // Only simulated third-party apps retain their own artwork.
@@ -35,6 +36,7 @@ export default function AppIcon({
   icon: Icon,
   size = 24,
   strokeWidth,
+  variant = 'outline',
 }: AppIconProps) {
   const ThirdPartyIcon = THIRD_PARTY_GLYPHS[appId]
 
@@ -46,7 +48,12 @@ export default function AppIcon({
       style={{ '--app-icon-size': `${size}px` } as CSSProperties}
       aria-hidden="true"
     >
-      <Icon className={styles.ideal} size={size} strokeWidth={strokeWidth} />
+      <Icon
+        className={styles.ideal}
+        size={size}
+        strokeWidth={strokeWidth}
+        variant={variant}
+      />
       {ThirdPartyIcon && (
         <span className={styles.realistic}>
           <ThirdPartyIcon strokeWidth={1.65} />

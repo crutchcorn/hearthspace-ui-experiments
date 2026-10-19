@@ -31,6 +31,13 @@ highlight. Opening a panel shouldn't spread the toolbar's tint through every
 control inside it. See [materials and light](materials-and-light.md) for the
 shared treatment.
 
+The Wi-Fi switch uses the same enabled treatment as **Enable AI features** in
+Settings: an accent track with a pale thumb on the right. Its faint upper
+highlight and muted dark-mode fill keep the switch readable without making it
+glow brighter than the panel. The connected network's check uses an accent
+badge, matching selected controls elsewhere. Turning Wi-Fi off moves the thumb
+left, returns the track to its neutral fill, and removes that badge.
+
 ## Canvas placement and search
 
 Move a control to Canvas or Background to make it travel with the painting.
@@ -52,6 +59,8 @@ doesn't open the layout editor or alter a visible control's placement.
 
 [useSystemStatus](../src/useSystemStatus.ts) owns shared preview state;
 [SystemBar](../src/components/SystemBar.tsx) renders each control.
+Its Wi-Fi switch reuses the [Settings switch styles](../src/components/Settings.module.css)
+so both themes stay consistent with the Settings app.
 [PlacedWidget](../src/components/PlacedWidget.tsx) places it, and
 [WidgetPopover](../src/components/WidgetPopover.tsx) separates detached popup
 layering from the control body. Its [shared panel styles](../src/components/WidgetPopover.module.css)

@@ -78,7 +78,10 @@ highlights elsewhere. The dotted field is one solid color per mode, independent
 of the accent, so its grid moves with the canvas without a stationary wash.
 
 [Custom SVG icons](icons.md) identify Hearthspace controls and Settings. The
-seven simulated third-party apps keep their existing artwork. Change layout's
+app and document glyphs have outline and filled variants. Native desktop icons
+use their filled versions over photos; controls and the dotted canvas keep
+the outlined versions. The seven simulated third-party apps keep their
+existing artwork. Change layout's
 divided frame, the map's viewfinder, and Arrange's tall-left/two-right panes
 give the neighboring toolbar actions distinct shapes.
 

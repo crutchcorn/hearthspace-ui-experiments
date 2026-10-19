@@ -42,6 +42,10 @@ accent wash; ordinary surfaces retain white highlights. Dark mode keeps a
 faint pale hover, with a muted accent fill for enabled Settings switches.
 
 The shell, Settings, and canvas tools use the [local geometric icons](icons.md).
+App and document glyphs include outline and filled variants. Native desktop
+items use the filled shapes over a photo, with white labels and soft shadows;
+their outlined treatment returns on the dotted canvas. Toolbars and frame
+attachments keep outlines on their existing material surfaces.
 Browser, Files, Terminal, Notes, Music, Photos, and Calendar keep their existing
 Lucide artwork and individual window interiors. Keeping that difference lets
 us judge how Hearthspace looks around apps with their own visual conventions.

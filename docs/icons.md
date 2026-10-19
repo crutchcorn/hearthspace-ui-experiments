@@ -4,7 +4,8 @@ Hearthspace controls share a local SVG icon set in [`src/icons/`](../src/icons/)
 Simple geometry and restrained strokes keep a small tool recognizable over a
 translucent surface. Square line caps and miter joins give the set a consistent
 shape, while the surrounding control supplies its color and interaction light.
-The icon itself doesn't need a glow or a separate background.
+Outline glyphs are the default; filled variants give freely placed desktop
+icons a stronger silhouette over photos. Neither variant needs a separate tile.
 
 ## App identities
 
@@ -26,6 +27,34 @@ show the third-party artwork in place of the catalog's local fallback glyph.
 Those fallback glyphs still exist in `src/icons/apps.tsx`; their presence isn't
 a reason to replace an app's displayed identity. Lucide remains a dependency
 for this boundary, rather than a second source for new shell controls.
+
+## Outline and filled variants
+
+App and document glyphs in `apps.tsx` provide `outline` and `filled` variants.
+Choose one with the `variant` prop:
+
+```tsx
+<Folder size={46} />
+<Folder size={46} variant="filled" />
+```
+
+Omitting `variant` keeps the existing outline drawing. Filled variants use
+dedicated solid geometry with their own internal details and cutouts. Adding
+`fill: currentColor` or increasing stroke widths on an outline isn't a
+substitute: it can close spaces that make the icon recognizable.
+
+`createIcon(name, outlineGeometry, filledGeometry)` accepts the filled drawing
+as an optional third argument. Icons without it still render their outline
+when asked for `filled`. The SVG's `data-icon-variant` reports the drawing
+actually used, so component styles can distinguish the two without changing
+their paths. The shared factory fills the solid geometry with `currentColor`;
+individual details can retain strokes where the design needs them.
+
+Over an uploaded photo, freely placed desktop folders, files, and Settings
+shortcuts use white filled variants with a small shadow around their shapes. The
+default dotted desktop, frame attachments, group members, and toolbars keep
+outline glyphs. This choice belongs to the placement rendering; it doesn't
+change the app's identity or replace simulated third-party artwork.
 
 ## Using and adding icons
 
@@ -86,9 +115,9 @@ the action; it doesn't change its shortcut, selection state, or placement rules.
 
 ## Source files
 
-- [`createIcon.ts`](../src/icons/createIcon.ts): SVG defaults and optical stroke sizing.
+- [`createIcon.ts`](../src/icons/createIcon.ts): variant selection, SVG defaults, and optical stroke sizing.
 - [`actions.tsx`](../src/icons/actions.tsx): common actions and window controls.
-- [`apps.tsx`](../src/icons/apps.tsx): geometric app and document glyphs.
+- [`apps.tsx`](../src/icons/apps.tsx): outline and filled app and document glyphs.
 - [`canvas.tsx`](../src/icons/canvas.tsx): canvas, drawing, selection, and layout glyphs.
 - [`system.tsx`](../src/icons/system.tsx): status, settings, and notification glyphs.
 - [`index.ts`](../src/icons/index.ts): public exports.
@@ -96,6 +125,7 @@ the action; it doesn't change its shortcut, selection state, or placement rules.
   [`AppIcon.module.css`](../src/components/AppIcon.module.css): app identity
   mapping and simulated artwork.
 - [`WindowContent.tsx`](../src/components/WindowContent.tsx): simulated app content.
+- [`app-icon-variants.svg`](../assets/app-icon-variants.svg): the app and document glyphs shown in outline and filled forms, rendered from the shared components.
 - [`icon-set.svg`](../assets/icon-set.svg): a visual reference sheet. It includes
   fallback app glyphs and isn't a complete inventory of the running UI; for
   example, `Pin` is defined in source but isn't pictured. The source definitions

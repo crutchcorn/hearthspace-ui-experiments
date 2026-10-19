@@ -1,6 +1,6 @@
 import type { PointerEvent } from 'react'
 import { createPortal } from 'react-dom'
-import { FileText, Folder, Compass } from '../icons'
+import { FileText, Folder, Compass, type IconVariant } from '../icons'
 import type { Bounds, DesktopItem } from '../desktop'
 import type { SearchPlacement } from '../canvas-search'
 import { getFrameBounds, type FrameLayout } from '../frame-layout'
@@ -21,6 +21,7 @@ interface DesktopItemsProps {
   dragHost?: HTMLElement | null
   draggingId?: string
   inline?: boolean
+  iconVariant?: IconVariant
   previewSelectedId?: string
   onPointerDown: (
     event: PointerEvent<HTMLButtonElement>,
@@ -42,6 +43,7 @@ export default function DesktopItems({
   draggingId,
   previewSelectedId,
   inline = false,
+  iconVariant = 'outline',
   onPointerDown,
   onOpen,
   onSelect,
@@ -72,6 +74,7 @@ export default function DesktopItems({
           location.surface === 'frame' &&
           (inline || (view && frameHost))
         const openOnClick = Boolean(framed || placements)
+        const itemIconVariant = framed || inline ? 'outline' : iconVariant
         const canvasBounds =
           location.surface === 'canvas' || location.surface === 'background'
             ? location.bounds
@@ -137,9 +140,9 @@ export default function DesktopItems({
           >
             <span className={styles.icon} aria-hidden="true">
               {item.kind === 'folder' ? (
-                <Folder size={framed ? 30 : 46} />
+                <Folder size={framed ? 30 : 46} variant={itemIconVariant} />
               ) : item.kind === 'file' ? (
-                <FileText size={framed ? 28 : 42} />
+                <FileText size={framed ? 28 : 42} variant={itemIconVariant} />
               ) : (
                 <AppIcon
                   appId={item.appId}
@@ -148,10 +151,13 @@ export default function DesktopItems({
                     Compass
                   }
                   size={framed ? 24 : 38}
+                  variant={itemIconVariant}
                 />
               )}
             </span>
-            <span className={styles.title}>{item.title}</span>
+            <span className={styles.title}>
+              <span className={styles.titleText}>{item.title}</span>
+            </span>
           </button>
         )
         if (!inline && draggingId === item.id && dragHost)

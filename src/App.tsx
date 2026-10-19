@@ -2464,6 +2464,7 @@ function App() {
           )}
           <div inert={focusView !== null || windowSwitcher.open}>
             <DesktopItems
+              iconVariant={background.photo ? 'filled' : 'outline'}
               items={
                 previewLayout
                   ? workspace.items

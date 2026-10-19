@@ -38,7 +38,7 @@ interaction and points to its implementation.
 ## Settings
 
 - [Appearance](appearance.md): coordinated accents, light/dark modes, translucent Settings, and preserved app identities.
-- [Backgrounds](background.md): local photos, fit modes, canvas movement, and storage failures.
+- [Backgrounds](background.md): local photos, fit modes, canvas movement, photo-specific contrast, and storage failures.
 - [Display layout](display-layout.md): two-monitor placement, recentering, and temporary settings.
 - [AI gathering](ai-gathering.md): simulated opt-in/download/deletion and implemented same-app window gathering.
 
@@ -47,8 +47,8 @@ interaction and points to its implementation.
 - [Testing the playground](testing.md): geometry tests, real-browser interaction coverage, isolation, and test boundaries.
 - [A canvas inside a frame](canvas-and-frame.md): the spatial analogy, layers, user-controlled attachments, and recovery through search.
 - [Visual language](visual-language.md): thin translucent layers, clear interaction states, compact controls, and restrained copy.
-- [Materials and light](materials-and-light.md): surface roles, raised toolbar contrast, subtle accent hover, quiet switches, and the uniform dotted canvas.
-- [Hearthspace icons](icons.md): local SVG geometry and sizing, current canvas glyphs, and preserved third-party app artwork.
+- [Materials and light](materials-and-light.md): surface roles, photo contrast, toolbar and popup blur, subtle accent hover, quiet switches, and the uniform dotted canvas.
+- [Hearthspace icons](icons.md): local outline and filled SVG geometry, optical sizing, current canvas glyphs, and preserved third-party app artwork.
 - [Spatial playground](spatial-playground.md): scene ownership, coordinates, layer invariants, source map, canonical saved-state validation, and layout resets.
 - [Drawing recognition](recognition.md): geometric gesture matching, handwriting worker/model ownership, and vendored recognizer provenance.
 

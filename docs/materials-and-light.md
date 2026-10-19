@@ -141,6 +141,6 @@ previews remain simulated. Backdrop blur depends on browser support.
 - [`ShellControls.module.css`](../src/components/ShellControls.module.css): toolbar surfaces and control states.
 - [`Settings.module.css`](../src/components/Settings.module.css): nested layers, appearance previews, compact navigation, and switches.
 - [`DisplaySettings.module.css`](../src/components/DisplaySettings.module.css): raised monitor surfaces and selection.
-- [`DesktopItems.module.css`](../src/components/DesktopItems.module.css): photo-only label backings and native icon plates.
+- [`DesktopItems.tsx`](../src/components/DesktopItems.tsx) and its [styles](../src/components/DesktopItems.module.css): photo-only filled native icons, white labels, and unclipped shadows.
 - [`PlacedWidget.module.css`](../src/components/PlacedWidget.module.css), [`LauncherDock.module.css`](../src/components/LauncherDock.module.css), and [`NotificationInbox.module.css`](../src/components/NotificationInbox.module.css): standalone and grouped mobile surfaces.
 - [`theme.ts`](../src/theme.ts) and [`useBackground.ts`](../src/useBackground.ts): preference and image storage.

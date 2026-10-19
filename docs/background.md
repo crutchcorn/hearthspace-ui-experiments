@@ -42,11 +42,13 @@ text color. The image's colors still come through the blur. Raised toolbars
 keep their lighter fill and restrained hover treatment; the photo itself
 isn't dimmed or recolored.
 
-Desktop labels get small translucent backings, and native file, folder, and
-Settings glyphs get a matching plate. Simulated third-party app artwork keeps
-its existing appearance. Frame attachments and grouped items already have a
-surface, so they don't add another plate. This support applies to every photo
-fit and disappears when you restore Canvas dots. See
+Desktop labels use white text with a shadow that extends beyond the letters.
+Native folder, file, and Settings icons use filled glyphs with a shadow that
+follows their shapes. The icons and labels stay directly on the image without
+tiles around them. Simulated third-party app artwork keeps its existing
+appearance. Frame attachments and grouped items already have a surface, so
+they keep their outline glyphs and normal treatment. This support
+applies to every photo fit and disappears when you restore Canvas dots. See
 [materials and light](materials-and-light.md) for the surface values and
 [desktop items](desktop-items.md) for placement behavior.
 
