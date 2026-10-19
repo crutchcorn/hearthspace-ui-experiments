@@ -108,3 +108,13 @@ and soft edges. These hover states add no new radial gradient.
 
 The shared `--toolbar-material` state also feeds standalone and merged mobile
 bars, while grouped child surfaces remain transparent.
+
+### Settings switch highlights
+
+Enabled Settings switches, including Enable AI features, use one faint top
+highlight and a small accent shadow. The light treatment keeps its accent fill
+without stacking the general control and surface highlights. Dark mode blends
+the base accent into the surface tint so the track stays muted beside its light
+thumb. Both states retain their existing thumb positions and keyboard focus
+outline. This treatment is shared with the canvas-tools visibility switch in
+`src/components/Settings.module.css`.
