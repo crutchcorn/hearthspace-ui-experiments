@@ -80,3 +80,20 @@
     max-height: calc(100dvh - 156px);
   }
 }
+
+.options {
+  display: flex;
+  gap: 4px;
+  padding-block: 4px;
+  border-top: 1px solid var(--chrome-border);
+}
+
+.option {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding-inline: 10px;
+  font-size: 12px;
+}

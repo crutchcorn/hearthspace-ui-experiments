@@ -328,22 +328,6 @@
   pointer-events: none;
 }
 
-.topbar {
-  display: contents;
-}
-
-.topbar > *,
-.docks {
-  transition: opacity 160ms ease;
-}
-
-.desktop[data-focus-mode='true'][data-shell-peek='false'] .topbar > *,
-.desktop[data-focus-mode='true'][data-shell-peek='false'] .docks,
-.desktop[data-focus-mode='true'][data-shell-peek='false'] .docks > * {
-  opacity: 0;
-  pointer-events: none;
-}
-
 .desktop[data-focus-mode='true'] .viewport {
   overflow: hidden;
   touch-action: auto;
@@ -364,26 +348,6 @@
 
 .desktop .window[data-focus-mode='true'] .windowBody {
   overscroll-behavior: contain;
-}
-
-.dockDivider {
-  display: none;
-}
-
-.docks {
-  position: fixed;
-  z-index: 700;
-  inset: auto 24px 24px;
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 10px;
-  height: 54px;
-  pointer-events: none;
-}
-
-.docks > * {
-  pointer-events: auto;
 }
 
 .selecting:not(.dragging),
@@ -835,36 +799,6 @@
 }
 
 @media (width <= 760px) {
-  .topbar {
-    position: fixed;
-    z-index: 1000;
-    inset: 12px 12px auto;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    transition: opacity 160ms ease;
-  }
-
-  .desktop[data-focus-mode='true'][data-shell-peek='false'] .topbar {
-    opacity: 0;
-    pointer-events: none;
-  }
-
-  .docks {
-    inset: auto 12px 12px;
-    align-items: center;
-    gap: 4px;
-    pointer-events: auto;
-  }
-
-  .dockDivider {
-    display: block;
-    width: 1px;
-    height: 24px;
-    flex-shrink: 0;
-    background: var(--line);
-  }
-
   .mapPanel {
     bottom: 78px;
     left: 12px;
@@ -902,13 +836,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .window,
-  .topbar,
-  .topbar > *,
-  .docks {
-    transition: none;
-  }
-
   .mapPanel {
     animation: none;
   }
@@ -940,12 +867,6 @@
   .window[data-drawing-launch='true'] {
     animation: none;
   }
-}
-
-/* Placement containers do not create a stacking context around canvas widgets. */
-.topbar,
-.docks {
-  display: contents;
 }
 
 .frameHost {
@@ -1042,35 +963,11 @@
 }
 
 .desktop[data-focus-mode='true'][data-shell-peek='false']
-  :is(.frameHost, [data-layout-widget]) {
+  :is(.frameHost, [data-layout-widget], [data-layout-group]) {
   opacity: 0;
   pointer-events: none;
 }
 
 .desktop[data-focus-mode='true'][data-shell-peek='false'] .frameHost > * {
   pointer-events: none;
-}
-
-@media (width <= 760px) {
-  .topbar[data-merged],
-  .docks[data-merged] {
-    position: fixed;
-    z-index: 1100;
-    display: flex;
-    left: 12px;
-    right: 12px;
-    align-items: center;
-    gap: 4px;
-    pointer-events: auto;
-  }
-
-  .topbar[data-merged] {
-    top: 12px;
-    bottom: auto;
-  }
-
-  .docks[data-merged] {
-    top: auto;
-    bottom: 12px;
-  }
 }

@@ -27,6 +27,7 @@
 }
 
 .trigger {
+  position: relative;
   display: inline-flex;
   width: max-content;
   align-items: center;
@@ -38,6 +39,23 @@
   font-variant-numeric: tabular-nums;
   text-align: left;
   white-space: nowrap;
+}
+
+.trigger[data-display-expanded='false'] {
+  width: 44px;
+  justify-content: center;
+  padding: 0;
+}
+
+.triggerDot {
+  position: absolute;
+  top: 9px;
+  right: 10px;
+  width: 5px;
+  height: 5px;
+  border-radius: var(--radius-round);
+  background: var(--accent);
+  box-shadow: 0 0 0 2px var(--chrome);
 }
 
 .trigger[data-unread='true'] {
@@ -536,4 +554,31 @@
     calc(-1 * (min(390px, 100vw - 24px) + 12px)),
     calc(100vw - var(--widget-x) - min(390px, 100vw - 24px) - 12px)
   );
+}
+
+:global(
+    [data-layout-widget]:is([data-frame-edge='left'], [data-frame-edge='right'])
+  )
+  .corner
+  .bar {
+  height: auto;
+}
+
+:global(
+    [data-layout-widget]:is([data-frame-edge='left'], [data-frame-edge='right'])
+  )
+  .trigger[data-display-expanded='true'] {
+  width: 44px;
+  height: auto;
+  min-height: 44px;
+  flex-direction: column;
+  justify-content: center;
+  padding: 10px 0;
+}
+
+:global(
+    [data-layout-widget]:is([data-frame-edge='left'], [data-frame-edge='right'])
+  )
+  .triggerText {
+  writing-mode: vertical-rl;
 }

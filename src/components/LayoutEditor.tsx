@@ -1,5 +1,14 @@
 import { useEffect, useId, useRef, useState } from 'react'
-import { Check, Layers2, PanelsTopLeft, Trash2, Wallpaper } from 'lucide-react'
+import {
+  Check,
+  Layers2,
+  PanelsTopLeft,
+  Trash2,
+  Wallpaper,
+  Ungroup,
+  List,
+  Square,
+} from 'lucide-react'
 import type { LayoutTarget, ObjectPlacement } from '../frame-layout'
 import styles from './LayoutEditor.module.css'
 import shellStyles from './ShellControls.module.css'
@@ -8,6 +17,10 @@ interface LayoutEditorProps {
   target: LayoutTarget | null
   title: string
   placement: ObjectPlacement | null
+  expanded?: boolean
+  grouped: boolean
+  onToggleExpanded: () => void
+  onUngroup: () => void
   onPlacementChange: (placement: ObjectPlacement) => void
   onFrame: () => void
   onRemove: () => void
@@ -24,6 +37,10 @@ export default function LayoutEditor({
   target,
   title,
   placement,
+  expanded,
+  grouped,
+  onToggleExpanded,
+  onUngroup,
   onPlacementChange,
   onFrame,
   onRemove,
@@ -60,8 +77,14 @@ export default function LayoutEditor({
     })
   }
 
-  const canRemove = target?.kind === 'widget' || placement?.surface === 'frame'
-  const removeLabel = target?.kind === 'widget' ? 'Remove' : 'Remove from frame'
+  const canRemove =
+    target?.kind === 'widget' ||
+    target?.kind === 'group' ||
+    placement?.surface === 'frame'
+  const removeLabel =
+    target?.kind === 'widget' || target?.kind === 'group'
+      ? 'Remove'
+      : 'Remove from frame'
 
   return (
     <section
@@ -109,6 +132,40 @@ export default function LayoutEditor({
             </button>
           </div>
         </div>
+        {target && (expanded !== undefined || grouped) && (
+          <div className={styles.options}>
+            {expanded !== undefined && (
+              <button
+                type="button"
+                className={`${styles.option} ${shellStyles.control}`}
+                onClick={onToggleExpanded}
+                aria-label={expanded ? 'Shrink to icon' : 'Show details'}
+              >
+                {expanded ? (
+                  <Square size={18} aria-hidden="true" />
+                ) : (
+                  <List size={18} aria-hidden="true" />
+                )}
+                <span>{expanded ? 'Icon only' : 'Show details'}</span>
+              </button>
+            )}
+            {grouped && (
+              <button
+                type="button"
+                className={`${styles.option} ${shellStyles.control}`}
+                onClick={onUngroup}
+                aria-label={
+                  target.kind === 'group'
+                    ? 'Ungroup items'
+                    : 'Remove from group'
+                }
+              >
+                <Ungroup size={18} aria-hidden="true" />
+                <span>{target.kind === 'group' ? 'Ungroup' : 'Separate'}</span>
+              </button>
+            )}
+          </div>
+        )}
         {target && (
           <div className={styles.placements} role="group" aria-label="Place on">
             {choices.map((choice) => {

@@ -19,6 +19,7 @@ import styles from './NotificationInbox.module.css'
 export type NotificationTarget = 'notes' | 'files' | 'browser' | 'gestures'
 
 interface NotificationInboxProps {
+  expanded?: boolean
   open: boolean
   previewVisible: boolean
   onToggle: () => void
@@ -77,6 +78,7 @@ const INITIAL_NOTIFICATIONS: Notification[] = [
 ]
 
 export default function NotificationInbox({
+  expanded = true,
   open,
   previewVisible,
   onToggle,
@@ -178,6 +180,7 @@ export default function NotificationInbox({
           aria-expanded={open}
           aria-controls="notification-inbox"
           data-unread={unreadCount > 0}
+          data-display-expanded={expanded}
           onClick={() => {
             setToast(null)
             onToggle()
@@ -188,9 +191,13 @@ export default function NotificationInbox({
           ) : (
             <Bell size={18} aria-hidden="true" />
           )}
-          <span aria-hidden="true">
-            {unreadCount ? `${unreadCount} new` : 'All clear'}
-          </span>
+          {expanded ? (
+            <span className={styles.triggerText} aria-hidden="true">
+              {unreadCount ? `${unreadCount} new` : 'All clear'}
+            </span>
+          ) : unreadCount ? (
+            <span className={styles.triggerDot} aria-hidden="true" />
+          ) : null}
         </button>
       </div>
 

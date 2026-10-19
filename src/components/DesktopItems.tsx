@@ -15,6 +15,7 @@ interface DesktopItemsProps {
   frameLayout?: FrameLayout
   view?: Bounds
   frameHost?: HTMLElement | null
+  inline?: boolean
   previewSelectedId?: string
   onPointerDown: (
     event: PointerEvent<HTMLButtonElement>,
@@ -32,22 +33,30 @@ export default function DesktopItems({
   view,
   frameHost,
   previewSelectedId,
+  inline = false,
   onPointerDown,
   onOpen,
   onSelect,
 }: DesktopItemsProps) {
   return (
-    <div className={styles.layer} role="group" aria-label="Desktop items">
+    <div
+      className={inline ? styles.inlineLayer : styles.layer}
+      role="group"
+      aria-label="Desktop items"
+    >
       {items.map((item) => {
         const placement = placements?.get(item.id)
         const layout = frameLayout
           ? getPlacement(frameLayout, { kind: 'item', id: item.id })
           : { surface: 'background' as const }
         const framed =
-          !placements && layout.surface === 'frame' && view && frameHost
-        const bounds = framed
-          ? getFrameBounds(layout, 54, 54, view, 'padded')
-          : item
+          !placements &&
+          (inline || (layout.surface === 'frame' && view && frameHost))
+        const bounds = inline
+          ? { x: 0, y: 0, width: 44, height: 44 }
+          : framed && layout.surface === 'frame' && view
+            ? getFrameBounds(layout, 54, 54, view, 'padded')
+            : item
         const element = (
           <button
             key={item.id}
@@ -55,6 +64,7 @@ export default function DesktopItems({
             className={styles.item}
             data-desktop-item-id={item.id}
             data-item-kind={item.kind}
+            data-group-member={inline || undefined}
             data-surface={placements ? 'canvas' : layout.surface}
             data-frame-attached={Boolean(framed)}
             data-preview-match={placement?.matches}
@@ -66,7 +76,7 @@ export default function DesktopItems({
             title={framed ? item.title : undefined}
             aria-pressed={selectedIds.includes(item.id)}
             style={{
-              position: framed ? 'fixed' : undefined,
+              position: inline ? 'relative' : framed ? 'fixed' : undefined,
               left: bounds.x,
               top: bounds.y,
               width: bounds.width,
@@ -116,7 +126,9 @@ export default function DesktopItems({
             <span className={styles.title}>{item.title}</span>
           </button>
         )
-        return framed ? createPortal(element, frameHost, item.id) : element
+        return framed && !inline && frameHost
+          ? createPortal(element, frameHost, item.id)
+          : element
       })}
     </div>
   )

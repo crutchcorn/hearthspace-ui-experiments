@@ -6,6 +6,7 @@ import {
   Moon,
   Palette,
   PanelLeft,
+  PanelsTopLeft,
   RotateCcw,
   SlidersHorizontal,
   Spline,
@@ -39,8 +40,7 @@ interface SettingsProps {
   allowHideTools: boolean
   onAllowHideToolsChange: (allow: boolean) => void
   onRestoreCanvasTools: () => void
-  showBatteryPercentage: boolean
-  onShowBatteryPercentageChange: (show: boolean) => void
+  onChangeLayout: () => void
   background: BackgroundPhoto | null
   backgroundBusy: boolean
   backgroundError: string | null
@@ -115,8 +115,7 @@ export default function Settings({
   allowHideTools,
   onAllowHideToolsChange,
   onRestoreCanvasTools,
-  showBatteryPercentage,
-  onShowBatteryPercentageChange,
+  onChangeLayout,
   background,
   backgroundBusy,
   backgroundError,
@@ -144,7 +143,6 @@ export default function Settings({
   const navigationId = useId()
   const colorModeGroupName = useId()
   const groupName = useId()
-  const batterySettingId = useId()
   const canvasToolsSettingId = useId()
   const activeCategory = CATEGORIES.find((item) => item.id === category)!
 
@@ -323,28 +321,19 @@ export default function Settings({
             {category === 'system' && (
               <>
                 <fieldset className={styles.palette}>
-                  <legend>System tray</legend>
-                  <label className={styles.toggleRow}>
-                    <span className={styles.toggleCopy}>
-                      <strong id={`${batterySettingId}-label`}>
-                        Show battery percentage
-                      </strong>
-                      <span id={`${batterySettingId}-description`}>
-                        Display the charge beside the battery icon.
-                      </span>
-                    </span>
-                    <input
-                      className={styles.toggle}
-                      type="checkbox"
-                      role="switch"
-                      aria-labelledby={`${batterySettingId}-label`}
-                      aria-describedby={`${batterySettingId}-description`}
-                      checked={showBatteryPercentage}
-                      onChange={(event) =>
-                        onShowBatteryPercentageChange(event.target.checked)
-                      }
-                    />
-                  </label>
+                  <legend>Frame layout</legend>
+                  <p className={styles.layoutDescription}>
+                    Arrange and group your frame items, or change how much
+                    detail they show.
+                  </p>
+                  <button
+                    type="button"
+                    className={styles.restoreTools}
+                    onClick={onChangeLayout}
+                  >
+                    <PanelsTopLeft size={15} aria-hidden="true" />
+                    Change layout
+                  </button>
                 </fieldset>
                 <fieldset className={styles.palette}>
                   <legend>Canvas tools</legend>

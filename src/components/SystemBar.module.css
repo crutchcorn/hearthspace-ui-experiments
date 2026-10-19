@@ -1,8 +1,6 @@
 .bar {
-  position: fixed;
+  position: relative;
   z-index: 1000;
-  top: 24px;
-  right: 24px;
   display: flex;
   width: max-content;
   align-items: center;
@@ -29,11 +27,6 @@
   white-space: nowrap;
 }
 
-.statusGroup {
-  display: flex;
-  gap: 4px;
-}
-
 .statusButton {
   display: grid;
   width: 44px;
@@ -43,7 +36,7 @@
   place-items: center;
 }
 
-.batteryWithPercentage {
+.withDetail {
   display: flex;
   width: auto;
   min-width: 44px;
@@ -53,7 +46,7 @@
   padding: 0 10px;
 }
 
-.batteryPercentage {
+.detail {
   font-size: 11px;
   font-weight: 500;
   font-variant-numeric: tabular-nums;
@@ -305,41 +298,6 @@
   }
 }
 
-@media (width <= 760px) {
-  .bar[data-system-popover-root] {
-    position: static;
-    flex: 1;
-    width: auto;
-    min-width: 0;
-    height: 44px;
-    justify-content: flex-end;
-    padding: 0;
-    border: 0;
-    background: transparent;
-    box-shadow: none;
-    backdrop-filter: none;
-  }
-
-  .statusGroup {
-    min-width: 0;
-    overflow: auto hidden;
-    overscroll-behavior-x: contain;
-    scrollbar-width: none;
-    touch-action: pan-x;
-  }
-
-  .statusGroup::-webkit-scrollbar {
-    display: none;
-  }
-
-  .popover {
-    position: fixed;
-    top: 78px;
-    right: 12px;
-    max-height: calc(100dvh - 156px);
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .toggle::before {
     transition: none;
@@ -367,82 +325,25 @@
   max-height: var(--widget-popover-height);
 }
 
-@media (width <= 760px) {
-  :global([data-layout-widget]) .bar[data-system-popover-root] {
-    width: max-content;
-    height: 54px;
-    padding: var(--shell-padding);
-    border: var(--shell-border-width) solid var(--chrome-border);
-    background: var(--chrome);
-    box-shadow: var(--shadow-panel), var(--glass-edge);
-    backdrop-filter: var(--glass-blur);
-  }
-}
-
-@media (width <= 760px) {
-  :global([data-layout-widget][data-merged]) .bar[data-system-popover-root] {
-    width: 100%;
-    height: 44px;
-    padding: 0;
-    border: 0;
-    background: transparent;
-    box-shadow: none;
-    backdrop-filter: none;
-  }
-}
-
 :global(
     [data-layout-widget]:is([data-frame-edge='left'], [data-frame-edge='right'])
   )
-  .bar[data-system-popover-root] {
-  width: 54px;
-  height: auto;
-  max-height: 100dvh;
+  .withDetail {
+  width: max-content;
+  min-width: 44px;
   flex-direction: column;
+  gap: 2px;
+  padding: 2px 6px;
 }
 
 :global(
     [data-layout-widget]:is([data-frame-edge='left'], [data-frame-edge='right'])
   )
-  .clockButton {
-  width: 44px;
-  font-size: 13px;
-}
-
-:global(
-    [data-layout-widget]:is([data-frame-edge='left'], [data-frame-edge='right'])
-  )
-  .statusGroup {
-  min-height: 0;
-  flex-direction: column;
-  overflow: hidden auto;
-  overscroll-behavior: contain;
-  scrollbar-width: none;
-  touch-action: pan-y;
-}
-
-:global(
-    [data-layout-widget]:is([data-frame-edge='left'], [data-frame-edge='right'])
-  )
-  .statusGroup::-webkit-scrollbar {
-  display: none;
-}
-
-:global(
-    [data-layout-widget]:is([data-frame-edge='left'], [data-frame-edge='right'])
-  )
-  .batteryWithPercentage {
-  width: 44px;
-  flex-direction: column;
-  gap: 0;
-  padding: 2px;
-}
-
-:global(
-    [data-layout-widget]:is([data-frame-edge='left'], [data-frame-edge='right'])
-  )
-  .batteryPercentage {
-  font-size: 9px;
+  .detail {
+  max-width: 100px;
+  overflow: hidden;
+  font-size: 10px;
+  text-overflow: ellipsis;
 }
 
 :global(

@@ -16,8 +16,10 @@ import {
   getFrameBounds,
   loadFrameLayout,
   getPinnedWindowOffset,
+  getTargetGroup,
+  getWidgetExpanded,
 } from './frame-layout'
-import PlacedWidget from './components/PlacedWidget'
+import FrameShell from './components/FrameShell'
 import LayoutEditor from './components/LayoutEditor'
 import FrameGuides from './components/FrameGuides'
 import LayoutConfirm from './components/LayoutConfirm'
@@ -109,10 +111,8 @@ import {
   ACCENT_THEMES,
   loadAccentTheme,
   loadColorMode,
-  loadShowBatteryPercentage,
   saveAccentTheme,
   saveColorMode,
-  saveShowBatteryPercentage,
   type AccentThemeId,
   type ColorMode,
 } from './theme'
@@ -152,9 +152,6 @@ function App() {
   const [accentTheme, setAccentTheme] = useState(loadAccentTheme)
   const [colorMode, setColorMode] = useState(loadColorMode)
   const [gestureShortcuts, setGestureShortcuts] = useState(loadGestureShortcuts)
-  const [showBatteryPercentage, setShowBatteryPercentage] = useState(
-    loadShowBatteryPercentage,
-  )
   const accent =
     ACCENT_THEMES.find((theme) => theme.id === accentTheme) ?? ACCENT_THEMES[0]
   const [workspace, setWorkspace] = useState(() =>
@@ -1170,6 +1167,15 @@ function App() {
     selectDrawing(id)
   }
 
+  function openDesktopItem(item: DesktopItem) {
+    if (canvasSearch) {
+      activateSearchResult({ kind: 'item', id: item.id })
+      return
+    }
+    const app = APP_CATALOG.find((entry) => entry.id === item.appId)
+    if (app) launchApp(app)
+  }
+
   function selectDesktopItem(item: DesktopItem, additive: boolean) {
     setSelectedDrawingId(null)
     setSelectedIds([])
@@ -1721,25 +1727,133 @@ function App() {
     saveColorMode(mode)
   }
 
-  function changeShowBatteryPercentage(show: boolean) {
-    setShowBatteryPercentage(show)
-    saveShowBatteryPercentage(show)
+  function changeLayout() {
+    leaveFocusView()
+    closePopovers()
+    objectLayout.setSelected(null)
+    setTool('layout')
   }
 
-  const isDefaultWidget = (id: string) => {
-    const current = objectLayout.placement({ kind: 'widget', id })
-    const initial = FRAME_WIDGETS.find(
-      (widget) => widget.id === id,
-    )!.defaultPlacement
-    return (
-      current.surface === 'frame' &&
-      current.edge === initial.edge &&
-      current.position === initial.position
-    )
+  const frameWidgets = {
+    notifications: (
+      <NotificationInbox
+        expanded={getWidgetExpanded(objectLayout.layout, 'notifications')}
+        open={notificationsOpen}
+        previewVisible={
+          !previewLayout && !systemPanel && !launcher && !showMap && !dockAppId
+        }
+        onToggle={() => {
+          setCanvasSearch(null)
+          setNotificationsOpen(!notificationsOpen)
+          setDockAppId(null)
+          setSystemPanel(null)
+          setLauncher(null)
+          setShowMap(false)
+          setSpaceHeld(false)
+        }}
+        onClose={() => setNotificationsOpen(false)}
+        onNavigate={openNotificationTarget}
+      />
+    ),
+    tools: (
+      <CanvasTools
+        mode={tool}
+        selectionShape={selectionShape}
+        onSelectionShapeChange={(shape) => {
+          closePopovers()
+          setSelectionShape(shape)
+          setTool('select')
+          setSelectedIds([])
+          setSelectedItemIds([])
+          setShowMap(false)
+          setLauncher(null)
+        }}
+        menusAllowed={
+          !previewLayout &&
+          !showMap &&
+          !launcher &&
+          !notificationsOpen &&
+          !systemPanel &&
+          !dockAppId
+        }
+        onModeChange={(mode) => {
+          if (mode === 'layout') {
+            leaveFocusView()
+            objectLayout.setSelected(null)
+          }
+          closePopovers()
+          setTool(mode)
+          if (mode !== 'select') setSelectedIds([])
+          if (mode !== 'cursor') setSelectedItemIds([])
+          setShowMap(false)
+          setLauncher(null)
+        }}
+        onOpenToolMenu={() => {
+          closePopovers()
+          setShowMap(false)
+          setLauncher(null)
+        }}
+        mapOpen={showMap}
+        onToggleMap={() => {
+          closePopovers()
+          setShowMap(!showMap)
+          setLauncher(null)
+        }}
+        onArrange={arrangeAllWindows}
+        windowCount={workspace.windows.length}
+      />
+    ),
+    apps: (
+      <LauncherDock
+        open={launcher !== null}
+        triggerRef={launcherTrigger}
+        onToggle={toggleLauncher}
+        onLaunch={launchApp}
+        windows={workspace.windows}
+        activeWindowId={focusedWindowId}
+        selectedAppId={dockAppId}
+        onSelectApp={(id) => {
+          closePopovers()
+          setDockAppId(id)
+          setLauncher(null)
+          setShowMap(false)
+          setSpaceHeld(false)
+        }}
+        onFocusWindow={revealWindow}
+        onReorderWindows={(orderedIds) => {
+          const order = new Map(orderedIds.map((id, index) => [id, index]))
+          setWorkspace((current) => ({
+            ...current,
+            windows: current.windows.map((item) => {
+              const dockOrder = order.get(item.id)
+              return dockOrder === undefined ? item : { ...item, dockOrder }
+            }),
+          }))
+        }}
+      />
+    ),
+    ...Object.fromEntries(
+      (['clock', 'wifi', 'volume', 'battery'] as const).map((id) => [
+        id,
+        <SystemBar
+          key={id}
+          id={id}
+          expanded={getWidgetExpanded(objectLayout.layout, id)}
+          openPanel={systemPanel}
+          onPanelChange={(panel) => {
+            setCanvasSearch(null)
+            setSystemPanel(panel)
+            if (panel) {
+              setDockAppId(null)
+              setNotificationsOpen(false)
+              setLauncher(null)
+              setShowMap(false)
+            }
+          }}
+        />,
+      ]),
+    ),
   }
-  const mergedTop =
-    isDefaultWidget('notifications') && isDefaultWidget('system')
-  const mergedBottom = isDefaultWidget('tools') && isDefaultWidget('apps')
 
   return (
     <main
@@ -1806,6 +1920,12 @@ function App() {
               if (objectLayout.selected)
                 objectLayout.place(objectLayout.selected, next)
             }}
+            expanded={objectLayout.expanded}
+            onToggleExpanded={objectLayout.toggleExpanded}
+            grouped={
+              !!objectLayout.group || objectLayout.selected?.kind === 'group'
+            }
+            onUngroup={objectLayout.ungroup}
             onFrame={objectLayout.attachSelected}
             onRemove={objectLayout.remove}
             onDone={() => setTool('cursor')}
@@ -1973,7 +2093,17 @@ function App() {
           )}
           <div inert={focusView !== null || windowSwitcher.open}>
             <DesktopItems
-              items={workspace.items}
+              items={
+                previewLayout
+                  ? workspace.items
+                  : workspace.items.filter(
+                      (item) =>
+                        !getTargetGroup(objectLayout.layout, {
+                          kind: 'item',
+                          id: item.id,
+                        }),
+                    )
+              }
               frameLayout={objectLayout.layout}
               frameHost={frameHost}
               view={view}
@@ -1984,14 +2114,7 @@ function App() {
               }
               onPointerDown={startItemGesture}
               onSelect={selectDesktopItem}
-              onOpen={(item) => {
-                if (canvasSearch) {
-                  activateSearchResult({ kind: 'item', id: item.id })
-                  return
-                }
-                const app = APP_CATALOG.find((entry) => entry.id === item.appId)
-                if (app) launchApp(app)
-              }}
+              onOpen={openDesktopItem}
             />
           </div>
           {!windowSwitcher.open && !focusView && (
@@ -2237,8 +2360,7 @@ function App() {
                     onSaveGestureShortcut={saveGestureShortcut}
                     onRemoveGestureShortcut={removeGestureShortcut}
                     onAccentThemeChange={changeAccentTheme}
-                    showBatteryPercentage={showBatteryPercentage}
-                    onShowBatteryPercentageChange={changeShowBatteryPercentage}
+                    onChangeLayout={changeLayout}
                     background={background.photo}
                     backgroundBusy={background.busy}
                     backgroundError={background.error}
@@ -2409,79 +2531,7 @@ function App() {
           )}
         </div>
       </div>
-      <div
-        className={`${styles.topbar} ${mergedTop ? shellStyles.mobileSurface : ''}`}
-        data-merged={mergedTop ? 'top' : undefined}
-        data-shell-controls
-        inert={windowSwitcher.open}
-      >
-        <PlacedWidget
-          draggingWidget={objectLayout.draggingWidget}
-          id="notifications"
-          merged={mergedTop ? 'top' : undefined}
-          placement={objectLayout.placement({
-            kind: 'widget',
-            id: 'notifications',
-          })}
-          view={view}
-          editing={tool === 'layout'}
-          selected={
-            objectLayout.selected?.kind === 'widget' &&
-            objectLayout.selected.id === 'notifications'
-          }
-          hidden={!!previewLayout}
-        >
-          <NotificationInbox
-            open={notificationsOpen}
-            previewVisible={
-              !previewLayout &&
-              !systemPanel &&
-              !launcher &&
-              !showMap &&
-              !dockAppId
-            }
-            onToggle={() => {
-              setCanvasSearch(null)
-              setNotificationsOpen(!notificationsOpen)
-              setDockAppId(null)
-              setSystemPanel(null)
-              setLauncher(null)
-              setShowMap(false)
-              setSpaceHeld(false)
-            }}
-            onClose={() => setNotificationsOpen(false)}
-            onNavigate={openNotificationTarget}
-          />
-        </PlacedWidget>
-        <PlacedWidget
-          draggingWidget={objectLayout.draggingWidget}
-          id="system"
-          merged={mergedTop ? 'top' : undefined}
-          placement={objectLayout.placement({ kind: 'widget', id: 'system' })}
-          view={view}
-          editing={tool === 'layout'}
-          selected={
-            objectLayout.selected?.kind === 'widget' &&
-            objectLayout.selected.id === 'system'
-          }
-          hidden={!!previewLayout}
-        >
-          <SystemBar
-            showBatteryPercentage={showBatteryPercentage}
-            openPanel={systemPanel}
-            onPanelChange={(panel) => {
-              setCanvasSearch(null)
-              setSystemPanel(panel)
-              if (panel) {
-                setDockAppId(null)
-                setNotificationsOpen(false)
-                setLauncher(null)
-                setShowMap(false)
-              }
-            }}
-          />
-        </PlacedWidget>
-      </div>
+
       {!focusView &&
         !previewLayout &&
         tool !== 'layout' &&
@@ -2587,114 +2637,29 @@ function App() {
             }}
           />
         )}
-      <div
-        className={`${styles.docks} ${mergedBottom ? shellStyles.mobileSurface : ''}`}
-        data-merged={mergedBottom ? 'bottom' : undefined}
-        data-shell-controls
+      <FrameShell
+        layout={objectLayout.layout}
+        view={view}
+        editing={tool === 'layout'}
+        selected={objectLayout.selected}
+        draggingWidget={objectLayout.draggingWidget}
+        groupDropTarget={objectLayout.groupDropTarget}
+        hidden={!!previewLayout}
         inert={windowSwitcher.open}
-      >
-        <PlacedWidget
-          draggingWidget={objectLayout.draggingWidget}
-          id="tools"
-          merged={mergedBottom ? 'bottom' : undefined}
-          placement={objectLayout.placement({ kind: 'widget', id: 'tools' })}
-          view={view}
-          editing={tool === 'layout'}
-          selected={
-            objectLayout.selected?.kind === 'widget' &&
-            objectLayout.selected.id === 'tools'
-          }
-          hidden={!!previewLayout}
-        >
-          <CanvasTools
-            mode={tool}
-            selectionShape={selectionShape}
-            onSelectionShapeChange={(shape) => {
-              closePopovers()
-              setSelectionShape(shape)
-              setTool('select')
-              setSelectedIds([])
-              setSelectedItemIds([])
-              setShowMap(false)
-              setLauncher(null)
-            }}
-            menusAllowed={
-              !previewLayout &&
-              !showMap &&
-              !launcher &&
-              !notificationsOpen &&
-              !systemPanel &&
-              !dockAppId
-            }
-            onModeChange={(mode) => {
-              if (mode === 'layout') {
-                leaveFocusView()
-                objectLayout.setSelected(null)
-              }
-              closePopovers()
-              setTool(mode)
-              if (mode !== 'select') setSelectedIds([])
-              if (mode !== 'cursor') setSelectedItemIds([])
-              setShowMap(false)
-              setLauncher(null)
-            }}
-            onOpenToolMenu={() => {
-              closePopovers()
-              setShowMap(false)
-              setLauncher(null)
-            }}
-            mapOpen={showMap}
-            onToggleMap={() => {
-              closePopovers()
-              setShowMap(!showMap)
-              setLauncher(null)
-            }}
-            onArrange={arrangeAllWindows}
-            windowCount={workspace.windows.length}
+        widgets={frameWidgets}
+        renderItem={(id) => (
+          <DesktopItems
+            items={workspace.items.filter((item) => item.id === id)}
+            selectedIds={selectedItemIds}
+            frameLayout={objectLayout.layout}
+            view={view}
+            inline
+            onPointerDown={startItemGesture}
+            onSelect={selectDesktopItem}
+            onOpen={openDesktopItem}
           />
-        </PlacedWidget>
-        <PlacedWidget
-          draggingWidget={objectLayout.draggingWidget}
-          id="apps"
-          merged={mergedBottom ? 'bottom' : undefined}
-          placement={objectLayout.placement({ kind: 'widget', id: 'apps' })}
-          view={view}
-          editing={tool === 'layout'}
-          selected={
-            objectLayout.selected?.kind === 'widget' &&
-            objectLayout.selected.id === 'apps'
-          }
-          hidden={!!previewLayout}
-        >
-          <LauncherDock
-            open={launcher !== null}
-            triggerRef={launcherTrigger}
-            onToggle={toggleLauncher}
-            onLaunch={launchApp}
-            windows={workspace.windows}
-            activeWindowId={focusedWindowId}
-            selectedAppId={dockAppId}
-            onSelectApp={(id) => {
-              closePopovers()
-              setDockAppId(id)
-              setLauncher(null)
-              setShowMap(false)
-              setSpaceHeld(false)
-            }}
-            onFocusWindow={revealWindow}
-            onReorderWindows={(orderedIds) => {
-              const order = new Map(orderedIds.map((id, index) => [id, index]))
-              setWorkspace((current) => ({
-                ...current,
-                windows: current.windows.map((item) => {
-                  const dockOrder = order.get(item.id)
-                  return dockOrder === undefined ? item : { ...item, dockOrder }
-                }),
-              }))
-            }}
-          />
-        </PlacedWidget>
-      </div>
+        )}
+      />
       {launcher && (
         <AppLauncher
           anchorRef={launcherTrigger}

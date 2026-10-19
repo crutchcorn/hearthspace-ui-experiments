@@ -83,3 +83,26 @@
     transition: none;
   }
 }
+
+:global([data-frame-group]) :global([data-group-member]) .surface.surface {
+  width: max-content;
+  height: auto;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+@media (width <= 760px) {
+  :global([data-layout-widget][data-merged]) .surface.surface {
+    height: 44px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+    backdrop-filter: none;
+  }
+}

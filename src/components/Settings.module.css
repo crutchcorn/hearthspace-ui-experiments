@@ -381,3 +381,10 @@
     display: flex;
   }
 }
+
+.layoutDescription {
+  margin: 0 0 8px;
+  color: var(--chrome-muted);
+  font-size: 12px;
+  line-height: 1.6;
+}

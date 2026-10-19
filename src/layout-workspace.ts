@@ -2,6 +2,7 @@ import type { Bounds, Workspace } from './desktop.ts'
 import type { CanvasDrawing } from './drawings.ts'
 import {
   getPlacement,
+  getTargetGroup,
   targetKey,
   type FrameLayout,
   type LayoutTarget,
@@ -14,6 +15,7 @@ function placementFor(
   target: LayoutTarget,
   drawing?: CanvasDrawing,
 ): ObjectPlacement {
+  if (getTargetGroup(layout, target)) return getPlacement(layout, target)
   return (
     layout.placements[targetKey(target)] ??
     (drawing

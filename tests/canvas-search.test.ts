@@ -120,7 +120,10 @@ test('empty search includes drawings and recoverable widgets alongside shortcuts
       'drawing:large-sketch',
       'drawing:small-sketch',
       'widget:notifications',
-      'widget:system',
+      'widget:clock',
+      'widget:wifi',
+      'widget:volume',
+      'widget:battery',
       'widget:tools',
       'widget:apps',
     ],
@@ -132,12 +135,12 @@ test('widget descriptions and keywords make removed defaults discoverable', () =
     workspace,
     view,
     { x: 600, y: 150 },
-    ' BATTERY  sound ',
+    ' BATTERY  power ',
     false,
     { widgets: FRAME_WIDGETS },
   )
-  assert.deepEqual(layout.results, [{ kind: 'widget', id: 'system' }])
-  assert.equal(layout.widgets.get('system')?.matches, true)
+  assert.deepEqual(layout.results, [{ kind: 'widget', id: 'battery' }])
+  assert.equal(layout.widgets.get('battery')?.matches, true)
   assert.equal(layout.widgets.get('tools')?.matches, false)
 })
 

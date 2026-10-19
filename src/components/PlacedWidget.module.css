@@ -1,11 +1,10 @@
 .widget {
   --widget-popover-x: var(--widget-x);
-  --widget-popover-height: var(--widget-unmerged-popover-height);
 
   position: fixed;
   z-index: var(--widget-z);
-  top: var(--widget-y);
-  left: var(--widget-x);
+  top: var(--widget-position-y);
+  left: var(--widget-position-x);
   width: max-content;
   max-width: calc(100vw - 48px);
   border-radius: var(--radius-panel);
@@ -28,11 +27,12 @@
   touch-action: none;
 }
 
-.widget[data-layout-editing='true'] .content {
+.widget[data-layout-editing='true'][data-layout-widget] > .content {
   pointer-events: none;
 }
 
-.widget[data-layout-selected='true'] {
+.widget[data-layout-selected='true'],
+.widget[data-group-drop-target='true'] {
   outline: 2px solid var(--accent);
   outline-offset: 4px;
 }
@@ -42,7 +42,7 @@
     max-width: calc(100vw - 24px);
   }
 
-  .widget[data-layout-widget='tools'] .content {
+  .widget[data-layout-widget='tools'] > .content {
     padding: 4px;
     border: 1px solid var(--chrome-border);
     border-radius: var(--radius-panel);
@@ -52,9 +52,6 @@
   }
 
   .widget[data-merged] {
-    --widget-popover-x: var(--widget-measured-x);
-    --widget-popover-height: var(--widget-merged-popover-height);
-
     position: relative;
     z-index: auto;
     inset: auto;
@@ -67,23 +64,45 @@
     width: 44px;
   }
 
-  .widget[data-merged]:is(
-      [data-layout-widget='system'],
-      [data-layout-widget='apps']
-    ) {
+  .widget[data-merged]:is([data-layout-group], [data-layout-widget='apps']) {
     min-width: 0;
     flex: 1;
   }
 
-  .widget[data-merged]:is(
-      [data-layout-widget='system'],
-      [data-layout-widget='apps']
-    )
-    .content {
+  .widget[data-merged]:is([data-layout-group], [data-layout-widget='apps'])
+    > .content {
     width: 100%;
   }
 
-  .widget[data-merged][data-layout-widget='tools'] .content {
+  .widget[data-merged][data-layout-widget='tools'] > .content {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+    backdrop-filter: none;
+  }
+}
+
+.widget[data-inline] {
+  position: relative;
+  z-index: auto;
+  inset: auto;
+  width: max-content;
+  max-width: none;
+  flex: none;
+  border-radius: var(--radius-control);
+}
+
+.widget[data-inline][data-layout-editing='true'] {
+  outline-offset: -1px;
+}
+
+.widget[data-inline][data-group-drop-target='true'] {
+  background: var(--accent-soft);
+}
+
+@media (width <= 760px) {
+  .widget[data-inline][data-layout-widget='tools'] > .content {
     padding: 0;
     border: 0;
     background: transparent;

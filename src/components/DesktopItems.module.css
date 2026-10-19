@@ -140,3 +140,18 @@
     animation: none;
   }
 }
+
+.inlineLayer {
+  display: contents;
+}
+
+.item[data-group-member] {
+  flex: 0 0 44px;
+  padding: 0;
+  border-color: transparent;
+  border-radius: calc(var(--radius-panel) - 5px);
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+  animation: none;
+}

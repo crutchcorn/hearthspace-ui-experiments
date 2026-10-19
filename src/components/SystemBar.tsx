@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import {
   BatteryFull,
   Check,
+  Clock3,
   Volume2,
   VolumeX,
   Wifi,
@@ -15,25 +16,28 @@ export type SystemPanel = 'wifi' | 'volume' | 'battery' | 'clock' | null
 interface SystemBarProps {
   openPanel: SystemPanel
   onPanelChange: (panel: SystemPanel) => void
-  showBatteryPercentage: boolean
+  id: Exclude<SystemPanel, null>
+  expanded: boolean
 }
 
 export default function SystemBar({
   openPanel,
   onPanelChange,
-  showBatteryPercentage,
+  id,
+  expanded,
 }: SystemBarProps) {
   const [wifiEnabled, setWifiEnabled] = useState(true)
   const [volume, setVolume] = useState(64)
   const [now, setNow] = useState(() => new Date())
 
   useEffect(() => {
+    if (id !== 'clock') return
     const timer = window.setInterval(() => setNow(new Date()), 15_000)
     return () => window.clearInterval(timer)
-  }, [])
+  }, [id])
 
   useEffect(() => {
-    if (!openPanel) return
+    if (openPanel !== id) return
 
     function dismissOnPointer(event: PointerEvent) {
       if (
@@ -54,7 +58,7 @@ export default function SystemBar({
       document.removeEventListener('pointerdown', dismissOnPointer, true)
       document.removeEventListener('keydown', dismissOnEscape)
     }
-  }, [openPanel, onPanelChange])
+  }, [id, openPanel, onPanelChange])
 
   function togglePanel(panel: Exclude<SystemPanel, null>) {
     onPanelChange(openPanel === panel ? null : panel)
@@ -70,73 +74,88 @@ export default function SystemBar({
   return (
     <header
       className={`${styles.bar} ${shellStyles.surface}`}
-      aria-label="Device status"
+      aria-label={id === 'clock' ? 'Date and time' : `${id} status`}
+      data-status-item={id}
       data-system-popover-root
     >
-      <button
-        type="button"
-        className={`${styles.clockButton} ${shellStyles.control}`}
-        onClick={() => togglePanel('clock')}
-        title={now.toLocaleDateString(undefined, {
-          weekday: 'long',
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric',
-        })}
-        aria-label="Date and time"
-        aria-expanded={openPanel === 'clock'}
-      >
-        {now.toLocaleTimeString(undefined, {
-          hour: '2-digit',
-          minute: '2-digit',
-          hourCycle: 'h23',
-        })}
-      </button>
-
-      <div
-        className={styles.statusGroup}
-        role="group"
-        aria-label="System tray"
-        onWheel={(event) => event.stopPropagation()}
-      >
+      {id === 'clock' && (
         <button
           type="button"
-          className={`${styles.statusButton} ${shellStyles.control}`}
+          className={`${expanded ? styles.clockButton : styles.statusButton} ${shellStyles.control}`}
+          onClick={() => togglePanel('clock')}
+          title={now.toLocaleDateString(undefined, {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          })}
+          aria-label="Date and time"
+          aria-expanded={openPanel === 'clock'}
+        >
+          {expanded ? (
+            now.toLocaleTimeString(undefined, {
+              hour: '2-digit',
+              minute: '2-digit',
+              hourCycle: 'h23',
+            })
+          ) : (
+            <Clock3 size={18} aria-hidden="true" />
+          )}
+        </button>
+      )}
+      {id === 'wifi' && (
+        <button
+          type="button"
+          className={`${styles.statusButton} ${expanded ? styles.withDetail : ''} ${shellStyles.control}`}
           title={wifiEnabled ? 'Wi-Fi · Studio network' : 'Wi-Fi · Off'}
           aria-label="Wi-Fi settings"
           aria-expanded={openPanel === 'wifi'}
           onClick={() => togglePanel('wifi')}
         >
           {wifiEnabled ? <Wifi size={17} /> : <WifiOff size={17} />}
+          {expanded && (
+            <span className={styles.detail} aria-hidden="true">
+              {wifiEnabled ? 'Studio network' : 'Wi-Fi off'}
+            </span>
+          )}
         </button>
+      )}
+      {id === 'volume' && (
         <button
           type="button"
-          className={`${styles.statusButton} ${shellStyles.control}`}
+          className={`${styles.statusButton} ${expanded ? styles.withDetail : ''} ${shellStyles.control}`}
           title={volume > 0 ? `Sound · ${volume}%` : 'Sound · Muted'}
           aria-label="Sound settings"
           aria-expanded={openPanel === 'volume'}
           onClick={() => togglePanel('volume')}
         >
           {volume > 0 ? <Volume2 size={17} /> : <VolumeX size={17} />}
+          {expanded && (
+            <span className={styles.detail} aria-hidden="true">
+              {volume}%
+            </span>
+          )}
         </button>
+      )}
+      {id === 'battery' && (
         <button
           type="button"
-          className={`${styles.statusButton} ${showBatteryPercentage ? styles.batteryWithPercentage : ''} ${shellStyles.control}`}
+          className={`${styles.statusButton} ${expanded ? styles.withDetail : ''} ${shellStyles.control}`}
           title="Battery · 87%"
           aria-label="Battery status, 87%"
           aria-expanded={openPanel === 'battery'}
           onClick={() => togglePanel('battery')}
         >
           <BatteryFull size={19} aria-hidden="true" />
-          {showBatteryPercentage && (
-            <span className={styles.batteryPercentage} aria-hidden="true">
+          {expanded && (
+            <span className={styles.detail} aria-hidden="true">
               87%
             </span>
           )}
         </button>
-      </div>
+      )}
 
-      {openPanel === 'wifi' && (
+      {id === 'wifi' && openPanel === id && (
         <div className={`${styles.popover} ${styles.systemPopover}`}>
           <label className={styles.toggleRow}>
             <strong>Wi-Fi</strong>
@@ -162,7 +181,7 @@ export default function SystemBar({
         </div>
       )}
 
-      {openPanel === 'volume' && (
+      {id === 'volume' && openPanel === id && (
         <div className={`${styles.popover} ${styles.systemPopover}`}>
           <div className={styles.settingHeading}>
             <label htmlFor="system-volume">Sound</label>
@@ -188,7 +207,7 @@ export default function SystemBar({
         </div>
       )}
 
-      {openPanel === 'battery' && (
+      {id === 'battery' && openPanel === id && (
         <div className={`${styles.popover} ${styles.systemPopover}`}>
           <div className={styles.settingHeading}>
             <strong>Battery</strong>
@@ -204,7 +223,7 @@ export default function SystemBar({
         </div>
       )}
 
-      {openPanel === 'clock' && (
+      {id === 'clock' && openPanel === id && (
         <div className={`${styles.popover} ${styles.calendarPopover}`}>
           <div className={styles.calendarHeading}>
             <div>

@@ -11,7 +11,6 @@ export type AccentThemeId = (typeof ACCENT_THEMES)[number]['id']
 export type ColorMode = 'light' | 'dark'
 
 const ACCENT_STORAGE_KEY = 'hearthspace-accent-v1'
-const BATTERY_PERCENTAGE_STORAGE_KEY = 'hearthspace-battery-percentage-v1'
 const COLOR_MODE_STORAGE_KEY = 'hearthspace-color-mode-v1'
 
 export function loadColorMode(): ColorMode {
@@ -49,21 +48,5 @@ export function saveAccentTheme(theme: AccentThemeId) {
     localStorage.setItem(ACCENT_STORAGE_KEY, theme)
   } catch {
     // Keep the selected accent for this session if storage is unavailable.
-  }
-}
-
-export function loadShowBatteryPercentage(): boolean {
-  try {
-    return localStorage.getItem(BATTERY_PERCENTAGE_STORAGE_KEY) === 'true'
-  } catch {
-    return false
-  }
-}
-
-export function saveShowBatteryPercentage(show: boolean) {
-  try {
-    localStorage.setItem(BATTERY_PERCENTAGE_STORAGE_KEY, String(show))
-  } catch {
-    // Keep the selected tray preference for this session if storage is unavailable.
   }
 }

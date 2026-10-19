@@ -28,8 +28,7 @@ interface WindowContentProps {
   allowHideTools: boolean
   onAllowHideToolsChange: (allow: boolean) => void
   onRestoreCanvasTools: () => void
-  showBatteryPercentage: boolean
-  onShowBatteryPercentageChange: (show: boolean) => void
+  onChangeLayout: () => void
   background: BackgroundPhoto | null
   backgroundBusy: boolean
   backgroundError: string | null
@@ -70,8 +69,7 @@ export default function WindowContent({
   allowHideTools,
   onAllowHideToolsChange,
   onRestoreCanvasTools,
-  showBatteryPercentage,
-  onShowBatteryPercentageChange,
+  onChangeLayout,
   background,
   backgroundBusy,
   backgroundError,
@@ -199,8 +197,7 @@ export default function WindowContent({
         allowHideTools={allowHideTools}
         onAllowHideToolsChange={onAllowHideToolsChange}
         onRestoreCanvasTools={onRestoreCanvasTools}
-        showBatteryPercentage={showBatteryPercentage}
-        onShowBatteryPercentageChange={onShowBatteryPercentageChange}
+        onChangeLayout={onChangeLayout}
         background={background}
         backgroundBusy={backgroundBusy}
         backgroundError={backgroundError}

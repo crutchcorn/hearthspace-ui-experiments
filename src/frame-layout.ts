@@ -2,16 +2,22 @@ import type { Bounds } from './desktop.ts'
 
 export type FrameEdge = 'top' | 'right' | 'bottom' | 'left'
 export type LayoutTarget = {
-  kind: 'widget' | 'item' | 'window' | 'drawing'
+  kind: 'widget' | 'item' | 'window' | 'drawing' | 'group'
   id: string
 }
 export type ObjectPlacement =
   | { surface: 'canvas' | 'background'; x?: number; y?: number }
   | { surface: 'frame'; edge: FrameEdge; position: number }
   | { surface: 'hidden' }
+export type FrameGroup = {
+  id: string
+  members: LayoutTarget[]
+}
 export type FrameLayout = {
   placements: Record<string, ObjectPlacement>
   allowHideTools: boolean
+  groups?: Record<string, FrameGroup>
+  expanded?: Record<string, boolean>
 }
 
 export const FRAME_LAYOUT_STORAGE_KEY = 'hearthspace-frame-layout-v1'
@@ -25,10 +31,31 @@ export const FRAME_WIDGETS = [
     defaultPlacement: { surface: 'frame', edge: 'top', position: 0 },
   },
   {
-    id: 'system',
-    title: 'System tray',
-    description: 'Sound, network, battery, and system controls.',
-    keywords: ['wifi', 'network', 'battery', 'volume', 'sound', 'settings'],
+    id: 'clock',
+    title: 'Clock',
+    description: 'The time and calendar.',
+    keywords: ['date', 'time', 'calendar', 'system tray'],
+    defaultPlacement: { surface: 'frame', edge: 'top', position: 1 },
+  },
+  {
+    id: 'wifi',
+    title: 'Wi-Fi',
+    description: 'Network connection and controls.',
+    keywords: ['wifi', 'network', 'internet', 'wireless', 'system tray'],
+    defaultPlacement: { surface: 'frame', edge: 'top', position: 1 },
+  },
+  {
+    id: 'volume',
+    title: 'Sound',
+    description: 'Sound output and volume.',
+    keywords: ['volume', 'audio', 'speaker', 'system tray'],
+    defaultPlacement: { surface: 'frame', edge: 'top', position: 1 },
+  },
+  {
+    id: 'battery',
+    title: 'Battery',
+    description: 'Battery charge and power status.',
+    keywords: ['power', 'charge', 'percentage', 'system tray'],
     defaultPlacement: { surface: 'frame', edge: 'top', position: 1 },
   },
   {
@@ -74,15 +101,66 @@ function protectPlacement(
   return placement
 }
 
+export function getFrameGroups(layout: FrameLayout): FrameGroup[] {
+  return Object.values(layout.groups ?? {})
+}
+
+export function getTargetGroup(
+  layout: FrameLayout,
+  target: LayoutTarget,
+): FrameGroup | undefined {
+  if (target.kind === 'group')
+    return layout.groups && Object.hasOwn(layout.groups, target.id)
+      ? layout.groups[target.id]
+      : undefined
+  return getFrameGroups(layout).find((group) =>
+    group.members.some((member) => targetKey(member) === targetKey(target)),
+  )
+}
+
 export function getPlacement(
   layout: FrameLayout,
   target: LayoutTarget,
 ): ObjectPlacement {
+  const group = getTargetGroup(layout, target)
+  const placementTarget = group
+    ? { kind: 'group' as const, id: group.id }
+    : target
   return protectPlacement(
     layout,
     target,
-    layout.placements[targetKey(target)] ?? defaultPlacement(target),
+    layout.placements[targetKey(placementTarget)] ??
+      defaultPlacement(group?.members[0] ?? target),
   )
+}
+
+export function ungroupFrameTarget(
+  layout: FrameLayout,
+  target: LayoutTarget,
+): FrameLayout {
+  const group = getTargetGroup(layout, target)
+  if (!group) return layout
+  const placement = getPlacement(layout, { kind: 'group', id: group.id })
+  const remaining =
+    target.kind === 'group'
+      ? []
+      : group.members.filter(
+          (member) => targetKey(member) !== targetKey(target),
+        )
+  const groups = { ...layout.groups }
+  const placements = { ...layout.placements }
+  const detached =
+    remaining.length < 2
+      ? group.members
+      : group.members.filter(
+          (member) => targetKey(member) === targetKey(target),
+        )
+  for (const member of detached) placements[targetKey(member)] = placement
+  if (remaining.length < 2) {
+    delete groups[group.id]
+    delete placements[targetKey({ kind: 'group', id: group.id })]
+  } else groups[group.id] = { ...group, members: remaining }
+  return { ...layout, groups, placements }
 }
 
 export function setObjectPlacement(
@@ -90,13 +168,104 @@ export function setObjectPlacement(
   target: LayoutTarget,
   placement: ObjectPlacement,
 ): FrameLayout {
+  if (target.kind === 'group' && placement.surface === 'hidden') {
+    const group = getTargetGroup(layout, target)
+    if (!group) return layout
+    let next = ungroupFrameTarget(layout, target)
+    for (const member of group.members)
+      next = setObjectPlacement(next, member, placement)
+    return next
+  }
+  const next =
+    target.kind === 'group' ? layout : ungroupFrameTarget(layout, target)
   return {
-    ...layout,
+    ...next,
     placements: {
-      ...layout.placements,
-      [targetKey(target)]: protectPlacement(layout, target, placement),
+      ...next.placements,
+      [targetKey(target)]: protectPlacement(next, target, placement),
     },
   }
+}
+
+export function mergeFrameTargets(
+  layout: FrameLayout,
+  source: LayoutTarget,
+  target: LayoutTarget,
+  before = false,
+): FrameLayout {
+  const canGroup = (candidate: LayoutTarget) =>
+    candidate.kind === 'widget' ||
+    candidate.kind === 'item' ||
+    (candidate.kind === 'group' && Boolean(getTargetGroup(layout, candidate)))
+  if (
+    !canGroup(source) ||
+    !canGroup(target) ||
+    targetKey(source) === targetKey(target)
+  )
+    return layout
+  const sourceGroup = getTargetGroup(layout, source)
+  const targetGroup = getTargetGroup(layout, target)
+  if (source.kind === 'group' && sourceGroup?.id === targetGroup?.id)
+    return layout
+  const sourceMembers =
+    source.kind === 'group' ? sourceGroup!.members : [source]
+  const placement = getPlacement(layout, target)
+  if (placement.surface !== 'frame') return layout
+  const sourceKeys = new Set(sourceMembers.map(targetKey))
+  const targetMembers = (targetGroup?.members ?? [target]).filter(
+    (member) => !sourceKeys.has(targetKey(member)),
+  )
+  const targetIndex = targetMembers.findIndex(
+    (member) => targetKey(member) === targetKey(target),
+  )
+  const insertionIndex =
+    target.kind === 'group'
+      ? before
+        ? 0
+        : targetMembers.length
+      : targetIndex < 0
+        ? targetMembers.length
+        : targetIndex + (before ? 0 : 1)
+  const members = [...targetMembers]
+  members.splice(insertionIndex, 0, ...sourceMembers)
+  if (members.length < 2) return layout
+
+  let next = layout
+  for (const member of sourceMembers) next = ungroupFrameTarget(next, member)
+  const groups = { ...next.groups }
+  const placements = { ...next.placements }
+  let id = targetGroup?.id
+  if (!id) {
+    let index = 1
+    while (Object.hasOwn(groups, `group-${index}`)) index++
+    id = `group-${index}`
+  }
+  groups[id] = { id, members }
+  placements[targetKey({ kind: 'group', id })] = placement
+  for (const member of members) delete placements[targetKey(member)]
+  return { ...next, groups, placements }
+}
+
+const EXPANDABLE_WIDGETS = new Set([
+  'notifications',
+  'clock',
+  'wifi',
+  'volume',
+  'battery',
+])
+
+export function getWidgetExpanded(layout: FrameLayout, id: string): boolean {
+  if (!EXPANDABLE_WIDGETS.has(id)) return false
+  return layout.expanded?.[id] ?? (id === 'clock' || id === 'notifications')
+}
+
+export function setWidgetExpanded(
+  layout: FrameLayout,
+  id: string,
+  expanded: boolean,
+): FrameLayout {
+  if (!EXPANDABLE_WIDGETS.has(id)) return layout
+  return { ...layout, expanded: { ...layout.expanded, [id]: expanded } }
 }
 
 export function setAllowHideTools(
@@ -105,7 +274,12 @@ export function setAllowHideTools(
 ): FrameLayout {
   const next = { ...layout, allowHideTools }
   const tools: LayoutTarget = { kind: 'widget', id: 'tools' }
-  return setObjectPlacement(next, tools, getPlacement(next, tools))
+  if (
+    !allowHideTools &&
+    layout.placements[targetKey(tools)]?.surface === 'hidden'
+  )
+    return setObjectPlacement(next, tools, defaultPlacement(tools))
+  return next
 }
 
 function readTarget(key: string): LayoutTarget | null {
@@ -118,7 +292,8 @@ function readTarget(key: string): LayoutTarget | null {
     (kind !== 'widget' &&
       kind !== 'item' &&
       kind !== 'window' &&
-      kind !== 'drawing')
+      kind !== 'drawing' &&
+      kind !== 'group')
   )
     return null
   if (kind === 'widget' && !FRAME_WIDGETS.some((widget) => widget.id === id))
@@ -161,35 +336,128 @@ function readPlacement(value: unknown): ObjectPlacement | null {
   return null
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === 'object' && !Array.isArray(value)
+}
+
+function systemGroup(): FrameGroup {
+  return {
+    id: 'system',
+    members: ['clock', 'wifi', 'volume', 'battery'].map((id) => ({
+      kind: 'widget',
+      id,
+    })),
+  }
+}
+
 function normalizeLayout(value: unknown): FrameLayout {
-  const layout: FrameLayout = { placements: {}, allowHideTools: false }
-  if (!value || typeof value !== 'object') return layout
-  layout.allowHideTools =
-    'allowHideTools' in value && value.allowHideTools === true
-  if (
-    !('placements' in value) ||
-    !value.placements ||
-    typeof value.placements !== 'object' ||
-    Array.isArray(value.placements)
-  )
-    return layout
-  for (const [key, saved] of Object.entries(value.placements)) {
+  const layout: FrameLayout = {
+    placements: {},
+    allowHideTools: false,
+    groups: {},
+  }
+  const saved = isRecord(value) ? value : {}
+  layout.allowHideTools = saved.allowHideTools === true
+  const savedPlacements = isRecord(saved.placements) ? saved.placements : {}
+  for (const [key, savedPlacement] of Object.entries(savedPlacements)) {
     const target = readTarget(key)
-    const placement = readPlacement(saved)
+    const placement = readPlacement(savedPlacement)
     if (target && placement)
       layout.placements[key] = protectPlacement(layout, target, placement)
+  }
+
+  const claimedMembers = new Set<string>()
+  if (isRecord(saved.groups)) {
+    for (const [id, value] of Object.entries(saved.groups)) {
+      if (
+        !id ||
+        id === '__proto__' ||
+        id === 'constructor' ||
+        id === 'prototype' ||
+        !isRecord(value) ||
+        value.id !== id ||
+        !Array.isArray(value.members)
+      )
+        continue
+      const members: LayoutTarget[] = []
+      const keys = new Set<string>()
+      for (const candidate of value.members) {
+        if (
+          !isRecord(candidate) ||
+          typeof candidate.id !== 'string' ||
+          (candidate.kind !== 'widget' && candidate.kind !== 'item')
+        )
+          continue
+        const member = readTarget(`${candidate.kind}:${candidate.id}`)
+        if (!member) continue
+        const key = targetKey(member)
+        if (claimedMembers.has(key) || keys.has(key)) continue
+        keys.add(key)
+        members.push(member)
+      }
+      const groupKey = targetKey({ kind: 'group', id })
+      const placement =
+        layout.placements[groupKey] ??
+        (members[0] ? getPlacement(layout, members[0]) : undefined)
+      if (members.length < 2) {
+        for (const member of members)
+          if (placement) layout.placements[targetKey(member)] = placement
+        continue
+      }
+      layout.groups![id] = { id, members }
+      layout.placements[groupKey] = placement!
+      for (const member of members) {
+        claimedMembers.add(targetKey(member))
+        delete layout.placements[targetKey(member)]
+      }
+    }
+  } else {
+    const group = systemGroup()
+    const previous = readPlacement(savedPlacements['widget:system']) ?? {
+      surface: 'frame',
+      edge: 'top',
+      position: 1,
+    }
+    if (previous.surface === 'hidden') {
+      for (const member of group.members)
+        layout.placements[targetKey(member)] = previous
+    } else {
+      layout.groups![group.id] = group
+      layout.placements[targetKey({ kind: 'group', id: group.id })] = previous
+    }
+  }
+  for (const key of Object.keys(layout.placements)) {
+    const target = readTarget(key)
+    if (target?.kind === 'group' && !Object.hasOwn(layout.groups!, target.id))
+      delete layout.placements[key]
+  }
+  if (isRecord(saved.expanded)) {
+    layout.expanded = {}
+    for (const [id, expanded] of Object.entries(saved.expanded))
+      if (EXPANDABLE_WIDGETS.has(id) && typeof expanded === 'boolean')
+        layout.expanded[id] = expanded
   }
   return layout
 }
 
 export function loadFrameLayout(): FrameLayout {
+  let saved: unknown
   try {
-    return normalizeLayout(
-      JSON.parse(localStorage.getItem(FRAME_LAYOUT_STORAGE_KEY) ?? 'null'),
-    )
+    saved = JSON.parse(localStorage.getItem(FRAME_LAYOUT_STORAGE_KEY) ?? 'null')
   } catch {
-    return { placements: {}, allowHideTools: false }
+    // Restore the default controls when the saved layout cannot be read.
   }
+  const layout = normalizeLayout(saved)
+  try {
+    if (
+      layout.expanded?.battery === undefined &&
+      localStorage.getItem('hearthspace-battery-percentage-v1') === 'true'
+    )
+      return setWidgetExpanded(layout, 'battery', true)
+  } catch {
+    // Keep the default detail level when browser storage is unavailable.
+  }
+  return layout
 }
 
 export function saveFrameLayout(layout: FrameLayout): void {

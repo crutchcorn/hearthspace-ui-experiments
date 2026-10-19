@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { arrangeWindows, type Workspace } from '../src/desktop.ts'
-import type { FrameLayout } from '../src/frame-layout.ts'
+import { setObjectPlacement, type FrameLayout } from '../src/frame-layout.ts'
 import {
   settleLayoutDrop,
   transformCanvasWorkspace,
@@ -101,6 +101,63 @@ test('frame drawings and shortcuts retain their geometry when canvas windows set
   assert.equal(result.drawings[0], workspace.drawings[0])
   assert.equal(result.windows[0].y, 76)
   assert.equal(result.windows[1], stacked.windows[1])
+})
+
+test('a grouped shortcut ignores its old canvas placement when windows settle', () => {
+  const layout: FrameLayout = {
+    ...defaults,
+    placements: {
+      'item:notes-shortcut': { surface: 'background' },
+      'group:dock': frame,
+    },
+    groups: {
+      dock: {
+        id: 'dock',
+        members: [
+          { kind: 'item', id: 'notes-shortcut' },
+          { kind: 'widget', id: 'apps' },
+        ],
+      },
+    },
+  }
+  const result = transformCanvasWorkspace(workspace, layout, settleCoveredItems)
+  assert.equal(result.items[0], workspace.items[0])
+  assert.notDeepEqual(result.drawings[0], workspace.drawings[0])
+})
+
+test('arranging windows preserves a grouped shortcut home until it returns to the canvas', () => {
+  const before: Workspace = {
+    ...workspace,
+    items: [{ ...workspace.items[0], x: 20, peekOrigin: { x: 140, y: 140 } }],
+  }
+  const layout: FrameLayout = {
+    ...defaults,
+    placements: { 'group:dock': frame },
+    groups: {
+      dock: {
+        id: 'dock',
+        members: [
+          { kind: 'item', id: 'notes-shortcut' },
+          { kind: 'widget', id: 'apps' },
+        ],
+      },
+    },
+  }
+  const arranged = transformCanvasWorkspace(before, layout, (canvas) =>
+    restoreBackgroundItems(arrangeWindows(canvas, { x: 500, y: 500 })),
+  )
+  assert.equal(arranged.windows[0].x, 524)
+  assert.equal(arranged.items[0], before.items[0])
+  const returned = transformCanvasWorkspace(
+    arranged,
+    setObjectPlacement(
+      layout,
+      { kind: 'item', id: 'notes-shortcut' },
+      { surface: 'background' },
+    ),
+    restoreBackgroundItems,
+  )
+  assert.deepEqual(returned.items[0], workspace.items[0])
 })
 
 test('raised shortcuts are not moved by background peeking', () => {

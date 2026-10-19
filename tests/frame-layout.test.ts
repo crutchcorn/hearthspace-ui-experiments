@@ -4,13 +4,19 @@ import {
   FRAME_LAYOUT_STORAGE_KEY,
   getFrameBounds,
   getFrameDropTarget,
+  getFrameGroups,
   getPlacement,
   getPinnedWindowOffset,
+  getTargetGroup,
+  getWidgetExpanded,
   getWidgetFrameDropTarget,
   loadFrameLayout,
+  mergeFrameTargets,
   saveFrameLayout,
   setAllowHideTools,
   setObjectPlacement,
+  setWidgetExpanded,
+  ungroupFrameTarget,
   type FrameLayout,
 } from '../src/frame-layout.ts'
 
@@ -37,6 +43,22 @@ after(() => {
 const defaults: FrameLayout = { placements: {}, allowHideTools: false }
 const tools = { kind: 'widget', id: 'tools' } as const
 const notifications = { kind: 'widget', id: 'notifications' } as const
+const clock = { kind: 'widget', id: 'clock' } as const
+const wifi = { kind: 'widget', id: 'wifi' } as const
+const volume = { kind: 'widget', id: 'volume' } as const
+const battery = { kind: 'widget', id: 'battery' } as const
+const apps = { kind: 'widget', id: 'apps' } as const
+const defaultSystemGroup = {
+  id: 'system',
+  members: [clock, wifi, volume, battery],
+}
+const loadedDefaults: FrameLayout = {
+  ...defaults,
+  placements: {
+    'group:system': { surface: 'frame', edge: 'top', position: 1 },
+  },
+  groups: { system: defaultSystemGroup },
+}
 
 test('an empty layout keeps the familiar corner controls and canvas objects', () => {
   assert.deepEqual(getPlacement(defaults, notifications), {
@@ -90,9 +112,10 @@ test('removing attachments hides widgets but returns work to the canvas', () => 
 test('frame and background placements survive a saved-layout round trip', () => {
   const layout: FrameLayout = {
     allowHideTools: true,
+    groups: {},
     placements: {
       'widget:tools': { surface: 'hidden' },
-      'widget:system': { surface: 'frame', edge: 'left', position: 0.7 },
+      'widget:wifi': { surface: 'frame', edge: 'left', position: 0.7 },
       'window:notes': { surface: 'frame', edge: 'right', position: 0.25 },
       'item:projects': { surface: 'background', x: 4320, y: 3690 },
       'drawing:my:sketch': { surface: 'canvas', x: 4500, y: 3700 },
@@ -131,18 +154,315 @@ test('invalid saved entries do not discard valid placements or hide protected to
     allowHideTools: false,
     placements: {
       'widget:tools': { surface: 'frame', edge: 'bottom', position: 0 },
-      'widget:system': { surface: 'frame', edge: 'right', position: 1 },
+      'group:system': { surface: 'frame', edge: 'right', position: 1 },
       'drawing:sketch': { surface: 'frame', edge: 'top', position: 0 },
       'item:hidden': { surface: 'background' },
     },
+    groups: { system: defaultSystemGroup },
   })
 })
 
 test('unreadable layout data restores defaults', () => {
   storage.set(FRAME_LAYOUT_STORAGE_KEY, '{unfinished')
-  assert.deepEqual(loadFrameLayout(), defaults)
+  assert.deepEqual(loadFrameLayout(), loadedDefaults)
   storage.set(FRAME_LAYOUT_STORAGE_KEY, 'null')
-  assert.deepEqual(loadFrameLayout(), defaults)
+  assert.deepEqual(loadFrameLayout(), loadedDefaults)
+})
+
+test('the former system tray migrates as one movable group of independent status items', () => {
+  storage.set(
+    FRAME_LAYOUT_STORAGE_KEY,
+    JSON.stringify({
+      placements: {
+        'widget:system': { surface: 'frame', edge: 'left', position: 0.7 },
+      },
+      allowHideTools: false,
+    }),
+  )
+  const layout = loadFrameLayout()
+  assert.deepEqual(getFrameGroups(layout), [defaultSystemGroup])
+  for (const member of defaultSystemGroup.members)
+    assert.deepEqual(getPlacement(layout, member), {
+      surface: 'frame',
+      edge: 'left',
+      position: 0.7,
+    })
+  assert.equal(Object.hasOwn(layout.placements, 'widget:system'), false)
+})
+
+test('an older layout with an implicit system default gains the default status group', () => {
+  const placement = { surface: 'frame', edge: 'left', position: 0.2 } as const
+  storage.set(
+    FRAME_LAYOUT_STORAGE_KEY,
+    JSON.stringify({
+      placements: { 'widget:tools': placement },
+      allowHideTools: true,
+    }),
+  )
+  const layout = loadFrameLayout()
+  assert.deepEqual(getFrameGroups(layout), [defaultSystemGroup])
+  assert.deepEqual(getPlacement(layout, clock), {
+    surface: 'frame',
+    edge: 'top',
+    position: 1,
+  })
+  assert.deepEqual(getPlacement(layout, tools), placement)
+  assert.equal(layout.allowHideTools, true)
+})
+
+test('a previously removed system tray stays removed after splitting its controls', () => {
+  storage.set(
+    FRAME_LAYOUT_STORAGE_KEY,
+    JSON.stringify({
+      placements: { 'widget:system': { surface: 'hidden' } },
+    }),
+  )
+  const layout = loadFrameLayout()
+  assert.deepEqual(getFrameGroups(layout), [])
+  for (const member of defaultSystemGroup.members)
+    assert.deepEqual(getPlacement(layout, member), { surface: 'hidden' })
+})
+
+test('merging dock, tools, and a status group produces one flat ordered frame group', () => {
+  let layout = mergeFrameTargets(loadedDefaults, tools, apps, true)
+  const dockGroup = getTargetGroup(layout, apps)!
+  layout = mergeFrameTargets(
+    layout,
+    { kind: 'group', id: 'system' },
+    { kind: 'group', id: dockGroup.id },
+  )
+  assert.deepEqual(getFrameGroups(layout), [
+    {
+      id: dockGroup.id,
+      members: [tools, apps, clock, wifi, volume, battery],
+    },
+  ])
+  for (const member of getFrameGroups(layout)[0]!.members)
+    assert.deepEqual(getPlacement(layout, member), {
+      surface: 'frame',
+      edge: 'bottom',
+      position: 1,
+    })
+  assert.equal(Object.hasOwn(layout.placements, 'group:system'), false)
+})
+
+test('an individual grouped status item can move independently without moving its neighbors', () => {
+  const layout = setObjectPlacement(loadedDefaults, wifi, {
+    surface: 'frame',
+    edge: 'bottom',
+    position: 0.5,
+  })
+  assert.deepEqual(getTargetGroup(layout, wifi), undefined)
+  assert.deepEqual(getPlacement(layout, wifi), {
+    surface: 'frame',
+    edge: 'bottom',
+    position: 0.5,
+  })
+  assert.deepEqual(getFrameGroups(layout)[0]!.members, [clock, volume, battery])
+  assert.deepEqual(getPlacement(layout, clock), {
+    surface: 'frame',
+    edge: 'top',
+    position: 1,
+  })
+  assert.deepEqual(
+    getFrameGroups(loadedDefaults)[0]!.members,
+    defaultSystemGroup.members,
+  )
+})
+
+test('moving one status item into another frame group leaves both groups valid', () => {
+  const grouped = mergeFrameTargets(loadedDefaults, tools, apps)
+  const moved = mergeFrameTargets(grouped, wifi, apps, true)
+  assert.deepEqual(getTargetGroup(moved, clock)?.members, [
+    clock,
+    volume,
+    battery,
+  ])
+  assert.deepEqual(getTargetGroup(moved, apps)?.members, [wifi, apps, tools])
+  assert.deepEqual(getPlacement(moved, wifi), {
+    surface: 'frame',
+    edge: 'bottom',
+    position: 1,
+  })
+  saveFrameLayout(moved)
+  assert.deepEqual(loadFrameLayout(), moved)
+})
+
+test('moving an entire group preserves its members and places them together', () => {
+  const placement = { surface: 'frame', edge: 'bottom', position: 0 } as const
+  const layout = setObjectPlacement(
+    loadedDefaults,
+    { kind: 'group', id: 'system' },
+    placement,
+  )
+  assert.deepEqual(getFrameGroups(layout), [defaultSystemGroup])
+  for (const member of defaultSystemGroup.members)
+    assert.deepEqual(getPlacement(layout, member), placement)
+})
+
+test('detaching from a two-item group dissolves it while keeping the remaining attachment in place', () => {
+  const grouped = mergeFrameTargets(defaults, tools, apps)
+  const layout = setObjectPlacement(grouped, tools, {
+    surface: 'canvas',
+    x: 120,
+    y: 240,
+  })
+  assert.deepEqual(getFrameGroups(layout), [])
+  assert.deepEqual(getPlacement(layout, apps), {
+    surface: 'frame',
+    edge: 'bottom',
+    position: 1,
+  })
+  assert.deepEqual(getPlacement(layout, tools), {
+    surface: 'canvas',
+    x: 120,
+    y: 240,
+  })
+  assert.equal(
+    Object.keys(layout.placements).some((key) => key.startsWith('group:')),
+    false,
+  )
+})
+
+test('members can be reordered and inserted into an existing group without duplicates', () => {
+  const reordered = mergeFrameTargets(loadedDefaults, battery, clock, true)
+  assert.deepEqual(getFrameGroups(reordered)[0]!.members, [
+    battery,
+    clock,
+    wifi,
+    volume,
+  ])
+  const item = { kind: 'item', id: 'projects' } as const
+  const inserted = mergeFrameTargets(reordered, item, wifi)
+  assert.deepEqual(getFrameGroups(inserted)[0]!.members, [
+    battery,
+    clock,
+    wifi,
+    item,
+    volume,
+  ])
+  assert.deepEqual(getPlacement(inserted, item), {
+    surface: 'frame',
+    edge: 'top',
+    position: 1,
+  })
+})
+
+test('ungrouping keeps every attachment on the same edge and remains ungrouped after reload', () => {
+  const layout = ungroupFrameTarget(loadedDefaults, {
+    kind: 'group',
+    id: 'system',
+  })
+  assert.deepEqual(getFrameGroups(layout), [])
+  for (const member of defaultSystemGroup.members)
+    assert.deepEqual(getPlacement(layout, member), {
+      surface: 'frame',
+      edge: 'top',
+      position: 1,
+    })
+  saveFrameLayout(layout)
+  assert.deepEqual(loadFrameLayout(), layout)
+})
+
+test('removing a group respects the canvas tools safeguard and preserves personal items', () => {
+  let layout = mergeFrameTargets(defaults, tools, apps)
+  layout = mergeFrameTargets(layout, { kind: 'item', id: 'projects' }, apps)
+  const group = getTargetGroup(layout, apps)!
+  const removed = setObjectPlacement(
+    layout,
+    { kind: 'group', id: group.id },
+    { surface: 'hidden' },
+  )
+  assert.deepEqual(getFrameGroups(removed), [])
+  assert.deepEqual(getPlacement(removed, tools), {
+    surface: 'frame',
+    edge: 'bottom',
+    position: 0,
+  })
+  assert.deepEqual(getPlacement(removed, apps), { surface: 'hidden' })
+  assert.deepEqual(getPlacement(removed, { kind: 'item', id: 'projects' }), {
+    surface: 'background',
+  })
+  const allowed = setObjectPlacement(
+    setAllowHideTools(layout, true),
+    { kind: 'group', id: group.id },
+    { surface: 'hidden' },
+  )
+  assert.deepEqual(getPlacement(allowed, tools), { surface: 'hidden' })
+})
+
+test('changing the tools hiding preference does not detach visible tools from their group', () => {
+  const grouped = mergeFrameTargets(defaults, tools, apps)
+  const changed = setAllowHideTools(grouped, true)
+  assert.deepEqual(getFrameGroups(changed), getFrameGroups(grouped))
+  assert.deepEqual(
+    getFrameGroups(setAllowHideTools(changed, false)),
+    getFrameGroups(grouped),
+  )
+})
+
+test('group and per-widget detail preferences survive a saved-layout round trip', () => {
+  let layout = mergeFrameTargets(loadedDefaults, notifications, clock, true)
+  layout = setWidgetExpanded(layout, 'notifications', false)
+  layout = setWidgetExpanded(layout, 'battery', true)
+  saveFrameLayout(layout)
+  assert.deepEqual(loadFrameLayout(), layout)
+  assert.equal(getWidgetExpanded(layout, 'clock'), true)
+  assert.equal(getWidgetExpanded(layout, 'notifications'), false)
+  assert.equal(getWidgetExpanded(layout, 'battery'), true)
+  assert.equal(getWidgetExpanded(layout, 'wifi'), false)
+})
+
+test('the former battery percentage preference migrates without replacing a new detail choice', () => {
+  storage.set('hearthspace-battery-percentage-v1', 'true')
+  storage.set(FRAME_LAYOUT_STORAGE_KEY, JSON.stringify(defaults))
+  assert.equal(getWidgetExpanded(loadFrameLayout(), 'battery'), true)
+  saveFrameLayout(setWidgetExpanded(loadFrameLayout(), 'battery', false))
+  assert.equal(getWidgetExpanded(loadFrameLayout(), 'battery'), false)
+  storage.delete('hearthspace-battery-percentage-v1')
+})
+
+test('malformed groups cannot duplicate an attachment, nest groups, or retain invalid placements', () => {
+  storage.set(
+    FRAME_LAYOUT_STORAGE_KEY,
+    JSON.stringify({
+      placements: {
+        'group:good': { surface: 'frame', edge: 'left', position: 0.5 },
+        'group:other': { surface: 'frame', edge: 'bottom', position: 0.3 },
+        'group:orphan': { surface: 'frame', edge: 'right', position: 0.5 },
+        'group:invalid': { surface: 'frame', edge: 'middle', position: 0.5 },
+      },
+      groups: {
+        good: {
+          id: 'good',
+          members: [clock, wifi, clock, { kind: 'group', id: 'other' }],
+        },
+        other: { id: 'other', members: [wifi, battery] },
+        invalid: {
+          id: 'invalid',
+          members: [
+            { kind: 'window', id: 'notes' },
+            { kind: 'widget', id: 'missing' },
+          ],
+        },
+      },
+      expanded: { battery: true, clock: 'true', missing: true },
+    }),
+  )
+  const layout = loadFrameLayout()
+  assert.deepEqual(getFrameGroups(layout), [
+    { id: 'good', members: [clock, wifi] },
+  ])
+  assert.deepEqual(getPlacement(layout, battery), {
+    surface: 'frame',
+    edge: 'bottom',
+    position: 0.3,
+  })
+  assert.deepEqual(Object.keys(layout.placements).sort(), [
+    'group:good',
+    'widget:battery',
+  ])
+  assert.deepEqual(layout.expanded, { battery: true })
 })
 
 test('edge attachment maps each position along the usable viewport span', () => {
