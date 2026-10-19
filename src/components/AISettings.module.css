@@ -113,6 +113,8 @@
 }
 
 .confirmation {
+  --chrome-hover: var(--raised-control-hover);
+
   width: min(380px, calc(100vw - 32px));
   max-height: calc(100dvh - 32px);
   padding: 24px;

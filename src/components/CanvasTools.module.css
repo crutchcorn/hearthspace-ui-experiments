@@ -47,6 +47,7 @@
 
 .toolMenu {
   --widget-panel-width: 260px;
+  --chrome-hover: var(--raised-control-hover);
 
   z-index: 1;
   overflow-y: auto;

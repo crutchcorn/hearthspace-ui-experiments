@@ -2,6 +2,7 @@
   --shell-padding: 4px;
   --shell-border-width: 1px;
   --toolbar-material: var(--material-raised);
+  --chrome-hover: var(--raised-control-hover);
 
   height: 54px;
   padding: var(--shell-padding);
@@ -76,6 +77,7 @@
     --shell-padding: 4px;
     --shell-border-width: 1px;
     --toolbar-material: var(--material-raised);
+    --chrome-hover: var(--raised-control-hover);
 
     height: 54px;
     isolation: isolate;

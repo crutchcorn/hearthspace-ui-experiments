@@ -81,6 +81,8 @@
 }
 
 .popover {
+  --chrome-hover: var(--raised-control-hover);
+
   z-index: 1000;
   display: flex;
   width: var(--trigger-width);

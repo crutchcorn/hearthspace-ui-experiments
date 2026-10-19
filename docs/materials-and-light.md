@@ -96,10 +96,15 @@ The surface tokens are in `src/index.css`. Toolbar coverage is in
 
 ### Light-mode hover
 
-In light mode, hovering or focusing within a toolbar gently darkens its raised
-fill. Individual hovered controls darken further so their bounds remain clear
-against the pale surface. Monitor previews use the same surface hover tint.
-The darkening uses the existing text color as a neutral tint; it does not add
-another radial glow. Dark mode keeps its existing hover fill and soft edges.
+In light mode, hovering or focusing within a toolbar adds a subtle accent tint
+to its raised fill. Monitor previews use the same 3% surface tint. Controls
+inside raised surfaces use a 5% accent wash with translucent white, keeping
+hover lighter and less saturated than an active selection.
+
+Ordinary surfaces retain their white hover highlight. The accent wash is
+scoped to toolbars, raised tool and app menus, confirmation dialogs, and the
+raised compact Settings navigation. Dark mode keeps its existing hover fill
+and soft edges. These hover states add no new radial gradient.
+
 The shared `--toolbar-material` state also feeds standalone and merged mobile
 bars, while grouped child surfaces remain transparent.

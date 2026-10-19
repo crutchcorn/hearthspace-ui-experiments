@@ -48,6 +48,8 @@
   }
 
   .widget[data-layout-widget='tools'] > .content {
+    --chrome-hover: var(--raised-control-hover);
+
     padding: 4px;
     border: 1px solid var(--chrome-border);
     border-radius: var(--radius-panel);

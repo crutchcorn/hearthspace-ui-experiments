@@ -461,6 +461,8 @@
   }
 
   .sidebar {
+    --chrome-hover: var(--raised-control-hover);
+
     position: absolute;
     z-index: 2;
     top: 49px;

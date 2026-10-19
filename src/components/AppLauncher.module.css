@@ -1,4 +1,6 @@
 .launcher {
+  --chrome-hover: var(--surface-control-hover);
+
   position: fixed;
   z-index: 1200;
   right: 24px;

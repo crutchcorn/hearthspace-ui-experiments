@@ -107,6 +107,7 @@
 
 .windowPopover {
   --widget-panel-width: 370px;
+  --chrome-hover: var(--surface-control-hover);
 
   overflow-y: auto;
   border: 1px solid var(--chrome-border);

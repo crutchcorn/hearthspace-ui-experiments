@@ -85,6 +85,8 @@
 }
 
 .panel {
+  --chrome-hover: var(--surface-control-hover);
+
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -347,6 +349,8 @@
 }
 
 .toast {
+  --chrome-hover: var(--surface-control-hover);
+
   padding: 12px 20px 16px;
 }
 

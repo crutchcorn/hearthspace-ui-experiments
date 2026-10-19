@@ -63,6 +63,7 @@
 
 .popover {
   --widget-panel-width: 320px;
+  --chrome-hover: var(--surface-control-hover);
 
   overflow: auto;
   box-sizing: border-box;
