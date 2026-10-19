@@ -43,7 +43,9 @@ layout editing.
 
 Choose **Canvas** or **Background** to set an object's layer directly. Dropping
 a whole group onto the canvas releases its members at their visible positions.
-The layer buttons do the same on the chosen layer. Toolbars
+The layer buttons do the same on the chosen layer. Canvas icons, drawings, and
+widgets sit above background work but below ordinary windows; frame
+attachments stay above the canvas. Toolbars
 on the left or right stack vertically with upright icons; top and bottom
 attachments stay horizontal. While dragging, entering a new edge area animates
 the surface, outline, and contents into that orientation together. The toolbar
@@ -83,7 +85,7 @@ of the screen, keeping the group narrow while its bell stays upright.
 Finishing a layout move reveals work that the placement fully covers. Placing
 an object on the background also moves blocked background objects aside; those
 adjusted positions become their new homes. This differs from a window
-temporarily pushing background icons out of the way, after which they return.
+temporarily pushing canvas icons or drawings out of the way, after which they return.
 
 **Remove from frame** returns a window, desktop item, or drawing to the canvas
 without closing or deleting it. **Remove** hides a shell widget, leaving it
@@ -125,9 +127,9 @@ artwork recognizable while taking less room on the frame.
   boundaries still apply.
 - **Leave covered work in sight.** Windows can overlap completely while you
   drag. On release or when a new window opens, fully hidden windows, desktop
-  icons, and drawings below windows slide toward the nearest opening until a
+  icons, and drawings on either canvas layer slide toward the nearest opening until a
   small part peeks out. A new window stays where it opened.
-  Icons and background drawings slide home once nothing overlaps their original
+  Canvas icons and drawings slide home once nothing overlaps their original
   space. Moving or editing one yourself gives it a new home; windows keep their
   adjusted positions. Partly visible items stay put. Header double-click
   maximization does the same; the maximize button's focused view leaves the
@@ -147,7 +149,8 @@ artwork recognizable while taking less room on the frame.
 
 ## Draw on the canvas
 
-Choose the pencil or press **D** to draw. New drawings begin above windows.
+Choose the pencil or press **D** to draw. New drawings begin on the raised
+canvas, above background work and beneath ordinary windows.
 Change layout handles their placement, just as it does other canvas objects.
 
 Each stroke joins the current drawing until you press its floating check to
@@ -305,3 +308,7 @@ selections, unfinished pointer strokes, temporary search arrangements, viewport
 travel, notifications, and mock display settings reset.
 Storage stays local to that browser; if it's unavailable, the current session
 remains usable without saving.
+
+The current scene format deliberately starts fresh instead of importing the
+earlier split workspace and frame-layout saves. Appearance, backgrounds,
+favorites, gestures, and other separately saved preferences are unaffected.

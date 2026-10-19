@@ -24,7 +24,7 @@ A photo can replace the dots. **Repeat with canvas** attaches native-size tiles 
 ## Give drawings a place
 
 Drawing adds content to the workspace. A sketch can sit on the canvas background,
-above windows, or on the frame. Several strokes
+on the raised canvas beneath ordinary windows, or on the frame. Several strokes
 make one object until the user finishes it, so moving a drawing keeps its parts
 together.
 
@@ -118,7 +118,9 @@ attachment's position.
 The frame is the screen boundary. Dragging an attachment away from an edge
 returns it to the canvas; reaching another edge attaches it again. Releasing
 in the interior keeps it on the canvas. The layer choices remain available
-when the user wants to place an object directly. Keep the outline,
+when the user wants to place an object directly. Canvas icons, drawings, and
+widgets stay beneath ordinary windows, even when raised above background work.
+Only frame attachments stay above all canvas layers. Keep the outline,
 surface, and controls moving as one object, including when a toolbar changes
 between a horizontal row and a vertical stack. Change orientation during the
 drag when the toolbar enters a new edge area, retain it across the interior,
@@ -223,12 +225,13 @@ confirmation banner. Adding an existing favorite never creates another copy
 inside the dock.
 
 Overlap should leave a clue that other work is there. Allow complete coverage
-during a drag, then slide fully hidden windows, desktop icons, and background
+during a drag, then slide fully hidden windows, desktop icons, and canvas
 drawings toward the nearest opening when the drag ends. Opening a new window
 does the same, keeping that window where it launched while covered work moves
 into view. A small exposed piece is enough; leave partly visible work where it
-is. Background objects keep their place underneath windows and slide home once
-their original space is clear.
+is. Icons and drawings on either canvas layer keep their place underneath
+windows and slide home once their original space is clear. Frame attachments
+stay outside this rearrangement.
 This temporary movement keeps a shortcut or piece of art from losing the place
 the user chose for it. Moving or editing it intentionally establishes a new
 home, while windows keep their adjusted positions. The movement itself explains

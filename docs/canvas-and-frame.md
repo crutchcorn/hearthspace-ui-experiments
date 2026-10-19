@@ -133,8 +133,9 @@ covering a large part of the painting.
 
 ## A raised painting has layers
 
-The painting has depth. Some things are affixed to its background; others sit
-higher up. All of that work remains beneath the frame.
+The painting has depth. Background work sits lowest. Raised canvas icons,
+drawings, and widgets sit above it, with ordinary windows above those objects.
+All of that work remains beneath the frame.
 
 | Place             | What moving the canvas does | Why something belongs there                   |
 | ----------------- | --------------------------- | --------------------------------------------- |
@@ -144,12 +145,14 @@ higher up. All of that work remains beneath the frame.
 
 Desktop items begin on the background, and windows begin above it. These are
 starting placements the user can change. A background window is still a
-window; a raised drawing is still a drawing. The layering rules should follow
-the chosen placement rather than hardcoding every app or object type.
+window; a raised drawing is still a drawing. Raising an icon or drawing above
+the background doesn't put it in front of ordinary windows. Attaching it to
+the frame makes it stay above canvas work.
 
 Existing movement gives that depth a useful purpose. Fully covered work can
-peek into view, and displaced background objects can return home when their
-space clears. The frame stays above those arrangements. Search can temporarily
+peek into view, and displaced icons and drawings on either canvas layer return
+home when their space clears. Frame attachments stay above and outside those
+arrangements. Search can temporarily
 borrow the visible canvas without rewriting the places the user chose.
 
 Deliberately placing something on the background also establishes a new

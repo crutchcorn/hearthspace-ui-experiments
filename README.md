@@ -55,6 +55,8 @@ Canvas tools are protected from removal until you enable **Make canvas tools hid
 
 Window and desktop-item positions, canvas drawings, frame attachments and groups, status detail, favorites, canvas layers, scratchpad text, gesture assignments, and preferences are saved in this browser when storage is available. Notifications and mock display settings reset on reload.
 
+The current scene format starts a fresh desktop instead of importing layouts saved by earlier versions of this playground. Appearance, backgrounds, favorites, gestures, and other preferences keep their separate saved values.
+
 This remains an interaction experiment. App windows are previews, device controls don't change your computer, and drawn launch gestures match the shortcuts saved in Settings. AI gathering starts off and performs no model download or analysis. After opt-in, Gather similar windows uses a same-app rule: following a brief shimmer, other windows from the selected applications move into view.
 
 Handwriting search separately downloads about 64 MB of model weights plus its runtime on first use, then reads ink locally; recognition can make mistakes. The [feature guide](docs/features.md) keeps these boundaries alongside the relevant controls.
