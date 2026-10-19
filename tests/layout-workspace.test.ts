@@ -687,7 +687,7 @@ test('a drawing dropped from the frame under a window peeks immediately', () => 
   assert.equal(result.windows[0], before.windows[0])
 })
 
-test('background drop proxies do not displace raised decorations or ordinary windows', () => {
+test('background drop obstacles do not displace raised decorations or ordinary windows', () => {
   const layout: FrameLayout = {
     ...defaults,
     placements: {
@@ -709,6 +709,81 @@ test('background drop proxies do not displace raised decorations or ordinary win
   assert.deepEqual(result.items, before.items)
   assert.deepEqual(result.drawings, before.drawings)
   assert.equal(result.windows[0], before.windows[0])
+})
+
+test('canvas transforms receive original drawing layers and explicit surfaces', () => {
+  const before: Workspace = {
+    ...workspace,
+    windows: [],
+    items: [],
+    drawings: [{ ...workspace.drawings[0], layer: 'above' }],
+  }
+  const layout = setObjectPlacement(
+    defaults,
+    { kind: 'drawing', id: 'sketch' },
+    {
+      surface: 'background',
+    },
+  )
+  const result = transformCanvasWorkspace(before, layout, (canvas, context) => {
+    assert.equal(canvas.drawings[0], before.drawings[0])
+    assert.equal(canvas.drawings[0].layer, 'above')
+    assert.equal(context.drawingSurfaces?.get('sketch'), 'background')
+    return canvas
+  })
+  assert.equal(result, before)
+})
+
+test('background drops use the actual position of ordinary windows while settling their peers', () => {
+  const before: Workspace = {
+    ...workspace,
+    items: [],
+    drawings: [],
+    windows: [
+      workspace.windows[0],
+      { ...workspace.windows[0], id: 'ordinary' },
+      { ...workspace.windows[0], id: 'background-peer', y: 76 },
+    ],
+  }
+  const layout: FrameLayout = {
+    ...defaults,
+    placements: {
+      'window:notes': { surface: 'background' },
+      'window:background-peer': { surface: 'background' },
+    },
+  }
+  const result = settleLayoutDrop(before, layout, {
+    kind: 'window',
+    id: 'notes',
+  })
+
+  assert.equal(result.windows[0], before.windows[0])
+  assert.equal(result.windows[1], before.windows[1])
+  // This peer is already exposed above both windows. A temporary move of the
+  // ordinary window must not make it appear covered during the calculation.
+  assert.equal(result.windows[2], before.windows[2])
+})
+
+test('a background drop commits the dropped shortcut home while making its later peer yield', () => {
+  const dropped = {
+    ...workspace.items[0],
+    peekOrigin: { x: 20, y: 20 },
+  }
+  const before: Workspace = {
+    ...workspace,
+    windows: [],
+    drawings: [],
+    items: [dropped, { ...workspace.items[0], id: 'later-peer' }],
+  }
+  const result = settleLayoutDrop(before, defaults, {
+    kind: 'item',
+    id: dropped.id,
+  })
+  assert.equal(result.items[0].x, dropped.x)
+  assert.equal(result.items[0].y, dropped.y)
+  assert.equal(result.items[0].peekOrigin, undefined)
+  assert.notDeepEqual(result.items[1], before.items[1])
+  assert.equal(result.items[1].peekOrigin, undefined)
 })
 
 test('settling canvas work excludes pinned and grouped controls from the calculation', () => {

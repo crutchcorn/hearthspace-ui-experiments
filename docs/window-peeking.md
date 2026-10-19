@@ -55,7 +55,18 @@ temporary homes across reloads.
 
 [peek-layout.ts](../src/peek-layout.ts) calculates coverage and restoration.
 [layout-workspace.ts](../src/layout-workspace.ts) applies layer rules and excludes
-frame work; [usePeekMotion](../src/usePeekMotion.ts) animates the result.
+frame work. It passes each drawing's resolved surface separately from the drawing
+content, so both canvas layers participate without temporarily rewriting the
+drawing's layer or strokes.
+
+A layout drop supplies a fixed rectangular obstacle to the calculation. It
+doesn't create a pretend window or add an identity to the window list. The dropped
+object makes its neighbors yield; afterward, a dropped icon, drawing, or control
+can still peek beneath a real window. Ordinary windows remain fixed throughout
+background and decoration drops, so an intermediate movement cannot distort where
+their background neighbors settle.
+
+[usePeekMotion](../src/usePeekMotion.ts) animates the result.
 [Peek tests](../tests/peek-layout.test.ts),
 [layout tests](../tests/layout-workspace.test.ts), and
 [scene tests](../tests/scene.test.ts) cover repeated displacement, folder

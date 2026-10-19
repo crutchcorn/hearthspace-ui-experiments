@@ -9,7 +9,7 @@ import { resolveObjectLocation } from './object-location.ts'
 import {
   settleBackgroundItems,
   settleCoveredItems,
-  type PeekLayers,
+  type PeekContext,
 } from './peek-layout.ts'
 
 function mergeById<T extends { id: string }>(original: T[], updated: T[]): T[] {
@@ -24,7 +24,7 @@ function mergeById<T extends { id: string }>(original: T[], updated: T[]): T[] {
 export function transformCanvasWorkspace(
   workspace: Workspace,
   layout: FrameLayout,
-  transform: (canvas: Workspace, layers: PeekLayers) => Workspace,
+  transform: (canvas: Workspace, context: PeekContext) => Workspace,
 ): Workspace {
   const windowLocations = new Map(
     workspace.windows.map((item) => [
@@ -54,14 +54,7 @@ export function transformCanvasWorkspace(
   const drawings = workspace.drawings.flatMap((drawing) => {
     const location = drawingLocations.get(drawing.id)!
     if (!('bounds' in location)) return []
-    const projected = atBounds(drawing, location.bounds)
-    // Both canvas layers sit beneath ordinary windows. Run their ink through
-    // the shared peek calculation, then restore the presentation layer below.
-    return [
-      projected.layer === 'below'
-        ? projected
-        : { ...projected, layer: 'below' as const },
-    ]
+    return [atBounds(drawing, location.bounds)]
   })
   const canvas: Workspace = {
     ...workspace,
@@ -95,7 +88,7 @@ export function transformCanvasWorkspace(
       ]
     }),
   }
-  const layers: PeekLayers = {
+  const context: PeekContext = {
     backgroundWindowIds: new Set(
       canvas.windows.flatMap((item) =>
         windowLocations.get(item.id)!.surface === 'background' ? [item.id] : [],
@@ -106,15 +99,16 @@ export function transformCanvasWorkspace(
         itemLocations.get(item.id)!.surface === 'canvas' ? [item.id] : [],
       ),
     ),
-    raisedDrawingIds: new Set(
-      canvas.drawings.flatMap((drawing) =>
-        drawingLocations.get(drawing.id)!.surface === 'canvas'
-          ? [drawing.id]
-          : [],
-      ),
+    drawingSurfaces: new Map(
+      canvas.drawings.map((drawing) => [
+        drawing.id,
+        drawingLocations.get(drawing.id)!.surface === 'background'
+          ? 'background'
+          : 'canvas',
+      ]),
     ),
   }
-  const result = transform(canvas, layers)
+  const result = transform(canvas, context)
   if (result === canvas) return workspace
   const originalDrawings = new Map(
     workspace.drawings.map((drawing) => [drawing.id, drawing]),
@@ -126,9 +120,7 @@ export function transformCanvasWorkspace(
     const original = originalDrawings.get(drawing.id)
     if (!original) return drawing
     if (drawing === projectedDrawings.get(drawing.id)) return original
-    return drawing.layer === original.layer
-      ? drawing
-      : { ...drawing, layer: original.layer }
+    return drawing
   })
   return {
     ...result,
@@ -174,18 +166,13 @@ export function settleLayoutDrop(
 
   const bounds = location.bounds
   const backgroundDrop = location.surface === 'background'
-  return transformCanvasWorkspace(workspace, layout, (canvas, layers) => {
-    let proxyId = '__layout-drop__'
-    while (canvas.windows.some((item) => item.id === proxyId)) proxyId += '_'
+  return transformCanvasWorkspace(workspace, layout, (canvas, context) => {
     const result = settleCoveredItems(
       {
         ...canvas,
-        windows: [
-          ...canvas.windows.filter(
-            (item) => target.kind !== 'window' || item.id !== target.id,
-          ),
-          { ...bounds, id: proxyId, title: '', kind: 'empty' },
-        ],
+        windows: canvas.windows.filter(
+          (item) => target.kind !== 'window' || item.id !== target.id,
+        ),
         items: canvas.items.filter(
           (item) => target.kind !== 'item' || item.id !== target.id,
         ),
@@ -197,10 +184,18 @@ export function settleLayoutDrop(
         ),
       },
       {
-        ...layers,
-        backgroundWindowIds: backgroundDrop
-          ? new Set([...(layers.backgroundWindowIds ?? []), proxyId])
-          : layers.backgroundWindowIds,
+        ...context,
+        obstacles: [{ bounds, surface: location.surface }],
+        // Decorations and background work never move ordinary windows. Keep
+        // those windows fixed throughout settlement, not just in the result.
+        fixedWindowIds: new Set(
+          canvas.windows.flatMap((item) =>
+            (backgroundDrop || target.kind !== 'window') &&
+            !context.backgroundWindowIds?.has(item.id)
+              ? [item.id]
+              : [],
+          ),
+        ),
       },
     )
     const windows = new Map(result.windows.map((item) => [item.id, item]))
@@ -242,16 +237,6 @@ export function settleLayoutDrop(
       ...result,
       windows: canvas.windows.map((item) => {
         if (target.kind === 'window' && item.id === target.id) return item
-        // Decorations and background work cannot cover ordinary windows.
-        if (
-          (backgroundDrop ||
-            target.kind === 'item' ||
-            target.kind === 'drawing' ||
-            target.kind === 'widget') &&
-          resolveObjectLocation(layout, { kind: 'window', id: item.id }, item)
-            .surface !== 'background'
-        )
-          return item
         return windows.get(item.id) ?? item
       }),
       items: canvas.items.map((item) =>
@@ -267,7 +252,7 @@ export function settleLayoutDrop(
     return target.kind === 'item' ||
       target.kind === 'drawing' ||
       target.kind === 'widget'
-      ? settleBackgroundItems(settled, layers)
+      ? settleBackgroundItems(settled, context)
       : settled
   })
 }

@@ -528,12 +528,42 @@ test('a visible stroke segment between covered endpoints prevents a drawing peek
   assert.equal(settleCoveredItems(before), before)
 })
 
-test('above drawings never peek or act as opaque blockers for desktop icons', () => {
+test('raised drawings peek beneath ordinary windows without becoming opaque blockers', () => {
   const above = drawing({ layer: 'above', width: 200, height: 200 })
   const withWindow = workspace([window('front')], [], [above])
-  assert.equal(settleCoveredItems(withWindow), withWindow)
+  const peeked = settleCoveredItems(withWindow)
+  assert.notEqual(peeked.drawings[0], above)
+  assert.equal(peeked.drawings[0].layer, 'above')
+  assert.equal(peeked.drawings[0].strokes, above.strokes)
+  assert.deepEqual(peeked.drawings[0].peekOrigin, { x: 100, y: 100 })
+  assert.deepEqual(
+    restoreBackgroundItems({ ...peeked, windows: [] }).drawings,
+    [above],
+  )
   const withIcon = workspace([], [icon()], [above])
   assert.equal(settleCoveredItems(withIcon), withIcon)
+})
+
+test('a fixed drop obstacle combines with window coverage without entering the window list', () => {
+  const before = workspace([
+    window('covered'),
+    window('right-half', { x: 200, width: 100 }),
+  ])
+  const result = settleCoveredItems(before, {
+    fixedWindowIds: new Set(['right-half']),
+    obstacles: [
+      {
+        bounds: { x: 100, y: 100, width: 100, height: 200 },
+        surface: 'canvas',
+      },
+    ],
+  })
+  assert.equal(result.windows[0].y, 76)
+  assert.equal(result.windows[1], before.windows[1])
+  assert.deepEqual(
+    result.windows.map((item) => item.id),
+    ['covered', 'right-half'],
+  )
 })
 
 test('a stroke whose thickness is already visible along a window edge stays put', () => {
