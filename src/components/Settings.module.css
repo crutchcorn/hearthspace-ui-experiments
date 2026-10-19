@@ -25,7 +25,7 @@
   overflow: auto;
   padding: 22px 12px;
   border-right: 1px solid var(--line);
-  background: var(--edge-light), var(--surface-subtle);
+  background: var(--surface-subtle);
   box-shadow: inset -1px 0 0 var(--chrome-border);
 }
 
@@ -57,7 +57,7 @@
 
 .category[aria-current='page'] {
   border-color: var(--accent-border);
-  background: var(--edge-light), var(--accent-soft);
+  background: var(--accent-soft);
   box-shadow: var(--control-glow), var(--glass-edge);
   color: var(--ink);
 }
@@ -153,19 +153,19 @@
   padding: 10px;
   border: 1px solid var(--chrome-border);
   border-radius: var(--radius-tile);
-  background: var(--edge-light), var(--surface-control);
+  background: var(--surface-control);
   box-shadow: var(--glass-edge);
 }
 
 .option:hover .card {
   border-color: var(--accent-border);
-  background: var(--edge-light), var(--chrome-hover);
+  background: var(--chrome-hover);
   box-shadow: var(--control-glow), var(--glass-edge-active);
 }
 
 .option input:checked + .card {
   border-color: var(--accent);
-  background: var(--edge-light), var(--accent-soft);
+  background: var(--accent-soft);
   box-shadow: var(--control-glow), var(--glass-edge-active);
 }
 
@@ -182,6 +182,8 @@
 }
 
 .modePreview {
+  --preview-dot: #586f6826;
+
   position: relative;
   pointer-events: none;
   height: 74px;
@@ -189,9 +191,12 @@
   overflow: hidden;
   border: 1px solid #ffffff40;
   border-radius: 7px;
-  background:
-    radial-gradient(ellipse at 0 100%, var(--accent-bright), transparent 72%),
-    radial-gradient(ellipse at 100% 0, #94bab8, transparent 75%), #e7e9e5;
+  background-color: #e5e9e3;
+  background-image: radial-gradient(
+    var(--preview-dot) 0.6px,
+    transparent 0.8px
+  );
+  background-size: 9px 9px;
 }
 
 .previewWindow,
@@ -199,8 +204,7 @@
   position: absolute;
   border: 1px solid #ffffffa6;
   border-radius: 6px;
-  background:
-    radial-gradient(ellipse at 0 100%, #ffffff40, transparent 70%), #fff9;
+  background: #fff9;
   box-shadow:
     0 5px 16px #40585a1a,
     inset 0 1px 0 #ffffffa6;
@@ -237,17 +241,16 @@
 }
 
 .modeCard[data-mode='dark'] .modePreview {
+  --preview-dot: #d5f1e51c;
+
   border-color: #ffffff12;
-  background:
-    radial-gradient(ellipse at 0 100%, var(--accent-base), transparent 72%),
-    radial-gradient(ellipse at 100% 0, #416a74, transparent 75%), #202b32;
+  background-color: #142225;
 }
 
 .modeCard[data-mode='dark'] .previewWindow,
 .modeCard[data-mode='dark'] .previewPanel {
   border-color: #ffffff29;
-  background:
-    radial-gradient(ellipse at 0 100%, #90a9b01f, transparent 70%), #20282d91;
+  background: #20282d91;
   box-shadow:
     0 5px 16px #111b2726,
     inset 0 1px 0 #ffffff1f;
@@ -329,14 +332,14 @@
   padding: 12px;
   border: 1px solid var(--line);
   border-radius: var(--radius-tile);
-  background: var(--edge-light), var(--surface-control);
+  background: var(--surface-control);
   box-shadow: var(--glass-edge);
   cursor: pointer;
 }
 
 .toggleRow:hover {
   border-color: var(--accent-border);
-  background: var(--edge-light), var(--chrome-hover);
+  background: var(--chrome-hover);
   box-shadow: var(--control-glow), var(--glass-edge-active);
 }
 

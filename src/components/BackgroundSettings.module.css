@@ -25,11 +25,9 @@
   overflow: hidden;
   border: 1px solid var(--line);
   border-radius: var(--radius-control);
-  background:
-    radial-gradient(ellipse at 88% 12%, var(--ambient-warm), transparent 62%),
-    radial-gradient(ellipse at 8% 90%, var(--ambient-cool), transparent 65%),
-    radial-gradient(ellipse at 75% 100%, var(--ambient-dusk), transparent 55%),
-    var(--field);
+  background-color: var(--field);
+  background-image: radial-gradient(var(--field-dot) 1px, transparent 1.2px);
+  background-size: 12px 12px;
   box-shadow: var(--glass-edge);
 }
 
@@ -64,7 +62,7 @@
   padding: 7px 10px;
   border: 1px solid var(--line);
   border-radius: var(--radius-control);
-  background: var(--edge-light), var(--surface-control);
+  background: var(--surface-control);
   box-shadow: var(--glass-edge);
   color: var(--ink);
   font-size: 11px;
@@ -87,7 +85,7 @@
 .upload:hover,
 .reset:hover {
   border-color: var(--accent-border);
-  background: var(--edge-light), var(--chrome-hover);
+  background: var(--chrome-hover);
   box-shadow: var(--control-glow), var(--glass-edge-active);
 }
 
@@ -120,7 +118,7 @@
   padding: 6px 8px;
   border: 1px solid var(--line);
   border-radius: var(--radius-control);
-  background: var(--edge-light), var(--surface-control);
+  background: var(--surface-control);
   box-shadow: var(--glass-edge);
   color: var(--ink);
   font: inherit;

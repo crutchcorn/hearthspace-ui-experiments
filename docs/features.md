@@ -128,4 +128,4 @@ for storage ownership and validation.
 
 ## Materials and light
 
-- [Materials and light](materials-and-light.md): Current translucent shell, layered tint, interaction lighting, and ambient canvas.
+- [Materials and light](materials-and-light.md): Current translucent shell, restrained interaction lighting, and solid dotted canvas.

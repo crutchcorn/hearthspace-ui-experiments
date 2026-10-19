@@ -4,11 +4,7 @@
   width: 100%;
   height: 100%;
   color: var(--ink);
-  background:
-    radial-gradient(ellipse at 88% 12%, var(--ambient-warm), transparent 62%),
-    radial-gradient(ellipse at 8% 90%, var(--ambient-cool), transparent 65%),
-    radial-gradient(ellipse at 75% 100%, var(--ambient-dusk), transparent 55%),
-    var(--field);
+  background: var(--field);
 }
 
 .viewport {
@@ -51,7 +47,7 @@
 .world {
   position: relative;
   isolation: isolate;
-  background-color: transparent;
+  background-color: var(--field);
   background-image: radial-gradient(var(--field-dot) 1px, transparent 1.2px);
   background-size: var(--canvas-grid-size) var(--canvas-grid-size);
 }

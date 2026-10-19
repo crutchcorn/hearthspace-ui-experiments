@@ -52,7 +52,7 @@
 .monitor[aria-pressed='true'] {
   z-index: 1;
   border-color: var(--accent);
-  background: var(--edge-light), var(--accent-soft);
+  background: var(--accent-soft);
   color: var(--accent-strong);
   box-shadow: var(--shadow-glow), var(--glass-edge-active);
 }
@@ -98,7 +98,7 @@
   place-items: center;
   border: 1px solid var(--line);
   border-radius: var(--radius-control);
-  background: var(--edge-light), var(--surface-control);
+  background: var(--surface-control);
   box-shadow: var(--glass-edge);
   color: var(--muted);
 }
@@ -119,7 +119,7 @@
   overflow: hidden;
   border: 1px solid var(--line);
   border-radius: var(--radius-tile);
-  background: var(--edge-light), var(--surface-subtle);
+  background: var(--surface-subtle);
   box-shadow: var(--glass-edge);
 }
 
@@ -143,7 +143,7 @@
   padding: 6px 8px;
   border: 1px solid var(--line);
   border-radius: var(--radius-control);
-  background: var(--edge-light), var(--surface-control);
+  background: var(--surface-control);
   box-shadow: var(--glass-edge);
   color: var(--ink);
   font: inherit;
@@ -152,7 +152,7 @@
 
 .setting select:hover {
   border-color: var(--accent-border);
-  background: var(--edge-light), var(--chrome-hover);
+  background: var(--chrome-hover);
   box-shadow: var(--control-glow), var(--glass-edge-active);
 }
 

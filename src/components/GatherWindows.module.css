@@ -20,7 +20,7 @@
   border-radius: inherit;
   background: radial-gradient(
     ellipse at 50% 100%,
-    color-mix(in srgb, var(--accent) 28%, transparent),
+    color-mix(in srgb, var(--accent) 10%, transparent),
     transparent 75%
   );
   animation: gather-glow 1200ms ease-in-out infinite alternate;

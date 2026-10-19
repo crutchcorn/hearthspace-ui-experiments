@@ -47,13 +47,13 @@
 
 .item:hover {
   border-color: var(--chrome-border);
-  background: var(--edge-light), var(--surface-control);
+  background: var(--surface-control);
   box-shadow: var(--control-glow), var(--glass-edge-active);
 }
 
 .item[aria-pressed='true'] {
   border-color: var(--accent-border);
-  background: var(--edge-light), var(--accent-soft);
+  background: var(--accent-soft);
   box-shadow: var(--control-glow), var(--glass-edge-active);
 }
 
@@ -165,7 +165,7 @@
 
 .item[data-group-member]:hover,
 .item[data-group-member][aria-pressed='true'] {
-  background: var(--edge-light), var(--surface-control);
+  background: var(--surface-control);
   box-shadow: var(--control-glow), var(--glass-edge-active);
 }
 

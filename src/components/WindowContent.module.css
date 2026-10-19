@@ -109,7 +109,7 @@
   padding: 12px;
   border: 1px solid var(--chrome-border);
   border-radius: var(--radius-tile);
-  background: var(--edge-light), var(--surface-control);
+  background: var(--surface-control);
   box-shadow: var(--glass-edge);
 }
 
@@ -214,7 +214,7 @@
   padding: 7px 11px;
   border: 1px solid var(--chrome-border);
   border-radius: var(--radius-control);
-  background: var(--edge-light), var(--surface-control);
+  background: var(--surface-control);
   box-shadow: var(--glass-edge);
   color: var(--muted);
   font-size: 10px;

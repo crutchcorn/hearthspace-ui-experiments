@@ -23,7 +23,7 @@
   overflow: hidden;
   border: 1px solid var(--line);
   border-radius: var(--radius-tile);
-  background: var(--edge-light), var(--surface-subtle);
+  background: var(--surface-subtle);
   box-shadow: var(--glass-edge);
 }
 
@@ -156,7 +156,7 @@
   padding: 9px 12px;
   border: 1px solid var(--line);
   border-radius: var(--radius-control);
-  background: var(--edge-light), var(--surface-control);
+  background: var(--surface-control);
   box-shadow: var(--glass-edge);
   color: var(--ink);
   font: inherit;
@@ -166,7 +166,7 @@
 
 .confirmationActions button:hover {
   border-color: var(--accent-border);
-  background: var(--edge-light), var(--chrome-hover);
+  background: var(--chrome-hover);
   box-shadow: var(--control-glow), var(--glass-edge-active);
 }
 

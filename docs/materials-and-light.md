@@ -15,23 +15,28 @@ Hover, focus, and press controls to see their highlights strengthen and soft
 tinted shadows expand. Drag Settings over another window to see the content
 underneath soften into color.
 
-The default **Ambient canvas** combines a quiet dot grid with warm, cool, and
-dusk-colored gradients. Settings → Background still accepts a personal image.
-The gradient field stays with the viewport while the dots move with the canvas;
-uploaded images retain their selected fit behavior.
+The default **Canvas dots** uses a single solid background color with a quiet
+dot grid. The grid belongs to the moving canvas, with no stationary gradient
+behind it to break the impression of panning one continuous surface. Settings →
+Background still accepts a personal image; uploaded images retain their selected
+fit behavior. Background and appearance previews reflect the solid dotted canvas.
 
 ## Composition
 
 - Top-level shell surfaces use a 40px backdrop blur with moderate saturation,
   a medium-alpha base, subtle inset highlights, and broad faint shadows.
-- Radial gradients put the strongest accent tint at the outer corners and fade
-  inward. They represent diffuse color, without reflection streaks or refraction.
-- Nested cards, navigation, fields, and selected controls add translucent layers.
-  They accumulate tint instead of replacing the parent with opaque paper.
+- A faint accent tint at the outer corner of each shell surface fades inward.
+  Its alpha is 5% in light mode and 6% in dark mode. There is no opposing colored
+  wash; the backdrop supplies most of the material's color.
+- Nested cards, navigation, fields, and selected controls add uniform translucent
+  layers, without repeating the parent's gradient. They accumulate tint instead
+  of replacing the parent with opaque paper.
 - Light and dark use the same material roles with different opacity and ink.
   The darker base stays more opaque to keep text readable over bright content.
 - Hover and focus brighten a control without changing its geometry. Active
   windows and open panels receive stronger edge highlights and a larger glow.
+  The inset and outer accent shadows stay restrained so small controls do not
+  look like independent colored light sources.
 - Entrances use opacity and translation. Decorative scale/bounce and moving
   shine were removed. Canvas overview scaling and actual resize interactions
   still express spatial navigation and changes in window bounds.
@@ -54,10 +59,10 @@ implement physical lighting, reflections, or refraction.
 ## Source
 
 - `src/index.css`: palette, translucency, edge light, blur, radius, and shadow tokens.
-- `src/App.module.css`: ambient canvas and Hearthspace window composition.
+- `src/App.module.css`: solid dotted canvas and Hearthspace window composition.
 - `src/components/ShellControls.module.css`: shared shell surfaces and interaction light.
 - `src/components/Settings.tsx` and `Settings.module.css`: appearance previews and nested layers.
-- `src/components/BackgroundSettings.tsx` and `BackgroundSettings.module.css`: ambient canvas preview.
+- `src/components/BackgroundSettings.tsx` and `BackgroundSettings.module.css`: dotted canvas preview.
 - The launcher, system bar, notifications, search, layout controls, gesture pad,
   and other component CSS Modules apply the shared material roles.
 - `src/theme.ts` and `src/useBackground.ts`: existing preference and image storage.

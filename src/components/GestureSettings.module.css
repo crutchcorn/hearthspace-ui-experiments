@@ -57,7 +57,7 @@
   padding: 0 12px;
   border: 1px solid var(--line);
   border-radius: var(--radius-control);
-  background: var(--edge-light), var(--surface-control);
+  background: var(--surface-control);
   box-shadow: var(--glass-edge);
   color: var(--ink);
   font: inherit;
@@ -68,7 +68,7 @@
 .addButton:hover,
 .iconButton:hover {
   border-color: var(--accent-border);
-  background: var(--edge-light), var(--chrome-hover);
+  background: var(--chrome-hover);
   box-shadow: var(--control-glow), var(--glass-edge-active);
 }
 
@@ -95,7 +95,7 @@
   padding: 8px;
   border: 1px solid var(--line);
   border-radius: var(--radius-tile);
-  background: var(--edge-light), var(--surface-subtle);
+  background: var(--surface-subtle);
   box-shadow: var(--glass-edge);
 }
 
@@ -107,7 +107,7 @@
   place-items: center;
   border: 1px solid var(--line);
   border-radius: var(--radius-control);
-  background: var(--edge-light), var(--surface-control);
+  background: var(--surface-control);
   box-shadow: var(--glass-edge);
   color: var(--accent-strong);
 }
