@@ -9,8 +9,18 @@ checks as the desktop experiments grow.
 
 The existing [Node tests](../tests) exercise the rules that work without a
 browser: snapping, peeking, frame grouping, search layout, gesture recognition,
-and saved-state validation. They use Node's test runner and TypeScript support.
-Keep those focused cases close to the behavior they explain.
+and saved-state validation. They use Node's test runner through
+[tsx](https://tsx.hirok.io/node-enhancement#test-runner) so shared modules can
+import the app's TSX icons. The test command explicitly uses
+`tsconfig.app.json` for the app's automatic JSX transform; Node's built-in
+TypeScript support cannot load those TSX modules or resolve directory imports.
+`pnpm typecheck` checks types separately. Keep those focused cases close to the
+behavior they explain.
+
+The [pnpm workspace configuration](../pnpm-workspace.yaml) allows esbuild's
+install script, which prepares the platform-specific binary used by tsx.
+Keep that approval with the test runner so a clean, frozen-lockfile CI install
+can complete without an interactive build-script prompt.
 
 [Browser tests](../tests/browser) use Vitest Browser Mode with Playwright and
 Chromium. They mount the real `App`, import the normal styles, and interact
