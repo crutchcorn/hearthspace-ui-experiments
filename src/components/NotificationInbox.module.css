@@ -20,6 +20,11 @@
   outline-offset: 3px;
 }
 
+.panel button:is(:hover, :focus-visible, :active):not(:disabled),
+.toast button:is(:hover, :focus-visible, :active):not(:disabled) {
+  box-shadow: var(--control-glow), var(--glass-edge-active);
+}
+
 .bar {
   display: flex;
   width: max-content;
@@ -54,7 +59,7 @@
   height: 5px;
   border-radius: var(--radius-round);
   background: var(--accent);
-  box-shadow: 0 0 0 2px var(--chrome);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--accent) 65%, transparent);
 }
 
 .trigger[data-unread='true'] {
@@ -72,13 +77,22 @@
   overflow: auto;
   border: 1px solid var(--chrome-border);
   border-radius: var(--radius-panel);
-  background: var(--panel-wash), var(--chrome);
+  background: var(--material-surface);
   box-shadow: var(--shadow-panel), var(--glass-edge);
   backdrop-filter: var(--glass-blur);
   overscroll-behavior: contain;
   scrollbar-color: var(--scrollbar) transparent;
   scrollbar-width: thin;
   animation: panel-in 160ms ease-out;
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.panel:is(:hover, :focus-within),
+.toast:is(:hover, :focus-within) {
+  border-color: var(--accent-border);
+  box-shadow: var(--shadow-glow), var(--glass-edge-active);
 }
 
 .panel {
@@ -96,6 +110,7 @@
   gap: 4px 12px;
   padding: 14px 14px 14px 22px;
   border-bottom: 1px solid var(--line);
+  background: var(--surface-subtle);
 }
 
 .heading h2 {
@@ -182,12 +197,15 @@
   place-items: center;
   border: 1px solid var(--chrome-border);
   border-radius: var(--radius-control);
-  background: var(--chrome-raised);
+  background: var(--surface-control);
   color: var(--chrome-muted);
-  box-shadow: 0 2px 5px color-mix(in srgb, var(--chrome-text) 4%, transparent);
+  box-shadow: var(--glass-edge);
 }
 
 .notification[data-unread='true'] .itemIcon {
+  border-color: var(--accent-border);
+  background: var(--accent-soft);
+  box-shadow: var(--control-glow), var(--glass-edge-active);
   color: var(--accent);
 }
 
@@ -421,16 +439,16 @@
   justify-content: center;
   gap: 7px;
   padding: 0 12px;
-  border: 1px solid var(--chrome-border);
+  border: 1px solid var(--accent-border);
   border-radius: var(--radius-control);
-  background: linear-gradient(135deg, var(--accent-bright), var(--accent));
-  box-shadow: 0 3px 10px color-mix(in srgb, var(--accent) 13%, transparent);
-  color: var(--accent-ink);
+  background: var(--accent-soft);
+  box-shadow: var(--glass-edge);
+  color: var(--accent);
   font-size: 12px;
 }
 
 .toastOpen:hover {
-  background: var(--accent-hover);
+  background: var(--chrome-hover);
 }
 
 @keyframes panel-in {
@@ -472,7 +490,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .corner button {
+  .corner button,
+  .panel,
+  .toast {
     transition: none;
   }
 
@@ -487,7 +507,7 @@
     height: 54px;
     padding: var(--shell-padding);
     border: var(--shell-border-width) solid var(--chrome-border);
-    background: var(--chrome);
+    background: var(--material-surface);
     box-shadow: var(--shadow-panel), var(--glass-edge);
     backdrop-filter: var(--glass-blur);
   }

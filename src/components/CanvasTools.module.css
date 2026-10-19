@@ -54,9 +54,17 @@
   padding: 5px;
   border: 1px solid var(--chrome-border);
   border-radius: var(--radius-panel);
-  background: var(--chrome-raised);
-  box-shadow: var(--shadow-panel);
-  backdrop-filter: blur(24px) saturate(1.25);
+  background: var(--material-raised);
+  box-shadow: var(--shadow-panel), var(--glass-edge);
+  backdrop-filter: var(--glass-blur);
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.toolMenu:is(:hover, :focus-within) {
+  border-color: var(--accent-border);
+  box-shadow: var(--shadow-glow), var(--glass-edge-active);
 }
 
 .menuOption {
@@ -74,15 +82,21 @@
   font-size: 12px;
   text-align: left;
   touch-action: manipulation;
+  transition:
+    background 180ms ease,
+    color 180ms ease,
+    box-shadow 180ms ease;
 }
 
 .menuOption[aria-checked='true'] {
   background: var(--accent-soft);
+  box-shadow: var(--control-glow), var(--glass-edge-active);
   color: var(--accent);
 }
 
 .menuOption:hover:not(:disabled) {
   background: var(--chrome-hover);
+  box-shadow: var(--control-glow), var(--glass-edge-active);
 }
 
 .menuOption:disabled {
@@ -92,6 +106,7 @@
 .menuOption:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: -2px;
+  box-shadow: var(--control-glow), var(--glass-edge-active);
 }
 
 .menuOption kbd {
@@ -115,8 +130,9 @@
   padding: 10px 12px;
   border: 1px solid var(--chrome-border);
   border-radius: var(--radius-control);
-  background: var(--chrome-raised);
-  box-shadow: var(--shadow-panel);
+  background: var(--material-raised);
+  box-shadow: var(--shadow-panel), var(--glass-edge);
+  backdrop-filter: var(--glass-blur);
   color: var(--chrome-text);
   font-size: 11px;
   pointer-events: none;
@@ -136,7 +152,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .expandIndicator {
+  .expandIndicator,
+  .toolMenu,
+  .menuOption {
     transition: none;
   }
 }

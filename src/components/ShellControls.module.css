@@ -6,10 +6,18 @@
   padding: var(--shell-padding);
   border: var(--shell-border-width) solid var(--chrome-border);
   border-radius: var(--radius-panel);
-  background: var(--chrome);
+  background: var(--material-surface);
   box-shadow: var(--shadow-panel), var(--glass-edge);
   backdrop-filter: var(--glass-blur);
   color: var(--chrome-text);
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.surface:is(:hover, :focus-within) {
+  border-color: var(--accent-border);
+  box-shadow: var(--shadow-glow), var(--glass-edge-active);
 }
 
 .control {
@@ -24,12 +32,14 @@
   color: var(--chrome-text);
   touch-action: manipulation;
   transition:
-    background 150ms ease,
-    color 150ms ease;
+    background 180ms ease,
+    color 180ms ease,
+    box-shadow 180ms ease;
 }
 
 .control:hover:where(:not(:disabled)) {
   background: var(--chrome-hover);
+  box-shadow: var(--control-glow), var(--glass-edge-active);
 }
 
 .control:is(
@@ -39,12 +49,14 @@
 ),
 .control:active:not(:disabled) {
   background: var(--accent-soft);
+  box-shadow: var(--control-glow), var(--glass-edge-active);
   color: var(--accent);
 }
 
 .control:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: -2px;
+  box-shadow: var(--control-glow), var(--glass-edge-active);
 }
 
 .control:disabled {
@@ -74,15 +86,25 @@
     z-index: -1;
     inset: 0;
     border-radius: inherit;
-    background: var(--chrome);
+    background: var(--material-surface);
     box-shadow: var(--glass-edge);
     backdrop-filter: var(--glass-blur);
     pointer-events: none;
     content: '';
   }
+
+  .mobileSurface:is(:hover, :focus-within) {
+    border-color: var(--accent-border);
+    box-shadow: var(--shadow-glow);
+  }
+
+  .mobileSurface:is(:hover, :focus-within)::before {
+    box-shadow: var(--glass-edge-active);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .surface,
   .control {
     transition: none;
   }

@@ -4,7 +4,11 @@
   width: 100%;
   height: 100%;
   color: var(--ink);
-  background: var(--field);
+  background:
+    radial-gradient(ellipse at 88% 12%, var(--ambient-warm), transparent 62%),
+    radial-gradient(ellipse at 8% 90%, var(--ambient-cool), transparent 65%),
+    radial-gradient(ellipse at 75% 100%, var(--ambient-dusk), transparent 55%),
+    var(--field);
 }
 
 .viewport {
@@ -47,7 +51,7 @@
 .world {
   position: relative;
   isolation: isolate;
-  background-color: var(--field);
+  background-color: transparent;
   background-image: radial-gradient(var(--field-dot) 1px, transparent 1.2px);
   background-size: var(--canvas-grid-size) var(--canvas-grid-size);
 }
@@ -67,12 +71,13 @@
   cursor: default;
   border: 1px solid var(--chrome-border);
   border-radius: var(--window-radius, var(--radius-panel));
-  background: var(--chrome);
+  background: var(--material-surface);
   backdrop-filter: var(--glass-blur);
   box-shadow: var(--glass-edge), var(--window-shadow);
   transition:
     box-shadow 180ms ease,
     border-color 180ms ease,
+    background-color 180ms ease,
     transform 360ms cubic-bezier(0.2, 0.7, 0.1, 1),
     opacity 220ms ease;
   transform-origin: top left;
@@ -137,7 +142,7 @@
   border-bottom: 1px solid var(--line);
   border-radius: calc(var(--window-radius, var(--radius-panel)) - 1px)
     calc(var(--window-radius, var(--radius-panel)) - 1px) 0 0;
-  background: var(--chrome-raised);
+  background: var(--surface-control);
   color: var(--muted);
   cursor: grab;
   user-select: none;
@@ -211,9 +216,15 @@
   background: transparent;
   color: inherit;
   opacity: 0.8;
+  transition:
+    background 180ms ease,
+    box-shadow 180ms ease,
+    color 180ms ease,
+    opacity 180ms ease;
 }
 
-.windowActions button:hover {
+.windowActions button:is(:hover, :focus-visible) {
+  box-shadow: var(--control-glow);
   background: var(--chrome-hover);
   opacity: 1;
 }
@@ -243,13 +254,17 @@
   background: transparent;
 }
 
-.window[data-active='true'] {
+.window:hover {
+  box-shadow: var(--glass-edge-active), var(--shadow-panel);
+}
+
+.window[data-active='true'],
+.window:focus-within {
   border-color: var(--accent-border);
   box-shadow:
-    var(--glass-edge),
-    0 0 0 1px color-mix(in srgb, var(--accent) 11%, transparent),
-    0 20px 48px color-mix(in srgb, var(--accent-strong) 14%, transparent),
-    0 4px 10px color-mix(in srgb, var(--accent-strong) 5%, transparent);
+    var(--glass-edge-active),
+    inset 0 0 36px -14px var(--light-tint),
+    var(--shadow-glow);
 }
 
 .resizeHandle {
@@ -750,7 +765,7 @@
   padding: 20px;
   border: 1px solid var(--chrome-border);
   border-radius: var(--radius-panel);
-  background: var(--chrome);
+  background: var(--material-surface);
   color: var(--chrome-text);
   backdrop-filter: var(--glass-blur);
   box-shadow: var(--glass-edge), var(--shadow-panel);
@@ -792,12 +807,12 @@
 @keyframes panel-in {
   from {
     opacity: 0;
-    transform: translateY(12px) scale(0.98);
+    transform: translateY(12px);
   }
 
   to {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translateY(0);
   }
 }
 
@@ -839,6 +854,11 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .window,
+  .windowActions button {
+    transition: none;
+  }
+
   .mapPanel {
     animation: none;
   }
@@ -857,12 +877,12 @@
 @keyframes drawing-window-reveal {
   from {
     opacity: 0;
-    transform: translateY(12px) scale(0.96);
+    transform: translateY(12px);
   }
 
   to {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translateY(0);
   }
 }
 
@@ -927,7 +947,7 @@
   overflow: hidden;
   border: 0;
   border-radius: inherit;
-  background: var(--chrome);
+  background: var(--material-surface);
   color: var(--chrome-text);
   cursor: pointer;
 }
@@ -980,7 +1000,7 @@
   padding: 16px;
   border: 1px solid var(--chrome-border);
   border-radius: var(--radius-panel);
-  background: var(--chrome);
+  background: var(--material-surface);
   color: var(--chrome-text);
   box-shadow: var(--shadow-panel);
   transform-origin: top left;

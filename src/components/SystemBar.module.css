@@ -68,7 +68,7 @@
   box-sizing: border-box;
   border: 1px solid var(--chrome-border);
   border-radius: var(--radius-panel);
-  background: var(--panel-wash), var(--chrome);
+  background: var(--material-surface);
   box-shadow: var(--shadow-panel), var(--glass-edge);
   backdrop-filter: var(--glass-blur);
   color: var(--chrome-text);
@@ -77,6 +77,14 @@
   scrollbar-color: var(--scrollbar) transparent;
   scrollbar-width: thin;
   animation: panel-in 160ms ease-out;
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.popover:is(:hover, :focus-within) {
+  border-color: var(--accent-border);
+  box-shadow: var(--shadow-glow), var(--glass-edge-active);
 }
 
 .systemPopover {
@@ -131,9 +139,17 @@
   border: 1px solid var(--chrome-border);
   border-radius: var(--radius-round);
   background: var(--control-track);
-  box-shadow: inset 0 1px 2px
-    color-mix(in srgb, var(--chrome-text) 12%, transparent);
+  box-shadow: var(--glass-edge);
   cursor: pointer;
+  transition:
+    background 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.toggle:is(:hover, :focus-visible) {
+  border-color: var(--accent-border);
+  box-shadow: var(--control-glow), var(--glass-edge-active);
 }
 
 .toggle::before {
@@ -150,10 +166,13 @@
 }
 
 .toggle:checked {
-  background: linear-gradient(135deg, var(--accent-bright), var(--accent));
+  border-color: var(--accent-border);
+  background: var(--accent-soft);
+  box-shadow: var(--control-glow), var(--glass-edge-active);
 }
 
 .toggle:checked::before {
+  background: var(--accent);
   transform: translateX(16px);
 }
 
@@ -189,6 +208,7 @@
   border: 1px solid var(--chrome-border);
   border-radius: var(--radius-control);
   background: var(--accent-soft);
+  box-shadow: var(--glass-edge);
   color: var(--accent);
 }
 
@@ -206,6 +226,13 @@
   margin: 0;
   accent-color: var(--accent);
   cursor: pointer;
+  transition: filter 180ms ease;
+}
+
+.volumeSlider:is(:hover, :focus-visible) {
+  filter: drop-shadow(
+    0 0 8px color-mix(in srgb, var(--accent) 35%, transparent)
+  );
 }
 
 .batteryMeter {
@@ -276,11 +303,11 @@
 }
 
 .today {
-  border: 1px solid var(--chrome-border);
+  border: 1px solid var(--accent-border);
   border-radius: var(--radius-control);
-  background: linear-gradient(135deg, var(--accent-bright), var(--accent));
-  box-shadow: 0 3px 10px color-mix(in srgb, var(--accent) 20%, transparent);
-  color: var(--accent-ink);
+  background: var(--accent-soft);
+  box-shadow: var(--control-glow), var(--glass-edge-active);
+  color: var(--accent);
 }
 
 @keyframes panel-in {
@@ -296,7 +323,10 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .toggle::before {
+  .toggle,
+  .toggle::before,
+  .volumeSlider,
+  .popover {
     transition: none;
   }
 

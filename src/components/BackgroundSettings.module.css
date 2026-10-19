@@ -28,6 +28,7 @@
   background-color: var(--field);
   background-image: radial-gradient(var(--field-dot) 1px, transparent 1.2px);
   background-size: 12px 12px;
+  box-shadow: var(--glass-edge);
 }
 
 .preview img {
@@ -61,7 +62,8 @@
   padding: 7px 10px;
   border: 1px solid var(--line);
   border-radius: var(--radius-control);
-  background: var(--surface-control);
+  background: var(--edge-light), var(--surface-control);
+  box-shadow: var(--glass-edge);
   color: var(--ink);
   font-size: 11px;
   cursor: pointer;
@@ -82,7 +84,9 @@
 
 .upload:hover,
 .reset:hover {
-  background: var(--chrome-hover);
+  border-color: var(--accent-border);
+  background: var(--edge-light), var(--chrome-hover);
+  box-shadow: var(--control-glow), var(--glass-edge-active);
 }
 
 .upload:has(input:focus-visible),
@@ -114,7 +118,8 @@
   padding: 6px 8px;
   border: 1px solid var(--line);
   border-radius: var(--radius-control);
-  background: var(--surface-control);
+  background: var(--edge-light), var(--surface-control);
+  box-shadow: var(--glass-edge);
   color: var(--ink);
   font: inherit;
   font-size: 11px;
@@ -126,6 +131,11 @@
   color: var(--muted);
   font-size: 10px;
   line-height: 1.5;
+}
+
+.fitRow select:hover {
+  border-color: var(--accent-border);
+  box-shadow: var(--control-glow), var(--glass-edge-active);
 }
 
 .reset {
@@ -157,5 +167,16 @@
     flex-direction: column;
     align-items: stretch;
     gap: 8px;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .upload,
+  .reset,
+  .fitRow select {
+    transition:
+      background 180ms ease,
+      border-color 180ms ease,
+      box-shadow 220ms ease;
   }
 }

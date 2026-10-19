@@ -64,7 +64,7 @@ const CATEGORIES = [
   {
     id: 'appearance',
     label: 'Appearance',
-    description: 'Color mode and accent.',
+    description: 'Light and color, shaped around your space.',
     icon: Palette,
   },
   {
@@ -259,7 +259,14 @@ export default function Settings({
                           checked={colorMode === id}
                           onChange={() => onColorModeChange(id)}
                         />
-                        <span className={`${styles.card} ${styles.modeCard}`}>
+                        <span
+                          className={`${styles.card} ${styles.modeCard}`}
+                          data-mode={id}
+                        >
+                          <span className={styles.modePreview} aria-hidden="true">
+                            <span className={styles.previewWindow} />
+                            <span className={styles.previewPanel} />
+                          </span>
                           <span className={styles.modeLabel}>
                             <Icon
                               size={18}

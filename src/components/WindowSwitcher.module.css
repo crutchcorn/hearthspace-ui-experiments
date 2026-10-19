@@ -12,8 +12,8 @@
   padding: 5px 12px;
   border: 1px solid var(--chrome-border);
   border-radius: var(--radius-control);
-  background: var(--chrome);
-  box-shadow: var(--glass-edge);
+  background: var(--material-raised);
+  box-shadow: var(--shadow-panel), var(--glass-edge);
   backdrop-filter: var(--glass-blur);
   color: var(--chrome-text);
   font-size: 12px;

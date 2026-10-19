@@ -64,16 +64,21 @@
   place-items: center;
   border: 1px solid var(--chrome-border);
   border-radius: var(--radius-control);
-  background: var(--chrome-raised);
-  box-shadow: var(--shadow-panel);
+  background: var(--material-raised);
+  box-shadow: var(--shadow-panel), var(--glass-edge);
+  backdrop-filter: var(--glass-blur);
   color: var(--chrome-muted);
   cursor: move;
   transform: translateX(-50%);
   touch-action: none;
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease;
 }
 
-.grip:hover {
-  background: var(--chrome-hover);
+.grip:is(:hover, :focus-visible) {
+  border-color: var(--accent-border);
+  box-shadow: var(--shadow-glow), var(--glass-edge-active);
   color: var(--chrome-text);
 }
 
@@ -156,4 +161,10 @@
 :global([data-focus-mode='true'][data-shell-peek='false']) .mobileBar {
   opacity: 0;
   pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .grip {
+    transition: none;
+  }
 }

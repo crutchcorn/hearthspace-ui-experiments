@@ -3,14 +3,15 @@
   padding: 24px;
   border: 1px solid var(--chrome-border);
   border-radius: var(--radius-panel);
-  background: var(--app-surface, var(--field));
-  color: var(--ink);
-  box-shadow: var(--shadow-panel);
+  background: var(--material-raised);
+  color: var(--chrome-text);
+  box-shadow: var(--shadow-glow), var(--glass-edge-active);
+  backdrop-filter: var(--glass-blur);
 }
 
 .dialog::backdrop {
-  background: #0006;
-  backdrop-filter: blur(5px);
+  background: color-mix(in srgb, var(--chrome-text) 18%, transparent);
+  backdrop-filter: blur(8px);
 }
 
 .dialog h2 {
@@ -20,7 +21,7 @@
 
 .dialog p {
   margin: 0 0 24px;
-  color: var(--muted);
+  color: var(--chrome-muted);
   font-size: 14px;
   line-height: 1.6;
 }
@@ -35,12 +36,34 @@
   border: 0;
   padding: 10px 14px;
   border-radius: var(--radius-control);
-  color: var(--ink);
-  background: var(--chrome-hover);
+  color: var(--chrome-text);
+  background: var(--surface-control);
+  box-shadow: var(--glass-edge);
   cursor: pointer;
+  transition:
+    background 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.dialog button:is(:hover, :focus-visible) {
+  background: var(--chrome-hover);
+  box-shadow: var(--control-glow), var(--glass-edge-active);
 }
 
 .dialog button[data-destructive='true'] {
   color: white;
   background: #ba3b32;
+}
+
+.dialog button[data-destructive='true']:is(:hover, :focus-visible) {
+  background: #d1483e;
+  box-shadow:
+    0 8px 24px #ba3b3230,
+    var(--glass-edge-active);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dialog button {
+    transition: none;
+  }
 }

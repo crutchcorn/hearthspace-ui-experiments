@@ -9,13 +9,32 @@
   overflow: auto;
   border: 1px solid var(--chrome-border);
   border-radius: var(--radius-panel);
-  background: var(--chrome);
+  background: var(--material-surface);
   box-shadow: var(--shadow-panel), var(--glass-edge);
   backdrop-filter: var(--glass-blur);
   color: var(--chrome-text);
   scrollbar-color: var(--scrollbar) transparent;
   scrollbar-width: thin;
   animation: surface-in 180ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.launcher:is(:hover, :focus-within) {
+  border-color: var(--accent-border);
+  box-shadow: var(--shadow-glow), var(--glass-edge-active);
+}
+
+.launcher button {
+  transition:
+    background 180ms ease,
+    color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.launcher button:focus-visible {
+  box-shadow: var(--control-glow), var(--glass-edge-active);
 }
 
 .commandBar {
@@ -81,6 +100,7 @@
 .searchField button:hover,
 .closeButton:hover {
   background: var(--chrome-hover);
+  box-shadow: var(--control-glow), var(--glass-edge-active);
   color: var(--chrome-text);
 }
 
@@ -110,6 +130,7 @@
   border: 1px solid var(--chrome-border);
   border-radius: var(--radius-tile);
   background: var(--surface-subtle);
+  box-shadow: var(--glass-edge);
 }
 
 .modeSwitch button {
@@ -127,14 +148,14 @@
 }
 
 .modeSwitch button:hover {
+  background: var(--surface-control);
+  box-shadow: var(--control-glow), var(--glass-edge-active);
   color: var(--chrome-text);
 }
 
 .modeSwitch .activeTab {
-  background: var(--chrome-raised);
-  box-shadow:
-    0 2px 8px color-mix(in srgb, var(--chrome-text) 6%, transparent),
-    var(--glass-edge);
+  background: var(--accent-soft);
+  box-shadow: var(--control-glow), var(--glass-edge-active);
   color: var(--accent);
 }
 
@@ -189,6 +210,7 @@
 .viewToggle button:hover,
 .viewToggle button[aria-pressed='true'] {
   background: var(--chrome-hover);
+  box-shadow: var(--control-glow), var(--glass-edge-active);
   color: var(--accent);
 }
 
@@ -224,29 +246,34 @@
   flex-direction: column;
 }
 
+.appButton:is(:hover, :focus-visible, [data-selected='true']) {
+  background: var(--surface-subtle);
+}
+
 .appIcon {
   display: grid;
   width: 54px;
   height: 49px;
   flex-shrink: 0;
   place-items: center;
-  border: 1px solid transparent;
+  border: 1px solid var(--chrome-border);
   border-radius: var(--radius-control);
+  background: var(--surface-control);
+  box-shadow: var(--glass-edge);
   transition:
-    transform 150ms ease,
-    color 150ms ease;
+    background 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease,
+    box-shadow 180ms ease;
 }
 
 .appButton:hover .appIcon,
+.appButton:focus-visible .appIcon,
 .appButton[data-selected='true'] .appIcon {
-  transform: translateY(-2px);
+  border-color: var(--accent-border);
+  background: var(--accent-soft);
+  box-shadow: var(--control-glow), var(--glass-edge-active);
   color: var(--accent);
-}
-
-.appButton[data-selected='true'] .appIcon {
-  border-color: var(--chrome-border);
-  background: var(--surface-control);
-  box-shadow: 0 4px 12px color-mix(in srgb, var(--chrome-text) 6%, transparent);
 }
 
 .appCopy {
@@ -399,6 +426,8 @@
     padding-inline: 2px;
   }
 
+  .launcher,
+  .launcher button,
   .appIcon {
     width: 47px;
     height: 44px;
@@ -416,7 +445,7 @@
 @keyframes surface-in {
   from {
     opacity: 0;
-    transform: translateY(var(--launcher-enter-y, 8px)) scale(0.985);
+    transform: translateY(var(--launcher-enter-y, 8px));
   }
 }
 
