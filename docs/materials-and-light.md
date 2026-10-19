@@ -25,9 +25,9 @@ their own colors and fit behavior.
 
 ## Give each surface a role
 
-The shared backdrop filter uses 40px blur and 1.35 saturation. Medium-alpha
-fills let the blurred content contribute color; thin borders, inset highlights,
-and broad faint shadows separate the surfaces.
+Over the default dotted canvas, the shared backdrop filter uses 40px blur and
+1.35 saturation. Medium-alpha fills let the blurred content contribute color;
+thin borders, inset highlights, and broad faint shadows separate the surfaces.
 
 | Role             | Current treatment                                                                                                               | Where we use it                                                                        |
 | ---------------- | ------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
@@ -38,6 +38,14 @@ and broad faint shadows separate the surfaces.
 The raised material is lighter so a toolbar or monitor doesn't disappear into
 its surroundings. Selected monitors keep this base; an accent border and
 number identify the selection without removing the surface beneath them.
+
+An uploaded photo can put bright sky and dark shadows beneath the same window.
+While a photo is active, ordinary surfaces use a steadier fill: 76% alpha in
+light mode and 80% in dark. Blur stays at 40px, with saturation reduced to 1.15,
+so the image still contributes color without overwhelming the controls. Muted
+text mixes 80% of the main text color with the surface tint for clearer labels.
+Raised fills, edge light, and hover treatments keep their existing values.
+Returning to Canvas dots restores the default material values automatically.
 
 Settings is a Hearthspace app. Its window, sidebar, content pane, and controls
 all participate in these layers. The simulated third-party apps keep their
@@ -55,6 +63,14 @@ Nested cards and controls use uniform layers instead of repeating that gradient.
 Stacking them naturally accumulates tint. Groups and merged mobile bars share
 one outer surface; their child toolbar containers stay transparent so each
 member doesn't add another complete glass tile.
+
+Shared toolbar containers paint their fill, blur, and inset highlights on a
+`::before` layer. The controls and their popovers sit outside that layer.
+Putting backdrop blur on the container itself restricts what a descendant
+popover can blur, leaving wallpaper details sharp behind panels that extend
+beyond the toolbar. Keep the material separate, including on standalone mobile
+tools, and disable child material layers when a group or merged bar supplies
+the surface.
 
 Shadows are large, soft, and lightly tinted. Hover and focus strengthen the
 edge highlights and expand the shadow. Keep the dark toolbar's upper rim dim:
@@ -125,5 +141,6 @@ previews remain simulated. Backdrop blur depends on browser support.
 - [`ShellControls.module.css`](../src/components/ShellControls.module.css): toolbar surfaces and control states.
 - [`Settings.module.css`](../src/components/Settings.module.css): nested layers, appearance previews, compact navigation, and switches.
 - [`DisplaySettings.module.css`](../src/components/DisplaySettings.module.css): raised monitor surfaces and selection.
+- [`DesktopItems.module.css`](../src/components/DesktopItems.module.css): photo-only label backings and native icon plates.
 - [`PlacedWidget.module.css`](../src/components/PlacedWidget.module.css), [`LauncherDock.module.css`](../src/components/LauncherDock.module.css), and [`NotificationInbox.module.css`](../src/components/NotificationInbox.module.css): standalone and grouped mobile surfaces.
 - [`theme.ts`](../src/theme.ts) and [`useBackground.ts`](../src/useBackground.ts): preference and image storage.

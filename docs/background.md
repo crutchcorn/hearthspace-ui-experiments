@@ -33,6 +33,23 @@ accent changes surrounding controls and materials. Neither recolors the pixels
 in an uploaded image. The Background and Appearance previews use the same
 uniform dotted treatment as the desktop.
 
+## Keep controls readable over a photo
+
+A bright sky and a dark foreground can sit behind the same window. While a
+photo is active, Hearthspace gives ordinary surfaces a stronger translucent
+fill, reduces backdrop saturation, and brings muted text closer to the main
+text color. The image's colors still come through the blur. Raised toolbars
+keep their lighter fill and restrained hover treatment; the photo itself
+isn't dimmed or recolored.
+
+Desktop labels get small translucent backings, and native file, folder, and
+Settings glyphs get a matching plate. Simulated third-party app artwork keeps
+its existing appearance. Frame attachments and grouped items already have a
+surface, so they don't add another plate. This support applies to every photo
+fit and disappears when you restore Canvas dots. See
+[materials and light](materials-and-light.md) for the surface values and
+[desktop items](desktop-items.md) for placement behavior.
+
 ## Keep the image local
 
 The original image is stored as a Blob in IndexedDB, alongside its filename
@@ -50,4 +67,5 @@ back to dots on the next load.
 
 - [`BackgroundSettings.tsx`](../src/components/BackgroundSettings.tsx) owns the upload, fit, reset, and error controls.
 - [`useBackground.ts`](../src/useBackground.ts) decodes images and manages IndexedDB and object URLs.
-- [`App.tsx`](../src/App.tsx) places repeating images on the world and fixed images behind the viewport.
+- [`App.tsx`](../src/App.tsx) places repeating images on the world and fixed images behind the viewport, and exposes the active background to the shared styles.
+- [`index.css`](../src/index.css) and [`DesktopItems.module.css`](../src/components/DesktopItems.module.css) provide the photo-specific contrast support.

@@ -89,6 +89,14 @@ AI switch against its row. The monitors should remain visibly raised; the
 switch should have a faint top edge without a bright halo. On the main canvas,
 pan across the dots to check that their uniform background travels with them.
 
+Upload a photo with both bright and dark areas, then move Settings across it
+in each color mode. Open Sound or Wi-Fi over a sharp edge in the photo: detail
+behind the whole panel should blur, including the portion outside its toolbar.
+Check desktop labels, native icon plates, and preserved third-party artwork.
+Try a grouped toolbar and a narrow viewport to catch doubled material layers.
+Compare a repeating photo with a fixed fit, then restore Canvas dots to confirm
+that the default surface strength and unplated desktop items return.
+
 For icons, inspect the actual toolbar sizes as well as the larger app icons.
 Change layout, Overview, and Arrange should each read as a different action.
 Settings uses the custom glyphs; simulated third-party apps keep their existing

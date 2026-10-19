@@ -491,7 +491,10 @@
     border-radius: 0;
     background: transparent;
     box-shadow: none;
-    backdrop-filter: none;
+  }
+
+  .dock .bar::before {
+    content: none;
   }
 
   .appStrip {
@@ -558,9 +561,11 @@
     padding: var(--shell-padding);
     border: var(--shell-border-width) solid var(--chrome-border);
     border-radius: var(--radius-panel);
-    background: var(--toolbar-material);
-    box-shadow: var(--shadow-panel), var(--glass-edge);
-    backdrop-filter: var(--glass-blur);
+    box-shadow: var(--shadow-panel);
+  }
+
+  :global(:is([data-layout-widget], [data-widget-popover])) .dock .bar::before {
+    content: '';
   }
 }
 
@@ -576,7 +581,10 @@
     border: 0;
     background: transparent;
     box-shadow: none;
-    backdrop-filter: none;
+  }
+
+  :global([data-layout-widget][data-merged]) .dock .bar::before {
+    content: none;
   }
 }
 

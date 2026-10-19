@@ -136,6 +136,21 @@
   color-scheme: dark;
 }
 
+/* Photo detail needs a steadier base without flattening the default canvas. */
+[data-background='photo'] {
+  --chrome: color-mix(in srgb, var(--surface-tint) 76%, transparent);
+  --chrome-muted: color-mix(
+    in srgb,
+    var(--chrome-text) 80%,
+    var(--surface-tint)
+  );
+  --glass-blur: blur(40px) saturate(1.15);
+}
+
+[data-background='photo'][data-color-mode='dark'] {
+  --chrome: color-mix(in srgb, var(--surface-tint) 80%, transparent);
+}
+
 * {
   box-sizing: border-box;
 }

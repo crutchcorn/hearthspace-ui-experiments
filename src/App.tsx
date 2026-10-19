@@ -2252,6 +2252,7 @@ function App() {
       }}
       data-accent={accentTheme}
       data-color-mode={colorMode}
+      data-background={background.photo ? 'photo' : 'dots'}
       data-presentation="realistic"
       data-focus-mode={renderedFocusView !== null}
       data-canvas-preview={previewLayout !== null}

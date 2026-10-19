@@ -14,6 +14,7 @@ import WidgetPopover from './WidgetPopover'
 import popoverStyles from './WidgetPopover.module.css'
 import styles from './SystemBar.module.css'
 import shellStyles from './ShellControls.module.css'
+import settingsStyles from './Settings.module.css'
 
 export type SystemPanel = 'wifi' | 'volume' | 'battery' | 'clock' | null
 
@@ -185,7 +186,7 @@ export default function SystemBar({
               <label className={styles.toggleRow}>
                 <strong>Wi-Fi</strong>
                 <input
-                  className={styles.toggle}
+                  className={`${settingsStyles.toggle} ${styles.toggle}`}
                   type="checkbox"
                   checked={wifiEnabled}
                   onChange={(event) => setWifiEnabled(event.target.checked)}

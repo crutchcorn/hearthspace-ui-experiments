@@ -50,15 +50,28 @@
   .widget[data-layout-widget='tools'] > .content {
     --chrome-hover: var(--raised-control-hover);
 
+    position: relative;
+    isolation: isolate;
     padding: 4px;
     border: 1px solid var(--chrome-border);
     border-radius: var(--radius-panel);
-    background: var(--material-raised);
-    box-shadow: var(--shadow-panel), var(--glass-edge);
-    backdrop-filter: var(--glass-blur);
+    box-shadow: var(--shadow-panel);
   }
 
-  .widget[data-layout-widget='tools'] > .content:is(:hover, :focus-within) {
+  .widget[data-layout-widget='tools'] > .content::before {
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+    border-radius: inherit;
+    background: var(--material-raised);
+    box-shadow: var(--glass-edge);
+    backdrop-filter: var(--glass-blur);
+    pointer-events: none;
+    content: '';
+  }
+
+  .widget[data-layout-widget='tools']
+    > .content:is(:hover, :focus-within)::before {
     background: var(--material-raised-hover);
   }
 
@@ -90,7 +103,10 @@
     border: 0;
     background: transparent;
     box-shadow: none;
-    backdrop-filter: none;
+  }
+
+  .widget[data-merged][data-layout-widget='tools'] > .content::before {
+    content: none;
   }
 }
 
@@ -118,6 +134,9 @@
     border: 0;
     background: transparent;
     box-shadow: none;
-    backdrop-filter: none;
+  }
+
+  .widget[data-inline][data-layout-widget='tools'] > .content::before {
+    content: none;
   }
 }

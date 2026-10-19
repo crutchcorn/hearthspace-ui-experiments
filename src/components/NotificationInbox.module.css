@@ -467,7 +467,10 @@
     border: 0;
     background: transparent;
     box-shadow: none;
-    backdrop-filter: none;
+  }
+
+  .corner .bar::before {
+    content: none;
   }
 }
 
@@ -500,9 +503,13 @@
     height: 54px;
     padding: var(--shell-padding);
     border: var(--shell-border-width) solid var(--chrome-border);
-    background: var(--toolbar-material);
-    box-shadow: var(--shadow-panel), var(--glass-edge);
-    backdrop-filter: var(--glass-blur);
+    box-shadow: var(--shadow-panel);
+  }
+
+  :global(:is([data-layout-widget], [data-widget-popover]))
+    .corner
+    .bar::before {
+    content: '';
   }
 }
 
@@ -513,7 +520,10 @@
     border: 0;
     background: transparent;
     box-shadow: none;
-    backdrop-filter: none;
+  }
+
+  :global([data-layout-widget][data-merged]) .corner .bar::before {
+    content: none;
   }
 }
 

@@ -132,49 +132,14 @@
 }
 
 .toggle {
-  appearance: none;
-  position: relative;
-  width: 40px;
-  height: 24px;
-  margin: 0;
-  border: 1px solid var(--chrome-border);
-  border-radius: var(--radius-round);
-  background: var(--control-track);
-  box-shadow: var(--glass-edge);
-  cursor: pointer;
   transition:
     background 180ms ease,
     border-color 180ms ease,
     box-shadow 180ms ease;
 }
 
-.toggle:is(:hover, :focus-visible) {
-  border-color: var(--accent-border);
-  box-shadow: var(--control-glow), var(--glass-edge-active);
-}
-
 .toggle::before {
-  content: '';
-  position: absolute;
-  top: 3px;
-  left: 3px;
-  width: 16px;
-  height: 16px;
-  border-radius: var(--radius-round);
-  background: var(--control-thumb);
-  box-shadow: 0 1px 3px color-mix(in srgb, var(--chrome-text) 15%, transparent);
   transition: transform 140ms ease;
-}
-
-.toggle:checked {
-  border-color: var(--accent-border);
-  background: var(--accent-soft);
-  box-shadow: var(--control-glow), var(--glass-edge-active);
-}
-
-.toggle:checked::before {
-  background: var(--accent);
-  transform: translateX(16px);
 }
 
 .networkRow {
@@ -206,11 +171,10 @@
   margin-left: auto;
   padding: 5px;
   box-sizing: content-box;
-  border: 1px solid var(--chrome-border);
+  border: 1px solid var(--accent);
   border-radius: var(--radius-control);
-  background: var(--accent-soft);
-  box-shadow: var(--glass-edge);
-  color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-ink);
 }
 
 .volumeRow {

@@ -15,6 +15,16 @@ colored Lucide artwork. Folder and file objects use Hearthspace's local glyphs.
 This is why **Projects** and the **Files app** can look different even though
 both open the Files preview. See [icons](icons.md) for that boundary.
 
+With an [uploaded background](background.md), labels have a small translucent
+backing so they stay readable across bright and dark parts of the image.
+Native file, folder, and Settings glyphs also get a blurred raised plate;
+simulated third-party app artwork keeps its existing treatment. These supports
+use the current color mode and disappear on the default dotted canvas.
+
+Frame attachments and group members already share a material surface, so they
+don't add photo-specific label backings or icon plates. Hover and selection
+still apply to the item around its artwork.
+
 ## Selecting and moving
 
 Choose **Select desktop items**, or press **V**. Click an item to select it, then
@@ -64,7 +74,8 @@ remain intact; see [saved state](spatial-playground.md#saved-state).
 ## Where this lives
 
 [DesktopItems](../src/components/DesktopItems.tsx) handles the item presentation
-and activation differences. [App.tsx](../src/App.tsx) coordinates mixed selections
+and activation differences; its [styles](../src/components/DesktopItems.module.css)
+provide the photo-specific contrast support. [App.tsx](../src/App.tsx) coordinates mixed selections
 and movement. [desktop.ts](../src/desktop.ts) defines starter items;
 [scene-storage.ts](../src/scene-storage.ts) validates saved objects and restores
 catalog completeness. [scene.ts](../src/scene.ts) owns their locations.
