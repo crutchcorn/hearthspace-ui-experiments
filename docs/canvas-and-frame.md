@@ -83,12 +83,11 @@ windows, desktop items, and widgets. Placement belongs to the object, rather
 than to a separate drawing mode or a special version of an app.
 
 Drag an object to an edge to attach it there. Distinct animated corner targets
-help align the placement. Once attached, dropping it in the interior snaps it
-to the nearest frame edge. Choose Canvas or Background to detach it deliberately.
-The small editor handles the choices
-that dragging alone doesn't express: Canvas, Background, or Frame, removal,
-and Done. Frame attaches to the nearest edge without choosing an individual
-edge button.
+help align the placement. Dragging an attachment away from an edge returns it
+to the canvas. Leave it there, or continue to another edge to attach it again.
+This lets the same drag move work between the painting and its frame.
+The small editor also offers Canvas, Background, or Frame, removal, and Done.
+Frame attaches to the nearest edge without choosing an individual edge button.
 Edge buttons and position sliders would repeat a choice the user can already
 make directly on the frame.
 
@@ -99,17 +98,18 @@ an attachment shouldn't disappear beneath its neighbor. The group follows one ed
 remain selectable for rearrangement or a different level of detail. This
 keeps a custom taskbar subject to the same rules as the default controls.
 
-Choosing Canvas or Background for a group releases its members onto that
-layer at their visible positions. Grouping organizes the frame; moving work
-back to the painting gives each object its own place again.
+Dropping a whole group on the canvas releases its members at their visible
+positions. Choosing Canvas or Background does the same on the chosen layer.
+Grouping organizes the frame; moving work back to the painting gives each
+object its own place again.
 
 Toolbars adapt their orientation to the edge: horizontal along the top or
 bottom, vertical along either side, with icons staying upright. Entering a new
 edge area during a drag changes that orientation; crossing the interior keeps
 the last orientation until another edge area is reached. The surface, outline,
-and contents animate together in either direction, and releasing snaps the
-object into place. This makes the frame a boundary the object belongs to,
-rather than an approximate region near the screen edge.
+and contents animate together in either direction. Releasing near an edge
+snaps the object against that boundary; releasing in the interior leaves it
+on the canvas.
 
 Expanded notification text follows the vertical direction of a side edge,
 while the bell stays upright. Changing the orientation changes how the same

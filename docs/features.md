@@ -33,16 +33,17 @@ add backgrounds; the notification status tells you when something needs attentio
 Choose **Change layout** in canvas tools or **Settings → System**, then select or drag a window,
 desktop item, drawing, or shell control. Drag it to an edge to attach it to the
 frame; animated corner targets help align it with the screen boundary. It stays
-nearby while you pan the canvas. Dropping an attached item in the interior
-animates it to the nearest frame edge. The editor's
+nearby while you pan the canvas. Dragging an attachment away from the edge
+returns it to the canvas; releasing it there keeps that position. Continue
+dragging to another edge to attach it again. The editor's
 **Canvas**, **Background**, and **Frame** choices set where it belongs. Frame
 attaches to the nearest edge; dragging chooses an edge or corner directly.
 There are no individual edge buttons or position slider. **Done** or Escape leaves
 layout editing.
 
-Choose **Canvas** or **Background** to detach an object deliberately. For a
-whole group, this releases its members onto the chosen layer at their current
-screen positions. Toolbars
+Choose **Canvas** or **Background** to set an object's layer directly. Dropping
+a whole group onto the canvas releases its members at their visible positions.
+The layer buttons do the same on the chosen layer. Toolbars
 on the left or right stack vertically with upright icons; top and bottom
 attachments stay horizontal. While dragging, entering a new edge area animates
 the surface, outline, and contents into that orientation together. The toolbar

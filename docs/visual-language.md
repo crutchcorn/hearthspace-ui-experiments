@@ -115,13 +115,14 @@ Background, and Frame, the selected object's name, removal when relevant, and
 Done. Frame chooses the nearest edge; dragging gives direct control over the
 attachment's position.
 
-The frame is the screen boundary. An attached object dropped in the interior
-returns to the nearest edge with a short animation. Detaching is an explicit
-Canvas or Background choice, or removal from the frame. Keep the outline,
+The frame is the screen boundary. Dragging an attachment away from an edge
+returns it to the canvas; reaching another edge attaches it again. Releasing
+in the interior keeps it on the canvas. The layer choices remain available
+when the user wants to place an object directly. Keep the outline,
 surface, and controls moving as one object, including when a toolbar changes
 between a horizontal row and a vertical stack. Change orientation during the
 drag when the toolbar enters a new edge area, retain it across the interior,
-and snap to the boundary on release. Animate both directions; the return trip
+and snap to the boundary when released near an edge. Animate both directions; the return trip
 should preserve the same sense of movement.
 
 Frame attachments should leave room for the work they surround. Pinned windows

@@ -113,7 +113,8 @@ stack controls vertically, with upright icons; top and bottom toolbars remain
 horizontal. During a drag, entering a new edge area changes the orientation;
 crossing the interior retains the last orientation until another edge area is
 reached. The surface, selection outline, and contents animate together in both
-directions. Release snaps the attachment into its final position.
+directions. Release near an edge snaps the attachment into its final position;
+release in the interior keeps it on the canvas.
 
 Widget edge detection uses a centered square based on the shorter toolbar
 dimension. That probe stays stable when the toolbar turns, preventing the new
@@ -159,23 +160,26 @@ the trigger stacks its upright bell and text in a 44-pixel-wide control.
 gesture. Selecting an object exposes the compact `LayoutEditor`; dragging it
 toward an edge previews attachment, with distinct animated corner targets
 providing alignment points.
-An object that started on the frame remains attached when dropped in the
-interior, animating to the nearest edge. The editor has Canvas, Background, and
-Frame choices, contextual removal, and Done. Canvas or Background explicitly
-detaches the object; Frame attaches to the nearest
+Dragging an attachment out of an edge area gives it a canvas placement.
+Releasing in the interior keeps that placement; entering another edge area
+previews attachment there. The starting surface doesn't force an interior
+drop back to the frame. The editor has Canvas, Background, and Frame choices,
+contextual removal, and Done. Canvas or Background sets the layer directly;
+Frame attaches to the nearest
 edge; dragging selects a specific edge or corner. There are no individual edge
 buttons or position sliders. Pointer cancellation, Escape,
 or losing browser focus restores the placement and geometry captured at the
 start of the drag. Layout mode intercepts ordinary object actions so arranging
 a control doesn't activate it.
 
-Choosing Canvas or Background for a whole group dissolves it. Each member
+Dropping a whole group onto the canvas or choosing Canvas or Background
+dissolves it. Each member
 receives the chosen layer and its current screen position plus the canvas
 view offset, constrained to the world bounds. Widgets store those coordinates
 in their placement; windows, desktop items, and drawings update workspace
 geometry. A drawing's layer follows the chosen surface. Moving a group during
 a drag can temporarily use canvas coordinates without dissolving membership;
-only the explicit layer choice releases its members.
+an interior release or explicit layer choice releases its members.
 
 Frame windows, items, and drawings render through the shared frame host,
 outside the scrolling canvas. Each object appears once. Personal attachments
