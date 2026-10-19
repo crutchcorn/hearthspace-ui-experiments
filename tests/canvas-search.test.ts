@@ -6,6 +6,7 @@ import {
 } from '../src/canvas-search.ts'
 import type { Bounds, Workspace } from '../src/desktop.ts'
 import { FRAME_WIDGETS } from '../src/frame-layout.ts'
+import { CANVAS_TOOL_CATALOG } from '../src/canvas-tool-catalog.ts'
 
 const view: Bounds = { x: 4000, y: 3000, width: 1200, height: 800 }
 const workspace: Workspace = {
@@ -79,7 +80,7 @@ const workspace: Workspace = {
   ],
 }
 
-test('one query returns desktop items, windows, drawings, and widgets together', () => {
+test('one query returns desktop items, windows, drawings, and tools together', () => {
   const before = structuredClone(workspace)
   const layout = getCanvasSearchLayout(
     workspace,
@@ -87,30 +88,30 @@ test('one query returns desktop items, windows, drawings, and widgets together',
     { x: 600, y: 150 },
     'draw',
     false,
-    { widgets: FRAME_WIDGETS },
+    { widgets: FRAME_WIDGETS, tools: CANVAS_TOOL_CATALOG },
   )
   assert.deepEqual(layout.results, [
     { kind: 'item', id: 'drawings-folder' },
     { kind: 'window', id: 'notes-window' },
     { kind: 'drawing', id: 'large-sketch' },
     { kind: 'drawing', id: 'small-sketch' },
-    { kind: 'widget', id: 'tools' },
+    { kind: 'tool', id: 'draw' },
   ])
   assert.equal(layout.items.get('browser-shortcut')?.matches, false)
   assert.equal(layout.windows.get('notes-window')?.matches, true)
   assert.equal(layout.drawings.get('large-sketch')?.matches, true)
-  assert.equal(layout.widgets.get('tools')?.matches, true)
+  assert.equal(layout.tools.get('draw')?.matches, true)
   assert.deepEqual(workspace, before)
 })
 
-test('empty search includes drawings and recoverable widgets alongside shortcuts', () => {
+test('empty search includes drawings, widgets, and tools alongside shortcuts', () => {
   const layout = getCanvasSearchLayout(
     workspace,
     view,
     { x: 600, y: 150 },
     '',
     false,
-    { widgets: FRAME_WIDGETS },
+    { widgets: FRAME_WIDGETS, tools: CANVAS_TOOL_CATALOG },
   )
   assert.deepEqual(
     layout.results.map((result) => `${result.kind}:${result.id}`),
@@ -126,6 +127,15 @@ test('empty search includes drawings and recoverable widgets alongside shortcuts
       'widget:battery',
       'widget:tools',
       'widget:apps',
+      'tool:cursor',
+      'tool:pan',
+      'tool:search',
+      'tool:rectangle',
+      'tool:freeform',
+      'tool:draw',
+      'tool:layout',
+      'tool:map',
+      'tool:arrange',
     ],
   )
 })
@@ -210,9 +220,87 @@ test('a query without matches moves drawings out of the result area', () => {
   }
 })
 
-test('window switching leaves drawing and widget search results empty', () => {
+test('window switching leaves drawing, widget, and tool search results empty', () => {
   const layout = getWindowSwitcherLayout(workspace, view, workspace.windows)
   assert.equal(layout.drawings.size, 0)
   assert.equal(layout.widgets.size, 0)
+  assert.equal(layout.tools.size, 0)
   assert.equal(layout.windows.get('notes-window')?.matches, true)
+})
+
+test('specific canvas tools remain searchable without their toolbar', () => {
+  const layout = getCanvasSearchLayout(
+    workspace,
+    view,
+    { x: 600, y: 150 },
+    'select windows',
+    false,
+    { tools: CANVAS_TOOL_CATALOG },
+  )
+  assert.deepEqual(layout.results, [
+    { kind: 'tool', id: 'rectangle' },
+    { kind: 'tool', id: 'freeform' },
+  ])
+  assert.equal(layout.tools.get('rectangle')?.matches, true)
+  assert.equal(layout.tools.get('freeform')?.matches, true)
+  assert.equal(layout.tools.get('cursor')?.matches, false)
+})
+
+test('canvas tools can be found by familiar selection and action names', () => {
+  for (const [query, id] of [
+    ['square select', 'rectangle'],
+    ['freeform', 'freeform'],
+    ['lasso', 'freeform'],
+    ['map', 'map'],
+    ['overview', 'map'],
+    ['organize', 'arrange'],
+    ['arrange', 'arrange'],
+  ]) {
+    const layout = getCanvasSearchLayout(
+      workspace,
+      view,
+      { x: 600, y: 150 },
+      query,
+      false,
+      { tools: CANVAS_TOOL_CATALOG },
+    )
+    assert.deepEqual(layout.results, [{ kind: 'tool', id }], query)
+  }
+})
+
+test('tool previews fit below a high search field', () => {
+  const layout = getCanvasSearchLayout(
+    workspace,
+    view,
+    { x: 600, y: 150 },
+    'organize',
+    false,
+    { tools: CANVAS_TOOL_CATALOG },
+  )
+  const placement = layout.tools.get('arrange')!
+  assert.equal(layout.resultsAbove, false)
+  assert.ok(placement.y > view.y + layout.position.y + 54)
+  assert.ok(placement.y + 72 * placement.scale <= view.y + view.height)
+  assert.ok(placement.x >= view.x)
+  assert.ok(placement.x + 240 * placement.scale <= view.x + view.width)
+})
+
+test('tool previews fit above a low search field with handwriting open', () => {
+  const layout = getCanvasSearchLayout(
+    workspace,
+    view,
+    { x: 600, y: 650 },
+    'organize',
+    true,
+    { tools: CANVAS_TOOL_CATALOG },
+  )
+  const placement = layout.tools.get('arrange')!
+  assert.equal(layout.resultsAbove, true)
+  assert.ok(placement.y >= view.y)
+  assert.ok(
+    placement.y + 72 * placement.scale <
+      view.y + layout.position.y - layout.handwritingHeight,
+  )
+  assert.ok(placement.x >= view.x)
+  assert.ok(placement.x + 240 * placement.scale <= view.x + view.width)
 })

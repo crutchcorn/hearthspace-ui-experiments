@@ -75,7 +75,7 @@ export default function CanvasSearch({
           ref={inputRef}
           type="text"
           role="searchbox"
-          aria-label="Search apps, windows, files, folders, drawings, and widgets"
+          aria-label="Search apps, windows, files, folders, drawings, tools, and widgets"
           placeholder="Search the canvas…"
           autoComplete="off"
           spellCheck={false}

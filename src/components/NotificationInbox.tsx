@@ -12,28 +12,26 @@ import {
   X,
   type LucideIcon,
 } from 'lucide-react'
+import {
+  INITIAL_NOTIFICATIONS,
+  type Notification,
+  type NotificationsState,
+  type NotificationTarget,
+} from '../useNotifications'
 import AppIcon from './AppIcon'
 import shellStyles from './ShellControls.module.css'
 import styles from './NotificationInbox.module.css'
 
-export type NotificationTarget = 'notes' | 'files' | 'browser' | 'gestures'
+export type { NotificationTarget } from '../useNotifications'
 
 interface NotificationInboxProps {
+  state: NotificationsState
   expanded?: boolean
   open: boolean
   previewVisible: boolean
   onToggle: () => void
   onClose: () => void
   onNavigate: (target: NotificationTarget) => void
-}
-
-interface Notification {
-  id: string
-  target: NotificationTarget
-  title: string
-  body: string
-  time: string
-  unread: boolean
 }
 
 const APPS: Record<
@@ -50,34 +48,8 @@ const APPS: Record<
   },
 }
 
-const INITIAL_NOTIFICATIONS: Notification[] = [
-  {
-    id: 'notes-updated',
-    target: 'notes',
-    title: 'Document updated',
-    body: 'Workspace notes · Local copy saved.',
-    time: '2 min ago',
-    unread: true,
-  },
-  {
-    id: 'files-download',
-    target: 'files',
-    title: 'Download complete',
-    body: 'reference-board.png is ready in Downloads.',
-    time: '8 min ago',
-    unread: true,
-  },
-  {
-    id: 'browser-reading',
-    target: 'browser',
-    title: 'Bookmark saved',
-    body: 'Spatial interfaces was added to Bookmarks.',
-    time: '12 min ago',
-    unread: true,
-  },
-]
-
 export default function NotificationInbox({
+  state,
   expanded = true,
   open,
   previewVisible,
@@ -85,12 +57,11 @@ export default function NotificationInbox({
   onClose,
   onNavigate,
 }: NotificationInboxProps) {
-  const [notifications, setNotifications] = useState(INITIAL_NOTIFICATIONS)
+  const { notifications, setNotifications, unreadCount } = state
   const [toast, setToast] = useState<Notification | null>(null)
   const root = useRef<HTMLDivElement>(null)
   const trigger = useRef<HTMLButtonElement>(null)
   const previewCount = useRef(0)
-  const unreadCount = notifications.filter((item) => item.unread).length
 
   useEffect(() => {
     if (open) trigger.current?.focus({ preventScroll: true })
@@ -152,7 +123,7 @@ export default function NotificationInbox({
     const index = previewCount.current++
     const item: Notification = {
       ...INITIAL_NOTIFICATIONS[index % INITIAL_NOTIFICATIONS.length],
-      id: `preview-${index}`,
+      id: `preview-${crypto.randomUUID()}`,
       time: 'Just now',
       unread: true,
     }

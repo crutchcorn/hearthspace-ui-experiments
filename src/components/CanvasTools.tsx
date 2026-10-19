@@ -1,17 +1,7 @@
-import {
-  Check,
-  ChevronUp,
-  Hand,
-  Lasso,
-  Map,
-  MousePointer2,
-  Pencil,
-  PanelsTopLeft,
-  Search,
-  SquareDashedMousePointer,
-} from 'lucide-react'
+import { Check, ChevronUp } from 'lucide-react'
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from 'react'
 import type { CanvasTool, WindowSelectionShape } from '../desktop'
+import { CANVAS_TOOLS } from '../canvas-tool-catalog.ts'
 import styles from './CanvasTools.module.css'
 import shellStyles from './ShellControls.module.css'
 
@@ -26,35 +16,20 @@ interface CanvasToolsProps {
   onArrange: () => void
   windowCount: number
   menusAllowed: boolean
+  openRequest?: number
 }
 
 const primaryTools = [
-  {
-    mode: 'cursor',
-    label: 'Select desktop items',
-    shortcut: 'V',
-    Icon: MousePointer2,
-  },
-  { mode: 'pan', label: 'Pan canvas', shortcut: 'H', Icon: Hand },
-  { mode: 'search', label: 'Search canvas', shortcut: '/', Icon: Search },
-] as const
+  CANVAS_TOOLS.cursor,
+  CANVAS_TOOLS.pan,
+  CANVAS_TOOLS.search,
+]
+const selectionTools = [CANVAS_TOOLS.rectangle, CANVAS_TOOLS.freeform]
+const canvasTools = [CANVAS_TOOLS.draw, CANVAS_TOOLS.layout]
+const MapIcon = CANVAS_TOOLS.map.Icon
+const ArrangeIcon = CANVAS_TOOLS.arrange.Icon
 
-const selectionTools = [
-  {
-    shape: 'rectangle',
-    label: 'Rectangle select',
-    shortcut: 'R',
-    Icon: SquareDashedMousePointer,
-  },
-  { shape: 'freeform', label: 'Freeform lasso', shortcut: 'L', Icon: Lasso },
-] as const
-
-const canvasTools = [
-  { mode: 'draw', label: 'Draw', shortcut: 'D', Icon: Pencil },
-  { mode: 'layout', label: 'Change layout', shortcut: '', Icon: PanelsTopLeft },
-] as const
-
-type ToolMenu = 'primary' | 'selection' | 'mobile'
+type ToolMenu = 'primary' | 'selection' | 'mobile' | 'all'
 type ToolHint = 'primary' | 'selection' | 'draw' | 'layout' | 'map' | 'arrange'
 type PrimaryTool = (typeof primaryTools)[number]['mode']
 
@@ -74,27 +49,6 @@ function focusMenuOption(
     menu.scrollTop += optionBounds.bottom - visibleBottom
 }
 
-function ArrangeIcon({ size = 20 }: { size?: number }) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={1.6}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-      focusable="false"
-    >
-      <rect x={2} y={3} width={9} height={18} rx={1.5} />
-      <rect x={15} y={3} width={7} height={7} rx={1.5} />
-      <rect x={15} y={14} width={7} height={7} rx={1.5} />
-    </svg>
-  )
-}
-
 export default function CanvasTools({
   mode,
   onModeChange,
@@ -106,6 +60,7 @@ export default function CanvasTools({
   onArrange,
   windowCount,
   menusAllowed,
+  openRequest = 0,
 }: CanvasToolsProps) {
   const hintId = useId()
   const toolMenuId = useId()
@@ -124,6 +79,7 @@ export default function CanvasTools({
   const mobileTriggerRef = useRef<HTMLButtonElement>(null)
   const mobileMenuRef = useRef<HTMLDivElement>(null)
   const [openToolMenu, setOpenToolMenu] = useState<ToolMenu | null>(null)
+  const [handledOpenRequest, setHandledOpenRequest] = useState(openRequest)
   const [primaryMode, setPrimaryMode] = useState<PrimaryTool>('cursor')
   const [visibleHint, setVisibleHint] = useState<ToolHint | null>(null)
   const hintTimeout = useRef<number | undefined>(undefined)
@@ -132,6 +88,11 @@ export default function CanvasTools({
     mode === 'cursor' || mode === 'pan' || mode === 'search'
   if (primaryModeActive && mode !== primaryMode) setPrimaryMode(mode)
   if (!menusAllowed && openToolMenu) setOpenToolMenu(null)
+  if (menusAllowed && openRequest > 0 && openRequest !== handledOpenRequest) {
+    setHandledOpenRequest(openRequest)
+    setOpenToolMenu('all')
+    setVisibleHint(null)
+  }
 
   const visibleMenu = menusAllowed ? openToolMenu : null
   const primaryTool = primaryTools.find((tool) => tool.mode === primaryMode)!
@@ -146,8 +107,8 @@ export default function CanvasTools({
       : (canvasTools.find((tool) => tool.mode === mode) ?? primaryTool)
   const CurrentIcon = currentTool.Icon
   const hints = {
-    primary: { label: primaryTool.label, shortcut: primaryTool.shortcut },
-    selection: { label: selectionTool.label, shortcut: selectionTool.shortcut },
+    primary: { label: primaryTool.title, shortcut: primaryTool.shortcut },
+    selection: { label: selectionTool.title, shortcut: selectionTool.shortcut },
     draw: { label: 'Draw', shortcut: 'D' },
     layout: { label: 'Change layout', shortcut: '' },
     map: { label: 'Toggle canvas map', shortcut: 'M' },
@@ -182,19 +143,25 @@ export default function CanvasTools({
   useEffect(() => {
     if (!visibleMenu) return
     const activePickerRef =
-      visibleMenu === 'mobile'
-        ? mobilePickerRef
-        : visibleMenu === 'primary'
-          ? pickerRef
-          : selectionPickerRef
+      visibleMenu === 'all'
+        ? containerRef
+        : visibleMenu === 'mobile'
+          ? mobilePickerRef
+          : visibleMenu === 'primary'
+            ? pickerRef
+            : selectionPickerRef
     const activeTriggerRef =
-      visibleMenu === 'mobile'
-        ? mobileTriggerRef
-        : visibleMenu === 'primary'
-          ? triggerRef
-          : selectionTriggerRef
+      visibleMenu === 'all'
+        ? window.matchMedia('(width <= 760px)').matches
+          ? mobileTriggerRef
+          : triggerRef
+        : visibleMenu === 'mobile'
+          ? mobileTriggerRef
+          : visibleMenu === 'primary'
+            ? triggerRef
+            : selectionTriggerRef
     const activeMenuRef =
-      visibleMenu === 'mobile'
+      visibleMenu === 'mobile' || visibleMenu === 'all'
         ? mobileMenuRef
         : visibleMenu === 'primary'
           ? menuRef
@@ -247,7 +214,10 @@ export default function CanvasTools({
     onModeChange(nextMode)
     setOpenToolMenu(null)
     const activeTriggerRef =
-      visibleMenu === 'mobile' ? mobileTriggerRef : triggerRef
+      visibleMenu === 'mobile' ||
+      (visibleMenu === 'all' && window.matchMedia('(width <= 760px)').matches)
+        ? mobileTriggerRef
+        : triggerRef
     activeTriggerRef.current?.focus({ preventScroll: true })
   }
 
@@ -256,7 +226,10 @@ export default function CanvasTools({
     onSelectionShapeChange(shape)
     setOpenToolMenu(null)
     const activeTriggerRef =
-      visibleMenu === 'mobile' ? mobileTriggerRef : selectionTriggerRef
+      visibleMenu === 'mobile' ||
+      (visibleMenu === 'all' && window.matchMedia('(width <= 760px)').matches)
+        ? mobileTriggerRef
+        : selectionTriggerRef
     activeTriggerRef.current?.focus({ preventScroll: true })
   }
 
@@ -265,7 +238,8 @@ export default function CanvasTools({
     onModeChange(nextMode)
     setOpenToolMenu(null)
     const activeTriggerRef =
-      visibleMenu === 'mobile'
+      visibleMenu === 'mobile' ||
+      (visibleMenu === 'all' && window.matchMedia('(width <= 760px)').matches)
         ? mobileTriggerRef
         : nextMode === 'draw'
           ? drawingTriggerRef
@@ -278,7 +252,11 @@ export default function CanvasTools({
     setOpenToolMenu(null)
     if (action === 'map') onToggleMap()
     else onArrange()
-    mobileTriggerRef.current?.focus({ preventScroll: true })
+    const activeTriggerRef =
+      visibleMenu === 'all' && !window.matchMedia('(width <= 760px)').matches
+        ? triggerRef
+        : mobileTriggerRef
+    activeTriggerRef.current?.focus({ preventScroll: true })
   }
 
   function hideHint() {
@@ -312,7 +290,7 @@ export default function CanvasTools({
       selectCanvasMode('draw')
       return
     }
-    if (menu === 'primary' || menu === 'mobile') {
+    if (menu === 'primary' || menu === 'mobile' || menu === 'all') {
       const tool = primaryTools.find(
         (option) => option.shortcut.toLowerCase() === shortcut,
       )
@@ -322,7 +300,7 @@ export default function CanvasTools({
         return
       }
     }
-    if (menu === 'selection' || menu === 'mobile') {
+    if (menu === 'selection' || menu === 'mobile' || menu === 'all') {
       const tool = selectionTools.find(
         (option) => option.shortcut.toLowerCase() === shortcut,
       )
@@ -333,7 +311,7 @@ export default function CanvasTools({
       }
     }
     if (
-      menu === 'mobile' &&
+      (menu === 'mobile' || menu === 'all') &&
       (shortcut === 'm' || (shortcut === 'a' && windowCount))
     ) {
       event.preventDefault()
@@ -343,11 +321,15 @@ export default function CanvasTools({
     if (event.key === 'Tab') {
       setOpenToolMenu(null)
       const activeTriggerRef =
-        menu === 'mobile'
-          ? mobileTriggerRef
-          : menu === 'primary'
-            ? triggerRef
-            : selectionTriggerRef
+        menu === 'all'
+          ? window.matchMedia('(width <= 760px)').matches
+            ? mobileTriggerRef
+            : triggerRef
+          : menu === 'mobile'
+            ? mobileTriggerRef
+            : menu === 'primary'
+              ? triggerRef
+              : selectionTriggerRef
       activeTriggerRef.current?.focus({ preventScroll: true })
       return
     }
@@ -371,6 +353,104 @@ export default function CanvasTools({
     focusMenuOption(event.currentTarget, options[nextIndex])
   }
 
+  const fullToolMenu = (
+    <div
+      ref={mobileMenuRef}
+      id={mobileMenuId}
+      className={`${styles.toolMenu} ${styles.mobileMenu}`}
+      role="menu"
+      aria-label="Canvas tools"
+      onKeyDown={(event) =>
+        navigateMenu(event, visibleMenu === 'all' ? 'all' : 'mobile')
+      }
+    >
+      {primaryTools.map(({ mode: optionMode, title, shortcut, Icon }) => (
+        <button
+          key={optionMode}
+          type="button"
+          role="menuitemradio"
+          aria-checked={mode === optionMode}
+          data-value={optionMode}
+          className={styles.menuOption}
+          tabIndex={-1}
+          onClick={() => selectTool(optionMode)}
+        >
+          <Icon size={18} strokeWidth={1.5} aria-hidden="true" />
+          <span>{title}</span>
+          <kbd>{shortcut}</kbd>
+          {mode === optionMode && (
+            <Check size={14} className={styles.check} aria-hidden="true" />
+          )}
+        </button>
+      ))}
+      {selectionTools.map(({ shape, title, shortcut, Icon }) => (
+        <button
+          key={shape}
+          type="button"
+          role="menuitemradio"
+          aria-checked={mode === 'select' && selectionShape === shape}
+          data-value={shape}
+          className={styles.menuOption}
+          tabIndex={-1}
+          onClick={() => selectShape(shape)}
+        >
+          <Icon size={18} strokeWidth={1.5} aria-hidden="true" />
+          <span>{title}</span>
+          <kbd>{shortcut}</kbd>
+          {mode === 'select' && selectionShape === shape && (
+            <Check size={14} className={styles.check} aria-hidden="true" />
+          )}
+        </button>
+      ))}
+      {canvasTools.map(({ mode: optionMode, title, shortcut, Icon }) => (
+        <button
+          key={optionMode}
+          type="button"
+          role="menuitemradio"
+          aria-checked={mode === optionMode}
+          data-value={optionMode}
+          className={styles.menuOption}
+          tabIndex={-1}
+          onClick={() => selectCanvasMode(optionMode)}
+        >
+          <Icon size={18} strokeWidth={1.5} aria-hidden="true" />
+          <span>{title}</span>
+          <kbd>{shortcut}</kbd>
+          {mode === optionMode && (
+            <Check size={14} className={styles.check} aria-hidden="true" />
+          )}
+        </button>
+      ))}
+      <button
+        type="button"
+        role="menuitemcheckbox"
+        aria-checked={mapOpen}
+        className={styles.menuOption}
+        tabIndex={-1}
+        onClick={() => selectMobileAction('map')}
+      >
+        <MapIcon size={18} aria-hidden="true" />
+        <span>Overview</span>
+        <kbd>M</kbd>
+        {mapOpen && (
+          <Check size={14} className={styles.check} aria-hidden="true" />
+        )}
+      </button>
+      <button
+        type="button"
+        role="menuitem"
+        className={styles.menuOption}
+        disabled={windowCount === 0}
+        tabIndex={-1}
+        onClick={() => selectMobileAction('arrange')}
+      >
+        <ArrangeIcon size={18} />
+        <span>Arrange windows</span>
+        <kbd>A</kbd>
+      </button>
+    </div>
+  )
+
   return (
     <div ref={containerRef} className={styles.container}>
       <div
@@ -379,7 +459,10 @@ export default function CanvasTools({
         role="group"
         aria-label="Canvas tools"
         onBlur={(event) => {
-          if (!event.currentTarget.contains(event.relatedTarget))
+          if (
+            visibleMenu !== 'all' &&
+            !event.currentTarget.contains(event.relatedTarget)
+          )
             setOpenToolMenu(null)
         }}
       >
@@ -387,12 +470,17 @@ export default function CanvasTools({
           ref={mobileTriggerRef}
           type="button"
           className={`${styles.tool} ${styles.expandable} ${shellStyles.control}`}
-          aria-label={`${currentTool.label}, choose canvas tool`}
+          aria-label={`${currentTool.title}, choose canvas tool`}
           aria-haspopup="menu"
-          aria-expanded={visibleMenu === 'mobile'}
-          aria-controls={visibleMenu === 'mobile' ? mobileMenuId : undefined}
+          aria-expanded={visibleMenu === 'mobile' || visibleMenu === 'all'}
+          aria-controls={
+            visibleMenu === 'mobile' || visibleMenu === 'all'
+              ? mobileMenuId
+              : undefined
+          }
           onClick={() => {
-            if (visibleMenu === 'mobile') setOpenToolMenu(null)
+            if (visibleMenu === 'mobile' || visibleMenu === 'all')
+              setOpenToolMenu(null)
             else openMenu('mobile')
           }}
           onKeyDown={(event) => {
@@ -409,113 +497,7 @@ export default function CanvasTools({
             aria-hidden="true"
           />
         </button>
-        {visibleMenu === 'mobile' && (
-          <div
-            ref={mobileMenuRef}
-            id={mobileMenuId}
-            className={`${styles.toolMenu} ${styles.mobileMenu}`}
-            role="menu"
-            aria-label="Canvas tools"
-            onKeyDown={(event) => navigateMenu(event, 'mobile')}
-          >
-            {primaryTools.map(({ mode: optionMode, label, shortcut, Icon }) => (
-              <button
-                key={optionMode}
-                type="button"
-                role="menuitemradio"
-                aria-checked={mode === optionMode}
-                data-value={optionMode}
-                className={styles.menuOption}
-                tabIndex={-1}
-                onClick={() => selectTool(optionMode)}
-              >
-                <Icon size={18} strokeWidth={1.5} aria-hidden="true" />
-                <span>{label}</span>
-                <kbd>{shortcut}</kbd>
-                {mode === optionMode && (
-                  <Check
-                    size={14}
-                    className={styles.check}
-                    aria-hidden="true"
-                  />
-                )}
-              </button>
-            ))}
-            {selectionTools.map(({ shape, label, shortcut, Icon }) => (
-              <button
-                key={shape}
-                type="button"
-                role="menuitemradio"
-                aria-checked={mode === 'select' && selectionShape === shape}
-                data-value={shape}
-                className={styles.menuOption}
-                tabIndex={-1}
-                onClick={() => selectShape(shape)}
-              >
-                <Icon size={18} strokeWidth={1.5} aria-hidden="true" />
-                <span>{label}</span>
-                <kbd>{shortcut}</kbd>
-                {mode === 'select' && selectionShape === shape && (
-                  <Check
-                    size={14}
-                    className={styles.check}
-                    aria-hidden="true"
-                  />
-                )}
-              </button>
-            ))}
-            {canvasTools.map(({ mode: optionMode, label, shortcut, Icon }) => (
-              <button
-                key={optionMode}
-                type="button"
-                role="menuitemradio"
-                aria-checked={mode === optionMode}
-                data-value={optionMode}
-                className={styles.menuOption}
-                tabIndex={-1}
-                onClick={() => selectCanvasMode(optionMode)}
-              >
-                <Icon size={18} strokeWidth={1.5} aria-hidden="true" />
-                <span>{label}</span>
-                <kbd>{shortcut}</kbd>
-                {mode === optionMode && (
-                  <Check
-                    size={14}
-                    className={styles.check}
-                    aria-hidden="true"
-                  />
-                )}
-              </button>
-            ))}
-            <button
-              type="button"
-              role="menuitemcheckbox"
-              aria-checked={mapOpen}
-              className={styles.menuOption}
-              tabIndex={-1}
-              onClick={() => selectMobileAction('map')}
-            >
-              <Map size={18} aria-hidden="true" />
-              <span>Overview</span>
-              <kbd>M</kbd>
-              {mapOpen && (
-                <Check size={14} className={styles.check} aria-hidden="true" />
-              )}
-            </button>
-            <button
-              type="button"
-              role="menuitem"
-              className={styles.menuOption}
-              disabled={windowCount === 0}
-              tabIndex={-1}
-              onClick={() => selectMobileAction('arrange')}
-            >
-              <ArrangeIcon size={18} />
-              <span>Arrange windows</span>
-              <kbd>A</kbd>
-            </button>
-          </div>
-        )}
+        {visibleMenu === 'mobile' && fullToolMenu}
       </div>
       <div
         className={`${styles.dock} ${shellStyles.surface}`}
@@ -527,7 +509,10 @@ export default function CanvasTools({
             ref={pickerRef}
             className={styles.picker}
             onBlur={(event) => {
-              if (!event.currentTarget.contains(event.relatedTarget))
+              if (
+                visibleMenu !== 'all' &&
+                !event.currentTarget.contains(event.relatedTarget)
+              )
                 setOpenToolMenu(null)
             }}
           >
@@ -536,13 +521,23 @@ export default function CanvasTools({
               type="button"
               className={`${styles.tool} ${styles.expandable} ${shellStyles.control}`}
               aria-pressed={primaryModeActive}
-              aria-label={`${primaryTool.label}, choose canvas tool`}
+              aria-label={`${primaryTool.title}, choose canvas tool`}
               aria-haspopup="menu"
-              aria-expanded={visibleMenu === 'primary'}
-              aria-controls={visibleMenu === 'primary' ? toolMenuId : undefined}
+              aria-expanded={visibleMenu === 'primary' || visibleMenu === 'all'}
+              aria-controls={
+                visibleMenu === 'all'
+                  ? mobileMenuId
+                  : visibleMenu === 'primary'
+                    ? toolMenuId
+                    : undefined
+              }
               {...hintProps('primary')}
               onClick={() => {
                 hideHint()
+                if (visibleMenu === 'all') {
+                  setOpenToolMenu(null)
+                  return
+                }
                 if (!primaryModeActive) {
                   selectTool(primaryMode)
                   return
@@ -574,7 +569,7 @@ export default function CanvasTools({
                 onKeyDown={(event) => navigateMenu(event, 'primary')}
               >
                 {primaryTools.map(
-                  ({ mode: optionMode, label, shortcut, Icon }) => (
+                  ({ mode: optionMode, title, shortcut, Icon }) => (
                     <button
                       key={optionMode}
                       type="button"
@@ -586,7 +581,7 @@ export default function CanvasTools({
                       onClick={() => selectTool(optionMode)}
                     >
                       <Icon size={18} strokeWidth={1.5} aria-hidden="true" />
-                      <span>{label}</span>
+                      <span>{title}</span>
                       <kbd>{shortcut}</kbd>
                       {mode === optionMode && (
                         <Check
@@ -605,7 +600,10 @@ export default function CanvasTools({
             ref={selectionPickerRef}
             className={styles.picker}
             onBlur={(event) => {
-              if (!event.currentTarget.contains(event.relatedTarget))
+              if (
+                visibleMenu !== 'all' &&
+                !event.currentTarget.contains(event.relatedTarget)
+              )
                 setOpenToolMenu(null)
             }}
           >
@@ -614,7 +612,7 @@ export default function CanvasTools({
               type="button"
               className={`${styles.tool} ${styles.expandable} ${shellStyles.control}`}
               aria-pressed={mode === 'select'}
-              aria-label={`${selectionTool.label}, choose window selection tool`}
+              aria-label={`${selectionTool.title}, choose window selection tool`}
               aria-haspopup="menu"
               aria-expanded={visibleMenu === 'selection'}
               aria-controls={
@@ -653,7 +651,7 @@ export default function CanvasTools({
                 aria-label="Window selection tool"
                 onKeyDown={(event) => navigateMenu(event, 'selection')}
               >
-                {selectionTools.map(({ shape, label, shortcut, Icon }) => (
+                {selectionTools.map(({ shape, title, shortcut, Icon }) => (
                   <button
                     key={shape}
                     type="button"
@@ -665,7 +663,7 @@ export default function CanvasTools({
                     onClick={() => selectShape(shape)}
                   >
                     <Icon size={18} strokeWidth={1.5} aria-hidden="true" />
-                    <span>{label}</span>
+                    <span>{title}</span>
                     <kbd>{shortcut}</kbd>
                     {mode === 'select' && selectionShape === shape && (
                       <Check
@@ -679,14 +677,14 @@ export default function CanvasTools({
               </div>
             )}
           </div>
-          {canvasTools.map(({ mode: optionMode, label, Icon }) => (
+          {canvasTools.map(({ mode: optionMode, title, Icon }) => (
             <button
               key={optionMode}
               ref={optionMode === 'draw' ? drawingTriggerRef : layoutTriggerRef}
               type="button"
               className={`${styles.tool} ${shellStyles.control}`}
               aria-pressed={mode === optionMode}
-              aria-label={label}
+              aria-label={title}
               {...hintProps(optionMode)}
               onClick={() => selectCanvasMode(optionMode)}
             >
@@ -705,7 +703,7 @@ export default function CanvasTools({
               onToggleMap()
             }}
           >
-            <Map size={18} aria-hidden="true" />
+            <MapIcon size={18} aria-hidden="true" />
           </button>
           <div>
             <button
@@ -724,6 +722,7 @@ export default function CanvasTools({
           </div>
         </div>
       </div>
+      {visibleMenu === 'all' && fullToolMenu}
       {hint && (
         <span id={hintId} className={styles.tooltip} role="tooltip">
           {hint.label} {hint.shortcut && <kbd>{hint.shortcut}</kbd>}

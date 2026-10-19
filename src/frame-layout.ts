@@ -59,8 +59,8 @@ export const FRAME_WIDGETS = [
   {
     id: 'tools',
     title: 'Canvas tools',
-    description: 'Select, move, draw, search, and change the layout.',
-    keywords: ['cursor', 'pan', 'draw', 'search', 'arrange', 'layout', 'map'],
+    description: 'Choose a canvas tool.',
+    keywords: ['toolbar', 'toolbox', 'canvas tools'],
     defaultPlacement: { surface: 'frame', edge: 'bottom', position: 0 },
   },
   {

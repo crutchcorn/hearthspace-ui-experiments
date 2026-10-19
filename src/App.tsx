@@ -13,6 +13,10 @@ import { transformCanvasWorkspace } from './layout-workspace'
 import { CANVAS_LAYERS } from './canvas-layers'
 import useObjectLayout from './useObjectLayout'
 import useScene from './useScene'
+import { useSystemStatus } from './useSystemStatus'
+import { useNotifications } from './useNotifications'
+import { CANVAS_TOOL_CATALOG } from './canvas-tool-catalog'
+import SearchControlPreview from './components/SearchControlPreview'
 import {
   FRAME_WIDGETS,
   getFrameBounds,
@@ -183,6 +187,13 @@ function App() {
   const [showMap, setShowMap] = useState(false)
   const [notificationsOpen, setNotificationsOpen] = useState(false)
   const [systemPanel, setSystemPanel] = useState<SystemPanel>(null)
+  const status = useSystemStatus()
+  const notificationState = useNotifications()
+  const [widgetReveal, setWidgetReveal] = useState<{
+    id: string
+    onFrame: boolean
+  } | null>(null)
+  const [toolMenuRequest, setToolMenuRequest] = useState(0)
   const [tool, setTool] = useState(loadCanvasTool)
   const drawingLayer: DrawingLayerName = 'above'
   const [frameHost, setFrameHost] = useState<HTMLDivElement | null>(null)
@@ -254,7 +265,7 @@ function App() {
         canvasSearch.anchor,
         canvasSearch.query,
         canvasSearch.handwriting,
-        { widgets: FRAME_WIDGETS },
+        { widgets: FRAME_WIDGETS, tools: CANVAS_TOOL_CATALOG },
       )
     : null
   const searchResult = searchLayout?.results[canvasSearch?.selected ?? 0]
@@ -309,6 +320,7 @@ function App() {
     activeWindowId: focusedWindowId,
     onCommit: (id) => revealWindow(id, { center: true }),
     onOpen: () => {
+      setWidgetReveal(null)
       setCanvasSearch(null)
       setNotificationsOpen(false)
       setSystemPanel(null)
@@ -396,6 +408,7 @@ function App() {
     : undefined
 
   const closePopovers = useCallback(() => {
+    setWidgetReveal(null)
     setCanvasSearch(null)
     setNotificationsOpen(false)
     setSystemPanel(null)
@@ -523,6 +536,120 @@ function App() {
   useLayoutEffect(() => {
     viewport.current?.scrollTo(home.x, home.y)
   }, [home.x, home.y])
+
+  const finishWidgetReveal = useEffectEvent((id: string) => {
+    setWidgetReveal(null)
+    if (id === 'notifications') setNotificationsOpen(true)
+    else if (id === 'apps') {
+      setEditingGestures(false)
+      setLauncher('apps')
+    } else if (id === 'tools') setToolMenuRequest((current) => current + 1)
+    else if (
+      id === 'wifi' ||
+      id === 'volume' ||
+      id === 'battery' ||
+      id === 'clock'
+    )
+      setSystemPanel(id)
+  })
+
+  useLayoutEffect(() => {
+    if (!widgetReveal) return
+    const canvas = viewport.current
+    const element = document.querySelector<HTMLElement>(
+      `[data-layout-widget="${CSS.escape(widgetReveal.id)}"]`,
+    )
+    if (!canvas || !element) return
+
+    // Reveal members inside scrolling frame groups without moving the canvas.
+    for (
+      let parent = element.parentElement;
+      parent && parent !== canvas;
+      parent = parent.parentElement
+    ) {
+      const overflow = getComputedStyle(parent)
+      const bounds = element.getBoundingClientRect()
+      const container = parent.getBoundingClientRect()
+      if (/auto|scroll/.test(overflow.overflowX))
+        parent.scrollLeft +=
+          bounds.left < container.left
+            ? bounds.left - container.left
+            : Math.max(0, bounds.right - container.right)
+      if (/auto|scroll/.test(overflow.overflowY))
+        parent.scrollTop +=
+          bounds.top < container.top
+            ? bounds.top - container.top
+            : Math.max(0, bounds.bottom - container.bottom)
+    }
+
+    const bounds = element.getBoundingClientRect()
+    const canvasBounds = canvas.getBoundingClientRect()
+    const left = widgetReveal.onFrame
+      ? canvas.scrollLeft
+      : clamp(
+          canvas.scrollLeft +
+            bounds.left -
+            canvasBounds.left +
+            bounds.width / 2 -
+            canvas.clientWidth / 2,
+          0,
+          canvas.scrollWidth - canvas.clientWidth,
+        )
+    const top = widgetReveal.onFrame
+      ? canvas.scrollTop
+      : clamp(
+          canvas.scrollTop +
+            bounds.top -
+            canvasBounds.top +
+            bounds.height / 2 -
+            canvas.clientHeight * 0.35,
+          0,
+          canvas.scrollHeight - canvas.clientHeight,
+        )
+    const reducedMotion = window.matchMedia(
+      '(prefers-reduced-motion: reduce)',
+    ).matches
+    if (!widgetReveal.onFrame)
+      canvas.scrollTo({
+        left,
+        top,
+        behavior: reducedMotion ? 'instant' : 'smooth',
+      })
+
+    let frame: number
+    let arrived = false
+    function waitForArrival() {
+      if (!canvas || !widgetReveal) return
+      if (
+        Math.abs(canvas.scrollLeft - left) < 1 &&
+        Math.abs(canvas.scrollTop - top) < 1
+      ) {
+        arrived = true
+        finishWidgetReveal(widgetReveal.id)
+      } else frame = requestAnimationFrame(waitForArrival)
+    }
+    const cancel = () => setWidgetReveal(null)
+    frame = requestAnimationFrame(waitForArrival)
+    document.addEventListener('pointerdown', cancel, true)
+    document.addEventListener('wheel', cancel, true)
+    document.addEventListener('keydown', cancel, true)
+    window.addEventListener('resize', cancel)
+    window.addEventListener('blur', cancel)
+    return () => {
+      cancelAnimationFrame(frame)
+      if (!arrived && !widgetReveal.onFrame)
+        canvas.scrollTo({
+          left: canvas.scrollLeft,
+          top: canvas.scrollTop,
+          behavior: 'instant',
+        })
+      document.removeEventListener('pointerdown', cancel, true)
+      document.removeEventListener('wheel', cancel, true)
+      document.removeEventListener('keydown', cancel, true)
+      window.removeEventListener('resize', cancel)
+      window.removeEventListener('blur', cancel)
+    }
+  }, [widgetReveal])
 
   useLayoutEffect(() => {
     if (!revealRequest || (focusView && !revealRequest.preview)) return
@@ -1724,11 +1851,23 @@ function App() {
     setCanvasSearch(null)
     if (result.kind === 'window') revealWindow(result.id, { center: true })
     else if (result.kind === 'widget') {
-      const target = { kind: 'widget' as const, id: result.id }
-      const widget = FRAME_WIDGETS.find((entry) => entry.id === result.id)!
-      objectLayout.place(target, widget.defaultPlacement)
-      objectLayout.setSelected(target)
-      setTool('layout')
+      const id = result.id
+      if (!FRAME_WIDGETS.some((widget) => widget.id === id)) return
+      closePopovers()
+      setTool('cursor')
+      setLauncher(null)
+      setShowMap(false)
+      const target = { kind: 'widget' as const, id }
+      const placement = objectLayout.placement(target)
+      if (placement.surface === 'hidden')
+        objectLayout.place(target, {
+          surface: 'canvas',
+          x: view.x + view.width / 2 - 28,
+          y: view.y + view.height * 0.35 - 28,
+        })
+      setWidgetReveal({ id, onFrame: placement.surface === 'frame' })
+    } else if (result.kind === 'tool') {
+      activateCanvasTool(result.id)
     } else if (result.kind === 'drawing') {
       const drawing = workspace.drawings.find((entry) => entry.id === result.id)
       setTool('cursor')
@@ -1748,6 +1887,32 @@ function App() {
       const app = APP_CATALOG.find((entry) => entry.id === item?.appId)
       if (app) launchApp(app)
     }
+  }
+
+  function activateCanvasTool(id: string) {
+    const entry = CANVAS_TOOL_CATALOG.find((item) => item.id === id)
+    if (!entry) return
+    closePopovers()
+    setLauncher(null)
+    setShowMap(false)
+    setSpaceHeld(false)
+    setSelection(null)
+    setDrawingDraft(null)
+    setSelectedDrawingId(null)
+    setSelectedIds([])
+    setSelectedItemIds([])
+    if ('mode' in entry) {
+      if (entry.mode === 'layout') changeLayout()
+      else {
+        setTool(entry.mode)
+        if ('shape' in entry) setSelectionShape(entry.shape)
+      }
+    } else {
+      setTool('cursor')
+      if (entry.action === 'map') setShowMap(true)
+      else arrangeAllWindows()
+    }
+    viewport.current?.focus({ preventScroll: true })
   }
 
   function openGestureSettings(
@@ -1828,12 +1993,14 @@ function App() {
   const frameWidgets = {
     notifications: (
       <NotificationInbox
+        state={notificationState}
         expanded={getWidgetExpanded(objectLayout.layout, 'notifications')}
         open={notificationsOpen}
         previewVisible={
           !previewLayout && !systemPanel && !launcher && !showMap && !dockAppId
         }
         onToggle={() => {
+          setWidgetReveal(null)
           setCanvasSearch(null)
           setNotificationsOpen(!notificationsOpen)
           setDockAppId(null)
@@ -1848,6 +2015,7 @@ function App() {
     ),
     tools: (
       <CanvasTools
+        openRequest={toolMenuRequest}
         mode={tool}
         selectionShape={selectionShape}
         onSelectionShapeChange={(shape) => {
@@ -1930,11 +2098,13 @@ function App() {
       (['clock', 'wifi', 'volume', 'battery'] as const).map((id) => [
         id,
         <SystemBar
+          status={status}
           key={id}
           id={id}
           expanded={getWidgetExpanded(objectLayout.layout, id)}
           openPanel={systemPanel}
           onPanelChange={(panel) => {
+            setWidgetReveal(null)
             setCanvasSearch(null)
             setSystemPanel(panel)
             if (panel) {
@@ -2617,16 +2787,25 @@ function App() {
             </div>
           )}
           {searchLayout &&
-            FRAME_WIDGETS.map((widget) => {
-              const place = searchLayout.widgets.get(widget.id)
+            searchLayout.results.map((result) => {
+              if (result.kind !== 'widget' && result.kind !== 'tool')
+                return null
+              const place = (
+                result.kind === 'widget'
+                  ? searchLayout.widgets
+                  : searchLayout.tools
+              ).get(result.id)
               if (!place?.matches) return null
               return (
                 <button
-                  key={widget.id}
+                  key={`${result.kind}:${result.id}`}
+                  type="button"
                   className={styles.widgetResult}
+                  data-search-result-kind={result.kind}
+                  data-search-result-id={result.id}
                   data-preview-selected={
-                    searchResult?.kind === 'widget' &&
-                    searchResult.id === widget.id
+                    searchResult?.kind === result.kind &&
+                    searchResult.id === result.id
                   }
                   style={{
                     left: place.x,
@@ -2635,12 +2814,18 @@ function App() {
                     height: 72,
                     transform: `scale(${place.scale})`,
                   }}
-                  onClick={() =>
-                    activateSearchResult({ kind: 'widget', id: widget.id })
-                  }
+                  onPointerDown={(event) => event.stopPropagation()}
+                  onClick={() => activateSearchResult(result)}
                 >
-                  <PanelsTopLeft size={23} />
-                  <span>{widget.title}</span>
+                  <SearchControlPreview
+                    widgetId={result.kind === 'widget' ? result.id : undefined}
+                    toolId={result.kind === 'tool' ? result.id : undefined}
+                    status={status}
+                    notifications={notificationState}
+                    tool={tool}
+                    selectionShape={selectionShape}
+                    favoriteAppIds={favoriteAppIds}
+                  />
                 </button>
               )
             })}

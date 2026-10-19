@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import {
   BatteryFull,
   Check,
@@ -8,12 +8,14 @@ import {
   Wifi,
   WifiOff,
 } from 'lucide-react'
+import type { SystemStatus } from '../useSystemStatus'
 import styles from './SystemBar.module.css'
 import shellStyles from './ShellControls.module.css'
 
 export type SystemPanel = 'wifi' | 'volume' | 'battery' | 'clock' | null
 
 interface SystemBarProps {
+  status: SystemStatus
   openPanel: SystemPanel
   onPanelChange: (panel: SystemPanel) => void
   id: Exclude<SystemPanel, null>
@@ -21,20 +23,32 @@ interface SystemBarProps {
 }
 
 export default function SystemBar({
+  status,
   openPanel,
   onPanelChange,
   id,
   expanded,
 }: SystemBarProps) {
-  const [wifiEnabled, setWifiEnabled] = useState(true)
-  const [volume, setVolume] = useState(64)
-  const [now, setNow] = useState(() => new Date())
+  const root = useRef<HTMLElement>(null)
+  const {
+    wifiEnabled,
+    setWifiEnabled,
+    volume,
+    setVolume,
+    now,
+    batteryPercentage,
+  } = status
 
   useEffect(() => {
-    if (id !== 'clock') return
-    const timer = window.setInterval(() => setNow(new Date()), 15_000)
-    return () => window.clearInterval(timer)
-  }, [id])
+    if (openPanel !== id) return
+    const panel = root.current?.querySelector<HTMLElement>(
+      '[data-system-panel]',
+    )
+    const control = panel?.querySelector<HTMLElement>(
+      'button:not(:disabled), input:not(:disabled), select:not(:disabled)',
+    )
+    ;(control ?? panel)?.focus({ preventScroll: true })
+  }, [id, openPanel])
 
   useEffect(() => {
     if (openPanel !== id) return
@@ -73,6 +87,7 @@ export default function SystemBar({
 
   return (
     <header
+      ref={root}
       className={`${styles.bar} ${shellStyles.surface}`}
       aria-label={id === 'clock' ? 'Date and time' : `${id} status`}
       data-status-item={id}
@@ -141,22 +156,26 @@ export default function SystemBar({
         <button
           type="button"
           className={`${styles.statusButton} ${expanded ? styles.withDetail : ''} ${shellStyles.control}`}
-          title="Battery · 87%"
-          aria-label="Battery status, 87%"
+          title={`Battery · ${batteryPercentage}%`}
+          aria-label={`Battery status, ${batteryPercentage}%`}
           aria-expanded={openPanel === 'battery'}
           onClick={() => togglePanel('battery')}
         >
           <BatteryFull size={19} aria-hidden="true" />
           {expanded && (
             <span className={styles.detail} aria-hidden="true">
-              87%
+              {batteryPercentage}%
             </span>
           )}
         </button>
       )}
 
       {id === 'wifi' && openPanel === id && (
-        <div className={`${styles.popover} ${styles.systemPopover}`}>
+        <div
+          className={`${styles.popover} ${styles.systemPopover}`}
+          data-system-panel
+          tabIndex={-1}
+        >
           <label className={styles.toggleRow}>
             <strong>Wi-Fi</strong>
             <input
@@ -182,7 +201,11 @@ export default function SystemBar({
       )}
 
       {id === 'volume' && openPanel === id && (
-        <div className={`${styles.popover} ${styles.systemPopover}`}>
+        <div
+          className={`${styles.popover} ${styles.systemPopover}`}
+          data-system-panel
+          tabIndex={-1}
+        >
           <div className={styles.settingHeading}>
             <label htmlFor="system-volume">Sound</label>
             <span>
@@ -208,11 +231,16 @@ export default function SystemBar({
       )}
 
       {id === 'battery' && openPanel === id && (
-        <div className={`${styles.popover} ${styles.systemPopover}`}>
+        <div
+          className={`${styles.popover} ${styles.systemPopover}`}
+          data-system-panel
+          tabIndex={-1}
+        >
           <div className={styles.settingHeading}>
             <strong>Battery</strong>
             <span>
-              87<small>%</small>
+              {batteryPercentage}
+              <small>%</small>
             </span>
           </div>
           <div className={styles.batteryMeter}>
@@ -224,7 +252,11 @@ export default function SystemBar({
       )}
 
       {id === 'clock' && openPanel === id && (
-        <div className={`${styles.popover} ${styles.calendarPopover}`}>
+        <div
+          className={`${styles.popover} ${styles.calendarPopover}`}
+          data-system-panel
+          tabIndex={-1}
+        >
           <div className={styles.calendarHeading}>
             <div>
               <strong>

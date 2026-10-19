@@ -9,7 +9,14 @@ import { getWindowClearance } from './window-layout.ts'
 
 export interface CanvasSearchResult {
   id: string
-  kind: 'item' | 'window' | 'drawing' | 'widget'
+  kind: 'item' | 'window' | 'drawing' | 'widget' | 'tool'
+}
+
+interface SearchEntry {
+  id: string
+  title: string
+  description: string
+  keywords: readonly string[]
 }
 
 export interface SearchPlacement {
@@ -126,12 +133,8 @@ export function getCanvasSearchLayout(
   query: string,
   handwritingOpen = false,
   extra?: {
-    widgets: readonly {
-      id: string
-      title: string
-      description: string
-      keywords: readonly string[]
-    }[]
+    widgets?: readonly SearchEntry[]
+    tools?: readonly SearchEntry[]
   },
 ) {
   const words = query.trim().toLocaleLowerCase().split(/\s+/).filter(Boolean)
@@ -157,11 +160,18 @@ export function getCanvasSearchLayout(
       `${widget.title} ${widget.description} ${widget.keywords.join(' ')} widget`,
     ),
   )
+  const allTools = extra?.tools ?? []
+  const tools = allTools.filter((tool) =>
+    matches(
+      `${tool.title} ${tool.description} ${tool.keywords.join(' ')} tool`,
+    ),
+  )
   const results: CanvasSearchResult[] = [
     ...items.map(({ id }) => ({ id, kind: 'item' as const })),
     ...windows.map(({ id }) => ({ id, kind: 'window' as const })),
     ...drawings.map(({ id }) => ({ id, kind: 'drawing' as const })),
     ...widgets.map(({ id }) => ({ id, kind: 'widget' as const })),
+    ...tools.map(({ id }) => ({ id, kind: 'tool' as const })),
   ]
   const clearance = getWindowClearance(view.width)
   const fieldWidth = Math.min(420, view.width - clearance.side * 2)
@@ -218,7 +228,10 @@ export function getCanvasSearchLayout(
     results.length,
     availableWidth,
     availableHeight,
-    windows.length > 0 || drawings.length > 0 || widgets.length > 0,
+    windows.length > 0 ||
+      drawings.length > 0 ||
+      widgets.length > 0 ||
+      tools.length > 0,
   )
   const resultTop = resultsAbove
     ? position.y - 24 - grid.height - handwritingHeight
@@ -241,6 +254,12 @@ export function getCanvasSearchLayout(
     widgets.map((item, index) => [
       item.id,
       items.length + windows.length + drawings.length + index,
+    ]),
+  )
+  const toolIndexes = new Map(
+    tools.map((item, index) => [
+      item.id,
+      items.length + windows.length + drawings.length + widgets.length + index,
     ]),
   )
   return {
@@ -293,6 +312,18 @@ export function getCanvasSearchLayout(
         ]
       }),
     ),
+    tools: new Map(
+      allTools.map((tool) => {
+        const index = toolIndexes.get(tool.id)
+        const bounds = { x: view.x, y: view.y, width: 240, height: 72 }
+        return [
+          tool.id,
+          index === undefined
+            ? parkOutsideView(bounds, view)
+            : placeInGrid(bounds, index, grid, origin),
+        ]
+      }),
+    ),
   }
 }
 
@@ -322,6 +353,7 @@ export function getWindowSwitcherLayout(
   return {
     drawings: new Map<string, SearchPlacement>(),
     widgets: new Map<string, SearchPlacement>(),
+    tools: new Map<string, SearchPlacement>(),
     items: new Map(
       workspace.items.map((item) => [item.id, parkOutsideView(item, view)]),
     ),

@@ -15,6 +15,14 @@
   position: fixed;
 }
 
+/* Only an open control rises above canvas windows; its resting layer stays put. */
+.widget:is(
+    [data-layout-surface='canvas'],
+    [data-layout-surface='background']
+  ):has(:global([aria-expanded='true']), :global([role='menu'])) {
+  z-index: 1000;
+}
+
 .widget[hidden] {
   display: none;
 }
