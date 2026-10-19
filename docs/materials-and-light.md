@@ -97,7 +97,7 @@ The surface tokens are in `src/index.css`. Toolbar coverage is in
 ### Light-mode hover
 
 In light mode, hovering or focusing within a toolbar adds a subtle accent tint
-to its raised fill. Monitor previews use the same 3% surface tint. Controls
+to its raised fill. Monitor previews use the same 1% surface tint. Controls
 inside raised surfaces use a 5% accent wash with translucent white, keeping
 hover lighter and less saturated than an active selection.
 

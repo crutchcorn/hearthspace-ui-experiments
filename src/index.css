@@ -20,12 +20,12 @@
   );
   --chrome-raised-hover: color-mix(
     in srgb,
-    var(--chrome-raised) 97%,
+    var(--chrome-raised) 99%,
     var(--accent)
   );
   --surface-control-hover: #ffffff5c;
   --chrome-hover: var(--surface-control-hover);
-  --raised-control-hover: color-mix(in srgb, var(--accent) 5%, #ffffff33);
+  --raised-control-hover: color-mix(in srgb, var(--accent) 5%, #fff3);
   --chrome-border: #ffffff70;
   --chrome-text: #303a3c;
   --chrome-muted: #667373;
