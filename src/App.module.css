@@ -948,6 +948,8 @@
   border: 0;
   border-radius: inherit;
   background: var(--material-surface);
+  backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-edge);
   color: var(--chrome-text);
   cursor: pointer;
 }
@@ -1002,13 +1004,29 @@
   border-radius: var(--radius-panel);
   background: var(--material-surface);
   color: var(--chrome-text);
-  box-shadow: var(--shadow-panel);
+  backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-edge), var(--shadow-panel);
   transform-origin: top left;
   cursor: pointer;
 }
 
 .widgetResult[data-preview-selected='true'] {
   outline: 2px solid var(--accent);
+}
+
+.pinnedReveal:is(:hover, :focus-visible),
+.widgetResult:is(:hover, :focus-visible, [data-preview-selected='true']) {
+  background: var(--material-raised);
+  box-shadow: var(--glass-edge-active), var(--shadow-glow);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .pinnedReveal,
+  .widgetResult {
+    transition:
+      background 180ms ease,
+      box-shadow 220ms ease;
+  }
 }
 
 .desktop[data-focus-mode='true'][data-shell-peek='false']

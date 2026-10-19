@@ -12,23 +12,21 @@
   height: 236px;
   flex-shrink: 0;
   overflow: hidden;
-  border: 1px solid #ffffff5c;
+  border: 1px solid var(--chrome-border);
   border-radius: var(--radius-tile);
-  background:
-    radial-gradient(
-      ellipse at 24% 100%,
-      color-mix(in srgb, var(--accent) 17%, transparent),
-      transparent 70%
-    ),
-    #302622ed;
-  box-shadow:
-    inset 0 1px 0 #d3ab8933,
-    0 8px 20px #51372517;
-  color: #f1d9c2;
+  background: var(--material-surface);
+  box-shadow: var(--glass-edge);
+  backdrop-filter: var(--glass-blur);
+  color: var(--chrome-text);
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease;
 }
 
+.pad:is(:hover, :focus-within),
 .pad[data-drawing='true'] {
-  border-color: color-mix(in srgb, var(--accent-light) 70%, transparent);
+  border-color: var(--accent-border);
+  box-shadow: var(--shadow-glow), var(--glass-edge-active);
 }
 
 .padMeta {
@@ -40,7 +38,7 @@
   height: 44px;
   align-items: center;
   padding-inline: 14px;
-  color: #d7baa194;
+  color: var(--chrome-muted);
   font-size: 9px;
   pointer-events: none;
 }
@@ -58,7 +56,7 @@
 
 .stroke {
   fill: none;
-  stroke: var(--accent-light);
+  stroke: var(--accent-strong);
   stroke-linecap: round;
   stroke-linejoin: round;
   stroke-width: 2.5;
@@ -78,7 +76,7 @@
 }
 
 .padPrompt > svg {
-  color: var(--accent-light);
+  color: var(--accent-strong);
 }
 
 .padPrompt strong {
@@ -89,7 +87,7 @@
 
 .padPrompt span {
   max-width: 220px;
-  color: #d7baa1ad;
+  color: var(--chrome-muted);
   font-size: 10px;
   line-height: 1.5;
 }
@@ -102,7 +100,7 @@
   max-width: calc(100% - 120px);
   align-items: center;
   gap: 5px;
-  color: var(--accent-light);
+  color: var(--accent-strong);
   font-size: 9px;
   pointer-events: none;
 }
@@ -121,22 +119,26 @@
   border: 1px solid var(--chrome-border);
   border-radius: var(--radius-control);
   background: var(--surface-control);
+  box-shadow: var(--glass-edge);
   color: var(--chrome-text);
   font-size: 11px;
   white-space: nowrap;
+  transition:
+    background 180ms ease,
+    box-shadow 180ms ease;
 }
 
-.cancelButton:hover {
-  background: var(--chrome-raised);
+.cancelButton:is(:hover, :focus-visible),
+.settingsButton:is(:hover, :focus-visible),
+.retryButton:is(:hover, :focus-visible) {
+  background: var(--chrome-hover);
+  box-shadow: var(--control-glow), var(--glass-edge-active);
 }
 
 .settingsButton,
 .retryButton {
   position: absolute;
   right: 8px;
-  border-color: #b6957733;
-  background: #6c4a3224;
-  color: #f1d9c2;
 }
 
 .settingsButton {
@@ -148,11 +150,6 @@
 
 .retryButton {
   bottom: 8px;
-}
-
-.settingsButton:hover,
-.retryButton:hover {
-  background: #b6957726;
 }
 
 .footer {
@@ -179,24 +176,36 @@
   border: 1px solid var(--accent-border);
   border-radius: var(--radius-control);
   background: var(--accent);
-  box-shadow:
-    0 4px 12px color-mix(in srgb, var(--accent) 13%, transparent),
-    inset 0 1px 0 color-mix(in srgb, var(--accent-wash) 30%, transparent);
+  box-shadow: var(--control-glow), var(--glass-edge);
   color: var(--accent-ink);
   font-size: 12px;
   font-weight: 500;
   white-space: nowrap;
+  transition:
+    background 180ms ease,
+    box-shadow 180ms ease;
 }
 
-.saveButton:hover {
+.saveButton:is(:hover, :focus-visible):not(:disabled) {
   background: var(--accent-hover);
+  box-shadow: var(--shadow-glow), var(--glass-edge-active);
 }
 
 .saveButton:disabled {
   border-color: var(--chrome-border);
-  background: #b6987d1a;
+  background: var(--surface-control);
   box-shadow: none;
   color: var(--chrome-muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pad,
+  .settingsButton,
+  .retryButton,
+  .cancelButton,
+  .saveButton {
+    transition: none;
+  }
 }
 
 .gesturePad button:focus-visible {

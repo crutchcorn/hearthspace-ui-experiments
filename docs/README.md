@@ -53,3 +53,7 @@ interaction and points to its implementation.
 For contributor commands, see [CONTRIBUTING.md](../CONTRIBUTING.md).
 [Temporary notes](../notes/README.md) are provisional, untrusted material;
 verify them against the implementation before relying on them.
+
+## Materials and light
+
+- [Materials and light](materials-and-light.md): Current translucent shell, layered tint, interaction lighting, and ambient canvas.

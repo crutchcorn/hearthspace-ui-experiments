@@ -263,7 +263,10 @@ export default function Settings({
                           className={`${styles.card} ${styles.modeCard}`}
                           data-mode={id}
                         >
-                          <span className={styles.modePreview} aria-hidden="true">
+                          <span
+                            className={styles.modePreview}
+                            aria-hidden="true"
+                          >
                             <span className={styles.previewWindow} />
                             <span className={styles.previewPanel} />
                           </span>

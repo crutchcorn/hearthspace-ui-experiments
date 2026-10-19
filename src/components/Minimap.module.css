@@ -7,7 +7,7 @@
   padding: 0;
   border: 1px solid var(--chrome-border);
   border-radius: var(--radius-control);
-  background-color: var(--field);
+  background-color: var(--surface-control);
   background-image:
     radial-gradient(
       color-mix(in srgb, var(--field-dot) 65%, transparent) 0.65px,
@@ -19,11 +19,19 @@
     12px 12px,
     48px 48px,
     48px 48px;
-  box-shadow: inset 0 1px 6px
-    color-mix(in srgb, var(--chrome-text) 5%, transparent);
+  box-shadow: var(--glass-edge);
   cursor: grab;
   touch-action: none;
   user-select: none;
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.map:is(:hover, :focus-visible),
+.map[data-dragging='true'] {
+  border-color: var(--accent-border);
+  box-shadow: var(--control-glow), var(--glass-edge-active);
 }
 
 .map:focus-visible {
@@ -39,9 +47,15 @@
   position: absolute;
   border: 1px solid var(--chrome-muted);
   border-radius: var(--radius-detail);
-  background: var(--chrome);
-  box-shadow: 0 1px 2px color-mix(in srgb, var(--chrome-text) 8%, transparent);
+  background: var(--material-surface);
+  box-shadow: var(--glass-edge);
   pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .map {
+    transition: none;
+  }
 }
 
 .viewport {

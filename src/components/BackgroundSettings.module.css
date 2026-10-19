@@ -25,9 +25,11 @@
   overflow: hidden;
   border: 1px solid var(--line);
   border-radius: var(--radius-control);
-  background-color: var(--field);
-  background-image: radial-gradient(var(--field-dot) 1px, transparent 1.2px);
-  background-size: 12px 12px;
+  background:
+    radial-gradient(ellipse at 88% 12%, var(--ambient-warm), transparent 62%),
+    radial-gradient(ellipse at 8% 90%, var(--ambient-cool), transparent 65%),
+    radial-gradient(ellipse at 75% 100%, var(--ambient-dusk), transparent 55%),
+    var(--field);
   box-shadow: var(--glass-edge);
 }
 

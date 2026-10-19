@@ -30,10 +30,19 @@
       transparent calc(74% + 0.5px)
     ),
     var(--surface-control);
+  box-shadow: var(--glass-edge);
   color: var(--accent);
   cursor: crosshair;
   touch-action: none;
   user-select: none;
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.surface:is(:hover, :active) {
+  border-color: var(--accent-border);
+  box-shadow: var(--control-glow), var(--glass-edge-active);
 }
 
 .controls {
@@ -54,10 +63,14 @@
   background: transparent;
   color: var(--chrome-muted);
   touch-action: manipulation;
+  transition:
+    background 180ms ease,
+    box-shadow 180ms ease;
 }
 
-.controls button:hover:not(:disabled) {
+.controls button:is(:hover, :focus-visible):not(:disabled) {
   background: var(--chrome-hover);
+  box-shadow: var(--control-glow), var(--glass-edge-active);
   color: var(--chrome-text);
 }
 
@@ -93,6 +106,11 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .surface,
+  .controls button {
+    transition: none;
+  }
+
   .spinner {
     animation: none;
   }

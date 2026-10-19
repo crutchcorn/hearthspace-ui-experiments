@@ -183,6 +183,7 @@
 
 .modePreview {
   position: relative;
+  pointer-events: none;
   height: 74px;
   grid-column: 1 / -1;
   overflow: hidden;
@@ -200,7 +201,9 @@
   border-radius: 6px;
   background:
     radial-gradient(ellipse at 0 100%, #ffffff40, transparent 70%), #fff9;
-  box-shadow: 0 5px 16px #40585a1a, inset 0 1px 0 #ffffffa6;
+  box-shadow:
+    0 5px 16px #40585a1a,
+    inset 0 1px 0 #ffffffa6;
   backdrop-filter: blur(12px);
 }
 
@@ -245,7 +248,9 @@
   border-color: #ffffff29;
   background:
     radial-gradient(ellipse at 0 100%, #90a9b01f, transparent 70%), #20282d91;
-  box-shadow: 0 5px 16px #111b2726, inset 0 1px 0 #ffffff1f;
+  box-shadow:
+    0 5px 16px #111b2726,
+    inset 0 1px 0 #ffffff1f;
 }
 
 .modeCard[data-mode='dark'] .previewWindow::before,

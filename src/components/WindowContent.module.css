@@ -43,7 +43,9 @@
 }
 
 .notes textarea:focus-visible {
-  box-shadow: inset 0 -1px color-mix(in srgb, var(--accent) 41%, transparent);
+  box-shadow:
+    inset 0 -1px color-mix(in srgb, var(--accent) 55%, transparent),
+    0 8px 22px -16px var(--accent);
 }
 
 .footer {
@@ -65,6 +67,7 @@
   min-height: 100%;
   flex-direction: column;
   padding: 20px 22px 0;
+  background: var(--surface-subtle);
 }
 
 .fileHeader {
@@ -106,8 +109,8 @@
   padding: 12px;
   border: 1px solid var(--chrome-border);
   border-radius: var(--radius-tile);
-  background: var(--surface-control);
-  box-shadow: 0 2px 5px #996e3f05;
+  background: var(--edge-light), var(--surface-control);
+  box-shadow: var(--glass-edge);
 }
 
 .fileTile > svg {
@@ -143,15 +146,15 @@
   min-height: 100%;
   flex-direction: column;
   padding: 23px 23px 0;
-  background: linear-gradient(145deg, #312720, #211c18);
-  color: #f4e9df;
+  background: var(--surface-subtle);
+  color: var(--ink);
 }
 
 .terminalSession {
   margin-bottom: 22px;
   padding-bottom: 13px;
-  border-bottom: 1px solid #d1a38126;
-  color: #bc9f89;
+  border-bottom: 1px solid var(--line);
+  color: var(--muted);
   font-family: var(--mono);
   font-size: 10px;
 }
@@ -169,18 +172,18 @@
 }
 
 .console p > span:first-child {
-  color: var(--accent-light);
+  color: var(--accent-strong);
 }
 
 .consoleOutput {
-  color: #c3ad9b;
+  color: var(--muted);
 }
 
 .directoryList {
   display: flex;
   flex-wrap: wrap;
   gap: 5px 15px;
-  color: #c3ad9b;
+  color: var(--muted);
 }
 
 .cursor {
@@ -193,13 +196,14 @@
 }
 
 .terminal .footer {
-  border-color: #d1a38126;
-  color: #bc9f89;
+  border-color: var(--line);
+  color: var(--muted);
 }
 
 .browser {
   min-height: 100%;
   padding: 13px 15px 0;
+  background: var(--surface-subtle);
 }
 
 .addressBar {
@@ -210,7 +214,8 @@
   padding: 7px 11px;
   border: 1px solid var(--chrome-border);
   border-radius: var(--radius-control);
-  background: var(--surface-control);
+  background: var(--edge-light), var(--surface-control);
+  box-shadow: var(--glass-edge);
   color: var(--muted);
   font-size: 10px;
 }
@@ -267,7 +272,9 @@
 }
 
 .appPreview {
+  min-height: 100%;
   padding: 26px 25px;
+  background: var(--surface-subtle);
 }
 
 .previewHeading {
@@ -414,6 +421,7 @@
   border-bottom: 1px solid #d5d5de;
   border-radius: 0;
   background: #eeeef3;
+  box-shadow: none;
   color: #5a5c67;
 }
 

@@ -24,13 +24,18 @@
   border: 1px solid var(--chrome-border);
   border-radius: var(--radius-control);
   background: var(--surface-control);
+  box-shadow: var(--glass-edge);
   color: var(--chrome-text);
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease;
 }
 
 .field[data-focus-within] {
   border-color: var(--accent-border);
   outline: 2px solid var(--accent);
   outline-offset: -2px;
+  box-shadow: var(--control-glow), var(--glass-edge-active);
 }
 
 .input {
@@ -63,11 +68,15 @@
   border-radius: var(--radius-control);
   background: transparent;
   color: var(--chrome-muted);
+  transition:
+    background 180ms ease,
+    box-shadow 180ms ease;
 }
 
 .trigger[data-hovered],
 .trigger[data-pressed] {
   background: var(--chrome-hover);
+  box-shadow: var(--control-glow), var(--glass-edge-active);
   color: var(--chrome-text);
 }
 
@@ -82,7 +91,7 @@
   border: 1px solid var(--chrome-border);
   border-radius: var(--radius-tile);
   outline: none;
-  background: var(--chrome-raised);
+  background: var(--material-raised);
   box-shadow: var(--shadow-panel), var(--glass-edge);
   backdrop-filter: var(--glass-blur);
   color: var(--chrome-text);
@@ -107,6 +116,9 @@
   color: var(--chrome-text);
   font-size: 12px;
   cursor: pointer;
+  transition:
+    background 180ms ease,
+    box-shadow 180ms ease;
 }
 
 .appName {
@@ -121,11 +133,21 @@
 .app[data-focused],
 .app[data-hovered] {
   background: var(--chrome-hover);
+  box-shadow: var(--control-glow), var(--glass-edge-active);
 }
 
 .app[data-selected] {
   background: var(--accent-soft);
   color: var(--accent);
+  box-shadow: var(--glass-edge);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .field,
+  .trigger,
+  .app {
+    transition: none;
+  }
 }
 
 .app[data-focus-visible] {

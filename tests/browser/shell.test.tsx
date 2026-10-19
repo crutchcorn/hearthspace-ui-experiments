@@ -2,6 +2,34 @@ import { expect, test } from 'vitest'
 import { page, userEvent } from 'vitest/browser'
 import { renderDesktop, windowBounds } from './desktop'
 
+test('the launcher remains usable on a narrow desktop', async () => {
+  await page.viewport(390, 844)
+  try {
+    await renderDesktop()
+    await page.getByRole('button', { name: 'Open app launcher' }).click()
+    const launcher = page.getByRole('region', { name: 'App launcher' })
+    const search = launcher.getByRole('searchbox', { name: 'Search apps' })
+
+    // Catch a panel collapsing to icon size even when its children exist.
+    await expect
+      .poll(() => launcher.element().getBoundingClientRect().width)
+      .toBeGreaterThan(window.innerWidth / 2)
+    const bounds = launcher.element().getBoundingClientRect()
+    expect(bounds.left).toBeGreaterThanOrEqual(0)
+    expect(bounds.right).toBeLessThanOrEqual(window.innerWidth)
+    await search.fill('Settings')
+    await launcher
+      .getByRole('button', { name: 'Settings', exact: true })
+      .click()
+    await expect.element(launcher).not.toBeInTheDocument()
+    await expect
+      .element(page.getByRole('heading', { name: 'Appearance', exact: true }))
+      .toBeVisible()
+  } finally {
+    await page.viewport(1280, 900)
+  }
+})
+
 test('opening another shell panel dismisses the previous one', async () => {
   await renderDesktop()
   await page.getByRole('button', { name: 'Notifications, 3 new' }).click()

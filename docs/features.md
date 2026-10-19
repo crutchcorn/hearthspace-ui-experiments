@@ -125,3 +125,7 @@ including the version where drawings could attach to frame edges and groups. Sep
 storage is unavailable, the current session remains usable; background save
 failures also display an explanation. See [saved state](spatial-playground.md#saved-state)
 for storage ownership and validation.
+
+## Materials and light
+
+- [Materials and light](materials-and-light.md): Current translucent shell, layered tint, interaction lighting, and ambient canvas.

@@ -426,8 +426,6 @@
     padding-inline: 2px;
   }
 
-  .launcher,
-  .launcher button,
   .appIcon {
     width: 47px;
     height: 44px;
@@ -454,6 +452,8 @@
     animation: none;
   }
 
+  .launcher,
+  .launcher button,
   .appIcon {
     transition: none;
   }

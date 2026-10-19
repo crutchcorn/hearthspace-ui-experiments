@@ -35,7 +35,7 @@ export default function BackgroundSettings({
         </div>
         <div className={styles.photoDetails}>
           <strong className={styles.filename} title={background?.name}>
-            {background?.name ?? 'Canvas dots'}
+            {background?.name ?? 'Ambient canvas'}
           </strong>
           <label className={styles.upload}>
             <ImagePlus size={14} aria-hidden="true" />
