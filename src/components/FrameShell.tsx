@@ -30,7 +30,7 @@ interface FrameShellProps {
   hidden: boolean
   inert: boolean
   widgets: Record<string, ReactNode>
-  renderItem: (id: string) => ReactNode
+  renderItem: (target: LayoutTarget, edge?: FrameEdge) => ReactNode
 }
 
 export default function FrameShell({
@@ -148,9 +148,10 @@ export default function FrameShell({
                   key={targetKey(member)}
                   className={styles.itemMember}
                   data-group-member
+                  data-member-kind={member.kind}
                   data-group-drop-target={matches(groupDropTarget, member)}
                 >
-                  {renderItem(member.id)}
+                  {renderItem(member, edge)}
                 </div>
               ),
             )}

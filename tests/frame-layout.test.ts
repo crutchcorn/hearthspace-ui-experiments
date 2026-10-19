@@ -391,6 +391,82 @@ test('removing a group respects the canvas tools safeguard and preserves persona
   assert.deepEqual(getPlacement(allowed, tools), { surface: 'hidden' })
 })
 
+test('windows and drawings join a frame group and retain membership after reload', () => {
+  const window = { kind: 'window', id: 'notes' } as const
+  const drawing = { kind: 'drawing', id: 'sketch' } as const
+  let layout = mergeFrameTargets(defaults, window, apps)
+  layout = mergeFrameTargets(layout, drawing, {
+    kind: 'group',
+    id: getTargetGroup(layout, apps)!.id,
+  })
+  assert.deepEqual(getTargetGroup(layout, apps)?.members, [
+    apps,
+    window,
+    drawing,
+  ])
+  assert.deepEqual(getPlacement(layout, window), {
+    surface: 'frame',
+    edge: 'bottom',
+    position: 1,
+  })
+  assert.deepEqual(getPlacement(layout, drawing), getPlacement(layout, apps))
+  saveFrameLayout(layout)
+  assert.deepEqual(loadFrameLayout(), layout)
+})
+
+test('removing a mixed group returns personal windows and drawings to the canvas', () => {
+  const window = { kind: 'window', id: 'notes' } as const
+  const drawing = { kind: 'drawing', id: 'sketch' } as const
+  let layout = mergeFrameTargets(defaults, window, apps)
+  layout = mergeFrameTargets(layout, drawing, apps)
+  const removed = setObjectPlacement(
+    layout,
+    { kind: 'group', id: getTargetGroup(layout, apps)!.id },
+    { surface: 'hidden' },
+  )
+  assert.deepEqual(getFrameGroups(removed), [])
+  assert.deepEqual(getPlacement(removed, window), { surface: 'canvas' })
+  assert.deepEqual(getPlacement(removed, drawing), { surface: 'canvas' })
+  assert.deepEqual(getPlacement(removed, apps), { surface: 'hidden' })
+  saveFrameLayout(removed)
+  assert.deepEqual(loadFrameLayout(), removed)
+})
+
+test('detaching a grouped drawing preserves the other window attachment and its frame edge', () => {
+  const window = { kind: 'window', id: 'notes' } as const
+  const drawing = { kind: 'drawing', id: 'sketch' } as const
+  let layout = setObjectPlacement(defaults, window, {
+    surface: 'frame',
+    edge: 'left',
+    position: 0.4,
+  })
+  layout = mergeFrameTargets(layout, drawing, window)
+  const detached = setObjectPlacement(layout, drawing, {
+    surface: 'background',
+    x: 420,
+    y: 360,
+  })
+  assert.deepEqual(getFrameGroups(detached), [])
+  assert.deepEqual(getPlacement(detached, drawing), {
+    surface: 'background',
+    x: 420,
+    y: 360,
+  })
+  assert.deepEqual(getPlacement(detached, window), {
+    surface: 'frame',
+    edge: 'left',
+    position: 0.4,
+  })
+  const ungrouped = ungroupFrameTarget(layout, {
+    kind: 'group',
+    id: getTargetGroup(layout, window)!.id,
+  })
+  assert.deepEqual(
+    getPlacement(ungrouped, drawing),
+    getPlacement(ungrouped, window),
+  )
+})
+
 test('changing the tools hiding preference does not detach visible tools from their group', () => {
   const grouped = mergeFrameTargets(defaults, tools, apps)
   const changed = setAllowHideTools(grouped, true)
@@ -441,7 +517,7 @@ test('malformed groups cannot duplicate an attachment, nest groups, or retain in
         invalid: {
           id: 'invalid',
           members: [
-            { kind: 'window', id: 'notes' },
+            { kind: 'group', id: 'good' },
             { kind: 'widget', id: 'missing' },
           ],
         },

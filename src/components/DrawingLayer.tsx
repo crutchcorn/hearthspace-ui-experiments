@@ -4,8 +4,15 @@ import type { Bounds } from '../desktop'
 import type { SearchPlacement } from '../canvas-search'
 import type { CanvasDrawing, DrawingLayerName } from '../drawings'
 import type { GesturePoint } from '../gestures'
-import { getFrameBounds, targetKey, type FrameLayout } from '../frame-layout'
+import {
+  getFrameBounds,
+  getPlacement,
+  getTargetGroup,
+  targetKey,
+  type FrameLayout,
+} from '../frame-layout'
 import styles from './DrawingLayer.module.css'
+import type { FramePreviewBounds } from './FramePreviewSlot'
 
 interface DrawingLayerProps {
   drawings: CanvasDrawing[]
@@ -16,6 +23,7 @@ interface DrawingLayerProps {
   frameLayout?: FrameLayout
   view?: Bounds
   frameHost?: HTMLElement | null
+  groupBounds?: Map<string, FramePreviewBounds>
   draft?: { points: GesturePoint[]; layer: DrawingLayerName }
   interactive: boolean
   onPointerDown: (event: PointerEvent<SVGSVGElement>, id: string) => void
@@ -58,6 +66,7 @@ export default function DrawingLayer({
   frameLayout,
   view,
   frameHost,
+  groupBounds,
   draft,
   interactive,
   onPointerDown,
@@ -82,11 +91,17 @@ export default function DrawingLayer({
     <div className={styles.layer} data-drawing-layer={layer}>
       {drawings.map((drawing, index) => {
         const placement = placements?.get(drawing.id)
-        const layout = frameLayout?.placements[
-          targetKey({ kind: 'drawing', id: drawing.id })
-        ] ?? {
-          surface: drawing.layer === 'below' ? 'background' : 'canvas',
-        }
+        const group =
+          frameLayout &&
+          getTargetGroup(frameLayout, { kind: 'drawing', id: drawing.id })
+        const layout =
+          group && frameLayout
+            ? getPlacement(frameLayout, { kind: 'drawing', id: drawing.id })
+            : (frameLayout?.placements[
+                targetKey({ kind: 'drawing', id: drawing.id })
+              ] ?? {
+                surface: drawing.layer === 'below' ? 'background' : 'canvas',
+              })
         const effectiveLayer = placements
           ? 'above'
           : layout.surface === 'background'
@@ -98,6 +113,13 @@ export default function DrawingLayer({
         const bounds = framed
           ? getFrameBounds(layout, drawing.width, drawing.height, view)
           : drawing
+        const slot = groupBounds?.get(`drawing:${drawing.id}`)
+        if (framed && group && slot) {
+          bounds.x = slot.x
+          bounds.y = slot.y
+          bounds.width = slot.width
+          bounds.height = slot.height
+        }
         const drawingInteractive =
           !consumingIds.includes(drawing.id) &&
           (placements ? placement?.matches === true : interactive)
@@ -122,6 +144,10 @@ export default function DrawingLayer({
             tabIndex={drawingInteractive ? 0 : undefined}
             viewBox={`0 0 ${drawing.width} ${drawing.height}`}
             style={{
+              clipPath:
+                framed && group && slot
+                  ? `inset(${Math.max(0, slot.frame.y - bounds.y)}px ${Math.max(0, bounds.x + bounds.width - slot.frame.x - slot.frame.width)}px ${Math.max(0, bounds.y + bounds.height - slot.frame.y - slot.frame.height)}px ${Math.max(0, slot.frame.x - bounds.x)}px)`
+                  : undefined,
               position: framed ? 'fixed' : undefined,
               left: bounds.x,
               top: bounds.y,

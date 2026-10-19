@@ -194,9 +194,7 @@ export function mergeFrameTargets(
   before = false,
 ): FrameLayout {
   const canGroup = (candidate: LayoutTarget) =>
-    candidate.kind === 'widget' ||
-    candidate.kind === 'item' ||
-    (candidate.kind === 'group' && Boolean(getTargetGroup(layout, candidate)))
+    candidate.kind !== 'group' || Boolean(getTargetGroup(layout, candidate))
   if (
     !canGroup(source) ||
     !canGroup(target) ||
@@ -385,7 +383,10 @@ function normalizeLayout(value: unknown): FrameLayout {
         if (
           !isRecord(candidate) ||
           typeof candidate.id !== 'string' ||
-          (candidate.kind !== 'widget' && candidate.kind !== 'item')
+          (candidate.kind !== 'widget' &&
+            candidate.kind !== 'item' &&
+            candidate.kind !== 'window' &&
+            candidate.kind !== 'drawing')
         )
           continue
         const member = readTarget(`${candidate.kind}:${candidate.id}`)

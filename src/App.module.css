@@ -871,7 +871,7 @@
 
 .frameHost {
   position: fixed;
-  z-index: 1000;
+  z-index: 1101;
   inset: 0;
   overflow: hidden;
   pointer-events: none;

@@ -18,8 +18,13 @@ import {
   getPinnedWindowOffset,
   getTargetGroup,
   getWidgetExpanded,
+  targetKey,
+  type LayoutTarget,
 } from './frame-layout'
 import FrameShell from './components/FrameShell'
+import FramePreviewSlot, {
+  type FramePreviewBounds,
+} from './components/FramePreviewSlot'
 import LayoutEditor from './components/LayoutEditor'
 import FrameGuides from './components/FrameGuides'
 import LayoutConfirm from './components/LayoutConfirm'
@@ -182,6 +187,36 @@ function App() {
   const [tool, setTool] = useState(loadCanvasTool)
   const drawingLayer: DrawingLayerName = 'above'
   const [frameHost, setFrameHost] = useState<HTMLDivElement | null>(null)
+  const [framePreviewBounds, setFramePreviewBounds] = useState(
+    new Map<string, FramePreviewBounds>(),
+  )
+  const updateFramePreviewBounds = useCallback(
+    (target: LayoutTarget, bounds: FramePreviewBounds | null) => {
+      setFramePreviewBounds((current) => {
+        const key = targetKey(target)
+        const previous = current.get(key)
+        if (
+          (!bounds && !previous) ||
+          (bounds &&
+            previous &&
+            bounds.x === previous.x &&
+            bounds.y === previous.y &&
+            bounds.width === previous.width &&
+            bounds.height === previous.height &&
+            bounds.frame.x === previous.frame.x &&
+            bounds.frame.y === previous.frame.y &&
+            bounds.frame.width === previous.frame.width &&
+            bounds.frame.height === previous.frame.height)
+        )
+          return current
+        const next = new Map(current)
+        if (bounds) next.set(key, bounds)
+        else next.delete(key)
+        return next
+      })
+    },
+    [],
+  )
   const [expandedPinnedId, setExpandedPinnedId] = useState<string | null>(null)
   const [hoveredPinnedId, setHoveredPinnedId] = useState<string | null>(null)
   const [closingPinnedId, setClosingPinnedId] = useState<string | null>(null)
@@ -2123,6 +2158,7 @@ function App() {
                 drawings={workspace.drawings}
                 frameLayout={objectLayout.layout}
                 frameHost={frameHost}
+                groupBounds={framePreviewBounds}
                 view={view}
                 placements={searchLayout?.drawings}
                 onOpen={(id) => activateSearchResult({ kind: 'drawing', id })}
@@ -2145,23 +2181,72 @@ function App() {
           )}
           {workspace.windows.map((item, index) => {
             const placement = previewLayout?.windows.get(item.id)
-            const objectPlacement = objectLayout.placement({
+            const grouped = getTargetGroup(objectLayout.layout, {
               kind: 'window',
               id: item.id,
             })
+            const movingGroup =
+              grouped && objectLayout.draggingWidget?.id === grouped.id
+                ? objectLayout.draggingWidget
+                : null
+            const savedObjectPlacement = objectLayout.placement({
+              kind: 'window',
+              id: item.id,
+            })
+            const objectPlacement = movingGroup?.edge
+              ? {
+                  surface: 'frame' as const,
+                  edge: movingGroup.edge,
+                  position: 0.5,
+                }
+              : savedObjectPlacement
             const attached =
               !previewLayout && objectPlacement.surface === 'frame'
+            const slot = grouped
+              ? framePreviewBounds.get(`window:${item.id}`)
+              : undefined
+            const expanded =
+              expandedPinnedId === item.id || (tool === 'layout' && !grouped)
             const frameBounds = attached
               ? getFrameBounds(objectPlacement, item.width, item.height, view)
               : null
-            const expanded = expandedPinnedId === item.id || tool === 'layout'
+            if (frameBounds && slot && objectPlacement.surface === 'frame') {
+              if (
+                objectPlacement.edge === 'top' ||
+                objectPlacement.edge === 'bottom'
+              ) {
+                frameBounds.x = expanded
+                  ? clamp(slot.x, 0, view.width - frameBounds.width)
+                  : slot.x
+                frameBounds.width = slot.width
+              } else {
+                frameBounds.y = expanded
+                  ? clamp(slot.y, 0, view.height - frameBounds.height)
+                  : slot.y
+                frameBounds.height = slot.height
+              }
+            }
             const offset = attached
               ? getPinnedWindowOffset(
                   frameBounds!,
                   objectPlacement.edge,
                   view,
                   expanded,
-                  hoveredPinnedId === item.id ? 100 : 42,
+                  slot
+                    ? Math.max(
+                        42,
+                        (objectPlacement.edge === 'left'
+                          ? slot.frame.x + slot.frame.width
+                          : objectPlacement.edge === 'right'
+                            ? view.width - slot.frame.x
+                            : objectPlacement.edge === 'top'
+                              ? slot.frame.y + slot.frame.height
+                              : view.height - slot.frame.y) +
+                          (hoveredPinnedId === item.id ? 58 : 0),
+                      )
+                    : hoveredPinnedId === item.id
+                      ? 100
+                      : 42,
                 )
               : { x: 0, y: 0 }
             const app = APP_CATALOG.find((entry) => entry.id === item.appId)
@@ -2220,6 +2305,13 @@ function App() {
                 }
                 className={styles.window}
                 style={{
+                  clipPath:
+                    slot && frameBounds && attached && !expanded
+                      ? objectPlacement.edge === 'top' ||
+                        objectPlacement.edge === 'bottom'
+                        ? `inset(0px ${Math.max(0, frameBounds.x + frameBounds.width - slot.frame.x - slot.frame.width)}px 0px ${Math.max(0, slot.frame.x - frameBounds.x)}px)`
+                        : `inset(${Math.max(0, slot.frame.y - frameBounds.y)}px 0px ${Math.max(0, frameBounds.y + frameBounds.height - slot.frame.y - slot.frame.height)}px 0px)`
+                      : undefined,
                   position:
                     renderedFocusView?.id === item.id || attached
                       ? 'fixed'
@@ -2436,6 +2528,7 @@ function App() {
                 drawings={workspace.drawings}
                 frameLayout={objectLayout.layout}
                 frameHost={frameHost}
+                groupBounds={framePreviewBounds}
                 view={view}
                 placements={searchLayout?.drawings}
                 onOpen={(id) => activateSearchResult({ kind: 'drawing', id })}
@@ -2647,18 +2740,37 @@ function App() {
         hidden={!!previewLayout}
         inert={windowSwitcher.open}
         widgets={frameWidgets}
-        renderItem={(id) => (
-          <DesktopItems
-            items={workspace.items.filter((item) => item.id === id)}
-            selectedIds={selectedItemIds}
-            frameLayout={objectLayout.layout}
-            view={view}
-            inline
-            onPointerDown={startItemGesture}
-            onSelect={selectDesktopItem}
-            onOpen={openDesktopItem}
-          />
-        )}
+        renderItem={(target, edge) => {
+          if (target.kind === 'item')
+            return (
+              <DesktopItems
+                items={workspace.items.filter((item) => item.id === target.id)}
+                selectedIds={selectedItemIds}
+                frameLayout={objectLayout.layout}
+                view={view}
+                inline
+                onPointerDown={startItemGesture}
+                onSelect={selectDesktopItem}
+                onOpen={openDesktopItem}
+              />
+            )
+          const item =
+            target.kind === 'window'
+              ? workspace.windows.find((item) => item.id === target.id)
+              : workspace.drawings.find((item) => item.id === target.id)
+          if (!item) return null
+          const vertical = edge === 'left' || edge === 'right'
+          const width = Math.min(item.width, view.width - 48)
+          const height = Math.min(item.height, view.height - 48)
+          return (
+            <FramePreviewSlot
+              target={target}
+              width={target.kind === 'window' && vertical ? 44 : width}
+              height={target.kind === 'window' && !vertical ? 44 : height}
+              onBounds={updateFramePreviewBounds}
+            />
+          )
+        }}
       />
       {launcher && (
         <AppLauncher

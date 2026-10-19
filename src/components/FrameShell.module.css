@@ -36,9 +36,14 @@
 
 .itemMember {
   flex: none;
+  min-width: 0;
+  min-height: 0;
+  border-radius: var(--radius-control);
+}
+
+.itemMember[data-member-kind='item'] {
   min-width: 44px;
   min-height: 44px;
-  border-radius: var(--radius-control);
 }
 
 .itemMember[data-group-drop-target='true'] {

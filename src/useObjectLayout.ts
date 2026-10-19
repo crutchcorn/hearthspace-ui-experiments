@@ -17,6 +17,7 @@ import {
   setAllowHideTools,
   targetKey,
   getFrameDropTarget,
+  getFrameBounds,
   getWidgetFrameDropTarget,
   type LayoutTarget,
   type ObjectPlacement,
@@ -31,6 +32,7 @@ import {
   type FrameLayout,
 } from './frame-layout'
 import { transformCanvasWorkspace, settleLayoutDrop } from './layout-workspace'
+import { mergeOverlappingFrameItems } from './frame-collisions'
 import { restoreBackgroundItems } from './peek-layout'
 
 export default function useObjectLayout(
@@ -173,6 +175,92 @@ export default function useObjectLayout(
     })
   }, [layout])
 
+  useLayoutEffect(() => {
+    const frame = requestAnimationFrame(() => {
+      if (drag.current) return
+      const targets: LayoutTarget[] = [
+        ...getFrameGroups(layout).map((group) => ({
+          kind: 'group' as const,
+          id: group.id,
+        })),
+        ...FRAME_WIDGETS.map((widget) => ({
+          kind: 'widget' as const,
+          id: widget.id,
+        })),
+        ...workspace.items.map((item) => ({
+          kind: 'item' as const,
+          id: item.id,
+        })),
+        ...workspace.windows.map((item) => ({
+          kind: 'window' as const,
+          id: item.id,
+        })),
+        ...workspace.drawings.map((item) => ({
+          kind: 'drawing' as const,
+          id: item.id,
+        })),
+      ]
+      const entries = targets.flatMap((target) => {
+        if (target.kind !== 'group' && getTargetGroup(layout, target)) return []
+        const placement = getPlacement(layout, target)
+        const element = targetElement(target)
+        if (
+          placement.surface !== 'frame' ||
+          !element ||
+          element.closest('[hidden]') ||
+          (!element.offsetWidth && !element.getBoundingClientRect().width)
+        )
+          return []
+        const rect = element.getBoundingClientRect()
+        const bounds = getFrameBounds(
+          placement,
+          element.offsetWidth || rect.width,
+          element.offsetHeight || rect.height,
+          view,
+          target.kind === 'window' || target.kind === 'drawing'
+            ? 'flush'
+            : 'padded',
+        )
+        if (target.kind === 'window') {
+          if (placement.edge === 'left' || placement.edge === 'right') {
+            bounds.width = Math.min(42, bounds.width)
+            if (placement.edge === 'right') bounds.x = view.width - bounds.width
+          } else {
+            bounds.height = Math.min(42, bounds.height)
+            if (placement.edge === 'bottom')
+              bounds.y = view.height - bounds.height
+          }
+        }
+        return [{ target, bounds }]
+      })
+      const next = mergeOverlappingFrameItems(layout, entries)
+      if (next === layout) return
+      setLayout(next)
+      setSelected((previous) => {
+        if (!previous) return previous
+        const representative =
+          previous.kind === 'group'
+            ? getTargetGroup(layout, previous)?.members[0]
+            : previous
+        const group = representative
+          ? getTargetGroup(next, representative)
+          : undefined
+        return group ? { kind: 'group', id: group.id } : previous
+      })
+      setWorkspace((previous) =>
+        transformCanvasWorkspace(previous, next, restoreBackgroundItems),
+      )
+    })
+    return () => cancelAnimationFrame(frame)
+  }, [
+    layout,
+    view,
+    workspace.items,
+    workspace.windows,
+    workspace.drawings,
+    setWorkspace,
+  ])
+
   function motionBounds(element: HTMLElement, widget: boolean): Bounds {
     const rect = element.getBoundingClientRect()
     if (!widget) return rect
@@ -205,27 +293,26 @@ export default function useObjectLayout(
   }
 
   function findGroupDrop(source: LayoutTarget, x: number, y: number) {
-    if (
-      source.kind !== 'widget' &&
-      source.kind !== 'item' &&
-      source.kind !== 'group'
-    )
-      return null
     const members =
       source.kind === 'group'
         ? (getFrameGroups(layout).find((group) => group.id === source.id)
             ?.members ?? [])
         : [source]
     const elements = document.querySelectorAll<HTMLElement>(
-      '[data-layout-widget], [data-desktop-item-id], [data-layout-group]',
+      '[data-layout-widget], [data-desktop-item-id], [data-layout-group], [data-window-id], [data-drawing-id]',
     )
     const candidates = [...elements].flatMap((element) => {
-      if (!element.offsetWidth || element.closest('[hidden]')) return []
+      if (!element.getBoundingClientRect().width || element.closest('[hidden]'))
+        return []
       const target: LayoutTarget = element.dataset.layoutWidget
         ? { kind: 'widget', id: element.dataset.layoutWidget }
         : element.dataset.desktopItemId
           ? { kind: 'item', id: element.dataset.desktopItemId }
-          : { kind: 'group', id: element.dataset.layoutGroup! }
+          : element.dataset.windowId
+            ? { kind: 'window', id: element.dataset.windowId }
+            : element.dataset.drawingId
+              ? { kind: 'drawing', id: element.dataset.drawingId }
+              : { kind: 'group', id: element.dataset.layoutGroup! }
       if (
         targetKey(target) === targetKey(source) ||
         members.some((member) => targetKey(member) === targetKey(target))
@@ -240,7 +327,22 @@ export default function useObjectLayout(
         return []
       const placement = getPlacement(layout, target)
       if (placement.surface !== 'frame') return []
-      const bounds = element.getBoundingClientRect()
+      let bounds = element.getBoundingClientRect()
+      if (target.kind === 'window') {
+        const vertical = placement.edge === 'left' || placement.edge === 'right'
+        const edgeBounds = getFrameBounds(
+          placement,
+          bounds.width,
+          bounds.height,
+          view,
+        )
+        bounds = new DOMRect(
+          placement.edge === 'right' ? view.width - 42 : edgeBounds.x,
+          placement.edge === 'bottom' ? view.height - 42 : edgeBounds.y,
+          vertical ? 42 : edgeBounds.width,
+          vertical ? edgeBounds.height : 42,
+        )
+      }
       if (
         x < bounds.left - 8 ||
         x > bounds.right + 8 ||
