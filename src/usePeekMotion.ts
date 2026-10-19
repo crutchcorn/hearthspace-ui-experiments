@@ -37,9 +37,10 @@ export default function usePeekMotion(
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
       for (const element of viewport.current?.querySelectorAll<Surface>(
         backgroundOnly
-          ? '[data-desktop-item-id], [data-drawing-layer="below"] [data-drawing-id]'
-          : '[data-window-id], [data-desktop-item-id], [data-drawing-layer="below"] [data-drawing-id]',
+          ? '[data-desktop-item-id], [data-drawing-id]'
+          : '[data-window-id], [data-desktop-item-id], [data-drawing-id]',
       ) ?? []) {
+        if (element.dataset.surface === 'frame') continue
         if (element.dataset.windowId === excludedWindowId && excludedWindowId)
           continue
         // Extending ink can rebase its SVG bounds without moving the artwork.

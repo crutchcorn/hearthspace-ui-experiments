@@ -30,7 +30,6 @@ export type Workspace = {
   note: string
 }
 
-export const STORAGE_KEY = 'hearthspace-playground-v1'
 export const CANVAS_TOOL_STORAGE_KEY = 'hearthspace-canvas-tool-v1'
 export const WINDOW_SELECTION_STORAGE_KEY = 'hearthspace-window-selection-v1'
 export const MIN_WIDTH = 280
@@ -66,13 +65,6 @@ export function loadWindowSelectionShape(): WindowSelectionShape {
 
 const INITIAL_NOTE =
   'Interface notes\n\nUse the corners for controls.\nKeep the canvas for work.\n\nTo explore\n- Compare grid and freeform layouts\n- Open a second browser window\n- Record a launch gesture\n\nOne accent color. Clear states.'
-const LEGACY_NOTE =
-  'What if a desktop felt a little more like a place?\n\nA place to leave a thought.\nTo spread things out.\nTo pick up right where you left off.\n\nLess switching. More space.'
-const DEMO_TITLES = new Map([
-  ['notes', { previous: 'A few thoughts', current: 'Scratchpad' }],
-  ['canvas', { previous: 'Room for something new', current: 'Files' }],
-])
-
 export const clamp = (value: number, min: number, max: number) =>
   Math.max(min, Math.min(value, max))
 
@@ -126,9 +118,15 @@ function includeAppShortcuts(
   return result
 }
 
-function createWorkspace(): Workspace {
-  const width = Math.max(window.innerWidth, 960)
-  const height = Math.max(window.innerHeight, 720)
+export function createWorkspace(): Workspace {
+  const width = Math.max(
+    typeof window === 'undefined' ? 960 : window.innerWidth,
+    960,
+  )
+  const height = Math.max(
+    typeof window === 'undefined' ? 720 : window.innerHeight,
+    720,
+  )
   const home = { x: width * 4.5, y: height * 4.5 }
   return {
     width: width * 10,
@@ -161,11 +159,9 @@ function createWorkspace(): Workspace {
   }
 }
 
-export function loadWorkspace(): Workspace {
+export function readWorkspace(input: unknown): Workspace {
   try {
-    const value: Workspace = JSON.parse(
-      localStorage.getItem(STORAGE_KEY) ?? 'null',
-    )
+    const value = input as Workspace
     if (
       !value ||
       !Number.isFinite(value.width) ||
@@ -187,7 +183,6 @@ export function loadWorkspace(): Workspace {
           ids.has(item.id) ||
           typeof item.title !== 'string' ||
           !['notes', 'empty'].includes(item.kind) ||
-          item.appId === 'workspace-welcome' ||
           ![item.x, item.y, item.width, item.height].every(Number.isFinite)
         )
           return false
@@ -204,17 +199,11 @@ export function loadWorkspace(): Workspace {
             : item
         const width = clamp(bounds.width, MIN_WIDTH, value.width)
         const height = clamp(bounds.height, MIN_HEIGHT, value.height)
-        const demoTitle = DEMO_TITLES.get(item.id)
-        const legacyFiles =
-          item.id === 'canvas' &&
-          item.kind === 'empty' &&
-          item.title === 'Room for something new' &&
-          !item.appId
         return {
-          ...item,
-          title:
-            demoTitle?.previous === item.title ? demoTitle.current : item.title,
-          appId: legacyFiles ? 'files' : item.appId,
+          id: item.id,
+          title: item.title,
+          kind: item.kind,
+          ...(typeof item.appId === 'string' ? { appId: item.appId } : {}),
           dockOrder:
             typeof item.dockOrder === 'number' &&
             Number.isFinite(item.dockOrder) &&
@@ -228,8 +217,17 @@ export function loadWorkspace(): Workspace {
         }
       })
     const home = {
-      x: clamp(value.home.x, 0, value.width - window.innerWidth),
-      y: clamp(value.home.y, 0, value.height - window.innerHeight),
+      x: clamp(
+        value.home.x,
+        0,
+        value.width - (typeof window === 'undefined' ? 960 : window.innerWidth),
+      ),
+      y: clamp(
+        value.home.y,
+        0,
+        value.height -
+          (typeof window === 'undefined' ? 720 : window.innerHeight),
+      ),
     }
     const itemIds = new Set<string>()
     const knownApps = new Set(APP_CATALOG.map((app) => app.id))
@@ -279,8 +277,9 @@ export function loadWorkspace(): Workspace {
           })
       : createDesktopItems(home)
     return {
-      ...value,
-      note: value.note === LEGACY_NOTE ? INITIAL_NOTE : value.note,
+      width: value.width,
+      height: value.height,
+      note: value.note,
       home,
       windows,
       items: includeAppShortcuts(items, home, value),

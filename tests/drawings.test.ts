@@ -46,6 +46,17 @@ test('retains a background drawing’s home position across saving and loading',
   assert.deepEqual(loadDrawings(saved, world), [peeking])
 })
 
+test('retains a raised drawing’s home position across saving and loading', () => {
+  const peeking = {
+    ...drawing,
+    layer: 'above' as const,
+    peekOrigin: { x: 300, y: 400 },
+  }
+  assert.deepEqual(loadDrawings(JSON.parse(JSON.stringify([peeking])), world), [
+    peeking,
+  ])
+})
+
 test('discards invalid drawing home positions without losing the artwork', () => {
   const origins = [
     null,
@@ -64,11 +75,6 @@ test('discards invalid drawing home positions without losing the artwork', () =>
       drawing,
     ])
   }
-  const above = { ...drawing, layer: 'above' as const }
-  assert.deepEqual(
-    loadDrawings([{ ...above, peekOrigin: { x: 300, y: 400 } }], world),
-    [above],
-  )
 })
 
 test('drawing a new stroke makes a peeked position the intentional placement', () => {

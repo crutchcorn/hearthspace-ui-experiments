@@ -20,8 +20,6 @@ export type FrameLayout = {
   expanded?: Record<string, boolean>
 }
 
-export const FRAME_LAYOUT_STORAGE_KEY = 'hearthspace-frame-layout-v1'
-
 export const FRAME_WIDGETS = [
   {
     id: 'notifications',
@@ -348,7 +346,7 @@ function systemGroup(): FrameGroup {
   }
 }
 
-function normalizeLayout(value: unknown): FrameLayout {
+export function readFrameLayout(value: unknown): FrameLayout {
   const layout: FrameLayout = {
     placements: {},
     allowHideTools: false,
@@ -414,17 +412,11 @@ function normalizeLayout(value: unknown): FrameLayout {
     }
   } else {
     const group = systemGroup()
-    const previous = readPlacement(savedPlacements['widget:system']) ?? {
+    layout.groups![group.id] = group
+    layout.placements[targetKey({ kind: 'group', id: group.id })] = {
       surface: 'frame',
       edge: 'top',
       position: 1,
-    }
-    if (previous.surface === 'hidden') {
-      for (const member of group.members)
-        layout.placements[targetKey(member)] = previous
-    } else {
-      layout.groups![group.id] = group
-      layout.placements[targetKey({ kind: 'group', id: group.id })] = previous
     }
   }
   for (const key of Object.keys(layout.placements)) {
@@ -439,37 +431,6 @@ function normalizeLayout(value: unknown): FrameLayout {
         layout.expanded[id] = expanded
   }
   return layout
-}
-
-export function loadFrameLayout(): FrameLayout {
-  let saved: unknown
-  try {
-    saved = JSON.parse(localStorage.getItem(FRAME_LAYOUT_STORAGE_KEY) ?? 'null')
-  } catch {
-    // Restore the default controls when the saved layout cannot be read.
-  }
-  const layout = normalizeLayout(saved)
-  try {
-    if (
-      layout.expanded?.battery === undefined &&
-      localStorage.getItem('hearthspace-battery-percentage-v1') === 'true'
-    )
-      return setWidgetExpanded(layout, 'battery', true)
-  } catch {
-    // Keep the default detail level when browser storage is unavailable.
-  }
-  return layout
-}
-
-export function saveFrameLayout(layout: FrameLayout): void {
-  try {
-    localStorage.setItem(
-      FRAME_LAYOUT_STORAGE_KEY,
-      JSON.stringify(normalizeLayout(layout)),
-    )
-  } catch {
-    // Keep the current layout usable when browser storage is unavailable.
-  }
 }
 
 export function getFrameBounds(

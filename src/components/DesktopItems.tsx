@@ -3,10 +3,12 @@ import { createPortal } from 'react-dom'
 import { FileText, Folder, Globe } from 'lucide-react'
 import type { Bounds, DesktopItem } from '../desktop'
 import type { SearchPlacement } from '../canvas-search'
-import { getFrameBounds, getPlacement, type FrameLayout } from '../frame-layout'
+import { getFrameBounds, type FrameLayout } from '../frame-layout'
+import { resolveObjectLocation } from '../object-location'
 import AppIcon from './AppIcon'
 import { APP_CATALOG } from './launcher-apps'
 import styles from './DesktopItems.module.css'
+import { CANVAS_LAYERS } from '../canvas-layers'
 
 interface DesktopItemsProps {
   items: DesktopItem[]
@@ -48,17 +50,32 @@ export default function DesktopItems({
     >
       {items.map((item) => {
         const placement = placements?.get(item.id)
-        const layout = frameLayout
-          ? getPlacement(frameLayout, { kind: 'item', id: item.id })
-          : { surface: 'background' as const }
+        const location = resolveObjectLocation(
+          frameLayout,
+          { kind: 'item', id: item.id },
+          item,
+        )
+        if (location.surface === 'hidden') return null
+        if (
+          !placements &&
+          !inline &&
+          location.surface === 'frame' &&
+          (!view || !frameHost)
+        )
+          return null
         const framed =
           !placements &&
-          (inline || (layout.surface === 'frame' && view && frameHost))
+          location.surface === 'frame' &&
+          (inline || (view && frameHost))
+        const canvasBounds =
+          location.surface === 'canvas' || location.surface === 'background'
+            ? location.bounds
+            : item
         const bounds = inline
           ? { x: 0, y: 0, width: 44, height: 44 }
-          : framed && layout.surface === 'frame' && view
-            ? getFrameBounds(layout, 54, 54, view, 'padded')
-            : item
+          : framed && location.surface === 'frame' && view
+            ? getFrameBounds(location, 54, 54, view, 'padded')
+            : canvasBounds
         const element = (
           <button
             key={item.id}
@@ -68,7 +85,7 @@ export default function DesktopItems({
             data-item-kind={item.kind}
             data-favorite-returning={returningIds.includes(item.id)}
             data-group-member={inline || undefined}
-            data-surface={placements ? 'canvas' : layout.surface}
+            data-surface={placements ? 'canvas' : location.surface}
             data-frame-attached={Boolean(framed)}
             data-preview-match={placement?.matches}
             data-preview-selected={
@@ -84,9 +101,12 @@ export default function DesktopItems({
               top: bounds.y,
               width: bounds.width,
               height: bounds.height,
-              zIndex: layout.surface === 'canvas' ? 500 : 0,
+              zIndex:
+                location.surface === 'canvas'
+                  ? CANVAS_LAYERS.raised
+                  : CANVAS_LAYERS.background,
               transform: placement
-                ? `translate(${placement.x - item.x}px, ${placement.y - item.y}px) scale(${placement.scale})`
+                ? `translate(${placement.x - canvasBounds.x}px, ${placement.y - canvasBounds.y}px) scale(${placement.scale})`
                 : 'translate(0px, 0px) scale(1)',
             }}
             onPointerDown={(event) => onPointerDown(event, item)}

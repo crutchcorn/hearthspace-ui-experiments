@@ -11,6 +11,34 @@ const clamp = (value: number, min: number, max: number) =>
 
 type Interval = { start: number; end: number }
 
+export interface PeekLayers {
+  backgroundWindowIds?: ReadonlySet<string>
+  raisedItemIds?: ReadonlySet<string>
+  raisedDrawingIds?: ReadonlySet<string>
+}
+
+function coveringWindows(
+  workspace: Workspace,
+  raised: boolean,
+  layers: PeekLayers,
+): DesktopWindow[] {
+  return raised
+    ? workspace.windows.filter(
+        (window) => !layers.backgroundWindowIds?.has(window.id),
+      )
+    : workspace.windows
+}
+
+function coveringIcons(
+  items: DesktopItem[],
+  raised: boolean,
+  layers: PeekLayers,
+): DesktopItem[] {
+  return raised
+    ? items.filter((item) => layers.raisedItemIds?.has(item.id))
+    : items
+}
+
 function intersect(a: Bounds, b: Bounds): Bounds | null {
   const x = Math.max(a.x, b.x)
   const y = Math.max(a.y, b.y)
@@ -222,7 +250,10 @@ function homeBlocked(
 }
 
 /** Return displaced background objects once their home has room again. */
-export function restoreBackgroundItems(workspace: Workspace): Workspace {
+export function restoreBackgroundItems(
+  workspace: Workspace,
+  layers: PeekLayers = {},
+): Workspace {
   const items = [...workspace.items]
   let changed = false
   let restored: boolean
@@ -238,12 +269,21 @@ export function restoreBackgroundItems(workspace: Workspace): Workspace {
     do {
       blocked = false
       for (const index of returning) {
-        const icons = items.flatMap((item, other) =>
-          other === index
-            ? []
-            : [iconBody(returning.has(other) ? homes[other] : item)],
-        )
-        if (homeBlocked(homes[index], workspace.windows, icons)) {
+        const raised = layers.raisedItemIds?.has(homes[index].id) ?? false
+        const icons = coveringIcons(
+          items.flatMap((item, other) =>
+            other === index ? [] : [returning.has(other) ? homes[other] : item],
+          ),
+          raised,
+          layers,
+        ).map(iconBody)
+        if (
+          homeBlocked(
+            homes[index],
+            coveringWindows(workspace, raised, layers),
+            icons,
+          )
+        ) {
           returning.delete(index)
           blocked = true
         }
@@ -264,8 +304,17 @@ export function restoreBackgroundItems(workspace: Workspace): Workspace {
     for (let index = items.length - 1; index >= 0; index--) {
       const item = items[index]
       if (!item.peekOrigin) continue
-      const icons = items.filter((_, other) => other !== index).map(iconBody)
-      items[index] = restoreBackground(item, workspace.windows, icons)
+      const raised = layers.raisedItemIds?.has(item.id) ?? false
+      const icons = coveringIcons(
+        items.filter((_, other) => other !== index),
+        raised,
+        layers,
+      ).map(iconBody)
+      items[index] = restoreBackground(
+        item,
+        coveringWindows(workspace, raised, layers),
+        icons,
+      )
       if (items[index] !== item) {
         restored = true
         changed = true
@@ -274,10 +323,14 @@ export function restoreBackgroundItems(workspace: Workspace): Workspace {
     // Returning one icon can clear another icon's home. An origin is removed
     // at most once, so this converges without making peers trade positions.
   } while (restored)
-  const icons = items.map(iconBody)
   const drawings = workspace.drawings.map((drawing) => {
     if (drawing.layer !== 'below') return drawing
-    const result = restoreBackground(drawing, workspace.windows, icons)
+    const raised = layers.raisedDrawingIds?.has(drawing.id) ?? false
+    const result = restoreBackground(
+      drawing,
+      coveringWindows(workspace, raised, layers),
+      coveringIcons(items, raised, layers).map(iconBody),
+    )
     changed ||= result !== drawing
     return result
   })
@@ -395,15 +448,30 @@ function revealDrawing(
 }
 
 /** Restore and reveal background objects without rearranging any windows. */
-export function settleBackgroundItems(workspace: Workspace): Workspace {
-  const restored = restoreBackgroundItems(workspace)
+export function settleBackgroundItems(
+  workspace: Workspace,
+  layers: PeekLayers = {},
+): Workspace {
+  const restored = restoreBackgroundItems(workspace, layers)
   const items = [...restored.items]
-  const higher: Bounds[] = [...restored.windows]
+  const ordered = items
+    .map((item, index) => ({
+      index,
+      raised: layers.raisedItemIds?.has(item.id) ?? false,
+    }))
+    .toSorted(
+      (a, b) => Number(b.raised) - Number(a.raised) || b.index - a.index,
+    )
+  const higherIcons: DesktopItem[] = []
   let changed = false
-  // Desktop items always live below every window, including a dropped item.
-  for (let index = items.length - 1; index >= 0; index--) {
+  // Raised decorations cover background work, but stay below ordinary windows.
+  for (const { index, raised } of ordered) {
     const item = items[index]
     const body = iconBody(item)
+    const higher = [
+      ...coveringWindows(restored, raised, layers),
+      ...coveringIcons(higherIcons, raised, layers).map(iconBody),
+    ]
     if (fullyCovered(body, higher)) {
       const position = revealPosition(item, body, higher, restored, iconPeek)
       if (position) {
@@ -411,9 +479,14 @@ export function settleBackgroundItems(workspace: Workspace): Workspace {
         changed ||= items[index] !== item
       }
     }
-    higher.push(iconBody(items[index]))
+    higherIcons.push(items[index])
   }
   const drawings = restored.drawings.map((drawing) => {
+    const raised = layers.raisedDrawingIds?.has(drawing.id) ?? false
+    const higher = [
+      ...coveringWindows(restored, raised, layers),
+      ...coveringIcons(items, raised, layers).map(iconBody),
+    ]
     if (drawing.layer !== 'below' || !drawingCovered(drawing, higher))
       return drawing
     const position = revealDrawing(drawing, higher, restored)
@@ -426,7 +499,10 @@ export function settleBackgroundItems(workspace: Workspace): Workspace {
 }
 
 /** Reveal fully covered bodies without changing their size or stacking order. */
-export function settleCoveredItems(workspace: Workspace): Workspace {
+export function settleCoveredItems(
+  workspace: Workspace,
+  layers: PeekLayers = {},
+): Workspace {
   const windows = [...workspace.windows]
   const higher: Bounds[] = []
   let changed = false
@@ -441,5 +517,8 @@ export function settleCoveredItems(workspace: Workspace): Workspace {
     }
     higher.push(windows[index])
   }
-  return settleBackgroundItems(changed ? { ...workspace, windows } : workspace)
+  return settleBackgroundItems(
+    changed ? { ...workspace, windows } : workspace,
+    layers,
+  )
 }

@@ -10,8 +10,6 @@ import {
 } from 'react'
 import type { Workspace, Bounds } from './desktop'
 import {
-  loadFrameLayout,
-  saveFrameLayout,
   getPlacement,
   setObjectPlacement,
   setAllowHideTools,
@@ -39,6 +37,8 @@ import { restoreBackgroundItems } from './peek-layout'
 export default function useObjectLayout(
   workspace: Workspace,
   setWorkspace: Dispatch<SetStateAction<Workspace>>,
+  layout: FrameLayout,
+  setLayout: Dispatch<SetStateAction<FrameLayout>>,
   view: Bounds,
   editing: boolean,
   beforeSettle: (target: LayoutTarget) => void,
@@ -47,23 +47,6 @@ export default function useObjectLayout(
     drop: (itemId: string, x: number, y: number) => boolean
   },
 ) {
-  const [layout, setLayout] = useState(() => {
-    let initial = loadFrameLayout()
-    for (const widget of FRAME_WIDGETS) {
-      const target = { kind: 'widget' as const, id: widget.id }
-      const saved = getPlacement(initial, target)
-      if (
-        (saved.surface === 'canvas' || saved.surface === 'background') &&
-        (saved.x === undefined || saved.y === undefined)
-      )
-        initial = setObjectPlacement(initial, target, {
-          ...saved,
-          x: saved.x ?? view.x + 100,
-          y: saved.y ?? view.y + 120,
-        })
-    }
-    return initial
-  })
   const [selected, setSelected] = useState<LayoutTarget | null>(null)
   const [groupDropTarget, setGroupDropTarget] = useState<LayoutTarget | null>(
     null,
@@ -108,7 +91,6 @@ export default function useObjectLayout(
     snapAnimation.current?.cancel()
     turnAnimation.current?.cancel()
   }, [])
-  useEffect(() => saveFrameLayout(layout), [layout])
   useEffect(() => cancelMotion, [cancelMotion])
   useLayoutEffect(() => {
     if (!pendingSnap.current || motionFrame.current !== null) return
@@ -263,6 +245,7 @@ export default function useObjectLayout(
     workspace.windows,
     workspace.drawings,
     setWorkspace,
+    setLayout,
   ])
 
   function motionBounds(element: HTMLElement, widget: boolean): Bounds {
@@ -416,7 +399,7 @@ export default function useObjectLayout(
         ),
       }))
     }
-  }, [setWorkspace, cancelMotion])
+  }, [setWorkspace, setLayout, cancelMotion])
 
   useEffect(() => {
     if (!editing) return

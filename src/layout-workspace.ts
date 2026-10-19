@@ -1,28 +1,11 @@
 import type { Bounds, Workspace } from './desktop.ts'
-import type { CanvasDrawing } from './drawings.ts'
+import type { FrameLayout, LayoutTarget } from './frame-layout.ts'
+import { resolveObjectLocation } from './object-location.ts'
 import {
-  getPlacement,
-  getTargetGroup,
-  targetKey,
-  type FrameLayout,
-  type LayoutTarget,
-  type ObjectPlacement,
-} from './frame-layout.ts'
-import { settleCoveredItems } from './peek-layout.ts'
-
-function placementFor(
-  layout: FrameLayout,
-  target: LayoutTarget,
-  drawing?: CanvasDrawing,
-): ObjectPlacement {
-  if (getTargetGroup(layout, target)) return getPlacement(layout, target)
-  return (
-    layout.placements[targetKey(target)] ??
-    (drawing
-      ? { surface: drawing.layer === 'below' ? 'background' : 'canvas' }
-      : getPlacement(layout, target))
-  )
-}
+  settleBackgroundItems,
+  settleCoveredItems,
+  type PeekLayers,
+} from './peek-layout.ts'
 
 function mergeById<T extends { id: string }>(original: T[], updated: T[]): T[] {
   const updates = new Map(updated.map((item) => [item.id, item]))
@@ -36,44 +19,83 @@ function mergeById<T extends { id: string }>(original: T[], updated: T[]): T[] {
 export function transformCanvasWorkspace(
   workspace: Workspace,
   layout: FrameLayout,
-  transform: (canvas: Workspace) => Workspace,
+  transform: (canvas: Workspace, layers: PeekLayers) => Workspace,
 ): Workspace {
-  const onCanvas = (placement: ObjectPlacement) =>
-    placement.surface === 'canvas' || placement.surface === 'background'
-  const windowLayers = new Map(
+  const windowLocations = new Map(
     workspace.windows.map((item) => [
       item.id,
-      placementFor(layout, { kind: 'window', id: item.id }),
+      resolveObjectLocation(layout, { kind: 'window', id: item.id }, item),
     ]),
   )
+  const itemLocations = new Map(
+    workspace.items.map((item) => [
+      item.id,
+      resolveObjectLocation(layout, { kind: 'item', id: item.id }, item),
+    ]),
+  )
+  const drawingLocations = new Map(
+    workspace.drawings.map((drawing) => [
+      drawing.id,
+      resolveObjectLocation(
+        layout,
+        { kind: 'drawing', id: drawing.id },
+        drawing,
+        drawing.layer === 'below' ? 'background' : 'canvas',
+      ),
+    ]),
+  )
+  const atBounds = <T extends Bounds>(item: T, bounds: Bounds): T =>
+    item.x === bounds.x && item.y === bounds.y ? item : { ...item, ...bounds }
   const drawings = workspace.drawings.flatMap((drawing) => {
-    const placement = placementFor(
-      layout,
-      { kind: 'drawing', id: drawing.id },
-      drawing,
-    )
-    if (!onCanvas(placement)) return []
-    const layer: CanvasDrawing['layer'] =
-      placement.surface === 'background' ? 'below' : 'above'
-    return [drawing.layer === layer ? drawing : { ...drawing, layer }]
+    const location = drawingLocations.get(drawing.id)!
+    if (!('bounds' in location)) return []
+    const projected = atBounds(drawing, location.bounds)
+    // Both canvas layers sit beneath ordinary windows. Run their ink through
+    // the shared peek calculation, then restore the presentation layer below.
+    return [
+      projected.layer === 'below'
+        ? projected
+        : { ...projected, layer: 'below' as const },
+    ]
   })
   const canvas: Workspace = {
     ...workspace,
     windows: workspace.windows
-      .filter((item) => onCanvas(windowLayers.get(item.id)!))
+      .flatMap((item) => {
+        const location = windowLocations.get(item.id)!
+        return 'bounds' in location ? [atBounds(item, location.bounds)] : []
+      })
       .toSorted(
         (a, b) =>
-          Number(windowLayers.get(a.id)!.surface !== 'background') -
-          Number(windowLayers.get(b.id)!.surface !== 'background'),
+          Number(windowLocations.get(a.id)!.surface !== 'background') -
+          Number(windowLocations.get(b.id)!.surface !== 'background'),
       ),
-    items: workspace.items.filter(
-      (item) =>
-        placementFor(layout, { kind: 'item', id: item.id }).surface ===
-        'background',
-    ),
+    items: workspace.items.flatMap((item) => {
+      const location = itemLocations.get(item.id)!
+      return 'bounds' in location ? [atBounds(item, location.bounds)] : []
+    }),
     drawings,
   }
-  const result = transform(canvas)
+  const layers: PeekLayers = {
+    backgroundWindowIds: new Set(
+      canvas.windows.flatMap((item) =>
+        windowLocations.get(item.id)!.surface === 'background' ? [item.id] : [],
+      ),
+    ),
+    raisedItemIds: new Set(
+      canvas.items.flatMap((item) =>
+        itemLocations.get(item.id)!.surface === 'canvas' ? [item.id] : [],
+      ),
+    ),
+    raisedDrawingIds: new Set(
+      canvas.drawings.flatMap((drawing) =>
+        drawingLocations.get(drawing.id)!.surface === 'canvas'
+          ? [drawing.id]
+          : [],
+      ),
+    ),
+  }
+  const result = transform(canvas, layers)
   if (result === canvas) return workspace
   const originalDrawings = new Map(
     workspace.drawings.map((drawing) => [drawing.id, drawing]),
@@ -108,39 +130,51 @@ export function settleLayoutDrop(
     target.kind === 'drawing'
       ? workspace.drawings.find((item) => item.id === target.id)
       : undefined
-  const placement = placementFor(layout, target, drawing)
-  const bounds =
+  const storedBounds =
     target.kind === 'window'
       ? workspace.windows.find((item) => item.id === target.id)
       : target.kind === 'item'
         ? workspace.items.find((item) => item.id === target.id)
         : (drawing ?? extraBounds)
-  if (
-    !bounds ||
-    placement.surface === 'frame' ||
-    placement.surface === 'hidden'
+  if (!storedBounds)
+    return transformCanvasWorkspace(workspace, layout, settleCoveredItems)
+  const location = resolveObjectLocation(
+    layout,
+    target,
+    storedBounds,
+    drawing ? (drawing.layer === 'below' ? 'background' : 'canvas') : undefined,
   )
+  if (!('bounds' in location))
     return transformCanvasWorkspace(workspace, layout, settleCoveredItems)
 
-  const backgroundDrop = placement.surface === 'background'
-  return transformCanvasWorkspace(workspace, layout, (canvas) => {
+  const bounds = location.bounds
+  const backgroundDrop = location.surface === 'background'
+  return transformCanvasWorkspace(workspace, layout, (canvas, layers) => {
     let proxyId = '__layout-drop__'
     while (canvas.windows.some((item) => item.id === proxyId)) proxyId += '_'
-    const result = settleCoveredItems({
-      ...canvas,
-      windows: [
-        ...canvas.windows.filter(
-          (item) => target.kind !== 'window' || item.id !== target.id,
+    const result = settleCoveredItems(
+      {
+        ...canvas,
+        windows: [
+          ...canvas.windows.filter(
+            (item) => target.kind !== 'window' || item.id !== target.id,
+          ),
+          { ...bounds, id: proxyId, title: '', kind: 'empty' },
+        ],
+        items: canvas.items.filter(
+          (item) => target.kind !== 'item' || item.id !== target.id,
         ),
-        { ...bounds, id: proxyId, title: '', kind: 'empty' },
-      ],
-      items: canvas.items.filter(
-        (item) => target.kind !== 'item' || item.id !== target.id,
-      ),
-      drawings: canvas.drawings.filter(
-        (item) => target.kind !== 'drawing' || item.id !== target.id,
-      ),
-    })
+        drawings: canvas.drawings.filter(
+          (item) => target.kind !== 'drawing' || item.id !== target.id,
+        ),
+      },
+      {
+        ...layers,
+        backgroundWindowIds: backgroundDrop
+          ? new Set([...(layers.backgroundWindowIds ?? []), proxyId])
+          : layers.backgroundWindowIds,
+      },
+    )
     const windows = new Map(result.windows.map((item) => [item.id, item]))
     const items = new Map(result.items.map((item) => [item.id, item]))
     const drawings = new Map(result.drawings.map((item) => [item.id, item]))
@@ -173,15 +207,17 @@ export function settleLayoutDrop(
       }
       return updated
     }
-    return {
+    const settled = {
       ...result,
       windows: canvas.windows.map((item) => {
         if (target.kind === 'window' && item.id === target.id) return item
-        // Lowering work must not relocate windows on the raised canvas layer.
+        // Decorations and background work cannot cover ordinary windows.
         if (
-          backgroundDrop &&
-          placementFor(layout, { kind: 'window', id: item.id }).surface !==
-            'background'
+          (backgroundDrop ||
+            target.kind === 'item' ||
+            target.kind === 'drawing') &&
+          resolveObjectLocation(layout, { kind: 'window', id: item.id }, item)
+            .surface !== 'background'
         )
           return item
         return windows.get(item.id) ?? item
@@ -193,5 +229,8 @@ export function settleLayoutDrop(
         commitPosition(item, drawings.get(item.id) ?? item, 'drawing'),
       ),
     }
+    return target.kind === 'item' || target.kind === 'drawing'
+      ? settleBackgroundItems(settled, layers)
+      : settled
   })
 }

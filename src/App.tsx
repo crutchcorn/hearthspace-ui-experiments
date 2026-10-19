@@ -10,11 +10,12 @@ import {
 } from 'react'
 import { createPortal } from 'react-dom'
 import { transformCanvasWorkspace } from './layout-workspace'
+import { CANVAS_LAYERS } from './canvas-layers'
 import useObjectLayout from './useObjectLayout'
+import useScene from './useScene'
 import {
   FRAME_WIDGETS,
   getFrameBounds,
-  loadFrameLayout,
   getPinnedWindowOffset,
   getTargetGroup,
   getWidgetExpanded,
@@ -82,9 +83,7 @@ import {
   clamp,
   loadCanvasTool,
   loadWindowSelectionShape,
-  loadWorkspace,
   MIN_WIDTH,
-  STORAGE_KEY,
   WINDOW_SELECTION_STORAGE_KEY,
   type Bounds,
   type DesktopWindow,
@@ -169,18 +168,8 @@ function App() {
   const favoriteTimer = useRef<number | undefined>(undefined)
   useEffect(() => saveFavoriteApps(favoriteAppIds), [favoriteAppIds])
   useEffect(() => () => window.clearTimeout(favoriteTimer.current), [])
-  const [workspace, setWorkspace] = useState(() =>
-    transformCanvasWorkspace(
-      loadWorkspace(),
-      loadFrameLayout(),
-      restoreCanvasBackground,
-    ),
-  )
-  const [view, setView] = useState(() => ({
-    ...workspace.home,
-    width: window.innerWidth,
-    height: window.innerHeight,
-  }))
+  const { workspace, setWorkspace, layout, setLayout, view, setView } =
+    useScene()
   const [activeId, setActiveId] = useState<string | null>(
     workspace.windows.at(-1)?.id ?? null,
   )
@@ -197,6 +186,7 @@ function App() {
   const [tool, setTool] = useState(loadCanvasTool)
   const drawingLayer: DrawingLayerName = 'above'
   const [frameHost, setFrameHost] = useState<HTMLDivElement | null>(null)
+  const [canvasHost, setCanvasHost] = useState<HTMLDivElement | null>(null)
   const [framePreviewBounds, setFramePreviewBounds] = useState(
     new Map<string, FramePreviewBounds>(),
   )
@@ -358,6 +348,8 @@ function App() {
   const objectLayout = useObjectLayout(
     workspace,
     setWorkspace,
+    layout,
+    setLayout,
     view,
     tool === 'layout',
     (target) =>
@@ -432,7 +424,7 @@ function App() {
       ),
     }))
     setFocusView(null)
-  }, [focusView])
+  }, [focusView, setWorkspace])
 
   const openCanvasSearch = useCallback(
     (anchor: { x: number; y: number }) => {
@@ -522,6 +514,7 @@ function App() {
     objectLayout.layout,
     restoreBackgroundItems,
     leaveFocusView,
+    setWorkspace,
     setLauncher,
     setSelectedIds,
     setSelectedItemIds,
@@ -585,17 +578,6 @@ function App() {
       /* Keep the selected shape usable when storage is unavailable. */
     }
   }, [selectionShape])
-
-  useEffect(() => {
-    const timer = window.setTimeout(() => {
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(workspace))
-      } catch {
-        /* Keep the playground usable when storage is unavailable. */
-      }
-    }, 200)
-    return () => window.clearTimeout(timer)
-  }, [workspace])
 
   useEffect(() => {
     const resize = () =>
@@ -745,6 +727,7 @@ function App() {
   }, [
     home.x,
     home.y,
+    setView,
     tool,
     launcher,
     closePopovers,
@@ -2183,7 +2166,9 @@ function App() {
         onAuxClick={(event) => event.preventDefault()}
       >
         <div
+          ref={setCanvasHost}
           className={`${styles.world} ${background.photo ? styles.customBackground : ''}`}
+          data-canvas-world
           data-background-fit={
             background.photo?.fit === 'repeat' ? 'repeat' : undefined
           }
@@ -2417,12 +2402,12 @@ function App() {
                     : `translate(${offset.x}px, ${offset.y}px) scale(1)`,
                   zIndex:
                     renderedFocusView?.id === item.id
-                      ? workspace.windows.length + 1
+                      ? CANVAS_LAYERS.window + workspace.windows.length
                       : attached
                         ? 1100 + index
                         : objectPlacement.surface === 'background'
-                          ? 1
-                          : index + 10,
+                          ? CANVAS_LAYERS.backgroundWindow
+                          : CANVAS_LAYERS.window + index,
                 }}
                 onFocusCapture={() => {
                   if (!previewLayout) focusWindow(item.id)
@@ -2602,7 +2587,7 @@ function App() {
           {!windowSwitcher.open && !focusView && (
             <div
               className={styles.drawingLayer}
-              style={{ zIndex: workspace.windows.length + 1 }}
+              style={{ zIndex: CANVAS_LAYERS.raised }}
             >
               <DrawingLayer
                 drawings={workspace.drawings}
@@ -2669,7 +2654,7 @@ function App() {
                 top: selection.y - 2,
                 width: selection.width + 4,
                 height: selection.height + 4,
-                zIndex: workspace.windows.length + 1,
+                zIndex: CANVAS_LAYERS.window + workspace.windows.length,
               }}
             >
               <polygon
@@ -2699,7 +2684,7 @@ function App() {
                   zIndex:
                     selection.target === 'items'
                       ? 0
-                      : workspace.windows.length + 1,
+                      : CANVAS_LAYERS.window + workspace.windows.length,
                 }}
               />
             )
@@ -2817,6 +2802,7 @@ function App() {
           />
         )}
       <FrameShell
+        canvasHost={canvasHost}
         layout={objectLayout.layout}
         view={view}
         editing={tool === 'layout'}

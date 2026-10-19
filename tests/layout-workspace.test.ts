@@ -143,8 +143,8 @@ test('arranging windows preserves a grouped shortcut home until it returns to th
       },
     },
   }
-  const arranged = transformCanvasWorkspace(before, layout, (canvas) =>
-    restoreBackgroundItems(arrangeWindows(canvas, { x: 500, y: 500 })),
+  const arranged = transformCanvasWorkspace(before, layout, (canvas, layers) =>
+    restoreBackgroundItems(arrangeWindows(canvas, { x: 500, y: 500 }), layers),
   )
   assert.equal(arranged.windows[0].x, 524)
   assert.equal(arranged.items[0], before.items[0])
@@ -160,7 +160,7 @@ test('arranging windows preserves a grouped shortcut home until it returns to th
   assert.deepEqual(returned.items[0], workspace.items[0])
 })
 
-test('raised shortcuts are not moved by background peeking', () => {
+test('canvas shortcuts peek from ordinary windows', () => {
   const result = transformCanvasWorkspace(
     workspace,
     {
@@ -169,7 +169,8 @@ test('raised shortcuts are not moved by background peeking', () => {
     },
     settleCoveredItems,
   )
-  assert.equal(result.items[0], workspace.items[0])
+  assert.notDeepEqual(result.items[0], workspace.items[0])
+  assert.deepEqual(result.items[0].peekOrigin, { x: 140, y: 140 })
   assert.notDeepEqual(result.drawings[0], workspace.drawings[0])
   assert.deepEqual(result.drawings[0].peekOrigin, { x: 240, y: 140 })
 })
@@ -209,7 +210,9 @@ test('drawing placements override legacy layers without rewriting them', () => {
     },
     settleCoveredItems,
   )
-  assert.equal(raised.drawings[0], workspace.drawings[0])
+  assert.notDeepEqual(raised.drawings[0], workspace.drawings[0])
+  assert.equal(raised.drawings[0].layer, 'below')
+  assert.deepEqual(raised.drawings[0].peekOrigin, { x: 240, y: 140 })
   const legacyRaised: Workspace = {
     ...workspace,
     drawings: [{ ...workspace.drawings[0], layer: 'above' }],
@@ -227,13 +230,12 @@ test('drawing placements override legacy layers without rewriting them', () => {
   assert.notEqual(lowered.drawings[0].y, legacyRaised.drawings[0].y)
 })
 
-test('Arrange moves only canvas windows and preserves attached and hidden window geometry', () => {
+test('Arrange moves only canvas windows and preserves attached window geometry', () => {
   const before: Workspace = {
     ...workspace,
     windows: [
       workspace.windows[0],
       { ...workspace.windows[0], id: 'frame-window' },
-      { ...workspace.windows[0], id: 'hidden-window' },
     ],
   }
   const result = transformCanvasWorkspace(
@@ -242,7 +244,6 @@ test('Arrange moves only canvas windows and preserves attached and hidden window
       ...defaults,
       placements: {
         'window:frame-window': frame,
-        'window:hidden-window': { surface: 'hidden' },
       },
     },
     (canvas) => arrangeWindows(canvas, { x: 500, y: 500 }),
@@ -250,7 +251,6 @@ test('Arrange moves only canvas windows and preserves attached and hidden window
   assert.equal(result.windows[0].x, 524)
   assert.equal(result.windows[0].y, 596)
   assert.equal(result.windows[1], before.windows[1])
-  assert.equal(result.windows[2], before.windows[2])
   assert.equal(result.items, before.items)
   assert.equal(result.drawings, before.drawings)
 })
@@ -452,4 +452,261 @@ test('lowering a window commits the background positions it had already displace
   const restored = restoreBackgroundItems(windowMovedAway)
   assert.equal(restored.items[0], lowered.items[0])
   assert.equal(restored.drawings[0], lowered.drawings[0])
+})
+
+test('a detached canvas shortcut retains its first home across repeated window coverage', () => {
+  const before = { ...workspace, drawings: [] }
+  const layout = setObjectPlacement(
+    { ...defaults, placements: { 'item:notes-shortcut': frame } },
+    { kind: 'item', id: 'notes-shortcut' },
+    { surface: 'canvas' },
+  )
+  const first = transformCanvasWorkspace(before, layout, settleCoveredItems)
+  const second = transformCanvasWorkspace(
+    {
+      ...first,
+      windows: [
+        ...first.windows,
+        {
+          ...workspace.windows[0],
+          id: 'second-window',
+          x: first.items[0].x,
+          y: first.items[0].y,
+        },
+      ],
+    },
+    layout,
+    settleCoveredItems,
+  )
+  assert.notDeepEqual(
+    { x: second.items[0].x, y: second.items[0].y },
+    { x: first.items[0].x, y: first.items[0].y },
+  )
+  assert.deepEqual(second.items[0].peekOrigin, { x: 140, y: 140 })
+  const restored = transformCanvasWorkspace(
+    { ...second, windows: [] },
+    layout,
+    restoreBackgroundItems,
+  )
+  assert.deepEqual(restored.items, before.items)
+  assert.deepEqual(layout.placements['item:notes-shortcut'], {
+    surface: 'canvas',
+  })
+})
+
+test('a detached canvas drawing peeks repeatedly and returns without rewriting its legacy layer', () => {
+  const before: Workspace = {
+    ...workspace,
+    items: [],
+    drawings: [{ ...workspace.drawings[0], layer: 'above' }],
+  }
+  const layout = setObjectPlacement(
+    { ...defaults, placements: { 'drawing:sketch': frame } },
+    { kind: 'drawing', id: 'sketch' },
+    { surface: 'canvas' },
+  )
+  const first = transformCanvasWorkspace(before, layout, settleCoveredItems)
+  assert.deepEqual(first.drawings[0].peekOrigin, { x: 240, y: 140 })
+  const second = transformCanvasWorkspace(
+    {
+      ...first,
+      windows: [
+        ...first.windows,
+        {
+          ...workspace.windows[0],
+          id: 'second-window',
+          x: first.drawings[0].x,
+          y: first.drawings[0].y,
+        },
+      ],
+    },
+    layout,
+    settleCoveredItems,
+  )
+  assert.notDeepEqual(
+    { x: second.drawings[0].x, y: second.drawings[0].y },
+    { x: first.drawings[0].x, y: first.drawings[0].y },
+  )
+  assert.deepEqual(second.drawings[0].peekOrigin, { x: 240, y: 140 })
+  assert.equal(second.drawings[0].layer, 'above')
+  assert.equal(second.drawings[0].strokes, before.drawings[0].strokes)
+  const restored = transformCanvasWorkspace(
+    { ...second, windows: [] },
+    layout,
+    restoreBackgroundItems,
+  )
+  assert.deepEqual(restored.drawings, before.drawings)
+  assert.deepEqual(layout.placements['drawing:sketch'], { surface: 'canvas' })
+})
+
+test('background windows only displace background shortcuts', () => {
+  const before: Workspace = {
+    ...workspace,
+    items: [
+      workspace.items[0],
+      { ...workspace.items[0], id: 'raised-shortcut', x: 240 },
+    ],
+    drawings: [],
+  }
+  const layout: FrameLayout = {
+    ...defaults,
+    placements: {
+      'window:notes': { surface: 'background' },
+      'item:raised-shortcut': { surface: 'canvas' },
+    },
+  }
+  const result = transformCanvasWorkspace(before, layout, settleCoveredItems)
+  assert.notDeepEqual(result.items[0], before.items[0])
+  assert.equal(result.items[1], before.items[1])
+})
+
+test('background windows only displace background drawings', () => {
+  const before: Workspace = {
+    ...workspace,
+    items: [],
+    drawings: [
+      workspace.drawings[0],
+      { ...workspace.drawings[0], id: 'raised-sketch', layer: 'above' },
+    ],
+  }
+  const layout: FrameLayout = {
+    ...defaults,
+    placements: {
+      'window:notes': { surface: 'background' },
+      'drawing:raised-sketch': { surface: 'canvas' },
+    },
+  }
+  const result = transformCanvasWorkspace(before, layout, settleCoveredItems)
+  assert.notDeepEqual(result.drawings[0], before.drawings[0])
+  assert.equal(result.drawings[1], before.drawings[1])
+})
+
+test('raised shortcuts and drawings return over a window moved to the background', () => {
+  const layout: FrameLayout = {
+    ...defaults,
+    placements: {
+      'item:notes-shortcut': { surface: 'canvas' },
+      'drawing:sketch': { surface: 'canvas' },
+    },
+  }
+  const first = transformCanvasWorkspace(workspace, layout, settleCoveredItems)
+  assert.ok(first.items[0].peekOrigin)
+  assert.ok(first.drawings[0].peekOrigin)
+  const lowered = setObjectPlacement(
+    layout,
+    { kind: 'window', id: 'notes' },
+    { surface: 'background' },
+  )
+  const restored = transformCanvasWorkspace(
+    first,
+    lowered,
+    restoreBackgroundItems,
+  )
+  assert.deepEqual(restored.items, workspace.items)
+  assert.deepEqual(restored.drawings, workspace.drawings)
+})
+
+test('raised icons cover background icons regardless of their saved array order', () => {
+  const before: Workspace = {
+    ...workspace,
+    windows: [],
+    items: [
+      workspace.items[0],
+      { ...workspace.items[0], id: 'background-shortcut' },
+    ],
+    drawings: [],
+  }
+  const layout: FrameLayout = {
+    ...defaults,
+    placements: { 'item:notes-shortcut': { surface: 'canvas' } },
+  }
+  const result = transformCanvasWorkspace(before, layout, settleCoveredItems)
+  assert.equal(result.items[0], before.items[0])
+  assert.notDeepEqual(result.items[1], before.items[1])
+})
+
+test('background icon glyphs do not displace raised drawings', () => {
+  const before: Workspace = {
+    ...workspace,
+    windows: [],
+    drawings: [
+      {
+        ...workspace.drawings[0],
+        layer: 'above',
+        x: 166,
+        y: 160,
+        width: 30,
+        height: 30,
+        strokes: [
+          [
+            { x: 2, y: 2 },
+            { x: 28, y: 28 },
+          ],
+        ],
+      },
+    ],
+  }
+  const result = transformCanvasWorkspace(before, defaults, settleCoveredItems)
+  assert.equal(result, before)
+})
+
+test('a shortcut dropped from the frame under a window peeks immediately', () => {
+  const before = { ...workspace, drawings: [] }
+  const layout = setObjectPlacement(
+    { ...defaults, placements: { 'item:notes-shortcut': frame } },
+    { kind: 'item', id: 'notes-shortcut' },
+    { surface: 'canvas' },
+  )
+  const result = settleLayoutDrop(before, layout, {
+    kind: 'item',
+    id: 'notes-shortcut',
+  })
+  assert.deepEqual(result.items[0].peekOrigin, { x: 140, y: 140 })
+  assert.notDeepEqual(result.items[0], before.items[0])
+  assert.equal(result.windows[0], before.windows[0])
+})
+
+test('a drawing dropped from the frame under a window peeks immediately', () => {
+  const before: Workspace = {
+    ...workspace,
+    items: [],
+    drawings: [{ ...workspace.drawings[0], layer: 'above' }],
+  }
+  const layout = setObjectPlacement(
+    { ...defaults, placements: { 'drawing:sketch': frame } },
+    { kind: 'drawing', id: 'sketch' },
+    { surface: 'canvas' },
+  )
+  const result = settleLayoutDrop(before, layout, {
+    kind: 'drawing',
+    id: 'sketch',
+  })
+  assert.deepEqual(result.drawings[0].peekOrigin, { x: 240, y: 140 })
+  assert.notDeepEqual(result.drawings[0], before.drawings[0])
+  assert.equal(result.drawings[0].layer, 'above')
+  assert.equal(result.windows[0], before.windows[0])
+})
+
+test('background drop proxies do not displace raised decorations or ordinary windows', () => {
+  const layout: FrameLayout = {
+    ...defaults,
+    placements: {
+      'widget:notifications': { surface: 'background', x: 100, y: 100 },
+      'item:notes-shortcut': { surface: 'canvas' },
+      'drawing:sketch': { surface: 'canvas' },
+    },
+  }
+  const before = {
+    ...workspace,
+    windows: [{ ...workspace.windows[0], x: 1000 }],
+  }
+  const result = settleLayoutDrop(
+    before,
+    layout,
+    { kind: 'widget', id: 'notifications' },
+    { x: 100, y: 100, width: 280, height: 200 },
+  )
+  assert.deepEqual(result.items, before.items)
+  assert.deepEqual(result.drawings, before.drawings)
+  assert.equal(result.windows[0], before.windows[0])
 })

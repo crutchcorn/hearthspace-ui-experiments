@@ -5,6 +5,8 @@ import {
   type CSSProperties,
   type ReactNode,
 } from 'react'
+import { createPortal } from 'react-dom'
+import { CANVAS_LAYERS } from '../canvas-layers'
 import {
   getFrameBounds,
   type FrameEdge,
@@ -14,6 +16,7 @@ import type { Bounds } from '../desktop'
 import styles from './PlacedWidget.module.css'
 
 interface PlacedWidgetProps {
+  canvasHost: HTMLElement | null
   id: string
   kind?: 'widget' | 'group'
   inline?: boolean
@@ -34,6 +37,7 @@ interface PlacedWidgetProps {
 }
 
 export default function PlacedWidget({
+  canvasHost,
   id,
   kind = 'widget',
   inline = false,
@@ -156,8 +160,8 @@ export default function PlacedWidget({
     ? edge === 'top' || (edge !== 'bottom' && spaceBelow >= spaceAbove)
     : spaceBelow >= spaceAbove
   const style = {
-    '--widget-position-x': `${x}px`,
-    '--widget-position-y': `${y}px`,
+    '--widget-position-x': `${onFrame ? x : x + view.x}px`,
+    '--widget-position-y': `${onFrame ? y : y + view.y}px`,
     '--widget-x': `${anchorX}px`,
     '--widget-y': `${anchorY}px`,
     '--widget-side-top': sideOpenBelow ? `${sideTop - anchorY}px` : 'auto',
@@ -165,13 +169,17 @@ export default function PlacedWidget({
       ? 'auto'
       : `${anchorY + anchorHeight - sideBottom}px`,
     '--widget-side-height': `${Math.max(0, sideOpenBelow ? view.height - sideTop - 12 : sideBottom - 12)}px`,
-    '--widget-z': onFrame ? 1100 : placement.surface === 'background' ? 2 : 900,
+    '--widget-z': onFrame
+      ? 1100
+      : placement.surface === 'background'
+        ? CANVAS_LAYERS.background
+        : CANVAS_LAYERS.raised,
     '--widget-popover-top': openBelow ? 'calc(100% + 12px)' : 'auto',
     '--widget-popover-bottom': openBelow ? 'auto' : 'calc(100% + 12px)',
     '--widget-popover-height': `${openBelow ? spaceBelow : spaceAbove}px`,
   } as CSSProperties
 
-  return (
+  const element = (
     <div
       ref={wrapper}
       className={styles.widget}
@@ -198,4 +206,6 @@ export default function PlacedWidget({
       </div>
     </div>
   )
+  if (inline || onFrame || placement.surface === 'hidden') return element
+  return canvasHost ? createPortal(element, canvasHost) : null
 }

@@ -87,7 +87,6 @@ export function loadDrawings(value: unknown, world: World): CanvasDrawing[] {
     if (strokes.length !== item.strokes.length) continue
     const origin = item.peekOrigin
     const peekOrigin =
-      item.layer === 'below' &&
       record(origin) &&
       typeof origin.x === 'number' &&
       typeof origin.y === 'number' &&

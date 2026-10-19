@@ -1,7 +1,7 @@
 .widget {
   --widget-popover-x: var(--widget-x);
 
-  position: fixed;
+  position: absolute;
   z-index: var(--widget-z);
   top: var(--widget-position-y);
   left: var(--widget-position-x);
@@ -9,6 +9,10 @@
   max-width: calc(100vw - 48px);
   border-radius: var(--radius-panel);
   pointer-events: auto;
+}
+
+.widget[data-layout-surface='frame'] {
+  position: fixed;
 }
 
 .widget[hidden] {

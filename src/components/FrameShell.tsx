@@ -17,6 +17,7 @@ import shellStyles from './ShellControls.module.css'
 import styles from './FrameShell.module.css'
 
 interface FrameShellProps {
+  canvasHost: HTMLElement | null
   layout: FrameLayout
   view: Bounds
   editing: boolean
@@ -34,6 +35,7 @@ interface FrameShellProps {
 }
 
 export default function FrameShell({
+  canvasHost,
   layout,
   view,
   editing,
@@ -81,6 +83,7 @@ export default function FrameShell({
     const target = { kind: 'widget' as const, id }
     return (
       <PlacedWidget
+        canvasHost={canvasHost}
         key={targetKey(target)}
         id={id}
         placement={getPlacement(layout, target)}
@@ -110,6 +113,7 @@ export default function FrameShell({
           : undefined
     return (
       <PlacedWidget
+        canvasHost={canvasHost}
         key={targetKey(target)}
         kind="group"
         id={group.id}
