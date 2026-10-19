@@ -2,7 +2,7 @@
 
 A private browser playground for trying desktop ideas for [Hearthspace](https://github.com/crutchcorn/hearthspace), a Linux distribution exploring how computing could work. Spread windows, files, and drawings across a large canvas, attach things you want nearby to its frame, and use search to bring work into view without losing its place.
 
-![Hearthspace in dark mode, with translucent Settings over app windows, a uniform dotted canvas, and custom controls in all four corners.](assets/hearthspace-desktop.jpg)
+![Hearthspace desktop in dark mode, with Appearance settings over app windows, desktop shortcuts, and controls in all four corners.](assets/hearthspace-desktop.jpg)
 
 Think of it as a [painting canvas inside a frame](docs/canvas-and-frame.md). Work can move with the painting or stay attached to its edges. The default arrangement puts compact controls in four corners, with thin translucent surfaces that pick up color from the work beneath them. We've repeatedly removed labels, counts, and instructions that only describe what's already visible. The selected window's name in the switcher helps you choose; a permanent “Drag to explore” caption doesn't need to occupy your desktop.
 
