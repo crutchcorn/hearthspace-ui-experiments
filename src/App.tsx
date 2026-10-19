@@ -31,6 +31,8 @@ import FramePreviewSlot, {
   type FramePreviewBounds,
 } from './components/FramePreviewSlot'
 import LayoutEditor from './components/LayoutEditor'
+import LayoutItemControls from './components/LayoutItemControls'
+import { getLayoutItemOptions } from './layout-item-options'
 import FrameGuides from './components/FrameGuides'
 import LayoutConfirm from './components/LayoutConfirm'
 import {
@@ -207,6 +209,7 @@ function App() {
   const [notificationsOpen, setNotificationsOpen] = useState(false)
   const [systemPanel, setSystemPanel] = useState<SystemPanel>(null)
   const status = useSystemStatus()
+  const clockOptions = getLayoutItemOptions(layout, 'widget:clock')
   const notificationState = useNotifications()
   const [widgetReveal, setWidgetReveal] = useState<{
     id: string
@@ -2286,6 +2289,7 @@ function App() {
         id,
         <SystemBar
           status={status}
+          clockDateFormat={clockOptions.dateFormat}
           key={id}
           id={id}
           expanded={getWidgetExpanded(objectLayout.layout, id)}
@@ -2411,7 +2415,14 @@ function App() {
             onFrame={objectLayout.attachSelected}
             onRemove={objectLayout.remove}
             onDone={() => setTool('cursor')}
-          />
+          >
+            <LayoutItemControls
+              target={objectLayout.selected}
+              layout={layout}
+              onChange={setLayout}
+              now={status.now}
+            />
+          </LayoutEditor>
         </>
       )}
       {objectLayout.warning && (
@@ -3027,6 +3038,7 @@ function App() {
                     widgetId={result.kind === 'widget' ? result.id : undefined}
                     toolId={result.kind === 'tool' ? result.id : undefined}
                     status={status}
+                    clockDateFormat={clockOptions.dateFormat}
                     notifications={notificationState}
                     tool={tool}
                     selectionShape={selectionShape}

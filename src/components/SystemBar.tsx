@@ -9,6 +9,7 @@ import {
   WifiOff,
 } from 'lucide-react'
 import type { SystemStatus } from '../useSystemStatus'
+import { formatClock, type ClockDateFormat } from '../clock-format'
 import WidgetPopover from './WidgetPopover'
 import styles from './SystemBar.module.css'
 import shellStyles from './ShellControls.module.css'
@@ -21,6 +22,7 @@ interface SystemBarProps {
   onPanelChange: (panel: SystemPanel) => void
   id: Exclude<SystemPanel, null>
   expanded: boolean
+  clockDateFormat: ClockDateFormat
 }
 
 export default function SystemBar({
@@ -29,6 +31,7 @@ export default function SystemBar({
   onPanelChange,
   id,
   expanded,
+  clockDateFormat,
 }: SystemBarProps) {
   const root = useRef<HTMLElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)
@@ -109,11 +112,9 @@ export default function SystemBar({
           aria-expanded={openPanel === 'clock'}
         >
           {expanded ? (
-            now.toLocaleTimeString(undefined, {
-              hour: '2-digit',
-              minute: '2-digit',
-              hourCycle: 'h23',
-            })
+            <span className={styles.clockLabel}>
+              {formatClock(now, clockDateFormat)}
+            </span>
           ) : (
             <Clock3 size={18} aria-hidden="true" />
           )}

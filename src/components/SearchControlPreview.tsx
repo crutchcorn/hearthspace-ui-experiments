@@ -17,6 +17,7 @@ import { CANVAS_TOOL_CATALOG } from '../canvas-tool-catalog'
 import type { CanvasTool, WindowSelectionShape } from '../desktop'
 import type { NotificationsState } from '../useNotifications'
 import type { SystemStatus } from '../useSystemStatus'
+import { formatClock, type ClockDateFormat } from '../clock-format'
 import AppIcon from './AppIcon'
 import { APP_CATALOG } from './launcher-apps'
 import styles from './SearchControlPreview.module.css'
@@ -25,6 +26,7 @@ interface SearchControlPreviewProps {
   widgetId?: string
   toolId?: string
   status: SystemStatus
+  clockDateFormat: ClockDateFormat
   notifications: NotificationsState
   tool: CanvasTool
   selectionShape: WindowSelectionShape
@@ -35,6 +37,7 @@ export default function SearchControlPreview({
   widgetId,
   toolId,
   status,
+  clockDateFormat,
   notifications,
   tool,
   selectionShape,
@@ -86,14 +89,7 @@ export default function SearchControlPreview({
       case 'clock':
         title = 'Clock'
         icon = <Clock3 size={26} aria-hidden="true" />
-        detail = `${status.now.toLocaleTimeString(undefined, {
-          hour: '2-digit',
-          minute: '2-digit',
-          hourCycle: 'h23',
-        })} · ${status.now.toLocaleDateString(undefined, {
-          month: 'short',
-          day: 'numeric',
-        })}`
+        detail = formatClock(status.now, clockDateFormat)
         break
       case 'apps': {
         title = 'Apps'

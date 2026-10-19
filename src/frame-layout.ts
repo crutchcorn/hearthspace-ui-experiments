@@ -1,4 +1,8 @@
 import type { Bounds } from './desktop.ts'
+import {
+  readLayoutItemOptions,
+  type LayoutItemOptionsMap,
+} from './layout-item-options.ts'
 
 export type FrameEdge = 'top' | 'right' | 'bottom' | 'left'
 export type LayoutTarget = {
@@ -25,6 +29,7 @@ export type FrameLayout = {
   allowHideTools: boolean
   groups?: Record<string, FrameGroup>
   expanded?: Record<string, boolean>
+  options?: Partial<LayoutItemOptionsMap>
 }
 
 export const FRAME_WIDGETS = [
@@ -471,6 +476,8 @@ export function readFrameLayout(value: unknown): FrameLayout {
       if (EXPANDABLE_WIDGETS.has(id) && typeof expanded === 'boolean')
         layout.expanded[id] = expanded
   }
+  if (Object.hasOwn(saved, 'options'))
+    layout.options = readLayoutItemOptions(saved.options)
   return layout
 }
 

@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState, type ReactNode } from 'react'
 import {
   Check,
   Layers2,
@@ -25,6 +25,7 @@ interface LayoutEditorProps {
   onFrame: () => void
   onRemove: () => void
   onDone: () => void
+  children?: ReactNode
 }
 
 const choices = [
@@ -45,6 +46,7 @@ export default function LayoutEditor({
   onFrame,
   onRemove,
   onDone,
+  children,
 }: LayoutEditorProps) {
   const [hint, setHint] = useState<string | null>(null)
   const hintId = useId()
@@ -166,6 +168,7 @@ export default function LayoutEditor({
             )}
           </div>
         )}
+        {target && children}
         {target && (
           <div className={styles.placements} role="group" aria-label="Place on">
             {choices.map((choice) => {

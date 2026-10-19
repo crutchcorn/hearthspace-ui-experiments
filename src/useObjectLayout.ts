@@ -223,11 +223,10 @@ export default function useObjectLayout(
       if (next === layout) return
       setLayout(next)
       setSelected((previous) => {
-        if (!previous) return previous
-        const representative =
-          previous.kind === 'group'
-            ? getTargetGroup(layout, previous)?.members[0]
-            : previous
+        // Resizing an edited item may merge its frame neighbors. Keep editing
+        // that item; only a selected group needs its merged identity resolved.
+        if (previous?.kind !== 'group') return previous
+        const representative = getTargetGroup(layout, previous)?.members[0]
         const group = representative
           ? getTargetGroup(next, representative)
           : undefined

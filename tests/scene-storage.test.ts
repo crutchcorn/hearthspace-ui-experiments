@@ -1,8 +1,14 @@
 import assert from 'node:assert/strict'
 import { beforeEach, test } from 'node:test'
 import { createWorkspace } from '../src/desktop.ts'
-import { readFrameLayout, setObjectPlacement } from '../src/frame-layout.ts'
-import { createScene, projectScene } from '../src/scene.ts'
+import {
+  getPlacement,
+  getTargetGroup,
+  mergeFrameTargets,
+  readFrameLayout,
+  setObjectPlacement,
+} from '../src/frame-layout.ts'
+import { createScene, projectScene, updateSceneLayout } from '../src/scene.ts'
 import {
   loadScene,
   saveScene,
@@ -10,6 +16,10 @@ import {
 } from '../src/scene-storage.ts'
 import { transformCanvasWorkspace } from '../src/layout-workspace.ts'
 import { restoreBackgroundItems } from '../src/peek-layout.ts'
+import {
+  getLayoutItemOptions,
+  setLayoutItemOptions,
+} from '../src/layout-item-options.ts'
 
 const storage = new Map<string, string>()
 Object.defineProperty(globalThis, 'localStorage', {
@@ -162,4 +172,42 @@ test('detached controls retain measured bounds and their first home across reloa
     'controls' in JSON.parse(storage.get(SCENE_STORAGE_KEY)!).workspace,
     false,
   )
+})
+
+test('clock date format survives grouping, detaching, and saved-scene reloads', () => {
+  const workspace = createWorkspace()
+  const clock = { kind: 'widget', id: 'clock' } as const
+  const configured = setLayoutItemOptions(
+    readFrameLayout(undefined),
+    'widget:clock',
+    { dateFormat: 'long' },
+  )
+  const grouped = mergeFrameTargets(configured, clock, {
+    kind: 'widget',
+    id: 'apps',
+  })
+  saveScene(createScene(workspace, grouped))
+  const loaded = loadScene()
+  assert.deepEqual(getLayoutItemOptions(loaded.layout, 'widget:clock'), {
+    dateFormat: 'long',
+  })
+  assert.ok(
+    getTargetGroup(loaded.layout, clock)?.members.some(
+      (member) => member.kind === 'widget' && member.id === 'apps',
+    ),
+  )
+
+  const detached = updateSceneLayout(
+    loaded,
+    (layout) =>
+      setObjectPlacement(layout, clock, { surface: 'canvas', x: 600, y: 500 }),
+    { ...workspace.home, width: 960, height: 720 },
+  )
+  saveScene(detached)
+  const returned = loadScene()
+  assert.equal(getTargetGroup(returned.layout, clock), undefined)
+  assert.equal(getPlacement(returned.layout, clock).surface, 'canvas')
+  assert.deepEqual(getLayoutItemOptions(returned.layout, 'widget:clock'), {
+    dateFormat: 'long',
+  })
 })

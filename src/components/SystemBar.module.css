@@ -14,17 +14,25 @@
   outline-offset: -2px;
 }
 
-.clockButton {
+.bar .clockButton {
   display: grid;
-  width: 70px;
+  width: auto;
+  min-width: 70px;
+  max-width: calc(100dvw - 34px);
   height: 44px;
   flex-shrink: 0;
-  padding: 0;
+  padding: 0 12px;
   place-items: center;
   font-size: 14px;
   font-weight: 500;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
+}
+
+.clockLabel {
+  overflow: hidden;
+  max-width: 100%;
+  text-overflow: ellipsis;
 }
 
 .statusButton {
