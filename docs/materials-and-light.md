@@ -36,7 +36,9 @@ fit behavior. Background and appearance previews reflect the solid dotted canvas
 - Hover and focus brighten a control without changing its geometry. Active
   windows and open panels receive stronger edge highlights and a larger glow.
   The inset and outer accent shadows stay restrained so small controls do not
-  look like independent colored light sources.
+  look like independent colored light sources. Dark controls use one subtle
+  top highlight instead of stacking highlights from both the glow and edge
+  tokens; the surrounding shell rim is also dimmer in dark mode.
 - Entrances use opacity and translation. Decorative scale/bounce and moving
   shine were removed. Canvas overview scaling and actual resize interactions
   still express spatial navigation and changes in window bounds.

@@ -94,8 +94,8 @@
   --scrollbar: #c2dcd238;
   --control-track: #d9f3e82b;
   --control-thumb: #eff4ee;
-  --glass-edge: inset 0 1px 0 #e5fff226, inset 0 -1px 0 #0816161a;
-  --glass-edge-active: inset 0 1px 0 #e5fff24d, inset 0 0 0 1px #e5fff20f;
+  --glass-edge: inset 0 1px 0 #e5fff214, inset 0 -1px 0 #0816161a;
+  --glass-edge-active: inset 0 1px 0 #e5fff22e, inset 0 0 0 1px #e5fff20a;
   --window-shadow:
     0 24px 64px -20px #06141670,
     0 6px 20px -8px color-mix(in srgb, var(--accent) 10%, transparent);
@@ -106,7 +106,6 @@
     0 28px 88px -18px color-mix(in srgb, var(--accent) 14%, transparent),
     0 8px 32px -12px #06141680;
   --control-glow:
-    inset 0 1px 0 #e5fff24d,
     inset 0 0 18px color-mix(in srgb, var(--accent) 6%, transparent),
     0 6px 24px -5px color-mix(in srgb, var(--accent) 12%, transparent);
   --accent: color-mix(in srgb, var(--accent-base) 65%, #f9e5cc);
