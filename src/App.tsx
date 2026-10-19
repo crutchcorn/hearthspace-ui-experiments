@@ -1485,6 +1485,7 @@ function App() {
   }
 
   function openDesktopItem(item: DesktopItem) {
+    if (tool === 'layout' || previewExiting) return
     if (canvasSearch) {
       activateSearchResult({ kind: 'item', id: item.id })
       return

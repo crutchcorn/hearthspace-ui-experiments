@@ -67,6 +67,7 @@ export default function DesktopItems({
           !placements &&
           location.surface === 'frame' &&
           (inline || (view && frameHost))
+        const openOnClick = Boolean(framed || placements)
         const canvasBounds =
           location.surface === 'canvas' || location.surface === 'background'
             ? location.bounds
@@ -112,10 +113,11 @@ export default function DesktopItems({
             onPointerDown={(event) => onPointerDown(event, item)}
             onDoubleClick={(event) => {
               event.stopPropagation()
-              onOpen(item)
+              if (!openOnClick) onOpen(item)
             }}
             onClick={(event) => {
-              if (placements || event.detail === 0) onOpen(item)
+              if (event.detail === 0 || (openOnClick && event.detail === 1))
+                onOpen(item)
             }}
             onKeyDown={(event) => {
               if (event.key === 'Enter') {
@@ -131,9 +133,9 @@ export default function DesktopItems({
           >
             <span className={styles.icon} aria-hidden="true">
               {item.kind === 'folder' ? (
-                <Folder size={framed ? 32 : 46} strokeWidth={1.2} />
+                <Folder size={framed ? 30 : 46} strokeWidth={1.2} />
               ) : item.kind === 'file' ? (
-                <FileText size={framed ? 30 : 42} strokeWidth={1.2} />
+                <FileText size={framed ? 28 : 42} strokeWidth={1.2} />
               ) : (
                 <AppIcon
                   appId={item.appId}
@@ -141,7 +143,7 @@ export default function DesktopItems({
                     APP_CATALOG.find((app) => app.id === item.appId)?.icon ??
                     Globe
                   }
-                  size={framed ? 32 : 38}
+                  size={framed ? 24 : 38}
                   strokeWidth={1.4}
                 />
               )}

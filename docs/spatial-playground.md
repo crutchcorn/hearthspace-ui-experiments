@@ -232,6 +232,12 @@ grouped windows keep their resting presentation until opened.
 The maximize button and header double-click toggle this reveal while pinned.
 Close requests confirmation before closing the window and removing its frame
 attachment. Pinned desktop items instead animate into compact glass tiles.
+Outside Change layout, one click opens a pinned item, including grouped items;
+the second click and double-click event do not launch another window. Canvas
+items retain double-click activation. A standalone tile is 54 pixels square
+with 10-pixel padding; grouped items use a 44-pixel target and 5-pixel padding.
+App artwork fits its 32-pixel holder at 31.2 pixels, keeping the frame compact
+without crowding the surrounding glass.
 
 `transformCanvasWorkspace` applies arrangement, peeking, and gathering to a
 projection of the canvas objects, then merges the changed geometry back by ID.

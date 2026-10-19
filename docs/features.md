@@ -109,7 +109,9 @@ windows keep their peek until opened. Closing one asks
 **Close and remove from pinned?**; cancel keeps the window and its attachment.
 The maximize control and header double-click toggle its reveal while pinned.
 Pinned desktop shortcuts animate into compact glass tiles, keeping their app
-artwork recognizable while taking less room on the frame.
+artwork recognizable while taking less room on the frame. A single click opens
+a pinned item, including one inside a frame group; double-clicking launches it
+only once. Desktop items on the canvas still open with a double-click.
 
 ## Work across the canvas
 

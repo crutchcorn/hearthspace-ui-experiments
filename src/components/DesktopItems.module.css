@@ -96,7 +96,7 @@
 
 .item[data-frame-attached='true'] {
   gap: 0;
-  padding: 4px;
+  padding: 10px;
   border-color: var(--chrome-border);
   border-radius: var(--radius-panel);
   background: var(--chrome);
@@ -117,8 +117,8 @@
 }
 
 .item[data-frame-attached='true'] .icon {
-  width: 40px;
-  height: 40px;
+  width: 32px;
+  height: 32px;
 }
 
 .item[data-frame-attached='true'] .title {
@@ -147,7 +147,7 @@
 
 .item[data-group-member] {
   flex: 0 0 44px;
-  padding: 0;
+  padding: 5px;
   border-color: transparent;
   border-radius: calc(var(--radius-panel) - 5px);
   background: transparent;
