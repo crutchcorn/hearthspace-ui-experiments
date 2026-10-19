@@ -44,8 +44,10 @@ Completed strokes and placement persist with the scene. Drawing names in
 [search](canvas-search.md) are generated from their current order, such as
 “Drawing 2”; there is no naming or image-export UI.
 
-[`drawings.ts`](../src/drawings.ts) normalizes stroke bounds and validates saved
+[`drawings.ts`](../src/drawings.ts) normalizes stroke bounds and validates local
 ink, covered by [`drawings.test.ts`](../tests/drawings.test.ts).
+[`scene-storage.ts`](../src/scene-storage.ts) validates saved artwork and its
+owned location, covered by [scene storage tests](../tests/scene-storage.test.ts).
 [`DrawingLayer.tsx`](../src/components/DrawingLayer.tsx) renders and targets ink;
 [`DrawingActions.tsx`](../src/components/DrawingActions.tsx) provides the actions.
 [`App.tsx`](../src/App.tsx) owns recording, movement, and launch/consume behavior.

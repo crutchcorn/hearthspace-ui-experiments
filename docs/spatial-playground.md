@@ -572,7 +572,7 @@ across Settings windows.
 | [`src/components/PlacedWidget.tsx`](../src/components/PlacedWidget.tsx)                                                                               | Measured shell-widget positioning, canvas selection and dragging, responsive merging, and popover placement. |
 | [`src/components/WidgetPopover.tsx`](../src/components/WidgetPopover.tsx), [`widget-popover-context.ts`](../src/components/widget-popover-context.ts) | Detached popup, menu, and toast portals with shared placement; the control stays on the canvas.              |
 | [`src/components/LayoutConfirm.tsx`](../src/components/LayoutConfirm.tsx)                                                                             | Tool-removal warning and pinned-window close confirmation.                                                   |
-| [`src/drawings.ts`](../src/drawings.ts)                                                                                                               | Drawing types, stroke bounds, local coordinates, and saved-art validation.                                   |
+| [`src/drawings.ts`](../src/drawings.ts)                                                                                                               | Drawing types, stroke bounds, local coordinates, and stroke validation shared with the scene reader.         |
 | [`src/window-layout.ts`](../src/window-layout.ts)                                                                                                     | Responsive shell clearances and ordinary maximized window bounds.                                            |
 | [`src/canvas-grid.ts`](../src/canvas-grid.ts)                                                                                                         | Bounded object movement and dot snapping, including moving window edges during resizing.                     |
 | [`src/frame-grid.ts`](../src/frame-grid.ts)                                                                                                           | Alt alignment along frame edges with the visible canvas dots, preserving edge spacing and corners.           |
@@ -629,7 +629,7 @@ across Settings windows.
 
 ## Saved state
 
-The whole scene is saved under `hearthspace-scene-v1`. It contains world
+The whole scene is saved under `hearthspace-scene-v2`. It contains world
 dimensions and home coordinates, windows and their stacking, desktop items,
 drawings, frame groups and placements, status detail, item-specific options,
 the tools-hiding preference, window list order, and the scratchpad. Items and drawings each
@@ -645,16 +645,27 @@ placement, group membership, and expanded status. The clock currently saves
 unknown option keys and fields. Moving, grouping, or hiding the clock preserves
 its date format, and reloading restores it from the existing scene save.
 
-Validation checks supported object identities and locations, finite geometry,
-frame bounds, group membership, and drawing content. Only widgets may be
-hidden, and Canvas tools cannot load hidden while their hide-able preference
-is off. Missing or invalid scene storage starts with the default desktop and
-frame arrangement. Pinned-window hover and expanded states, layout selection,
-and unfinished placement drags are temporary.
+`readScene` validates the canonical records directly. It doesn't project a
+frame attachment into a viewport, parse that presentation as canvas geometry,
+and convert it back. A drawing attached to an edge therefore loads the same
+way on a smaller or larger screen, including when the canvas home is close
+to the world's boundary.
 
-This format deliberately ignores `hearthspace-playground-v1` and
-`hearthspace-frame-layout-v1`. There is no migration or fallback to those split
-saves: the first load with this format creates a fresh desktop. Theme,
+Validation checks supported object identities and locations, finite geometry,
+frame bounds, group membership, and local drawing strokes. Invalid individual
+records are discarded while valid neighboring work remains. Duplicate app
+shortcuts are removed and missing catalog shortcuts are restored without
+reusing existing IDs. Groups lose missing members; a lone surviving member
+retains the group's frame edge. Valid canvas peek homes remain attached to
+their objects. Only widgets may be hidden, and Canvas tools cannot load hidden
+while their hide-able preference is off. Missing, unreadable, or structurally
+invalid scene storage starts with the default desktop and frame arrangement.
+Pinned-window hover and expanded states, layout selection, and unfinished
+placement drags are temporary.
+
+This format deliberately ignores `hearthspace-scene-v1`,
+`hearthspace-playground-v1`, and `hearthspace-frame-layout-v1`. There is no
+migration or fallback to those saves: the first load with v2 creates a fresh desktop. Theme,
 background, favorites, gestures, and other preferences use their existing
 separate storage and are unaffected by this reset.
 

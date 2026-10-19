@@ -48,11 +48,17 @@ retain an active canvas position while also rendering as a frame object. Loading
 the desktop also restores missing catalog shortcuts and removes duplicate app
 shortcuts, keeping every catalog app represented.
 
+The current scene format starts a fresh desktop when only a pre-v2 scene is
+saved. It doesn't migrate those older placements or notes. Appearance,
+backgrounds, favorites, and gesture preferences use separate storage and
+remain intact; see [saved state](spatial-playground.md#saved-state).
+
 ## Where this lives
 
 [DesktopItems](../src/components/DesktopItems.tsx) handles the item presentation
 and activation differences. [App.tsx](../src/App.tsx) coordinates mixed selections
-and movement. [desktop.ts](../src/desktop.ts) defines starter items and catalog
-completeness; [scene.ts](../src/scene.ts) owns their locations.
-[Desktop persistence tests](../tests/desktop-persistence.test.ts) and
+and movement. [desktop.ts](../src/desktop.ts) defines starter items;
+[scene-storage.ts](../src/scene-storage.ts) validates saved objects and restores
+catalog completeness. [scene.ts](../src/scene.ts) owns their locations.
+[Scene storage tests](../tests/scene-storage.test.ts) and
 [scene tests](../tests/scene.test.ts) cover saved homes and location ownership.

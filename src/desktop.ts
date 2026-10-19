@@ -1,5 +1,5 @@
 import { APP_CATALOG } from './components/launcher-apps.ts'
-import { loadDrawings, type CanvasDrawing } from './drawings.ts'
+import type { CanvasDrawing } from './drawings.ts'
 
 export type Bounds = { x: number; y: number; width: number; height: number }
 export type CanvasTool =
@@ -95,35 +95,6 @@ function createDesktopItems(home: Workspace['home']): DesktopItem[] {
   }))
 }
 
-function includeAppShortcuts(
-  items: DesktopItem[],
-  home: Workspace['home'],
-  world: { width: number; height: number },
-): DesktopItem[] {
-  const appIds = new Set<string>()
-  const result = items.filter((item) => {
-    if (item.kind !== 'app') return true
-    if (appIds.has(item.appId)) return false
-    appIds.add(item.appId)
-    return true
-  })
-  const itemIds = new Set(result.map((item) => item.id))
-  for (const item of createDesktopItems(home)) {
-    if (item.kind !== 'app' || appIds.has(item.appId)) continue
-    let id = item.id
-    let suffix = 2
-    while (itemIds.has(id)) id = `${item.id}-${suffix++}`
-    itemIds.add(id)
-    result.push({
-      ...item,
-      id,
-      x: clamp(item.x, 0, world.width - item.width),
-      y: clamp(item.y, 0, world.height - item.height),
-    })
-  }
-  return result
-}
-
 export function createWorkspace(): Workspace {
   const width = Math.max(
     typeof window === 'undefined' ? 960 : window.innerWidth,
@@ -162,137 +133,6 @@ export function createWorkspace(): Workspace {
         height: 280,
       },
     ],
-  }
-}
-
-export function readWorkspace(input: unknown): Workspace {
-  try {
-    const value = input as Workspace
-    if (
-      !value ||
-      !Number.isFinite(value.width) ||
-      !Number.isFinite(value.height) ||
-      value.width < 9600 ||
-      value.height < 7200 ||
-      !Number.isFinite(value.home?.x) ||
-      !Number.isFinite(value.home?.y) ||
-      typeof value.note !== 'string' ||
-      !Array.isArray(value.windows)
-    )
-      return createWorkspace()
-    const ids = new Set<string>()
-    const windows = value.windows
-      .filter((item) => {
-        if (
-          !item ||
-          typeof item.id !== 'string' ||
-          ids.has(item.id) ||
-          typeof item.title !== 'string' ||
-          !['notes', 'empty'].includes(item.kind) ||
-          ![item.x, item.y, item.width, item.height].every(Number.isFinite)
-        )
-          return false
-        ids.add(item.id)
-        return true
-      })
-      .map(({ restore, ...item }) => {
-        const bounds =
-          restore &&
-          [restore.x, restore.y, restore.width, restore.height].every(
-            Number.isFinite,
-          )
-            ? restore
-            : item
-        const width = clamp(bounds.width, MIN_WIDTH, value.width)
-        const height = clamp(bounds.height, MIN_HEIGHT, value.height)
-        return {
-          id: item.id,
-          title: item.title,
-          kind: item.kind,
-          ...(typeof item.appId === 'string' ? { appId: item.appId } : {}),
-          dockOrder:
-            typeof item.dockOrder === 'number' &&
-            Number.isFinite(item.dockOrder) &&
-            item.dockOrder >= 0
-              ? item.dockOrder
-              : undefined,
-          width,
-          height,
-          x: clamp(bounds.x, 0, value.width - width),
-          y: clamp(bounds.y, 0, value.height - height),
-        }
-      })
-    const home = {
-      x: clamp(
-        value.home.x,
-        0,
-        value.width - (typeof window === 'undefined' ? 960 : window.innerWidth),
-      ),
-      y: clamp(
-        value.home.y,
-        0,
-        value.height -
-          (typeof window === 'undefined' ? 720 : window.innerHeight),
-      ),
-    }
-    const itemIds = new Set<string>()
-    const knownApps = new Set(APP_CATALOG.map((app) => app.id))
-    const items = Array.isArray(value.items)
-      ? value.items
-          .filter((item) => {
-            if (
-              !item ||
-              typeof item.id !== 'string' ||
-              item.id.length === 0 ||
-              itemIds.has(item.id) ||
-              typeof item.title !== 'string' ||
-              item.title.trim().length === 0 ||
-              !['folder', 'file', 'app'].includes(item.kind) ||
-              !knownApps.has(item.appId) ||
-              ![item.x, item.y, item.width, item.height].every(Number.isFinite)
-            )
-              return false
-            itemIds.add(item.id)
-            return true
-          })
-          .map((item) => {
-            const width = clamp(item.width, 48, value.width)
-            const height = clamp(item.height, 64, value.height)
-            const origin = item.peekOrigin
-            const peekOrigin =
-              origin &&
-              Number.isFinite(origin.x) &&
-              Number.isFinite(origin.y) &&
-              origin.x >= 0 &&
-              origin.y >= 0 &&
-              origin.x + width <= value.width &&
-              origin.y + height <= value.height
-                ? { x: origin.x, y: origin.y }
-                : undefined
-            return {
-              id: item.id,
-              title: item.title,
-              kind: item.kind,
-              appId: item.appId,
-              width,
-              height,
-              x: clamp(item.x, 0, value.width - width),
-              y: clamp(item.y, 0, value.height - height),
-              ...(peekOrigin ? { peekOrigin } : {}),
-            }
-          })
-      : createDesktopItems(home)
-    return {
-      width: value.width,
-      height: value.height,
-      note: value.note,
-      home,
-      windows,
-      items: includeAppShortcuts(items, home, value),
-      drawings: loadDrawings(value.drawings, value),
-    }
-  } catch {
-    return createWorkspace()
   }
 }
 

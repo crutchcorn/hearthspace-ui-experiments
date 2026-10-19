@@ -47,7 +47,7 @@ interaction and points to its implementation.
 - [Testing the playground](testing.md): geometry tests, real-browser interaction coverage, isolation, and test boundaries.
 - [A canvas inside a frame](canvas-and-frame.md): the spatial analogy, layers, user-controlled attachments, and recovery through search.
 - [Visual language](visual-language.md): warm glass, opaque app content, consistent spacing, compact controls, and restraint with accent text.
-- [Spatial playground](spatial-playground.md): scene ownership, coordinates, layer invariants, source map, persistence, and saved-layout resets.
+- [Spatial playground](spatial-playground.md): scene ownership, coordinates, layer invariants, source map, canonical saved-state validation, and layout resets.
 - [Drawing recognition](recognition.md): geometric gesture matching, handwriting worker/model ownership, and vendored recognizer provenance.
 
 For contributor commands, see [CONTRIBUTING.md](../CONTRIBUTING.md).

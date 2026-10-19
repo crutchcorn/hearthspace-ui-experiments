@@ -27,90 +27,45 @@ function record(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === 'object'
 }
 
-export function loadDrawings(value: unknown, world: World): CanvasDrawing[] {
-  if (!Array.isArray(value) || !validWorld(world)) return []
-  const drawings: CanvasDrawing[] = []
-  const ids = new Set<string>()
-  for (const item of value) {
+/** Strokes use coordinates local to the drawing, regardless of its surface. */
+export function readDrawingStrokes(
+  value: unknown,
+  size: World,
+): GesturePoint[][] | null {
+  if (
+    !validWorld(size) ||
+    !Array.isArray(value) ||
+    value.length === 0 ||
+    value.length > MAX_DRAWING_STROKES
+  )
+    return null
+  const strokes: GesturePoint[][] = []
+  for (const stroke of value) {
     if (
-      !record(item) ||
-      typeof item.id !== 'string' ||
-      !item.id.trim() ||
-      item.id.length > 200 ||
-      ids.has(item.id) ||
-      (item.layer !== 'below' && item.layer !== 'above') ||
-      ![item.x, item.y, item.width, item.height].every(
-        (part) => typeof part === 'number' && Number.isFinite(part),
-      )
+      !Array.isArray(stroke) ||
+      !stroke.length ||
+      stroke.length > maximumPoints
     )
-      continue
-    const { x, y, width, height } = item as Record<string, number>
-    if (
-      x < 0 ||
-      y < 0 ||
-      width <= 0 ||
-      height <= 0 ||
-      x + width > world.width ||
-      y + height > world.height ||
-      !Array.isArray(item.strokes) ||
-      item.strokes.length === 0 ||
-      item.strokes.length > MAX_DRAWING_STROKES
-    )
-      continue
-    const strokes: GesturePoint[][] = []
-    for (const stroke of item.strokes) {
+      return null
+    const points: GesturePoint[] = []
+    for (const point of stroke) {
       if (
-        !Array.isArray(stroke) ||
-        !stroke.length ||
-        stroke.length > maximumPoints
+        !record(point) ||
+        typeof point.x !== 'number' ||
+        typeof point.y !== 'number' ||
+        !Number.isFinite(point.x) ||
+        !Number.isFinite(point.y) ||
+        point.x < 0 ||
+        point.y < 0 ||
+        point.x > size.width ||
+        point.y > size.height
       )
-        break
-      const points: GesturePoint[] = []
-      for (const point of stroke) {
-        if (
-          !record(point) ||
-          typeof point.x !== 'number' ||
-          typeof point.y !== 'number' ||
-          !Number.isFinite(point.x) ||
-          !Number.isFinite(point.y) ||
-          point.x < 0 ||
-          point.y < 0 ||
-          point.x > width ||
-          point.y > height
-        )
-          break
-        points.push({ x: point.x, y: point.y })
-      }
-      if (points.length !== stroke.length) break
-      strokes.push(points)
+        return null
+      points.push({ x: point.x, y: point.y })
     }
-    if (strokes.length !== item.strokes.length) continue
-    const origin = item.peekOrigin
-    const peekOrigin =
-      record(origin) &&
-      typeof origin.x === 'number' &&
-      typeof origin.y === 'number' &&
-      Number.isFinite(origin.x) &&
-      Number.isFinite(origin.y) &&
-      origin.x >= 0 &&
-      origin.y >= 0 &&
-      origin.x + width <= world.width &&
-      origin.y + height <= world.height
-        ? { x: origin.x, y: origin.y }
-        : undefined
-    ids.add(item.id)
-    drawings.push({
-      id: item.id,
-      layer: item.layer,
-      x,
-      y,
-      width,
-      height,
-      strokes,
-      ...(peekOrigin ? { peekOrigin } : {}),
-    })
+    strokes.push(points)
   }
-  return drawings
+  return strokes
 }
 
 export function addDrawingStroke(
