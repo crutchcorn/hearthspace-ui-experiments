@@ -8,7 +8,6 @@ import {
   type CSSProperties,
   type PointerEvent as ReactPointerEvent,
 } from 'react'
-import { createPortal } from 'react-dom'
 import { transformCanvasWorkspace } from './layout-workspace'
 import { CANVAS_LAYERS } from './canvas-layers'
 import useObjectLayout from './useObjectLayout'
@@ -67,6 +66,7 @@ import LauncherDock from './components/LauncherDock'
 import { loadFavoriteApps, saveFavoriteApps, addFavoriteApp } from './favorites'
 import AppIcon from './components/AppIcon'
 import WindowContent from './components/WindowContent'
+import WindowHost from './components/WindowHost'
 import type { SettingsNavigationRequest } from './components/Settings'
 import GatherWindows from './components/GatherWindows'
 import WindowSwitcher from './components/WindowSwitcher'
@@ -2967,9 +2967,14 @@ function App() {
                 )}
               </section>
             )
-            return attached && frameHost
-              ? createPortal(content, frameHost, item.id)
-              : content
+            return (
+              <WindowHost
+                key={item.id}
+                container={attached ? frameHost : canvasHost}
+              >
+                {content}
+              </WindowHost>
+            )
           })}
           {!windowSwitcher.open && !focusView && (
             <div

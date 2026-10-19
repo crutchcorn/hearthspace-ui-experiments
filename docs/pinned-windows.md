@@ -40,6 +40,10 @@ pinned?** Cancel preserves both the window and its attachment. Confirming remove
 both. The scene saves the attachment and window, while temporary hover and open
 preview state aren't saved.
 
+Moving a window between the canvas and frame keeps its app session intact.
+Settings stays on the selected category, and temporary display choices remain
+available until that Settings window is closed.
+
 ## Implementation
 
 [App](../src/App.tsx) coordinates focus, reveal, closing, and group preview slots.
@@ -47,6 +51,9 @@ preview state aren't saved.
 strip, with [tests](../tests/frame-layout.test.ts) for resting, hover, fully open,
 and small-window cases. [FramePreviewSlot](../src/components/FramePreviewSlot.tsx)
 measures grouped previews without substituting a second window visual.
+[WindowHost](../src/components/WindowHost.tsx) gives each window a persistent
+portal container. Changing placement moves that container without remounting
+the app inside it.
 
 Closing uses the scene's `removeObject` operation to remove the window and its
 placement together, release group members, and return displaced background work
