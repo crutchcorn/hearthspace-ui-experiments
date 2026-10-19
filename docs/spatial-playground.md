@@ -142,6 +142,16 @@ reached. The surface, selection outline, and contents animate together in both
 directions. Release near an edge snaps the attachment into its final position;
 release in the interior keeps it on the canvas.
 
+Alt also aligns attachments during Change layout. `snapFramePlacement` in
+`frame-grid.ts` converts the attachment's visible position into canvas
+coordinates, snaps it to the shared dot grid, then converts back. It adjusts
+only x along the top or bottom edge, or y along a side, preserving the normal
+screen inset or flush placement. Corner targets bypass grid snapping. The
+same rule applies to shortcuts, windows, drawings, widgets, and whole groups.
+Pressing or releasing Alt updates an active drag even while the pointer stays
+still; release uses the current modifier state and the final measured size.
+An interior Change layout drag remains freely positioned.
+
 Widget edge detection uses a centered square based on the shorter toolbar
 dimension. That probe stays stable when the toolbar turns, preventing the new
 bounding box from selecting another edge and immediately turning it back.
@@ -554,6 +564,7 @@ across Settings windows.
 | [`src/drawings.ts`](../src/drawings.ts)                                                                                                               | Drawing types, stroke bounds, local coordinates, and saved-art validation.                                   |
 | [`src/window-layout.ts`](../src/window-layout.ts)                                                                                                     | Responsive shell clearances and ordinary maximized window bounds.                                            |
 | [`src/canvas-grid.ts`](../src/canvas-grid.ts)                                                                                                         | Bounded object movement and dot snapping, including moving window edges during resizing.                     |
+| [`src/frame-grid.ts`](../src/frame-grid.ts)                                                                                                           | Alt alignment along frame edges with the visible canvas dots, preserving edge spacing and corners.           |
 | [`src/peek-layout.ts`](../src/peek-layout.ts)                                                                                                         | Covered-window placement, temporary canvas icon, control, and drawing peeking, and return-home positions.    |
 | [`src/usePeekMotion.ts`](../src/usePeekMotion.ts)                                                                                                     | Short slide animations for peeking objects and canvas icons, controls, and drawings returning home.          |
 | [`src/canvas-search.ts`](../src/canvas-search.ts)                                                                                                     | Search matching and shared grid/parking layouts for canvas search and window switching.                      |

@@ -56,6 +56,13 @@ horizontal. The animation works in either direction. Icons and toolbars use the 
 including the default mobile bars. Standalone windows and drawings stay flush
 with the edge; grouped work follows its shared surface.
 
+Hold **Alt** while positioning a frame attachment in Change layout to align it
+with the currently visible canvas dots. Top and bottom edges snap horizontally;
+side edges snap vertically, keeping the normal distance from the screen edge.
+Corners keep their corner placement. This works for shortcuts, windows,
+drawings, controls, and whole groups, and pressing or releasing Alt updates the
+alignment during the drag.
+
 Notifications, Clock, Wi-Fi, Sound, Battery, Canvas tools, and Apps are
 movable shell widgets. The four device controls start together, but you can
 select and move each one independently. They can also live on the canvas or
@@ -128,8 +135,8 @@ only once. Desktop items on the canvas still open with a double-click.
 - **Place windows.** Drag their headers, resize, and close them. Dragging toward
   the viewport edge carries a window farther across the canvas.
 - **Align with the dots.** Hold **Alt** while dragging a window, desktop item,
-  canvas control, or drawing to snap the top-left of its bounds to the wallpaper
-  dots. Release Alt to move freely again. Selected groups keep their spacing, using the
+  canvas control, or drawing on the canvas to snap the top-left of its bounds
+  to the wallpaper dots. Release Alt to move freely again. Selected groups keep their spacing, using the
   grabbed window or item as the anchor. The same hidden grid works with a
   photo background and with drawings on either layer. Hold Alt while resizing
   to align the edges you're moving with the dots, keeping opposite edges fixed.
