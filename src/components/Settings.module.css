@@ -2,6 +2,7 @@
   container: settings / inline-size;
   height: 100%;
   min-height: 0;
+  user-select: none;
 }
 
 .layout {

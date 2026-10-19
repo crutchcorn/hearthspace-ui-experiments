@@ -225,6 +225,7 @@
 
 .windowBody {
   flex: 1;
+  user-select: text;
   min-width: 0;
   min-height: 0;
   overflow: auto;
@@ -403,6 +404,7 @@
 
 .nativeMenu {
   display: flex;
+  user-select: none;
   gap: 20px;
   padding: 7px 13px;
   border-bottom: 1px solid #c9c9c9;

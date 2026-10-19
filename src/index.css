@@ -147,8 +147,10 @@
   box-sizing: border-box;
 }
 
+/* The shell behaves like desktop chrome; app content opts into selection. */
 body {
   margin: 0;
+  user-select: none;
 }
 
 html,
@@ -169,6 +171,19 @@ select {
 button {
   color: inherit;
   cursor: pointer;
+}
+
+button,
+label,
+select,
+summary {
+  user-select: none;
+}
+
+input,
+textarea,
+[contenteditable]:not([contenteditable='false']) {
+  user-select: text;
 }
 
 button:focus-visible {
