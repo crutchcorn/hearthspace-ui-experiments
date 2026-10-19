@@ -2237,6 +2237,7 @@ function App() {
                 frameHost={frameHost}
                 groupBounds={framePreviewBounds}
                 draggingWidget={objectLayout.draggingWidget}
+                frameDropTarget={objectLayout.dropTarget}
                 view={view}
                 placements={searchLayout?.drawings}
                 onOpen={(id) => activateSearchResult({ kind: 'drawing', id })}
@@ -2271,13 +2272,10 @@ function App() {
               kind: 'window',
               id: item.id,
             })
-            const objectPlacement = movingGroup?.edge
-              ? {
-                  surface: 'frame' as const,
-                  edge: movingGroup.edge,
-                  position: 0.5,
-                }
-              : savedObjectPlacement
+            const objectPlacement =
+              movingGroup && savedObjectPlacement.surface !== 'frame'
+                ? (objectLayout.dropTarget ?? { surface: 'canvas' as const })
+                : savedObjectPlacement
             const attached =
               !previewLayout && objectPlacement.surface === 'frame'
             const slot = grouped
@@ -2304,6 +2302,10 @@ function App() {
                 frameBounds.height = slot.height
               }
             }
+            const canvasBounds =
+              movingGroup && !previewLayout && !attached && slot
+                ? { ...item, x: slot.x + view.x, y: slot.y + view.y }
+                : item
             const offset = attached
               ? getPinnedWindowOffset(
                   frameBounds!,
@@ -2397,11 +2399,11 @@ function App() {
                   left:
                     renderedFocusView?.id === item.id
                       ? 0
-                      : (frameBounds?.x ?? item.x),
+                      : (frameBounds?.x ?? canvasBounds.x),
                   top:
                     renderedFocusView?.id === item.id
                       ? 0
-                      : (frameBounds?.y ?? item.y),
+                      : (frameBounds?.y ?? canvasBounds.y),
                   width:
                     renderedFocusView?.id === item.id
                       ? view.width
@@ -2608,6 +2610,7 @@ function App() {
                 frameHost={frameHost}
                 groupBounds={framePreviewBounds}
                 draggingWidget={objectLayout.draggingWidget}
+                frameDropTarget={objectLayout.dropTarget}
                 view={view}
                 placements={searchLayout?.drawings}
                 onOpen={(id) => activateSearchResult({ kind: 'drawing', id })}

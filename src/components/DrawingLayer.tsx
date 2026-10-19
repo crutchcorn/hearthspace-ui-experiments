@@ -11,6 +11,7 @@ import {
   targetKey,
   type FrameEdge,
   type FrameLayout,
+  type ObjectPlacement,
 } from '../frame-layout'
 import styles from './DrawingLayer.module.css'
 import type { FramePreviewBounds } from './FramePreviewSlot'
@@ -26,6 +27,7 @@ interface DrawingLayerProps {
   frameHost?: HTMLElement | null
   groupBounds?: Map<string, FramePreviewBounds>
   draggingWidget?: { id: string; edge?: FrameEdge } | null
+  frameDropTarget?: Extract<ObjectPlacement, { surface: 'frame' }> | null
   draft?: { points: GesturePoint[]; layer: DrawingLayerName }
   interactive: boolean
   onPointerDown: (event: PointerEvent<SVGSVGElement>, id: string) => void
@@ -70,6 +72,7 @@ export default function DrawingLayer({
   frameHost,
   groupBounds,
   draggingWidget,
+  frameDropTarget,
   draft,
   interactive,
   onPointerDown,
@@ -107,13 +110,10 @@ export default function DrawingLayer({
               ] ?? {
                 surface: drawing.layer === 'below' ? 'background' : 'canvas',
               })
-        const layout = movingGroup?.edge
-          ? {
-              surface: 'frame' as const,
-              edge: movingGroup.edge,
-              position: 0.5,
-            }
-          : savedLayout
+        const layout =
+          movingGroup && savedLayout.surface !== 'frame'
+            ? (frameDropTarget ?? { surface: 'canvas' as const })
+            : savedLayout
         const effectiveLayer = placements
           ? 'above'
           : layout.surface === 'background'
@@ -122,10 +122,17 @@ export default function DrawingLayer({
         if (effectiveLayer !== layer || (placements && !placement)) return null
         const framed =
           !placements && layout.surface === 'frame' && view && frameHost
+        const slot = groupBounds?.get(`drawing:${drawing.id}`)
         const bounds = framed
           ? getFrameBounds(layout, drawing.width, drawing.height, view)
-          : drawing
-        const slot = groupBounds?.get(`drawing:${drawing.id}`)
+          : movingGroup && !placements && slot && view
+            ? {
+                x: slot.x + view.x,
+                y: slot.y + view.y,
+                width: slot.width,
+                height: slot.height,
+              }
+            : drawing
         if (framed && group && slot) {
           bounds.x = slot.x
           bounds.y = slot.y

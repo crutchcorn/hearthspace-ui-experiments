@@ -3,6 +3,7 @@ import { after, before, test } from 'node:test'
 import {
   FRAME_LAYOUT_STORAGE_KEY,
   getFrameBounds,
+  getFrameDragBounds,
   getFrameDropTarget,
   getFrameGroups,
   getPlacement,
@@ -883,7 +884,7 @@ test('a toolbar still changes orientation when entering an edge away from a corn
   )
 })
 
-test('interior widgets remain untargeted until a final nearest-edge attachment is requested', () => {
+test('interior widgets stay on the canvas unless explicitly attached to the nearest edge', () => {
   const viewport = { width: 1000, height: 800 }
   const horizontal = {
     x: 250 - 299 / 2,
@@ -900,4 +901,24 @@ test('interior widgets remain untargeted until a final nearest-edge attachment i
     getWidgetFrameDropTarget(vertical, viewport, Infinity),
     target,
   )
+})
+
+test('collapsed windows detach using their exposed strip instead of their offscreen body', () => {
+  const viewport = { width: 1000, height: 800 }
+  const previews = [
+    { x: -308, y: 200, width: 350, height: 360 },
+    { x: 958, y: 200, width: 350, height: 360 },
+    { x: 300, y: -318, width: 350, height: 360 },
+    { x: 300, y: 758, width: 350, height: 360 },
+  ]
+  for (const preview of previews) {
+    const grabbed = getFrameDragBounds(preview, viewport)
+    assert.equal(Math.min(grabbed.width, grabbed.height), 42)
+    const interior = { ...grabbed, x: 300, y: 200 }
+    assert.equal(getFrameDropTarget(interior, viewport), null)
+    assert.equal(
+      getFrameDropTarget({ ...interior, x: 20 }, viewport)?.edge,
+      'left',
+    )
+  }
 })

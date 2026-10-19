@@ -539,6 +539,24 @@ export function getPinnedWindowOffset(
   }
 }
 
+export function getFrameDragBounds(
+  bounds: Bounds,
+  viewport: { width: number; height: number },
+): Bounds {
+  // Grab the exposed part of a pinned window, not its hidden offscreen body.
+  const x = Math.max(0, bounds.x)
+  const y = Math.max(0, bounds.y)
+  return {
+    x,
+    y,
+    width: Math.max(0, Math.min(viewport.width, bounds.x + bounds.width) - x),
+    height: Math.max(
+      0,
+      Math.min(viewport.height, bounds.y + bounds.height) - y,
+    ),
+  }
+}
+
 export function getFrameDropTarget(
   bounds: Bounds,
   viewport: { width: number; height: number },

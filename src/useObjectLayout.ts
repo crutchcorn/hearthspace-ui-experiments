@@ -17,6 +17,7 @@ import {
   setAllowHideTools,
   targetKey,
   getFrameDropTarget,
+  getFrameDragBounds,
   getFrameBounds,
   getWidgetFrameDropTarget,
   type LayoutTarget,
@@ -84,7 +85,6 @@ export default function useObjectLayout(
     y: number
     bounds: Bounds
     moved: boolean
-    startedOnFrame: boolean
     captureTarget: HTMLElement
     originalLayout: FrameLayout
     originalPlacement?: ObjectPlacement
@@ -649,10 +649,13 @@ export default function useObjectLayout(
           : element.dataset.desktopItemId
             ? { kind: 'item', id: element.dataset.desktopItemId }
             : { kind: 'drawing', id: element.dataset.drawingId! }
-    const bounds = motionBounds(
-      targetElement(target) ?? element,
-      isToolbar(target),
-    )
+    const movingElement = targetElement(target) ?? element
+    const measured = motionBounds(movingElement, isToolbar(target))
+    const bounds =
+      target.kind === 'window' &&
+      movingElement.dataset.pinnedCollapsed === 'true'
+        ? getFrameDragBounds(measured, view)
+        : measured
     cancelMotion()
     event.preventDefault()
     event.stopPropagation()
@@ -678,7 +681,6 @@ export default function useObjectLayout(
       y: event.clientY,
       bounds,
       moved: false,
-      startedOnFrame: placement(target).surface === 'frame',
       captureTarget: event.currentTarget,
       originalLayout: layout,
       originalPlacement: layout.placements[targetKey(target)],
@@ -782,17 +784,13 @@ export default function useObjectLayout(
         finishDrag(event)
         return
       }
-      const maximumDistance = current.startedOnFrame ? Infinity : 72
       const drop = isToolbar(current.target)
-        ? getWidgetFrameDropTarget(
-            movingBounds,
-            view,
-            maximumDistance,
-            draggingWidget?.edge,
-          )
-        : getFrameDropTarget(movingBounds, view, maximumDistance)
+        ? getWidgetFrameDropTarget(movingBounds, view, 72, draggingWidget?.edge)
+        : getFrameDropTarget(movingBounds, view)
       if (drop) place(current.target, drop)
-      else {
+      else if (current.target.kind === 'group') {
+        place(current.target, { surface: 'canvas' })
+      } else {
         if (isToolbar(current.target)) {
           queueMotion(current.target)
           // Canvas widgets return to a row without shifting their drag center.
@@ -826,6 +824,7 @@ export default function useObjectLayout(
           current.target,
           nextPlacement,
         )
+        setLayout(nextLayout)
         beforeSettle(current.target)
         setWorkspace((previous) =>
           settleLayoutDrop(
