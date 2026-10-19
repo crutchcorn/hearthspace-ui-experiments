@@ -22,7 +22,7 @@ Each corner starts with a job. These are the default frame attachments:
 
 On narrow screens, the default corners join into a top bar and bottom bar. Apps and
 tray icons scroll horizontally when needed, while the notification label stays
-visible. App icons stay right-aligned. Canvas tools become one selector with a
+visible when its details are expanded. App icons stay right-aligned. Canvas tools become one selector with a
 flat list of choices.
 
 Icons carry routine actions without permanent captions. Hover and selection
@@ -30,7 +30,7 @@ add backgrounds; the notification status tells you when something needs attentio
 
 ## Arrange the canvas and frame
 
-Choose **Change layout** in canvas tools, then select or drag a window,
+Choose **Change layout** in canvas tools or **Settings → System**, then select or drag a window,
 desktop item, drawing, or shell control. Drag it to an edge to attach it to the
 frame; animated corner targets help align it with the screen boundary. It stays
 nearby while you pan the canvas. Dropping an attached item in the interior
@@ -40,7 +40,9 @@ attaches to the nearest edge; dragging chooses an edge or corner directly.
 There are no individual edge buttons or position slider. **Done** or Escape leaves
 layout editing.
 
-Choose **Canvas** or **Background** to detach an object deliberately. Toolbars
+Choose **Canvas** or **Background** to detach an object deliberately. For a
+whole group, this releases its members onto the chosen layer at their current
+screen positions. Toolbars
 on the left or right stack vertically with upright icons; top and bottom
 attachments stay horizontal. While dragging, entering a new edge area animates
 the surface, outline, and contents into that orientation together. The toolbar
@@ -48,11 +50,34 @@ keeps its orientation while crossing the interior until it reaches another
 edge area, then snaps into place on release. Corners preserve the incoming
 orientation: a vertical toolbar stays vertical, and a horizontal one stays
 horizontal. The animation works in either direction. Icons and toolbars use the same screen inset along every edge,
-including the default mobile bars. Windows and drawings stay flush with the edge.
+including the default mobile bars. Standalone windows and drawings stay flush
+with the edge; grouped work follows its shared surface.
 
-The default Notifications, System tray, Canvas tools, and Apps groups are
-movable shell widgets. They can also live on the canvas or its background.
-Custom widgets aren't part of the playground yet.
+Notifications, Clock, Wi-Fi, Sound, Battery, Canvas tools, and Apps are
+movable shell widgets. The four device controls start together, but you can
+select and move each one independently. They can also live on the canvas or
+its background. Custom widgets aren't part of the playground yet.
+
+Place desktop icons, shell widgets, windows, or drawings together on the frame
+to join them in one group. Any overlap joins attachments automatically, including
+overlap caused by snapping, resizing, changing status detail, or loading a saved
+layout. Groups share a continuous surface and follow the orientation of
+their edge. Combine Apps, Canvas tools, and device controls for a taskbar, or
+keep a few folders and shortcuts together. Individual members remain
+selectable, so you can rearrange them or take one out of the group.
+Windows keep their actual chrome and content, and drawings keep their visible
+art within the group. A grouped window's resting peek meets the edge of the
+group's glass surface; hovering brings it a little farther into view.
+The group's grip moves the whole group. **Separate** releases a selected
+member; **Ungroup** releases all members of a selected group.
+
+Select a status item in Change layout to show more detail or reduce it to an
+icon. This applies to notifications as well as the clock, Wi-Fi, sound, and
+battery. Expanded items show unread status, the time, network name, volume,
+or charge percentage; their popovers remain available in either size.
+The editor labels these choices **Show details** and **Icon only**.
+Expanded notification text follows a vertical edge when placed on either side
+of the screen, keeping the group narrow while its bell stays upright.
 
 Finishing a layout move reveals work that the placement fully covers. Placing
 an object on the background also moves blocked background objects aside; those
@@ -74,7 +99,8 @@ turning the hide-able setting off restores the tools if they were hidden.
 Pinned windows leave a small strip visible at the frame edge. Hover reveals
 a little more, and clicking opens it fully and focuses it. Focusing
 another window or clicking outside slides it back toward the edge. Layout
-editing reveals pinned windows so they're easy to move. Closing one asks
+editing reveals standalone pinned windows so they're easy to move; grouped
+windows keep their peek until opened. Closing one asks
 **Close and remove from pinned?**; cancel keeps the window and its attachment.
 The maximize control and header double-click toggle its reveal while pinned.
 Pinned desktop shortcuts animate into compact glass tiles, keeping their app
@@ -208,8 +234,11 @@ require their key events to reach the page.
 
 The launcher offers a gallery, list, and search across eight app previews.
 Choose Apps to open it; arrow keys and Enter select an app. Browser, Files,
-and Notes are preset favorites beside the launcher. **Ctrl/⌘ K** opens the
-broader canvas search.
+and Notes are preset favorites beside the launcher. Drag an app shortcut onto
+the Apps button to add another favorite. The button highlights the drop;
+the original shortcut returns to its canvas position and the favorite
+appears in the dock. Adding the same app again keeps one favorite. Favorites
+survive reloads. **Ctrl/⌘ K** opens the broader canvas search.
 
 Running apps show up to three dots for their window instances. Select an app
 to open its window list, bring an instance into view, or create another. Drag
@@ -233,7 +262,7 @@ The Settings sidebar collapses in small windows.
 | Displays   | Drag two numbered monitors, release to snap them together and recenter the pair, then select one to change its displayed resolution, scale, and refresh rate.                                                                     |
 | Gestures   | Manage the saved app assignments and drawn marks.                                                                                                                                                                                 |
 | AI         | Opt in to a four-second, 3 GB download preview. Turning enabled AI off asks for confirmation about deleting the model and downloading it again later.                                                                             |
-| System     | Choose whether the battery percentage appears beside its tray icon; allow hiding canvas tools or restore them.                                                                                                                    |
+| System     | Open **Change layout** to arrange and group frame items or change status detail; allow hiding canvas tools or restore them.                                                                                                       |
 
 **Gather similar windows** appears beside selected windows. AI starts off;
 enabling it makes this action available. Press it to show a one-second shimmer,
@@ -264,12 +293,13 @@ Prototype boundaries:
   don't change the host system. Notifications have no external event source.
 - AI gathering doesn't download a model or inspect window contents. It uses a
   local same-app rule to move windows after its brief delay. Custom desktop
-  widgets, uninstalling apps, and editing favorites aren't implemented.
+  widgets and uninstalling apps aren't implemented. Favorites can be added by
+  dragging; there is no separate favorites-management screen.
 
 The browser saves window layouts and stacking, desktop-item positions, drawings,
-frame attachments, canvas layers, hidden widgets, the tools-hiding preference,
+frame attachments and groups, status detail, favorites, canvas layers, hidden widgets, the tools-hiding preference,
 window list order, the scratchpad, tool choices, gesture assignments, appearance,
-background, battery-label preference, and completed AI opt-in. Panels,
+background, and completed AI opt-in. Panels,
 selections, unfinished pointer strokes, temporary search arrangements, viewport
 travel, notifications, and mock display settings reset.
 Storage stays local to that browser; if it's unavailable, the current session

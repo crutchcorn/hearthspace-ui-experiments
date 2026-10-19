@@ -91,19 +91,24 @@ Gathering is an AI feature preview. Until AI is enabled in Settings, the button 
 
 The [canvas-and-frame model](canvas-and-frame.md) separates an object's identity
 from its placement. `frame-layout.ts` addresses objects by kind and ID:
-`window`, `item`, `drawing`, or `widget`. A placement is `canvas`, `background`,
+`window`, `item`, `drawing`, `widget`, or `group`. A placement is `canvas`, `background`,
 or `frame`; only catalog widgets can be `hidden`. Canvas widgets store world
 coordinates in their placement. Windows, desktop items, and drawings keep
 their ordinary geometry in the workspace.
 
-`FRAME_WIDGETS` defines Notifications, System tray, Canvas tools, and Apps,
-including default corners and search metadata. `PlacedWidget` measures the
+`FRAME_WIDGETS` defines Notifications, Clock, Wi-Fi, Sound, Battery, Canvas
+tools, and Apps, including default corners and search metadata. The four
+device controls begin in a `system` frame group; that grouping is editable.
+`PlacedWidget` measures the
 control's contents, positions it relative to the viewport or world, and keeps
-its popovers within the available screen space. On mobile, each pair merges
-into its shared bar only while both widgets retain their default placements.
+its popovers within the available screen space. `FrameShell` arranges the
+groups and independent widgets. On mobile, Notifications and the unchanged
+default device group share the top bar; Canvas tools and Apps share the bottom
+bar while both retain their default placements.
 Frame bounds inset widgets and desktop items by 24 pixels on desktop and
-12 pixels on mobile, matching corner and side spacing. Windows and drawings
-remain flush with the screen boundary. Side toolbars
+12 pixels on mobile, matching corner and side spacing. Standalone windows and
+drawings remain flush with the screen boundary; grouped work uses the shared
+group surface. Side toolbars
 stack controls vertically, with upright icons; top and bottom toolbars remain
 horizontal. During a drag, entering a new edge area changes the orientation;
 crossing the interior retains the last orientation until another edge area is
@@ -117,6 +122,38 @@ Corner targets preserve the current drag orientation, choosing the vertical
 or horizontal edge of that corner accordingly. Preview and release use the
 same rule; only entering a non-corner edge changes orientation.
 Windows, desktop items, and drawings use their object bounds for edge targets.
+
+Groups store ordered member targets and have their own placement. Members
+retain their identity and use the group's placement while joined. Groups can
+contain desktop items, shell widgets, windows, and drawings, including the dock
+and canvas tools. Dropping a group onto another
+group combines their members in one row or column rather than nesting surfaces.
+Dragging an individual member out leaves the others together. A group with
+fewer than two members dissolves, keeping the remaining item available.
+The group's grip selects and moves the whole group. The editor offers
+**Separate** for a selected member and **Ungroup** for the whole group.
+
+The layout drag checks for a nearby frame member or group before selecting an
+edge attachment. `frame-collisions.ts` also combines attachments with any
+positive-area overlap; touching edges alone doesn't join them. It checks
+transitive overlaps, so a chain of intersecting attachments forms one group.
+The measured layout is checked after release, edge snapping, resizing,
+status-detail changes, and loading saved state. Existing group members are
+represented by their group bounds, and standalone pinned windows use their
+resting strip for collision checks. This keeps an attachment from settling
+beneath another. The drop's side of a member determines insertion order.
+Moving a group excludes its own members from these targets. A shortcut over
+the launcher trigger instead adds a favorite, taking precedence over grouping.
+Cancellation restores the original group membership as well as placement.
+
+Clock, Wi-Fi, Sound, Battery, and Notifications also have a saved expanded
+state, edited from Change layout. Clock and Notifications begin expanded;
+the other three begin as icons. Expansion shows the time, connected network,
+volume, charge percentage, or unread status without changing the corresponding
+popover's controls. Group membership and detail are independent choices.
+The editor's detail action switches between **Show details** and **Icon only**.
+Expanded notification text uses vertical writing on left and right edges;
+the trigger stacks its upright bell and text in a 44-pixel-wide control.
 
 `useObjectLayout` owns the selected object and the Change layout pointer
 gesture. Selecting an object exposes the compact `LayoutEditor`; dragging it
@@ -132,6 +169,14 @@ or losing browser focus restores the placement and geometry captured at the
 start of the drag. Layout mode intercepts ordinary object actions so arranging
 a control doesn't activate it.
 
+Choosing Canvas or Background for a whole group dissolves it. Each member
+receives the chosen layer and its current screen position plus the canvas
+view offset, constrained to the world bounds. Widgets store those coordinates
+in their placement; windows, desktop items, and drawings update workspace
+geometry. A drawing's layer follows the chosen surface. Moving a group during
+a drag can temporarily use canvas coordinates without dissolving membership;
+only the explicit layer choice releases its members.
+
 Frame windows, items, and drawings render through the shared frame host,
 outside the scrolling canvas. Each object appears once. Personal attachments
 retain their workspace identity and content; taking one off the frame returns
@@ -139,10 +184,21 @@ it to the canvas. Desktop items return to Background, while windows and
 drawings return to Canvas. A removed widget becomes hidden and stays in the
 searchable catalog. There is no delete-shortcut action or uninstall flow.
 
+Grouped windows and drawings retain their actual content and artwork.
+`FramePreviewSlot` reserves their place in the group's row or column and
+reports both slot bounds and outer group bounds. The existing window or drawing
+renders through the frame portal at that measured position, so it isn't cloned
+or replaced with an app icon. A grouped window reserves a 44-pixel strip in
+the direction perpendicular to its edge and retains its extent along the
+edge; a drawing reserves its artwork bounds. Slots fit within the viewport.
+
 Pinned windows use a sliding presentation rather than changing their saved
-size. A small strip remains visible; hover reveals a little more, and click
-opens and focuses the whole window. Clicking outside or focusing another
-window retracts it. Change layout fully reveals pinned windows for arranging.
+size. A standalone window leaves 42 pixels visible and exposes 100 pixels on
+hover. A grouped window's resting peek aligns with the outer edge of its
+group's glass surface; hover reveals another 58 pixels. Clicking opens and
+focuses the whole window. Clicking outside or focusing another window retracts
+it. Change layout fully reveals standalone pinned windows for arranging;
+grouped windows keep their resting presentation until opened.
 The maximize button and header double-click toggle this reveal while pinned.
 Close requests confirmation before closing the window and removing its frame
 attachment. Pinned desktop items instead animate into compact glass tiles.
@@ -171,7 +227,7 @@ and opens Change layout for further arrangement.
 
 ## Desktop items
 
-Projects and Pictures folders, a Notes.txt document, and a shortcut for every app in `APP_CATALOG` start near the home viewport. App shortcuts are permanent and movable; the user can arrange them alongside files and folders, but cannot remove an app's desktop entry. These are simulated entry points into app previews. Items start on the background. Change layout can move an item to the raised canvas or the frame; selecting it alone keeps its chosen layer. The four built-in control groups are placeable shell widgets, while custom desktop widgets remain outside this experiment.
+Projects and Pictures folders, a Notes.txt document, and a shortcut for every app in `APP_CATALOG` start near the home viewport. App shortcuts are permanent and movable; the user can arrange them alongside files and folders, but cannot remove an app's desktop entry. These are simulated entry points into app previews. Items start on the background. Change layout can move an item to the raised canvas or the frame; selecting it alone keeps its chosen layer. Built-in shell controls can share groups with these items, while custom desktop widgets remain outside this experiment.
 
 Pan mode drags the canvas even when the drag starts on an item. The cursor is the default tool and selects desktop items. Dragging the background draws a rectangle in world coordinates and selects intersecting items without selecting windows. Clicking an item selects it; Shift, Ctrl, or ⌘ toggles individual items or adds a rectangle’s matches to the selection. Space selects a focused item. Dragging a selected item moves the selected group together, keeping it within the world bounds. Double-click or Enter on a focused item opens its associated simulated app preview without changing the canvas tool. Window and desktop-item selections have separate IDs. Desktop selection is shown through item highlights and the dragged rectangle, without a text hint or count.
 
@@ -271,11 +327,22 @@ At desktop widths, canvas tools start at the bottom left, with dropdowns for bac
 
 Default horizontal corner surfaces are 54 pixels high and sit 24 pixels inside the viewport edges. At 760 pixels or less, unchanged default attachments form two shared 54-pixel bars with a 12-pixel screen inset. Customized attachments keep their chosen edge and position with the same inset. The bottom bar contains one canvas-tool selector, the horizontally scrollable app strip, and the Apps launcher. The selector opens a single flat menu containing desktop-item selection, pan, search, rectangle select, freeform lasso, Draw, Change layout, Overview, and Arrange windows, without submenus. Choosing a tool or action closes the menu.
 
-The notification trigger pairs a bell with a single-line unread status. Its contents remain left-aligned at their natural width, preserving the full label on narrow screens. The clock and network, sound, and battery buttons occupy the right side; the device-icon strip scrolls horizontally when space is limited. Enabling the battery percentage widens its button. The full date and simulated device values appear in hover titles and expanded panels.
+The notification trigger defaults to a bell with a single-line unread status. Its expanded contents remain left-aligned at their natural width, preserving the full label on narrow screens; compact mode shows only the bell and its unread treatment. Clock, network, sound, and battery begin in one group on the right but can move independently. Their compact forms show icons; expanded forms show the time, network name, volume, or battery percentage. The full date and simulated device values remain available in hover titles and panels in either form.
 
 Placed widgets measure their actual size and available space to open panels above or below their current position. Default merged bars retain their compact mobile layout; relocated widgets clamp popovers within the viewport and scroll the panel internally when needed.
 
 One continuous glass dock at the bottom right contains preset Browser, Files, and Notes favorites, other apps with open windows, and Apps. Individual icon buttons have no separate resting bubbles. Running favorites reuse their existing icon button. Each running app shows one dot per window below its icon, capped at three dots; its hover title and accessible name retain the exact count. The app containing the active window is marked. Apps opens the launcher, where an Apps/Draw toggle in the command bar selects browsing or the gesture pad.
+
+Dragging a catalog app shortcut onto the Apps button adds it to favorites in
+ordinary desktop movement or Change layout. The launcher highlights as a drop
+target. The source restores its pre-drag position and any saved `peekOrigin`,
+so favoriting doesn't establish a different home for a displaced icon. The
+canvas icon bubbles back into view and the favorite animates into the dock.
+A repeated drop retains
+one favorite. `App` owns the favorite IDs and passes them to `LauncherDock`;
+`favorites.ts` validates and saves their order. Favorites appear first in that
+order, followed by other running apps in catalog order. Window instance order
+remains separate.
 
 The app strip scrolls horizontally when crowded, including within the shared mobile bottom bar. On mobile, its icons stay aligned to the right beside Apps when they fit, and the strip shrinks to scroll when needed. The app icons keep their 44-pixel targets inside the 54-pixel surface, and Apps remains beside them. Panels reserve space for that bar. The launcher panel sits above the dock and stays within the viewport. Canvas tools and dock apps use icon-only buttons with accessible names; desktop toolbar hints and dock hover titles identify their actions. Their targets remain at least 44 × 44 pixels across input types. Names remain visible in the app gallery and window picker.
 
@@ -308,7 +375,7 @@ Selecting a running app opens a popover listing its window instances, even when 
 
 Drag a row’s handle with a pointer or touch to preview a different order; release saves the change, while cancellation restores the previous order. Up and Down on a focused handle move its window one place. Reordering changes only the picker order, leaving canvas positions, stacking, and the active window unchanged. Each window’s optional `dockOrder` stores this order in the existing workspace state. New instances follow the ordered windows; closing an instance removes its row normally.
 
-Launching from a non-running favorite, **New window**, an app result, the gesture pad, or a matching canvas drawing creates an ordinary movable, resizable preview window with the catalog app’s title, icon, and description. Each uses the same launch action in `App`. There is no operating-system launch integration, favorite-editing UI, or separate running-app persistence; the dock derives its groups from workspace windows.
+Launching from a non-running favorite, **New window**, an app result, the gesture pad, or a matching canvas drawing creates an ordinary movable, resizable preview window with the catalog app’s title, icon, and description. Each uses the same launch action in `App`. There is no operating-system launch integration or separate favorites-management screen. Running apps are derived from workspace windows; favorite IDs have their own persistence.
 
 ## Keyboard window switcher
 
@@ -322,7 +389,7 @@ Search and switcher commits share the movement in `preview-motion.ts`. Before cl
 
 ## Notifications
 
-Notifications open from the top-left bell or with N. The trigger shows an accented ringing bell and an unread count, such as **3 new**, while items are unread, or a subdued bell and **All clear** otherwise. This full label remains visible on narrow screens. App actions ask `App` to reveal a matching window, including the original scratchpad for Notes. This uses the same raise, focus, and scroll action as the running-window picker, with immediate scrolling when reduced motion is preferred. If no matching window exists, it creates an app preview near the current viewport.
+Notifications open from their bell, initially at the top left, or with N. The expanded trigger shows an accented ringing bell and an unread count, such as **3 new**, while items are unread, or a subdued bell and **All clear** otherwise. This full label remains visible on narrow screens. Compact mode hides the label and preserves the bell's unread treatment; Change layout controls this choice. App actions ask `App` to reveal a matching window, including the original scratchpad for Notes. This uses the same raise, focus, and scroll action as the running-window picker, with immediate scrolling when reduced motion is preferred. If no matching window exists, it creates an app preview near the current viewport.
 
 `NotificationInbox` owns three initial sample notifications, unread flags, dismissals, and an optional toast. Opening the inbox does not mark items read. Following an item’s action marks it read; **Mark all read** changes all unread flags, while a row’s dismiss button removes that item. Pointer input outside the inbox closes it. Escape closes the inbox and any active toast.
 
@@ -372,7 +439,11 @@ The arrangement uses an 800 × 450 coordinate space in a responsive preview capp
 
 Each Settings window owns its mock layout and per-monitor values, retaining them across category changes until that window closes or the page reloads. They are not shared with other Settings windows or persisted. Resolution and scale are form values only; they do not resize the monitor tiles or the desktop. The selected monitor and active drag belong to the Displays view.
 
-**System** contains the **System tray** section and its **Show battery percentage** toggle, off by default. `App` shares the preference across Settings windows and passes it to the system row, where it displays **87%** beside the battery icon. The battery value remains simulated, and its popover shows the percentage regardless of this preference.
+**System → Frame layout** contains **Change layout**, opening the same editor
+as the canvas tool. This is the route for grouping, placement, and individual
+status detail. Battery percentage is the expanded form of the Battery widget,
+so it no longer has a separate visibility toggle in Settings. The charge
+value remains simulated, and the battery popover shows it in either form.
 
 Its **Canvas tools** section contains **Make canvas tools hide-able** and
 **Restore canvas tools**. The description explains the independent search
@@ -384,10 +455,13 @@ across Settings windows.
 | File                                                                                    | Responsibility                                                                                                   |
 | --------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
 | [`src/desktop.ts`](../src/desktop.ts)                                                   | Workspace types, starter desktop items, storage validation, window resizing, and arrangement.                    |
-| [`src/frame-layout.ts`](../src/frame-layout.ts)                                         | Object placements, widget catalog, frame bounds, edge attachment, pinned-window offsets, and storage validation. |
-| [`src/useObjectLayout.ts`](../src/useObjectLayout.ts)                                   | Shared layout editing, drag cancellation, placement changes, removal protection, and tool recovery.              |
+| [`src/frame-layout.ts`](../src/frame-layout.ts)                                         | Object placements, ordered groups, widget catalog, status detail, frame bounds, offsets, and storage validation. |
+| [`src/frame-collisions.ts`](../src/frame-collisions.ts)                                 | Positive-area attachment overlap and transitive group merging.                                                   |
+| [`src/useObjectLayout.ts`](../src/useObjectLayout.ts)                                   | Layout editing, grouping, cancellation, placement and detail choices, removal protection, and tool recovery.     |
 | [`src/layout-workspace.ts`](../src/layout-workspace.ts)                                 | Apply geometry operations to canvas objects while preserving frame attachments.                                  |
-| [`src/components/LayoutEditor.tsx`](../src/components/LayoutEditor.tsx)                 | Selected-object title, Canvas/Background/Frame choices, removal, and Done.                                       |
+| [`src/components/LayoutEditor.tsx`](../src/components/LayoutEditor.tsx)                 | Selected-object title, placement and detail choices, separation, removal, and Done.                              |
+| [`src/components/FrameShell.tsx`](../src/components/FrameShell.tsx)                     | Shared frame-group surfaces, member rendering, whole-group grips, and default mobile bars.                       |
+| [`src/components/FramePreviewSlot.tsx`](../src/components/FramePreviewSlot.tsx)         | Measured slots and group bounds for existing window and drawing surfaces.                                        |
 | [`src/components/PlacedWidget.tsx`](../src/components/PlacedWidget.tsx)                 | Measured shell-widget positioning, responsive merging, and popover placement.                                    |
 | [`src/components/LayoutConfirm.tsx`](../src/components/LayoutConfirm.tsx)               | Tool-removal warning and pinned-window close confirmation.                                                       |
 | [`src/drawings.ts`](../src/drawings.ts)                                                 | Drawing types, stroke bounds, local coordinates, and saved-art validation.                                       |
@@ -402,12 +476,13 @@ across Settings windows.
 | [`src/useWindowSwitcher.ts`](../src/useWindowSwitcher.ts)                               | Stable window-order snapshots, keyboard cycling, commit on Ctrl release, and cancellation.                       |
 | [`src/useAI.ts`](../src/useAI.ts)                                                       | Shared AI opt-in preference, simulated model download progress, cancellation, and persistence.                   |
 | [`src/selection.ts`](../src/selection.ts)                                               | Freeform polygon intersection with window bounds.                                                                |
-| [`src/theme.ts`](../src/theme.ts)                                                       | Accent, Light/Dark mode, and battery-label preferences, defaults, and storage validation.                        |
+| [`src/theme.ts`](../src/theme.ts)                                                       | Accent and Light/Dark mode preferences, defaults, and storage validation.                                        |
+| [`src/favorites.ts`](../src/favorites.ts)                                               | Favorite app defaults, valid IDs, deduplication, order, and persistence.                                         |
 | [`src/gestures.ts`](../src/gestures.ts)                                                 | Gesture assignment types, examples, pad coordinates, storage validation, and persistence.                        |
 | [`src/display-layout.ts`](../src/display-layout.ts)                                     | Monitor layout coordinates, nearest-edge snapping, and group centering for the two-display preview.              |
 | [`src/useBackground.ts`](../src/useBackground.ts)                                       | Photo decoding, shared background state, object URL lifetime, and IndexedDB persistence.                         |
 | [`src/App.tsx`](../src/App.tsx)                                                         | Workspace rendering, pointer gestures, viewport navigation, focused view, window actions, and saving.            |
-| [`src/components/SystemBar.tsx`](../src/components/SystemBar.tsx)                       | Compact 24-hour clock and status row, popovers, and simulated controls.                                          |
+| [`src/components/SystemBar.tsx`](../src/components/SystemBar.tsx)                       | Independent clock, Wi-Fi, sound, and battery items, compact/detail views, popovers, and simulated controls.      |
 | [`src/components/NotificationInbox.tsx`](../src/components/NotificationInbox.tsx)       | Notification trigger, inbox, unread/dismissal state, and sample toasts.                                          |
 | [`src/components/Minimap.tsx`](../src/components/Minimap.tsx)                           | Map rendering and pointer capture for dragging the visible canvas area.                                          |
 | [`src/components/CanvasTools.tsx`](../src/components/CanvasTools.tsx)                   | Background and window-selection dropdowns, drawing, Change layout, map, and arrangement actions.                 |
@@ -428,7 +503,7 @@ across Settings windows.
 | [`src/components/GestureSettings.tsx`](../src/components/GestureSettings.tsx)           | Saved gesture previews, assignment management, and the Settings editor.                                          |
 | [`src/components/BackgroundSettings.tsx`](../src/components/BackgroundSettings.tsx)     | Photo preview, upload, fit, reset, and storage feedback in Settings.                                             |
 | [`src/components/AppIcon.tsx`](../src/components/AppIcon.tsx)                           | Consistent icon sizing and app-specific artwork.                                                                 |
-| [`src/components/LauncherDock.tsx`](../src/components/LauncherDock.tsx)                 | Favorites, running-app groups, window instance picker, and the Apps trigger.                                     |
+| [`src/components/LauncherDock.tsx`](../src/components/LauncherDock.tsx)                 | Saved favorites, running-app groups, window instance picker, launcher drop feedback, and the Apps trigger.       |
 | [`src/components/WindowSwitcher.tsx`](../src/components/WindowSwitcher.tsx)             | Selected window's caption and initial focus for the canvas window-switching view.                                |
 | [`src/components/AppLauncher.tsx`](../src/components/AppLauncher.tsx)                   | App gallery/list, filtering, keyboard navigation, and launcher views.                                            |
 | [`src/components/GesturePad.tsx`](../src/components/GesturePad.tsx)                     | Shared pointer pad and assignment editor, with local gesture matching in launcher mode.                          |
@@ -436,20 +511,34 @@ across Settings windows.
 | [`src/components/launcher-apps.ts`](../src/components/launcher-apps.ts)                 | Shared app catalog, icons, and descriptions.                                                                     |
 | [`src/App.module.css`](../src/App.module.css)                                           | Canvas, windows, and navigation styling.                                                                         |
 | [`src/components/WindowContent.module.css`](../src/components/WindowContent.module.css) | Document surfaces and simulated app interior styling.                                                            |
-| [`src/components/SystemBar.module.css`](../src/components/SystemBar.module.css)         | Compact glass system row and popover styling.                                                                    |
+| [`src/components/SystemBar.module.css`](../src/components/SystemBar.module.css)         | Status-item detail, shared glass controls, and popover styling.                                                  |
 | [`src/index.css`](../src/index.css)                                                     | Shared visual tokens, Light/Dark and accent palettes, typography, viewport, and element defaults.                |
 
 ## Saved state
 
-Object placements and the tools-hiding preference are stored separately under
+Object placements, frame groups, status detail, and the tools-hiding preference are stored separately under
 `hearthspace-frame-layout-v1`. Validation accepts known target kinds, known
 widget IDs, supported surfaces and frame edges, finite canvas coordinates, and
 a frame position clamped to 0–1. Only widgets may be hidden, and Canvas tools
 cannot load hidden while their hide-able preference is off. Missing or invalid
-storage uses the four default controls, background desktop items, raised
+storage uses the default shell widgets and device group, background desktop items, raised
 windows, and each drawing's existing layer. Existing workspace contents and
 positions remain intact. Pinned-window hover and expanded states, layout
 selection, and unfinished placement drags are temporary.
+
+Groups preserve member order and accept known shell widgets, desktop-item,
+window, and drawing targets, with each member belonging to at most one group. Loading drops
+invalid and repeated entries and dissolves groups that no longer have two
+members. Older layouts with the single `widget:system` control migrate to a
+group containing Clock, Wi-Fi, Sound, and Battery at the previous placement.
+An intentionally empty saved group collection stays empty. Expanded states
+are accepted only for supported status widgets.
+
+Favorites are stored under `hearthspace-favorite-apps-v1` as catalog app IDs.
+Loading preserves order, removes duplicates and unknown apps, and keeps an
+explicitly empty list empty. Missing, malformed, or unavailable storage uses
+Browser, Files, and Notes. Favorites and desktop shortcuts keep separate
+identities; changing one doesn't remove the other.
 
 Handwriting model assets use the browser cache when available, separately from workspace and preference storage. Search ink and recognized query text are temporary. Turning off simulated AI gathering does not unload or delete the handwriting model; the two features do not share a model lifecycle.
 
@@ -476,7 +565,10 @@ The selected canvas tool is stored under `hearthspace-canvas-tool-v1`. Loading a
 
 The window-selection shape is stored separately under `hearthspace-window-selection-v1` as `rectangle` or `freeform`. Missing, invalid, or unavailable storage defaults to rectangle. Changing the shape activates window selection; choosing another tool leaves the shape remembered for later use and reloads.
 
-Battery-percentage visibility is stored under `hearthspace-battery-percentage-v1`. Only the literal string `true` enables it; missing, invalid, or unavailable storage defaults to off. The preference applies immediately and remains usable in the current session if saving fails.
+The legacy `hearthspace-battery-percentage-v1` preference migrates into the
+Battery widget's expanded state when no explicit detail choice is saved.
+An existing expanded-state choice takes precedence; new changes persist with
+the frame layout.
 
 AI opt-in is stored under `hearthspace-ai-enabled-v1`. Only the literal string `true` enables it; missing, invalid, or unavailable storage defaults to off. Confirming opt-out or canceling an active download saves `false` immediately. Opting in saves `true` only after the simulated download completes, so an interrupted download does not enable the feature on reload. Download progress is temporary and no model file is stored. The shared session remains usable when preference storage fails.
 

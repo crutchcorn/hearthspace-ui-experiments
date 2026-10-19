@@ -73,17 +73,38 @@ The default four corners provide stable places to look:
 | Bottom left  | Navigate and organize the canvas. | Background tool, window selection, drawing, Change layout, Overview, and Arrange. |
 | Bottom right | Open apps and return to work.     | Favorites, running apps, and Apps.                                                |
 
-Keep each default corner to one row on desktop. Icons and toolbars share the same screen inset on every edge, so moving a control from a corner to a side preserves its spacing. Windows and drawings remain flush with the edge. Side attachments stack their controls vertically while leaving the icons upright. The tray and clock have the same glass backing as the other corners, so their text and controls remain distinct from whatever passes underneath. Notifications stay left-aligned and take only the width their icon, status, and padding need. Apps share one continuous bar; each icon doesn't need another resting bubble.
+Keep each default corner to one row on desktop. Icons and toolbars share the same screen inset on every edge, so moving a control from a corner to a side preserves its spacing. Standalone windows and drawings remain flush with the edge; grouped work follows its shared surface. Side attachments stack their controls vertically while leaving the icons upright. The tray and clock have the same glass backing as the other corners, so their text and controls remain distinct from whatever passes underneath. Notifications stay left-aligned and take only the width their icon, status, and padding need. Apps share one continuous bar; each icon doesn't need another resting bubble.
 
 The common surface is 54 pixels tall, with 4 pixels of padding, a 1-pixel border, and 44-pixel control targets. Buttons are transparent at rest. Hover adds a shared fill, active or expanded controls use the soft accent, and keyboard focus adds an inset outline. This treatment comes from [ShellControls.module.css](../src/components/ShellControls.module.css), including the tray's background.
 
-On screens 760 pixels wide or narrower, the default top corners merge into one top bar and the default bottom corners into one bottom bar. Notifications retain their full status text. Device icons and app icons can scroll horizontally within their own strips. Apps remain right-aligned; the canvas tool stays on the left. That tool becomes one selector with a flat menu containing the available tools and actions. Custom attachments keep their chosen edge and position.
+On screens 760 pixels wide or narrower, the default top corners merge into one top bar and the default bottom corners into one bottom bar. Expanded notifications retain their full status text; a user can deliberately reduce them to an icon in Change layout. Device icons and app icons can scroll horizontally within their own strips. Apps remain right-aligned; the canvas tool stays on the left. That tool becomes one selector with a flat menu containing the available tools and actions. Custom attachments keep their chosen edge and position.
 
 These positions give the first session a clear arrangement, even when the
 available space changes. The configurable frame extends this to attachments on
 any edge. Users can move or remove controls, and can attach their own work. The
 shared surfaces and control states should keep that arrangement coherent even
 when the original corners are empty.
+
+Grouping extends the continuous dock surface to other combinations. A folder,
+window, drawing, the canvas tools, and the app dock can sit alongside one another inside one
+shared frame surface. Avoid nesting a complete glass tile around every member;
+padding, upright icons, and hover states provide separation without a row of
+bubbles. The group uses one orientation when it moves to another edge.
+Windows preserve their actual content and chrome; drawings preserve their art.
+A grouped window's resting peek meets the group's outer glass edge, keeping
+the shared surface and the visible window aligned.
+Overlapping frame attachments join automatically when placed or when their
+sizes change, including status expansion and restored layouts. The frame
+keeps these controls within reach, so letting one hide underneath another
+would undermine its purpose.
+
+Clock, Wi-Fi, sound, battery, and notifications are individually placeable
+items. Their compact form shows one icon; their expanded form adds useful
+status. Both forms open the same controls. Detail is a layout choice, so the
+editor exposes it when an item is selected, without adding permanent resize
+handles or explanatory captions to the desktop.
+Expanded notification text runs vertically on side edges, with its bell
+upright, so keeping the status visible doesn't make a vertical group wider.
 
 Change layout shows frame guides while the user is arranging objects. Dragging
 to an edge attaches the object, with distinct animated corner targets providing
@@ -192,6 +213,13 @@ Use distinct icons for distinct actions. Apps and Arrange have different silhoue
 Pointer, trackpad, touch, and keyboard should reach the same work. Controls retain usable targets and accessible names when visible labels are removed. Hover can explain an action, while direct activation and keyboard commands make it available without hover.
 
 Drawing, dragging, and resizing follow input immediately. Ordinary navigation pans to a chosen window after focus and stacking have updated. During Ctrl+1 switching, the viewport stays still while windows occupy temporary presentation positions. The saved workspace is untouched until the user chooses a window.
+
+Dropping an app shortcut onto the launcher adds a favorite while preserving
+the shortcut on the canvas. Highlight the destination during the drag, then
+let the source return and the favorite appear with a small rising motion.
+That movement explains why an app now has two entry points without adding a
+confirmation banner. Adding an existing favorite never creates another copy
+inside the dock.
 
 Overlap should leave a clue that other work is there. Allow complete coverage
 during a drag, then slide fully hidden windows, desktop icons, and background

@@ -17,13 +17,13 @@ behind the behavior.
 ## Two places, one collection of things
 
 The canvas extends beyond the viewport. Windows, app shortcuts, files, folders,
-drawings, and widgets can occupy it together. The current widgets are the four
-built-in control groups; future widgets can follow the same placement rules. Panning changes which part
+drawings, and widgets can occupy it together. The current widgets are the
+built-in shell controls; future widgets can follow the same placement rules. Panning changes which part
 you see without changing where those objects belong.
 
 The frame follows the viewport. An attached item stays along the chosen
 screen edge while the canvas moves. Icons and toolbars share the corner controls'
-screen inset; windows and drawings sit flush with the edge. A system tray is an obvious candidate, but the same placement
+screen inset; standalone windows and drawings sit flush with the edge. A system tray is an obvious candidate, but the same placement
 should work for a file you keep referring to, a drawing, a widget, or a window.
 The object keeps its identity and purpose when its placement changes.
 
@@ -53,11 +53,29 @@ Shared padding, hover states, icon sizes, and surface treatment still help
 unrelated objects feel comfortable beside one another. A user can change where
 something belongs without having to redesign it.
 
+Frame groups let any attachments share one surface. A folder can sit beside a
+reference window and drawing, or the app dock, canvas tools, and device controls
+can join into a single taskbar. Grouping changes how objects sit together;
+each member keeps its own action and can be moved out again. Windows retain
+their contents and chrome, and drawings retain their art, so the frame still
+shows the work you're keeping nearby.
+
+Device status is a useful example. Clock, Wi-Fi, sound, and battery begin
+together at the top right, but each is an independent item. Notifications are
+independent too. Each can show a compact icon or expand to useful information:
+the time, connected network, volume, battery percentage, or unread status.
+The user chooses which information deserves space without losing the control
+behind it.
+
 ## Change layout changes where things belong
 
 **Change layout** is a canvas tool for choosing an object's placement. It makes
 frame guides and canvas-layer choices visible while arranging things, then
 gets out of the way during ordinary work.
+
+**Settings → System → Change layout** opens the same editor. Placement,
+grouping, and status detail belong together there, including the choice to
+show a battery percentage.
 
 Use this tool to attach an item to a frame edge, return it to the canvas, or
 affix it to the canvas background. The same operation applies to drawings,
@@ -74,6 +92,17 @@ edge button.
 Edge buttons and position sliders would repeat a choice the user can already
 make directly on the frame.
 
+Dropping any attachment onto another frame item joins them in a
+group. Overlapping frame attachments also join automatically when placed,
+resized, expanded, or restored from a saved layout;
+an attachment shouldn't disappear beneath its neighbor. The group follows one edge and orientation, while individual members
+remain selectable for rearrangement or a different level of detail. This
+keeps a custom taskbar subject to the same rules as the default controls.
+
+Choosing Canvas or Background for a group releases its members onto that
+layer at their visible positions. Grouping organizes the frame; moving work
+back to the painting gives each object its own place again.
+
 Toolbars adapt their orientation to the edge: horizontal along the top or
 bottom, vertical along either side, with icons staying upright. Entering a new
 edge area during a drag changes that orientation; crossing the interior keeps
@@ -81,6 +110,10 @@ the last orientation until another edge area is reached. The surface, outline,
 and contents animate together in either direction, and releasing snaps the
 object into place. This makes the frame a boundary the object belongs to,
 rather than an approximate region near the screen edge.
+
+Expanded notification text follows the vertical direction of a side edge,
+while the bell stays upright. Changing the orientation changes how the same
+information fits alongside the work.
 
 Drawing therefore has one job: create ink. **Change layout** replaces the
 above/below drawing modes and the separate drawing pinning controls. A drawing
@@ -93,7 +126,8 @@ edge doesn't unexpectedly become a frame attachment.
 
 Attached objects can adapt to the space. A pinned window leaves a narrow strip
 visible, reveals a little more on hover, and opens fully on click. It slides
-back when focus moves away. A pinned shortcut shrinks into a compact glass
+back when focus moves away. Within a group, the window's resting peek lines
+up with the group's outer glass edge. A pinned shortcut shrinks into a compact glass
 tile. The object is still recognizable and available without permanently
 covering a large part of the painting.
 
@@ -142,6 +176,12 @@ uninstalling the app removes its shortcut; uninstalling remains outside the
 playground until an experiment needs it. If something is distracting, moving
 it out of the current view is a valid way to make room.
 
+Favorites are another route to an app, so adding one keeps its canvas shortcut
+in place. Drag a shortcut onto the app launcher to add it to favorites. The
+shortcut returns to its canvas position as the favorite appears in the dock;
+the movement makes the additional route visible. Attaching the shortcut to
+the frame, by comparison, changes where that same object lives.
+
 Canvas tools need one extra safeguard because removing them can hide the way
 to change the layout again. They stay removable only after the user enables
 **Make canvas tools hide-able** in Settings. The setting is off by default. An
@@ -150,8 +190,8 @@ points to that setting; it doesn't remove them. The warning explains how
 to recover the tools through search before the user opts in.
 
 Search remains reachable through **/** and **Ctrl/⌘ K**, independently of the
-tools' attachment. **Settings → System** also has a **Restore canvas tools**
-button. Turning the hide-able preference off restores hidden tools. These
+tools' attachment. **Settings → System** also has **Change layout** and
+**Restore canvas tools** buttons. Turning the hide-able preference off restores hidden tools. These
 routes let users recover the editor without resetting their layout.
 
 ## Search happens on the painting
