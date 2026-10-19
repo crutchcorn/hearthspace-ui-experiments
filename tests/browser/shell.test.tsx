@@ -2,6 +2,24 @@ import { expect, test } from 'vitest'
 import { page, userEvent } from 'vitest/browser'
 import { renderDesktop, windowBounds } from './desktop'
 
+test('pointer selection hides focus rings and Tab restores them', async () => {
+  await renderDesktop()
+  const note = page.getByRole('textbox', { name: 'Note content' })
+  await note.click()
+  await userEvent.keyboard('Editing before selecting an icon')
+
+  const projects = page.getByRole('button', { name: 'Projects', exact: true })
+  await projects.click()
+  await expect.element(projects).toHaveFocus()
+  await expect.element(projects).toHaveAttribute('aria-pressed', 'true')
+  expect(getComputedStyle(projects.element()).outlineStyle).toBe('none')
+
+  await userEvent.keyboard('{Tab}')
+  const pictures = page.getByRole('button', { name: 'Pictures', exact: true })
+  await expect.element(pictures).toHaveFocus()
+  expect(getComputedStyle(pictures.element()).outlineStyle).toBe('solid')
+})
+
 test('the launcher remains usable on a narrow desktop', async () => {
   await page.viewport(390, 844)
   try {

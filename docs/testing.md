@@ -28,6 +28,10 @@ An interrupted drag must restore the icon's position and leave the next
 drag usable. Assertions wait for the observable result instead of sleeping
 for an animation's current duration.
 
+The shell flow also types into a note before selecting a desktop icon with the
+mouse. Selection and focus should move to the icon without carrying over a
+keyboard outline; pressing Tab should restore the ring on the next icon.
+
 The [frame drag flows](../tests/browser/frame-drag.test.tsx) grab canvas tools
 near either end, move to an edge or corner, and check the resulting placement.
 They also sample the gripped point throughout a turn and the center of a
@@ -92,12 +96,20 @@ pan across the dots to check that their uniform background travels with them.
 Upload a photo with both bright and dark areas, then move Settings across it
 in each color mode. Open Sound or Wi-Fi over a sharp edge in the photo: detail
 behind the whole panel should blur, including the portion outside its toolbar.
-Check white desktop labels and native glyphs against both bright and dark
-regions, along with preserved third-party artwork. Include a long two-line
+Check white desktop labels and pale accent-colored native glyphs against both
+bright and dark regions, along with preserved third-party artwork. Include a long two-line
 label: its text should stay contained while its shadow fades beyond the letters
 without a hard rectangular cutoff. Check filled folder, file, and Settings
 glyphs over the photo, then attach or group an icon to check that its outline
 variant returns. The toolbars should keep their outline icons throughout.
+Change the accent, select an item or search result, and focus an item with the
+keyboard: icon fills and those outlines should share the pale accent while
+labels stay white.
+After typing in a field, click an icon or a system control. Pointer input
+should hide the keyboard outline while keeping selection and material
+highlights; Tab should bring the outline back. The desktop tracks input
+modality in [`useInputModality.ts`](../src/useInputModality.ts) because scripted
+focus during a drag can otherwise preserve the browser's keyboard heuristic.
 Try a grouped toolbar and a narrow viewport to catch doubled material layers.
 Compare a repeating photo with a fixed fit, then restore Canvas dots to confirm
 that the default surface strength, outline glyphs, and desktop item colors return.

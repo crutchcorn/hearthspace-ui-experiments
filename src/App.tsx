@@ -99,6 +99,7 @@ import { polygonIntersectsBounds, type SelectionPoint } from './selection'
 import useBackground from './useBackground'
 import useAI from './useAI'
 import useShellPeek from './useShellPeek'
+import useInputModality from './useInputModality'
 import useWindowSwitcher from './useWindowSwitcher'
 import usePeekMotion from './usePeekMotion'
 import {
@@ -143,6 +144,7 @@ type ShellPanel =
 const edges = ['n', 'e', 's', 'w', 'ne', 'se', 'sw', 'nw']
 
 function App() {
+  const inputModality = useInputModality()
   const background = useBackground()
   const ai = useAI()
   const [accentTheme, setAccentTheme] = useState(loadAccentTheme)
@@ -2252,6 +2254,7 @@ function App() {
       }}
       data-accent={accentTheme}
       data-color-mode={colorMode}
+      data-input-modality={inputModality}
       data-background={background.photo ? 'photo' : 'dots'}
       data-presentation="realistic"
       data-focus-mode={renderedFocusView !== null}

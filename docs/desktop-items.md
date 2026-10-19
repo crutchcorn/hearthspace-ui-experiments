@@ -20,12 +20,18 @@ restrained dark shadow in both color modes. The inner text keeps its two-line
 limit; an unclipped outer wrapper paints the shadow so it can extend past the
 letters instead of ending at a hard rectangular edge.
 
-Native folder, file, and Settings icons use the local set's filled variants in white,
-with a dark shadow that follows their shapes. These variants have their own
-solid geometry; the desktop doesn't fill or thicken outline paths with CSS.
+Native folder, file, and Settings icons use the local set's filled variants in
+a pale accent: 18% of the base accent mixed with white. A dark shadow follows
+their shapes. These variants have their own solid geometry; the desktop doesn't
+fill or thicken outline paths with CSS.
 Simulated third-party app artwork keeps its existing treatment. The icons and
 labels remain directly on the image.
 Restoring the default dotted canvas also restores their usual colors and shadows.
+
+Selected items and selected search previews use that same pale accent for a
+72%-alpha border and a faint 24%-alpha inset rim. Keyboard focus uses the pale
+accent too, keeping the outlines visible over the photo and tied to the icons.
+Labels stay white when the accent changes.
 
 Frame attachments and group members already share a material surface, so they
 keep their outline glyphs and normal label treatment, as do toolbars and the
@@ -39,6 +45,10 @@ drag it to move. Drag empty canvas to draw a selection rectangle; any intersecti
 items join the selection. Shift, Ctrl, or Command adds to a rectangle selection
 or toggles an individually clicked item. Dragging an already selected item moves
 the selection together, preserving its spacing.
+
+Pointer selection keeps the item focused without adding a keyboard focus ring.
+Its selection border remains visible. Pressing Tab restores the keyboard ring
+as focus moves to the next item, including after editing text in a window.
 
 Double-click a canvas item, or press Enter while it's focused, to open it.
 Space selects a focused item. Hold Alt during a move to align the grabbed item

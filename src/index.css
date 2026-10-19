@@ -199,6 +199,11 @@ button:focus-visible {
   outline-offset: 3px;
 }
 
+/* Programmatic focus can retain :focus-visible after a pointer gesture. */
+[data-input-modality='pointer'] :focus {
+  outline: none !important;
+}
+
 button:disabled {
   cursor: default;
 }

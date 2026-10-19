@@ -119,6 +119,11 @@
 }
 
 :global([data-background='photo'])
+  .item[data-frame-attached='false']:not([data-group-member]) {
+  --desktop-icon-ink: color-mix(in srgb, var(--accent-base) 18%, white);
+}
+
+:global([data-background='photo'])
   .item[data-frame-attached='false']:not([data-group-member])
   .title {
   color: #fff;
@@ -129,8 +134,25 @@
 :global([data-background='photo'])
   .item[data-frame-attached='false']:not([data-group-member])
   .icon:not(:has([data-app-artwork='simulated'])) {
-  color: #fff;
+  color: var(--desktop-icon-ink);
   filter: drop-shadow(0 0 1px #142225) drop-shadow(0 2px 3px #0008);
+}
+
+:global([data-background='photo'])
+  .item[data-frame-attached='false']:not([data-group-member]):is(
+    [aria-pressed='true'],
+    [data-preview-selected='true']
+  ) {
+  border-color: color-mix(in srgb, var(--desktop-icon-ink) 72%, transparent);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--desktop-icon-ink) 55%, transparent),
+    inset 0 0 0 1px color-mix(in srgb, var(--desktop-icon-ink) 24%, transparent),
+    0 6px 22px -5px color-mix(in srgb, var(--accent) 14%, transparent);
+}
+
+:global([data-background='photo'])
+  .item[data-frame-attached='false']:not([data-group-member]):focus-visible {
+  outline-color: var(--desktop-icon-ink);
 }
 
 .item[data-frame-attached='true']:hover {

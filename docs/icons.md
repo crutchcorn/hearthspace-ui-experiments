@@ -51,8 +51,10 @@ their paths. The shared factory fills the solid geometry with `currentColor`;
 individual details can retain strokes where the design needs them.
 
 Over an uploaded photo, freely placed desktop folders, files, and Settings
-shortcuts use white filled variants with a small shadow around their shapes. The
-default dotted desktop, frame attachments, group members, and toolbars keep
+shortcuts use pale accent-colored filled variants with a small shadow around
+their shapes. Desktop selection and focus outlines use the same pale accent,
+while labels stay white. The default dotted desktop, frame attachments,
+group members, and toolbars keep
 outline glyphs. This choice belongs to the placement rendering; it doesn't
 change the app's identity or replace simulated third-party artwork.
 

@@ -43,8 +43,9 @@ keep their lighter fill and restrained hover treatment; the photo itself
 isn't dimmed or recolored.
 
 Desktop labels use white text with a shadow that extends beyond the letters.
-Native folder, file, and Settings icons use filled glyphs with a shadow that
-follows their shapes. The icons and labels stay directly on the image without
+Native folder, file, and Settings icons use pale accent-colored filled glyphs
+with a shadow that follows their shapes. Selection and focus outlines share
+that pale accent. The icons and labels stay directly on the image without
 tiles around them. Simulated third-party app artwork keeps its existing
 appearance. Frame attachments and grouped items already have a surface, so
 they keep their outline glyphs and normal treatment. This support

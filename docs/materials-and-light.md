@@ -47,6 +47,12 @@ text mixes 80% of the main text color with the surface tint for clearer labels.
 Raised fills, edge light, and hover treatments keep their existing values.
 Returning to Canvas dots restores the default material values automatically.
 
+Freely placed native desktop icons use pale accent-colored filled glyphs over photos.
+Their selection and focus outlines share that pale accent, while labels stay
+white. Shape-following shadows provide separation from the image; they don't
+add another material tile. See [desktop items](desktop-items.md) for the
+placement exceptions and label clipping behavior.
+
 Settings is a Hearthspace app. Its window, sidebar, content pane, and controls
 all participate in these layers. The simulated third-party apps keep their
 individual title bars, content materials, and artwork. An opaque app interior
@@ -93,6 +99,10 @@ That gives us a visible highlight without darkening the whole interface.
 | Hover a control on an ordinary surface | White highlight (`#ffffff5c`).                              | Pale highlight (`#e0f5ee12`).                               |
 | Active or expanded shell control       | Stronger soft-accent fill and accent foreground.            | Theme-adjusted soft accent and foreground.                  |
 | Keyboard focus                         | Visible accent outline, with the control's focus treatment. | Visible accent outline, with the control's focus treatment. |
+
+Pointer input hides keyboard outlines across the desktop, including when a
+control receives focus through a script. Selection borders and material
+highlights remain. Keyboard input restores the normal focus outlines.
 
 Monitor previews use the same raised hover fill. The accent control wash is
 scoped to toolbars, raised tool and app menus, confirmation dialogs, and the
