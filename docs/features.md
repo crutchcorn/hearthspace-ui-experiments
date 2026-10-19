@@ -94,9 +94,10 @@ installed apps, and uninstalling is outside this prototype.
 
 Removing Canvas tools first requires **Make canvas tools hide-able** in
 **Settings → System**. With the setting off, a warning explains recovery and
-offers to open Settings. To recover removed controls, press **/** or **Ctrl/⌘ K**
-and search for their name. Choosing a widget restores its default corner and
-opens Change layout. System settings also offers **Restore canvas tools**;
+offers to open Settings. To use removed controls, press **/** or **Ctrl/⌘ K**
+and search for their name. Hidden controls return on the canvas and open
+there; **Canvas tools** opens its tool picker. Search for
+**Change layout** to enter the editor. System settings also offers **Restore canvas tools**;
 turning the hide-able setting off restores the tools if they were hidden.
 
 Pinned windows leave a small strip visible at the frame edge. Hover reveals
@@ -178,14 +179,18 @@ screen and above one in the lower half. Pressing **/** selects Search and opens
 the field near the upper center of the screen. **Ctrl/⌘ K** also opens canvas
 search, including when the toolbar is hidden.
 
-With an empty query, desktop items, drawings, and shell widgets come into view.
+With an empty query, desktop items, drawings, shell widgets, and canvas tools come into view.
 Typing brings matching app shortcuts, files, folders, open windows, drawings,
-and widgets into a temporary arrangement.
+widgets, and tools into a temporary arrangement.
 Try **Notes** to see its app shortcut, Notes.txt, and matching open windows
 together. Names and item types are searchable; window matches also include app
 names. Drawings match their numbered name or words such as **ink** and **sketch**;
-widgets also match related terms such as **battery** or **dock**. Matching
-windows retain their contents and chrome, scaled to fit.
+widgets also match related terms such as **battery** or **dock**. Tools match
+their names and related terms such as **lasso**, **pan**, or **organize**. Matching
+windows retain their contents and chrome, scaled to fit. Status results show
+the relevant icon and current state: Wi-Fi's network, sound level, battery
+percentage, time and date, or unread notifications. App shortcuts keep their
+app artwork, and the Apps result previews favorite icons.
 
 The field's pencil opens a one-line handwriting pad. Write with a mouse, pen,
 or touch, then pause for 800 milliseconds or press the check to read it. The
@@ -202,12 +207,20 @@ is independent of the simulated 3 GB download in **Settings → AI**.
 Use **Up/Down** to choose a result and **Enter** to open it, or click the result.
 An item opens its app preview; a window becomes active and the canvas centers on
 it, unless it is pinned, in which case it opens at the frame. Choosing a drawing
-selects it and brings its canvas position into view. Choosing a widget restores
-it at its default corner and opens Change layout. **Escape**, the close button,
+selects it and brings its canvas position into view. Status results open at
+their actual control: attached controls stay at their frame location, while
+the canvas scrolls to a control placed on it. Hidden controls return on the
+canvas and open there, without being pinned to the frame.
+**Apps** reveals its control and opens the launcher; an app shortcut launches
+that app. **Canvas tools** reveals its toolbar and opens a flat picker beside
+it, while each individual tool selects its mode or runs its action. Only
+**Change layout** opens the layout editor. Existing placements stay intact;
+restoring a hidden control saves its new canvas placement.
+**Escape**, the close button,
 clicking empty canvas, or using another shell
 control ends search. The temporary layout never replaces saved positions, so
-closing it restores where everything was. Search remains the selected tool
-until you choose another.
+closing it restores where everything was. Dismissing search leaves Search
+selected; opening a result can select the tool needed for that action.
 
 The dock and launcher offer additional routes to work while they are placed.
 Canvas search remains available independently of those controls.
@@ -291,7 +304,7 @@ Prototype boundaries:
 - App launches create browser-rendered windows. They don't open host apps or
   files. The original Scratchpad is editable; the catalog apps use sample content.
 - Canvas search matches the playground's desktop items, windows, numbered
-  drawings, and built-in shell widgets. It
+  drawings, built-in shell widgets, and canvas tools. It
   doesn't index the host filesystem or search inside app content.
 - Overview's zoom buttons are placeholders. Display controls and tray values
   don't change the host system. Notifications have no external event source.

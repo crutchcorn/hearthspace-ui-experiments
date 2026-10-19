@@ -248,8 +248,10 @@ opens a warning with a route to System settings. Enabling **Make canvas tools
 hide-able** permits removal; disabling it restores hidden tools. **Restore
 canvas tools** returns them to their default corner without resetting other
 placements. Search through / or Ctrl/⌘ K remains available independently of
-the toolbar. Choosing any widget search result restores its default placement
-and opens Change layout for further arrangement.
+the toolbar. Status search results reveal the placed control and open its
+panel there. Hidden controls return on the canvas. The Canvas tools result
+reveals the toolbar and opens its flat picker; Change layout is individually
+searchable when the user wants the editor.
 
 ## Desktop items
 
@@ -317,11 +319,17 @@ point counts when loading.
 
 Search is a primary canvas tool alongside desktop selection and Pan. Choosing it leaves the canvas in place until a background click opens search near that client-space point. The / shortcut selects Search and opens it near the upper center of the viewport. Ctrl/⌘ K also opens canvas search, independently of the placed toolbar or app launcher. Starting search exits focused view, closes other panels, clears selections, and holds the viewport at its current scroll position.
 
-The field stays near the clicked point, clamped to leave the shell controls available. Results use the space below a field in the upper half of the viewport, or above one in the lower half. With an empty query, desktop items, drawings, and shell-widget catalog entries gather into view, while windows move outside the viewport. Typing filters item titles and kinds, window titles and app names, numbered drawing names and ink/sketch terms, and widget titles, descriptions, and keywords. Matching is case-insensitive and requires every space-separated query term to appear. For example, Notes can match a shortcut, Notes.txt, and open Notes windows, while `folder` finds desktop folders.
+The field stays near the clicked point, clamped to leave the shell controls available. Results use the space below a field in the upper half of the viewport, or above one in the lower half. With an empty query, desktop items, drawings, shell-widget catalog entries, and canvas tools gather into view, while windows move outside the viewport. Typing filters item titles and kinds, window titles and app names, numbered drawing names and ink/sketch terms, and widget and tool titles, descriptions, and keywords. Matching is case-insensitive and requires every space-separated query term to appear. For example, Notes can match a shortcut, Notes.txt, and open Notes windows, while `folder` finds desktop folders.
 
 `getCanvasSearchLayout` computes presentation coordinates and scales from the current workspace, viewport, anchor, and query. Matching items, actual window surfaces, drawing SVGs, and widget cards share a result grid; nonmatching objects move beyond a viewport edge. Attached objects temporarily use the result placement instead of their frame placement. Windows keep their content and chrome, with inner controls inactive while they act as search results. The original workspace coordinates, sizes, and stacking remain unchanged. Closing search removes these temporary placements, so panning, arrangement, and persistence continue to use the workspace's ordinary geometry.
 
-Results place desktop items first, then matching windows in front-to-back order, drawings, and catalog widgets. Up and Down change the selected result, wrapping at either end; Left and Right retain normal text-cursor behavior. Enter or clicking a result closes search, then opens the item's associated preview or focuses and centers the existing window. A pinned window opens at its frame edge. A drawing is selected and centered unless it is attached to the frame. Choosing a widget restores its default frame placement and opens Change layout with that widget selected. Escape, the field's close button, empty-canvas input, or another shell or tool action also closes search. Dismissing it preserves the Search tool, ready for another background click. The field has no result count or instruction footer; a query without matches displays **No matches**.
+Results place desktop items first, then matching windows in front-to-back order, drawings, catalog widgets, and canvas tools. Up and Down change the selected result, wrapping at either end; Left and Right retain normal text-cursor behavior. Enter or clicking a result closes search, then opens the item's associated preview or focuses and centers the existing window. A pinned window opens at its frame edge. A drawing is selected and centered unless it is attached to the frame. Escape, the field's close button, empty-canvas input, or another shell or tool action also closes search. Dismissing it preserves the Search tool, ready for another background click. The field has no result count or instruction footer; a query without matches displays **No matches**.
+
+`SearchControlPreview` gives widgets and tools recognizable icons. Status previews read the same `useSystemStatus` and `useNotifications` state as the placed controls, so their network, sound level, battery percentage, time, and unread state stay in sync. The Apps result previews favorite app icons. Individual app shortcuts retain their existing `AppIcon` rendering and launch their app.
+
+Status results open the existing control at its actual placement. A frame attachment keeps its edge and group; a canvas control is brought into view before its panel opens. A hidden control receives a saved canvas placement near the current view and opens there, rather than returning to a default frame corner. The Canvas tools result follows the same reveal behavior and opens a flat picker anchored to the toolbar. Apps reveals its control and opens the launcher. These paths reuse the placed controls and their panels.
+
+Individual tool results select their mode or run their action from `CANVAS_TOOL_CATALOG`; only Change layout opens the layout editor. Shared catalog entries supply the toolbar and search with the same names, icons, shortcuts, and selection modes. Opening an existing control doesn't change its placement. Restoring a hidden control is an explicit placement change, separate from search's temporary result coordinates.
 
 The search field's pencil opens a one-line handwriting pad beside the query,
 on the same side as its results. The result layout reserves room for the pad.
@@ -339,7 +347,7 @@ app catalog. Recognition can be wrong. [Drawing recognition](recognition.md)
 records the model, download boundary, cancellation behavior, and ownership.
 This path is independent of the simulated AI-gathering preference.
 
-Canvas search uses the playground's local object metadata and the built-in widget catalog, including hidden controls. It doesn't inspect app contents or the host filesystem. The regular launcher search and dock continue to provide their existing routes to apps and window instances.
+Canvas search uses the playground's local object metadata and the built-in widget and tool catalogs, including hidden controls. It doesn't inspect app contents or the host filesystem. The regular launcher search and dock continue to provide their existing routes to apps and window instances.
 
 ## Arranging windows
 
@@ -503,6 +511,7 @@ across Settings windows.
 | [`src/peek-layout.ts`](../src/peek-layout.ts)                                           | Covered-window placement, temporary canvas icon and drawing peeking, and return-home positions.              |
 | [`src/usePeekMotion.ts`](../src/usePeekMotion.ts)                                       | Short slide animations for peeking objects and canvas icons and drawings returning home.                     |
 | [`src/canvas-search.ts`](../src/canvas-search.ts)                                       | Search matching and shared grid/parking layouts for canvas search and window switching.                      |
+| [`src/canvas-tool-catalog.ts`](../src/canvas-tool-catalog.ts)                           | Shared canvas-tool names, icons, shortcuts, modes, actions, and search terms.                                |
 | [`src/preview-motion.ts`](../src/preview-motion.ts)                                     | Window measurements and continuous transitions from temporary previews to the restored viewport.             |
 | [`src/gather-windows.ts`](../src/gather-windows.ts)                                     | Same-app window matching and placement near the selection within the current viewport.                       |
 | [`src/useShellPeek.ts`](../src/useShellPeek.ts)                                         | Temporary shell reveal near corners, over controls, and during keyboard interaction in focused view.         |
@@ -516,10 +525,13 @@ across Settings windows.
 | [`src/useBackground.ts`](../src/useBackground.ts)                                       | Photo decoding, shared background state, object URL lifetime, and IndexedDB persistence.                     |
 | [`src/App.tsx`](../src/App.tsx)                                                         | Workspace rendering, pointer gestures, viewport navigation, focused view, window actions, and saving.        |
 | [`src/components/SystemBar.tsx`](../src/components/SystemBar.tsx)                       | Independent clock, Wi-Fi, sound, and battery items, compact/detail views, popovers, and simulated controls.  |
-| [`src/components/NotificationInbox.tsx`](../src/components/NotificationInbox.tsx)       | Notification trigger, inbox, unread/dismissal state, and sample toasts.                                      |
+| [`src/useSystemStatus.ts`](../src/useSystemStatus.ts)                                   | Shared simulated Wi-Fi, volume, battery, and clock state for placed controls and search.                     |
+| [`src/useNotifications.ts`](../src/useNotifications.ts)                                 | Shared notification records, unread count, and updates for the inbox and search.                             |
+| [`src/components/NotificationInbox.tsx`](../src/components/NotificationInbox.tsx)       | Notification trigger, inbox, read/dismiss actions, and sample toasts.                                        |
 | [`src/components/Minimap.tsx`](../src/components/Minimap.tsx)                           | Map rendering and pointer capture for dragging the visible canvas area.                                      |
 | [`src/components/CanvasTools.tsx`](../src/components/CanvasTools.tsx)                   | Background and window-selection dropdowns, drawing, Change layout, map, and arrangement actions.             |
 | [`src/components/CanvasSearch.tsx`](../src/components/CanvasSearch.tsx)                 | Positioned search field, typed/handwritten query input, result navigation, and close/empty states.           |
+| [`src/components/SearchControlPreview.tsx`](../src/components/SearchControlPreview.tsx) | Status, app-launcher, and tool icons and state within canvas search results.                                 |
 | [`src/components/HandwritingPad.tsx`](../src/components/HandwritingPad.tsx)             | One-line ink input, pause/check submission, progress, clear, and retry controls.                             |
 | [`src/handwriting.ts`](../src/handwriting.ts)                                           | Lazy worker lifetime, recognition requests, cancellation, and recovery.                                      |
 | [`src/handwriting.worker.ts`](../src/handwriting.worker.ts)                             | Quantized local TrOCR loading, serialized inference, and raw recognized text.                                |

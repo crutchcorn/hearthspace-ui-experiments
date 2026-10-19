@@ -211,10 +211,19 @@ near the bottom, results can appear above it. Keep the existing objects
 recognizable while they move: finding work should feel like making room for it
 on the painting.
 
-Closing search restores the user's arrangement. Choosing a result opens,
-focuses, or restores that object as appropriate. Finding an unplaced system
-tray should make it possible to attach the tray again; it should not require
-resetting the whole layout.
+Closing search restores the user's arrangement. Choosing a result performs
+its ordinary action: an app launches, a window receives focus, and Wi-Fi opens
+its controls. Status results show their current state, then lead back to the
+actual control. Frame attachments open where they are pinned. For a canvas
+control, the viewport moves to it before opening its panel. A hidden control
+returns on the canvas, where it can be used or arranged again.
+
+Canvas tools also appear individually with their own icons. Choosing Pan
+selects panning; choosing Arrange places windows in a grid. The Canvas tools
+result reveals the toolbar and opens a flat picker beside it, and Apps reveals
+its control and opens the launcher. Only the explicit Change layout tool
+starts editing placement. Search respects existing placements, and restoring
+a hidden control doesn't pin it to the frame automatically.
 
 This also makes space a useful form of organization. You can move an app,
 window, or widget far from the current view knowing it still belongs to the
