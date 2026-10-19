@@ -2,16 +2,16 @@ import { useEffect, useRef, useState } from 'react'
 import {
   ArrowUpRight,
   Bell,
-  BellRing,
+  BellUnread,
   CheckCheck,
   Folder,
-  Globe,
+  Compass,
   Plus,
-  Settings2,
-  StickyNote,
+  AppSettings,
+  Note,
   X,
-  type LucideIcon,
-} from 'lucide-react'
+  type IconComponent,
+} from '../icons'
 import {
   INITIAL_NOTIFICATIONS,
   type Notification,
@@ -38,14 +38,14 @@ interface NotificationInboxProps {
 
 const APPS: Record<
   NotificationTarget,
-  { name: string; Icon: LucideIcon; action?: string }
+  { name: string; Icon: IconComponent; action?: string }
 > = {
-  notes: { name: 'Notes', Icon: StickyNote },
+  notes: { name: 'Notes', Icon: Note },
   files: { name: 'Files', Icon: Folder },
-  browser: { name: 'Browser', Icon: Globe },
+  browser: { name: 'Browser', Icon: Compass },
   gestures: {
     name: 'Gesture settings',
-    Icon: Settings2,
+    Icon: AppSettings,
     action: 'Customize gestures',
   },
 }
@@ -164,17 +164,15 @@ export default function NotificationInbox({
           }}
         >
           {unreadCount ? (
-            <BellRing size={18} aria-hidden="true" />
+            <BellUnread size={18} aria-hidden="true" />
           ) : (
             <Bell size={18} aria-hidden="true" />
           )}
-          {expanded ? (
+          {expanded && (
             <span className={styles.triggerText} aria-hidden="true">
               {unreadCount ? `${unreadCount} new` : 'All clear'}
             </span>
-          ) : unreadCount ? (
-            <span className={styles.triggerDot} aria-hidden="true" />
-          ) : null}
+          )}
         </button>
       </div>
 
@@ -213,12 +211,7 @@ export default function NotificationInbox({
                       data-unread={item.unread}
                     >
                       <div className={styles.itemIcon}>
-                        <AppIcon
-                          appId={item.target}
-                          icon={Icon}
-                          size={17}
-                          strokeWidth={1.6}
-                        />
+                        <AppIcon appId={item.target} icon={Icon} size={17} />
                       </div>
                       <div className={styles.itemContent}>
                         <div className={styles.itemMeta}>
@@ -256,7 +249,7 @@ export default function NotificationInbox({
               ) : (
                 <div className={styles.empty}>
                   <span>
-                    <Bell size={23} strokeWidth={1.3} />
+                    <Bell size={23} />
                   </span>
                   <h3>No notifications</h3>
                   <p>New activity will appear here.</p>
@@ -288,7 +281,7 @@ export default function NotificationInbox({
           >
             <div className={styles.toastTop}>
               <span>
-                <BellRing size={13} /> Notification preview
+                <BellUnread size={13} /> Notification preview
               </span>
               <button
                 type="button"

@@ -1,15 +1,15 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from 'react'
 import {
   Check,
-  Layers2,
-  PanelsTopLeft,
+  Layers,
+  FrameLayout,
   Trash2,
-  Wallpaper,
+  BackgroundLayer,
   Ungroup,
   List,
   Square,
   Pin,
-} from 'lucide-react'
+} from '../icons'
 import type { LayoutTarget, ObjectPlacement } from '../frame-layout'
 import styles from './LayoutEditor.module.css'
 import shellStyles from './ShellControls.module.css'
@@ -30,8 +30,8 @@ interface LayoutEditorProps {
 }
 
 const canvasChoices = [
-  { label: 'Canvas', Icon: Layers2, surface: 'canvas' },
-  { label: 'Background', Icon: Wallpaper, surface: 'background' },
+  { label: 'Canvas', Icon: Layers, surface: 'canvas' },
+  { label: 'Background', Icon: BackgroundLayer, surface: 'background' },
 ] as const
 
 export default function LayoutEditor({
@@ -54,7 +54,7 @@ export default function LayoutEditor({
     ),
     target?.kind === 'drawing'
       ? ({ label: 'Pin to top', Icon: Pin, surface: 'pinned' } as const)
-      : ({ label: 'Frame', Icon: PanelsTopLeft, surface: 'frame' } as const),
+      : ({ label: 'Frame', Icon: FrameLayout, surface: 'frame' } as const),
   ]
   const [hint, setHint] = useState<string | null>(null)
   const hintId = useId()

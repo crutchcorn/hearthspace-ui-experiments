@@ -1,14 +1,14 @@
 import {
-  Hand,
+  ArrangeWindows,
+  Pan,
   Lasso,
-  Map,
-  MousePointer2,
-  PanelsTopLeft,
+  Overview,
+  Cursor,
+  FrameLayout,
   Pencil,
   Search,
-  SquareDashedMousePointer,
-} from 'lucide-react'
-import ArrangeIcon from './components/ArrangeIcon.ts'
+  RectangleSelect,
+} from './icons'
 
 export const CANVAS_TOOLS = {
   cursor: {
@@ -18,7 +18,7 @@ export const CANVAS_TOOLS = {
     description: 'Select files, folders, and app shortcuts on the canvas.',
     keywords: ['cursor', 'pointer', 'desktop selection'],
     shortcut: 'V',
-    Icon: MousePointer2,
+    Icon: Cursor,
   },
   pan: {
     id: 'pan',
@@ -27,7 +27,7 @@ export const CANVAS_TOOLS = {
     description: 'Move around the canvas.',
     keywords: ['hand', 'grab', 'drag', 'navigate'],
     shortcut: 'H',
-    Icon: Hand,
+    Icon: Pan,
   },
   search: {
     id: 'search',
@@ -46,7 +46,7 @@ export const CANVAS_TOOLS = {
     description: 'Select windows inside a rectangle.',
     keywords: ['square', 'box', 'window selection'],
     shortcut: 'R',
-    Icon: SquareDashedMousePointer,
+    Icon: RectangleSelect,
   },
   freeform: {
     id: 'freeform',
@@ -74,7 +74,7 @@ export const CANVAS_TOOLS = {
     description: 'Move items between the frame and canvas.',
     keywords: ['edit', 'pin', 'attach', 'background', 'toolbar'],
     shortcut: '',
-    Icon: PanelsTopLeft,
+    Icon: FrameLayout,
   },
   map: {
     id: 'map',
@@ -83,7 +83,7 @@ export const CANVAS_TOOLS = {
     description: 'Open the canvas map.',
     keywords: ['map', 'minimap', 'zoom'],
     shortcut: 'M',
-    Icon: Map,
+    Icon: Overview,
   },
   arrange: {
     id: 'arrange',
@@ -92,7 +92,7 @@ export const CANVAS_TOOLS = {
     description: 'Place open windows side by side in a grid.',
     keywords: ['organize', 'tile', 'grid'],
     shortcut: 'A',
-    Icon: ArrangeIcon,
+    Icon: ArrangeWindows,
   },
 } as const
 

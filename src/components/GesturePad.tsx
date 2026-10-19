@@ -1,5 +1,5 @@
 import { useRef, useState, type PointerEvent } from 'react'
-import { Check, Pencil, RotateCcw, Settings, X } from 'lucide-react'
+import { Check, Pencil, RotateCcw, Settings, X } from '../icons'
 import { APP_CATALOG, type LauncherApp } from './launcher-apps'
 import {
   GESTURE_WIDTH,
@@ -176,7 +176,7 @@ export default function GesturePad(props: GesturePadProps) {
         )}
         {!stroke.length && (
           <div className={styles.padPrompt}>
-            <Pencil size={30} strokeWidth={1.3} />
+            <Pencil size={30} />
             <strong>{editing ? 'Record a gesture' : 'Draw a gesture'}</strong>
             <span>
               {editing

@@ -1,4 +1,4 @@
-import { Grip } from 'lucide-react'
+import { Grip } from '../icons'
 import type { PointerEvent, ReactNode } from 'react'
 import type { Bounds } from '../desktop'
 import {

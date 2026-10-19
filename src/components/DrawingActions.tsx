@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState } from 'react'
-import { Check, PanelsTopLeft, Play, Trash2 } from 'lucide-react'
+import { Check, FrameLayout, Play, Trash2 } from '../icons'
 import { clamp, type Bounds } from '../desktop'
 import type { CanvasDrawing } from '../drawings'
 import { getWindowClearance } from '../window-layout'
@@ -102,7 +102,7 @@ export default function DrawingActions({
             onChangeLayout()
           }}
         >
-          <PanelsTopLeft size={18} aria-hidden="true" />
+          <FrameLayout size={18} aria-hidden="true" />
         </button>
         {onPlay && (
           <button

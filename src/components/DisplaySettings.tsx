@@ -1,4 +1,4 @@
-import { Laptop, Monitor } from 'lucide-react'
+import { Laptop, Monitor } from '../icons'
 import { useId, useRef, useState, type PointerEvent } from 'react'
 import {
   DISPLAY_LAYOUT_HEIGHT,
@@ -211,7 +211,7 @@ export default function DisplaySettings({
       </p>
       <div className={styles.selectedDisplay}>
         <span className={styles.displayIdentity} aria-hidden="true">
-          <SelectedIcon size={21} strokeWidth={1.5} />
+          <SelectedIcon size={21} />
         </span>
         <div>
           <h3>{selectedDisplay.name}</h3>

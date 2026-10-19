@@ -1,6 +1,6 @@
 import type { PointerEvent } from 'react'
 import { createPortal } from 'react-dom'
-import { FileText, Folder, Globe } from 'lucide-react'
+import { FileText, Folder, Compass } from '../icons'
 import type { Bounds, DesktopItem } from '../desktop'
 import type { SearchPlacement } from '../canvas-search'
 import { getFrameBounds, type FrameLayout } from '../frame-layout'
@@ -137,18 +137,17 @@ export default function DesktopItems({
           >
             <span className={styles.icon} aria-hidden="true">
               {item.kind === 'folder' ? (
-                <Folder size={framed ? 30 : 46} strokeWidth={1.2} />
+                <Folder size={framed ? 30 : 46} />
               ) : item.kind === 'file' ? (
-                <FileText size={framed ? 28 : 42} strokeWidth={1.2} />
+                <FileText size={framed ? 28 : 42} />
               ) : (
                 <AppIcon
                   appId={item.appId}
                   icon={
                     APP_CATALOG.find((app) => app.id === item.appId)?.icon ??
-                    Globe
+                    Compass
                   }
                   size={framed ? 24 : 38}
-                  strokeWidth={1.4}
                 />
               )}
             </span>

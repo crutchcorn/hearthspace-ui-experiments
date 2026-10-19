@@ -1,4 +1,4 @@
-import { Check, ChevronUp } from 'lucide-react'
+import { Check, ChevronUp } from '../icons'
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from 'react'
 import type { CanvasTool, WindowSelectionShape } from '../desktop'
 import { CANVAS_TOOLS } from '../canvas-tool-catalog.ts'
@@ -385,7 +385,7 @@ export default function CanvasTools({
             tabIndex={-1}
             onClick={() => selectTool(optionMode)}
           >
-            <Icon size={18} strokeWidth={1.5} aria-hidden="true" />
+            <Icon size={18} aria-hidden="true" />
             <span>{title}</span>
             <kbd>{shortcut}</kbd>
             {mode === optionMode && (
@@ -404,7 +404,7 @@ export default function CanvasTools({
             tabIndex={-1}
             onClick={() => selectShape(shape)}
           >
-            <Icon size={18} strokeWidth={1.5} aria-hidden="true" />
+            <Icon size={18} aria-hidden="true" />
             <span>{title}</span>
             <kbd>{shortcut}</kbd>
             {mode === 'select' && selectionShape === shape && (
@@ -423,7 +423,7 @@ export default function CanvasTools({
             tabIndex={-1}
             onClick={() => selectCanvasMode(optionMode)}
           >
-            <Icon size={18} strokeWidth={1.5} aria-hidden="true" />
+            <Icon size={18} aria-hidden="true" />
             <span>{title}</span>
             <kbd>{shortcut}</kbd>
             {mode === optionMode && (
@@ -503,11 +503,10 @@ export default function CanvasTools({
             openMenu('mobile')
           }}
         >
-          <CurrentIcon size={20} strokeWidth={1.5} aria-hidden="true" />
+          <CurrentIcon size={20} aria-hidden="true" />
           <ChevronUp
             className={styles.expandIndicator}
             size={9}
-            strokeWidth={2}
             aria-hidden="true"
           />
         </button>
@@ -568,11 +567,10 @@ export default function CanvasTools({
                 openMenu('primary')
               }}
             >
-              <PrimaryIcon size={20} strokeWidth={1.5} aria-hidden="true" />
+              <PrimaryIcon size={20} aria-hidden="true" />
               <ChevronUp
                 className={styles.expandIndicator}
                 size={9}
-                strokeWidth={2}
                 aria-hidden="true"
               />
             </button>
@@ -598,7 +596,7 @@ export default function CanvasTools({
                         tabIndex={-1}
                         onClick={() => selectTool(optionMode)}
                       >
-                        <Icon size={18} strokeWidth={1.5} aria-hidden="true" />
+                        <Icon size={18} aria-hidden="true" />
                         <span>{title}</span>
                         <kbd>{shortcut}</kbd>
                         {mode === optionMode && (
@@ -656,11 +654,10 @@ export default function CanvasTools({
                 openMenu('selection')
               }}
             >
-              <SelectionIcon size={20} strokeWidth={1.5} aria-hidden="true" />
+              <SelectionIcon size={20} aria-hidden="true" />
               <ChevronUp
                 className={styles.expandIndicator}
                 size={9}
-                strokeWidth={2}
                 aria-hidden="true"
               />
             </button>
@@ -687,7 +684,7 @@ export default function CanvasTools({
                       tabIndex={-1}
                       onClick={() => selectShape(shape)}
                     >
-                      <Icon size={18} strokeWidth={1.5} aria-hidden="true" />
+                      <Icon size={18} aria-hidden="true" />
                       <span>{title}</span>
                       <kbd>{shortcut}</kbd>
                       {mode === 'select' && selectionShape === shape && (
@@ -714,7 +711,7 @@ export default function CanvasTools({
               {...hintProps(optionMode)}
               onClick={() => selectCanvasMode(optionMode)}
             >
-              <Icon size={20} strokeWidth={1.5} aria-hidden="true" />
+              <Icon size={20} aria-hidden="true" />
             </button>
           ))}
           <span className={styles.divider} aria-hidden="true" />
@@ -743,7 +740,7 @@ export default function CanvasTools({
               }}
               disabled={windowCount === 0}
             >
-              <ArrangeIcon />
+              <ArrangeIcon size={18} />
             </button>
           </div>
         </div>

@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, useState } from 'react'
+import { GatherWindows as GatherWindowsIcon } from '../icons'
 import type { Bounds, DesktopWindow } from '../desktop'
 import { clamp } from '../desktop'
 import { getWindowClearance } from '../window-layout'
@@ -115,20 +116,7 @@ export default function GatherWindows({
           onBlur={hideHint}
           onClick={gather}
         >
-          <svg
-            width={22}
-            height={22}
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={1.6}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
-            <path d="M16 7V4a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h4" />
-            <rect x={8} y={9} width={14} height={12} rx={1} />
-          </svg>
+          <GatherWindowsIcon size={22} />
         </button>
       </div>
       {hint && (

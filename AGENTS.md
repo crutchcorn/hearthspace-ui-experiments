@@ -9,8 +9,11 @@ full accessibility workflow are not requirements for these experiments.
 
 - Keep the existing React, Vite, TypeScript 6, and pnpm setup. `package.json` is
   authoritative for the package manager and supported Node versions.
-- Use CSS Modules and Lucide React icons. Ordinary CSS is sufficient; if SCSS
-  becomes useful, limit its features to media-query variables.
+- Use CSS Modules and the local SVG icon set in `src/icons/`. Follow
+  [docs/icons.md](docs/icons.md) when adding or changing glyphs; reuse the shared
+  factory and optical stroke sizing instead of importing another icon library.
+  Ordinary CSS is sufficient; if SCSS becomes useful, limit its features to
+  media-query variables.
 - Add routing, server state, a backend, orchestration, or abstractions only when
   an experiment needs them. Keep prototype system controls clearly simulated.
 - Run independent `pnpm typecheck`, `pnpm lint`, `pnpm lint:css`,

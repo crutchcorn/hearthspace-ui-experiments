@@ -1,20 +1,20 @@
 import {
-  CalendarDays,
+  Calendar,
   Folder,
-  Globe,
-  Image as ImageIcon,
-  Music2,
-  Settings2,
-  SquareTerminal,
-  StickyNote,
-  type LucideIcon,
-} from 'lucide-react'
+  Compass,
+  Photo,
+  Music,
+  AppSettings,
+  Terminal,
+  Note,
+  type IconComponent,
+} from '../icons'
 
 export interface LauncherApp {
   id: string
   name: string
   description: string
-  icon: LucideIcon
+  icon: IconComponent
 }
 
 export const APP_CATALOG: LauncherApp[] = [
@@ -22,7 +22,7 @@ export const APP_CATALOG: LauncherApp[] = [
     id: 'browser',
     name: 'Browser',
     description: 'Web pages and bookmarks',
-    icon: Globe,
+    icon: Compass,
   },
   {
     id: 'files',
@@ -34,36 +34,36 @@ export const APP_CATALOG: LauncherApp[] = [
     id: 'terminal',
     name: 'Terminal',
     description: 'Commands and workspaces',
-    icon: SquareTerminal,
+    icon: Terminal,
   },
   {
     id: 'notes',
     name: 'Notes',
     description: 'Quick notes and ideas',
-    icon: StickyNote,
+    icon: Note,
   },
   {
     id: 'music',
     name: 'Music',
     description: 'Albums and playlists',
-    icon: Music2,
+    icon: Music,
   },
   {
     id: 'photos',
     name: 'Photos',
     description: 'Images and collections',
-    icon: ImageIcon,
+    icon: Photo,
   },
   {
     id: 'calendar',
     name: 'Calendar',
     description: 'Events and schedules',
-    icon: CalendarDays,
+    icon: Calendar,
   },
   {
     id: 'settings',
     name: 'Settings',
     description: 'Preferences and system',
-    icon: Settings2,
+    icon: AppSettings,
   },
 ]

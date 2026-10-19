@@ -47,7 +47,7 @@ Open the printed address at `/hearthspace-ui-experiments/` and check that the de
 
 ## Implementation
 
-Keep experiments small enough to change quickly. The app uses React, TypeScript, Vite, CSS Modules, and Lucide icons. Local interaction state is sufficient for the current desktop; add routing, server rendering, or an API when an experiment actually needs them.
+Keep experiments small enough to change quickly. The app uses React, TypeScript, Vite, CSS Modules, and its [local SVG icon set](docs/icons.md). Local interaction state is sufficient for the current desktop; add routing, server rendering, or an API when an experiment actually needs them.
 
 See the [features list](docs/features.md) for the current experiment, and [the spatial playground architecture](docs/spatial-playground.md) for file ownership and coordinate behavior. Keep durable technical decisions in [docs](docs/README.md) and provisional investigations in [notes](notes/README.md).
 

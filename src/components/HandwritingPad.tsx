@@ -1,4 +1,4 @@
-import { Check, Eraser, LoaderCircle, RotateCcw } from 'lucide-react'
+import { Check, Eraser, Hourglass, RotateCcw } from '../icons'
 import { useLayoutEffect, useRef, useState, type PointerEvent } from 'react'
 import { recognizeHandwriting, type HandwritingStatus } from '../handwriting'
 import {
@@ -200,7 +200,7 @@ export default function HandwritingPad({ query, onText }: HandwritingPadProps) {
               setStrokes([])
             }}
           >
-            <Eraser size={18} strokeWidth={1.5} aria-hidden="true" />
+            <Eraser size={18} aria-hidden="true" />
           </button>
           <button
             type="button"
@@ -216,16 +216,15 @@ export default function HandwritingPad({ query, onText }: HandwritingPadProps) {
             }}
           >
             {busy ? (
-              <LoaderCircle
+              <Hourglass
                 className={styles.spinner}
                 size={18}
-                strokeWidth={1.5}
                 aria-hidden="true"
               />
             ) : error ? (
-              <RotateCcw size={18} strokeWidth={1.5} aria-hidden="true" />
+              <RotateCcw size={18} aria-hidden="true" />
             ) : (
-              <Check size={18} strokeWidth={1.5} aria-hidden="true" />
+              <Check size={18} aria-hidden="true" />
             )}
           </button>
         </div>

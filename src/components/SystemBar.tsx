@@ -2,12 +2,12 @@ import { useEffect, useRef } from 'react'
 import {
   BatteryFull,
   Check,
-  Clock3,
-  Volume2,
-  VolumeX,
+  Clock,
+  Volume,
+  VolumeMuted,
   Wifi,
   WifiOff,
-} from 'lucide-react'
+} from '../icons'
 import type { SystemStatus } from '../useSystemStatus'
 import { formatClock, type ClockDateFormat } from '../clock-format'
 import WidgetPopover from './WidgetPopover'
@@ -117,7 +117,7 @@ export default function SystemBar({
               {formatClock(now, clockDateFormat)}
             </span>
           ) : (
-            <Clock3 size={18} aria-hidden="true" />
+            <Clock size={18} aria-hidden="true" />
           )}
         </button>
       )}
@@ -147,7 +147,7 @@ export default function SystemBar({
           aria-expanded={openPanel === 'volume'}
           onClick={() => togglePanel('volume')}
         >
-          {volume > 0 ? <Volume2 size={17} /> : <VolumeX size={17} />}
+          {volume > 0 ? <Volume size={17} /> : <VolumeMuted size={17} />}
           {expanded && (
             <span className={styles.detail} aria-hidden="true">
               {volume}%
@@ -224,7 +224,7 @@ export default function SystemBar({
                 </span>
               </div>
               <div className={styles.volumeRow}>
-                <VolumeX size={16} />
+                <VolumeMuted size={16} />
                 <input
                   id="system-volume"
                   className={styles.volumeSlider}
@@ -234,7 +234,7 @@ export default function SystemBar({
                   value={volume}
                   onChange={(event) => setVolume(Number(event.target.value))}
                 />
-                <Volume2 size={17} />
+                <Volume size={17} />
               </div>
             </div>
           )}

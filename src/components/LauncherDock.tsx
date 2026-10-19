@@ -1,4 +1,4 @@
-import { GripVertical, LayoutGrid, PanelsTopLeft, Plus, X } from 'lucide-react'
+import { GripVertical, AppsGrid, FrameLayout, Plus, X } from '../icons'
 import {
   useEffect,
   useId,
@@ -22,7 +22,7 @@ const DOCK_APPS: LauncherApp[] = [
     id: 'workspace-windows',
     name: 'Windows',
     description: 'Other open windows',
-    icon: PanelsTopLeft,
+    icon: FrameLayout,
   },
 ]
 
@@ -415,7 +415,7 @@ export default function LauncherDock({
           title={favoriteDropActive ? 'Add to favorites' : 'Open app launcher'}
           onClick={onToggle}
         >
-          <LayoutGrid size={22} aria-hidden="true" />
+          <AppsGrid size={22} aria-hidden="true" />
         </button>
       </div>
       {selectedGroup && (

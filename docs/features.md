@@ -129,3 +129,5 @@ for storage ownership and validation.
 ## Materials and light
 
 - [Materials and light](materials-and-light.md): Current translucent shell, restrained interaction lighting, and solid dotted canvas.
+
+- [Custom icons](icons.md): Local geometric SVG glyphs for Hearthspace controls and applications.

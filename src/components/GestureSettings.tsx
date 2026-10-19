@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { ArrowLeft, Pencil, Plus, Spline, Trash2 } from 'lucide-react'
+import { ArrowLeft, Pencil, Plus, GestureStroke, Trash2 } from '../icons'
 import type { GestureShortcut } from '../gestures'
 import AppIcon from './AppIcon'
 import GesturePad from './GesturePad'
@@ -67,7 +67,7 @@ export default function GestureSettings({
             title="Back to gestures"
             onClick={() => showList(editor.shortcut?.appId ?? 'add')}
           >
-            <ArrowLeft size={19} strokeWidth={1.6} aria-hidden="true" />
+            <ArrowLeft size={19} aria-hidden="true" />
           </button>
           <h2>{editor.shortcut ? 'Edit gesture' : 'Add gesture'}</h2>
         </header>
@@ -96,7 +96,7 @@ export default function GestureSettings({
           className={styles.addButton}
           onClick={() => showEditor()}
         >
-          <Plus size={16} strokeWidth={1.7} aria-hidden="true" />
+          <Plus size={16} aria-hidden="true" />
           Add gesture
         </button>
       </header>
@@ -118,12 +118,7 @@ export default function GestureSettings({
                   </svg>
                 </div>
                 <div className={styles.app}>
-                  <AppIcon
-                    appId={app.id}
-                    icon={app.icon}
-                    size={22}
-                    strokeWidth={1.6}
-                  />
+                  <AppIcon appId={app.id} icon={app.icon} size={22} />
                   <strong>{app.name}</strong>
                 </div>
                 <div className={styles.actions}>
@@ -138,7 +133,7 @@ export default function GestureSettings({
                     title={`Edit ${app.name} gesture`}
                     onClick={() => showEditor(shortcut)}
                   >
-                    <Pencil size={16} strokeWidth={1.6} aria-hidden="true" />
+                    <Pencil size={16} aria-hidden="true" />
                   </button>
                   <button
                     type="button"
@@ -153,7 +148,7 @@ export default function GestureSettings({
                       onRemoveGestureShortcut(app.id)
                     }}
                   >
-                    <Trash2 size={16} strokeWidth={1.6} aria-hidden="true" />
+                    <Trash2 size={16} aria-hidden="true" />
                   </button>
                 </div>
               </li>
@@ -162,7 +157,7 @@ export default function GestureSettings({
         </ul>
       ) : (
         <div className={styles.empty}>
-          <Spline size={28} strokeWidth={1.3} aria-hidden="true" />
+          <GestureStroke size={28} aria-hidden="true" />
           <strong>No gestures yet</strong>
           <p>Add a gesture and choose the app it opens.</p>
         </div>

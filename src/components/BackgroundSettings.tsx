@@ -1,4 +1,4 @@
-import { ImagePlus, RotateCcw } from 'lucide-react'
+import { ImagePlus, RotateCcw } from '../icons'
 import { useId } from 'react'
 import type { BackgroundFit, BackgroundPhoto } from '../useBackground'
 import styles from './BackgroundSettings.module.css'

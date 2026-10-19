@@ -1,4 +1,4 @@
-import { ChevronDown } from 'lucide-react'
+import { ChevronDown } from '../icons'
 import { useId, useRef } from 'react'
 import type { AIControls } from '../useAI'
 import settingsStyles from './Settings.module.css'
@@ -73,7 +73,7 @@ export default function AISettings({ ai }: AISettingsProps) {
         <details className={styles.feature}>
           <summary>
             <span>On-device AI</span>
-            <ChevronDown size={14} strokeWidth={1.6} aria-hidden="true" />
+            <ChevronDown size={14} aria-hidden="true" />
           </summary>
           <p>
             AI runs locally on your device. No device information is sent
@@ -83,7 +83,7 @@ export default function AISettings({ ai }: AISettingsProps) {
         <details className={styles.feature}>
           <summary>
             <span>Gather similar windows</span>
-            <ChevronDown size={14} strokeWidth={1.6} aria-hidden="true" />
+            <ChevronDown size={14} aria-hidden="true" />
           </summary>
           <p>
             Select one or more windows, then choose Gather similar windows. AI

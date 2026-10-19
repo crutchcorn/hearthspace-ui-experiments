@@ -1,17 +1,17 @@
 import {
-  BrainCircuit,
+  Processor,
   Check,
-  Image,
+  Photo,
   Monitor,
   Moon,
-  Palette,
+  Appearance,
   PanelLeft,
-  PanelsTopLeft,
+  FrameLayout,
   RotateCcw,
-  SlidersHorizontal,
-  Spline,
+  Sliders,
+  GestureStroke,
   Sun,
-} from 'lucide-react'
+} from '../icons'
 import {
   useId,
   useLayoutEffect,
@@ -65,7 +65,7 @@ const CATEGORIES = [
     id: 'appearance',
     label: 'Appearance',
     description: 'Light and color, shaped around your space.',
-    icon: Palette,
+    icon: Appearance,
   },
   {
     id: 'displays',
@@ -77,25 +77,25 @@ const CATEGORIES = [
     id: 'background',
     label: 'Background',
     description: 'A backdrop for your workspace.',
-    icon: Image,
+    icon: Photo,
   },
   {
     id: 'gestures',
     label: 'Gestures',
     description: 'Draw shortcuts for your apps.',
-    icon: Spline,
+    icon: GestureStroke,
   },
   {
     id: 'ai',
     label: 'AI',
     description: 'Find related windows across your canvas.',
-    icon: BrainCircuit,
+    icon: Processor,
   },
   {
     id: 'system',
     label: 'System',
     description: 'Your system tray and canvas controls.',
-    icon: SlidersHorizontal,
+    icon: Sliders,
   },
 ] as const
 
@@ -178,7 +178,7 @@ export default function Settings({
             aria-controls={navigationId}
             onClick={() => setNavigationOpen((open) => !open)}
           >
-            <PanelLeft size={16} strokeWidth={1.6} aria-hidden="true" />
+            <PanelLeft size={16} aria-hidden="true" />
             <span>{activeCategory.label}</span>
           </button>
         </div>
@@ -203,7 +203,7 @@ export default function Settings({
                 }
               }}
             >
-              <Icon size={16} strokeWidth={1.6} aria-hidden="true" />
+              <Icon size={16} aria-hidden="true" />
               <span>{label}</span>
             </button>
           ))}
@@ -271,20 +271,14 @@ export default function Settings({
                             <span className={styles.previewPanel} />
                           </span>
                           <span className={styles.modeLabel}>
-                            <Icon
-                              size={18}
-                              strokeWidth={1.6}
-                              aria-hidden="true"
-                            />
+                            <Icon size={18} aria-hidden="true" />
                             <strong>{name}</strong>
                           </span>
                           <span
                             className={styles.selectionMark}
                             aria-hidden="true"
                           >
-                            {colorMode === id && (
-                              <Check size={11} strokeWidth={2.5} />
-                            )}
+                            {colorMode === id && <Check size={11} />}
                           </span>
                         </span>
                       </label>
@@ -310,11 +304,7 @@ export default function Settings({
                             style={{ '--swatch': theme.color } as CSSProperties}
                           >
                             {accentTheme === theme.id && (
-                              <Check
-                                size={17}
-                                strokeWidth={2}
-                                aria-hidden="true"
-                              />
+                              <Check size={17} aria-hidden="true" />
                             )}
                           </span>
                           <span className={styles.name}>
@@ -341,7 +331,7 @@ export default function Settings({
                     className={styles.restoreTools}
                     onClick={onChangeLayout}
                   >
-                    <PanelsTopLeft size={15} aria-hidden="true" />
+                    <FrameLayout size={15} aria-hidden="true" />
                     Change layout
                   </button>
                 </fieldset>

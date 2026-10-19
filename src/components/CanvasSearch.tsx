@@ -1,4 +1,4 @@
-import { Pencil, Search, X } from 'lucide-react'
+import { Pencil, Search, X } from '../icons'
 import { useLayoutEffect, useRef, type CSSProperties } from 'react'
 import { cancelHandwritingRecognition } from '../handwriting'
 import HandwritingPad from './HandwritingPad'
@@ -70,7 +70,7 @@ export default function CanvasSearch({
       }}
     >
       <div className={styles.field}>
-        <Search size={20} strokeWidth={1.5} aria-hidden="true" />
+        <Search size={20} aria-hidden="true" />
         <input
           ref={inputRef}
           type="text"
@@ -120,7 +120,7 @@ export default function CanvasSearch({
             if (!next) inputRef.current?.focus({ preventScroll: true })
           }}
         >
-          <Pencil size={18} strokeWidth={1.5} aria-hidden="true" />
+          <Pencil size={18} aria-hidden="true" />
         </button>
         <button
           type="button"
@@ -128,7 +128,7 @@ export default function CanvasSearch({
           aria-label="Close canvas search"
           onClick={closeSearch}
         >
-          <X size={18} strokeWidth={1.5} aria-hidden="true" />
+          <X size={18} aria-hidden="true" />
         </button>
       </div>
       {handwritingOpen && (

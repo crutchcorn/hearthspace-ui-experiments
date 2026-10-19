@@ -2,17 +2,17 @@ import type { ReactNode } from 'react'
 import {
   BatteryFull,
   Bell,
-  BellRing,
-  Clock3,
-  Grid2X2,
-  Hand,
-  MousePointer2,
+  BellUnread,
+  Clock,
+  AppsGrid,
+  Pan,
+  Cursor,
   Pencil,
-  Volume2,
-  VolumeX,
+  Volume,
+  VolumeMuted,
   Wifi,
   WifiOff,
-} from 'lucide-react'
+} from '../icons'
 import { CANVAS_TOOL_CATALOG } from '../canvas-tool-catalog'
 import type { CanvasTool, WindowSelectionShape } from '../desktop'
 import type { NotificationsState } from '../useNotifications'
@@ -60,7 +60,7 @@ export default function SearchControlPreview({
     switch (widgetId) {
       case 'notifications': {
         title = 'Notifications'
-        const Icon = notifications.unreadCount > 0 ? BellRing : Bell
+        const Icon = notifications.unreadCount > 0 ? BellUnread : Bell
         icon = <Icon size={26} aria-hidden="true" />
         detail = notifications.unreadCount
           ? `${notifications.unreadCount} unread`
@@ -76,7 +76,7 @@ export default function SearchControlPreview({
       }
       case 'volume': {
         title = 'Sound'
-        const Icon = status.volume > 0 ? Volume2 : VolumeX
+        const Icon = status.volume > 0 ? Volume : VolumeMuted
         icon = <Icon size={26} aria-hidden="true" />
         detail = status.volume > 0 ? `${status.volume}%` : 'Muted'
         break
@@ -88,12 +88,12 @@ export default function SearchControlPreview({
         break
       case 'clock':
         title = 'Clock'
-        icon = <Clock3 size={26} aria-hidden="true" />
+        icon = <Clock size={26} aria-hidden="true" />
         detail = formatClock(status.now, clockDateFormat)
         break
       case 'apps': {
         title = 'Apps'
-        icon = <Grid2X2 size={26} aria-hidden="true" />
+        icon = <AppsGrid size={26} aria-hidden="true" />
         const apps = favoriteAppIds
           .map((id) => APP_CATALOG.find((app) => app.id === id))
           .filter((app) => app !== undefined)
@@ -109,11 +109,11 @@ export default function SearchControlPreview({
       }
       default:
         title = 'Canvas tools'
-        icon = <MousePointer2 size={26} aria-hidden="true" />
+        icon = <Cursor size={26} aria-hidden="true" />
         detail = (
           <span className={styles.icons} aria-hidden="true">
-            <MousePointer2 size={16} data-active={tool === 'cursor'} />
-            <Hand size={16} data-active={tool === 'pan'} />
+            <Cursor size={16} data-active={tool === 'cursor'} />
+            <Pan size={16} data-active={tool === 'pan'} />
             <Pencil size={16} data-active={tool === 'draw'} />
           </span>
         )

@@ -9,12 +9,12 @@ import {
 import {
   ArrowUpRight,
   CornerDownLeft,
-  LayoutGrid,
+  AppsGrid,
   List,
-  PenLine,
+  Pencil,
   Search,
   X,
-} from 'lucide-react'
+} from '../icons'
 import GesturePad from './GesturePad'
 import type { GestureShortcut } from '../gestures'
 import AppIcon from './AppIcon'
@@ -176,7 +176,7 @@ export default function AppLauncher({
       <header className={styles.commandBar}>
         {mode === 'apps' ? (
           <div className={styles.searchField}>
-            <Search size={22} strokeWidth={1.6} />
+            <Search size={22} />
             <input
               ref={searchRef}
               type="search"
@@ -206,7 +206,7 @@ export default function AppLauncher({
           </div>
         ) : (
           <div className={styles.gestureHeading}>
-            <PenLine size={23} strokeWidth={1.6} />
+            <Pencil size={23} />
             <strong>Draw to open</strong>
           </div>
         )}
@@ -217,7 +217,7 @@ export default function AppLauncher({
             aria-pressed={mode === 'apps'}
             onClick={() => onModeChange('apps')}
           >
-            <LayoutGrid size={17} /> Apps
+            <AppsGrid size={17} /> Apps
           </button>
           <button
             type="button"
@@ -225,7 +225,7 @@ export default function AppLauncher({
             aria-pressed={mode === 'gestures'}
             onClick={() => onModeChange('gestures')}
           >
-            <PenLine size={17} /> Draw
+            <Pencil size={17} /> Draw
           </button>
         </div>
         <button
@@ -252,7 +252,7 @@ export default function AppLauncher({
                   aria-pressed={view === 'grid'}
                   onClick={() => setView('grid')}
                 >
-                  <LayoutGrid size={16} />
+                  <AppsGrid size={16} />
                 </button>
                 <button
                   type="button"
@@ -289,7 +289,6 @@ export default function AppLauncher({
                       appId={app.id}
                       icon={app.icon}
                       size={showList ? 25 : 30}
-                      strokeWidth={1.5}
                     />
                   </span>
                   <span className={styles.appCopy}>
@@ -309,7 +308,7 @@ export default function AppLauncher({
           </div>
           {apps.length === 0 && (
             <div className={styles.emptyResults}>
-              <Search size={30} strokeWidth={1.3} />
+              <Search size={30} />
               <p>No applications found</p>
               <span>Search by name or function.</span>
             </div>

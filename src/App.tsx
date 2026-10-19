@@ -38,14 +38,14 @@ import {
   ArrowDownRight,
   ChevronLeft,
   ChevronRight,
-  Maximize2,
-  Minimize2,
-  PanelsTopLeft,
-  StickyNote,
+  Maximize,
+  Minimize,
+  FrameLayout,
+  Note,
   X,
   ZoomIn,
   ZoomOut,
-} from 'lucide-react'
+} from './icons'
 import SystemBar, { type SystemPanel } from './components/SystemBar'
 import NotificationInbox, {
   type NotificationTarget,
@@ -2601,7 +2601,7 @@ function App() {
             const appId =
               app?.id ?? (item.kind === 'notes' ? 'notes' : 'workspace-windows')
             const Icon =
-              app?.icon ?? (item.kind === 'notes' ? StickyNote : PanelsTopLeft)
+              app?.icon ?? (item.kind === 'notes' ? Note : FrameLayout)
             const content = (
               <section
                 key={item.id}
@@ -2729,12 +2729,7 @@ function App() {
                   )}
                   <span className={styles.windowTitle}>
                     <span className={styles.windowAppIcon}>
-                      <AppIcon
-                        appId={appId}
-                        icon={Icon}
-                        size={15}
-                        strokeWidth={1.7}
-                      />
+                      <AppIcon appId={appId} icon={Icon} size={15} />
                     </span>
                     <span className={styles.windowName}>{item.title}</span>
                   </span>
@@ -2751,9 +2746,9 @@ function App() {
                       onClick={() => toggleFocusView(item)}
                     >
                       {attached || focusView?.id === item.id ? (
-                        <Minimize2 size={12} />
+                        <Minimize size={12} />
                       ) : (
-                        <Maximize2 size={12} />
+                        <Maximize size={12} />
                       )}
                     </button>
                     <button
@@ -3156,14 +3151,14 @@ function App() {
                 className={`${styles.zoomButton} ${shellStyles.control}`}
                 aria-label="Zoom out"
               >
-                <ZoomOut size={18} strokeWidth={1.5} aria-hidden="true" />
+                <ZoomOut size={18} aria-hidden="true" />
               </button>
               <button
                 type="button"
                 className={`${styles.zoomButton} ${shellStyles.control}`}
                 aria-label="Zoom in"
               >
-                <ZoomIn size={18} strokeWidth={1.5} aria-hidden="true" />
+                <ZoomIn size={18} aria-hidden="true" />
               </button>
             </div>
           </div>
