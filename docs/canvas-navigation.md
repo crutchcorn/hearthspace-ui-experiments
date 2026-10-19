@@ -40,6 +40,11 @@ another tool is active, its first press selects that remembered tool; the
 second opens its dropdown. On narrow screens, one flat picker exposes every
 tool directly.
 
+The small chevrons on the primary, window-selection, and compact tool pickers
+sit 6 pixels inside the top and right edges. This keeps them within the rounded
+hover highlight while the full 44-pixel button remains the click target. The
+chevron turns downward while its menu is open.
+
 Dragging a window, desktop item, canvas control, or drawing toward the viewport
 edge carries it farther across the canvas. Change layout deliberately disables
 that automatic travel: reaching an edge there means attaching to the frame.
@@ -73,5 +78,7 @@ and viewport locks. [Minimap](../src/components/Minimap.tsx) translates map
 pointer positions into canvas coordinates. Initial dimensions and tool defaults
 live in [desktop.ts](../src/desktop.ts); the
 [tool catalog](../src/canvas-tool-catalog.ts) supplies names, icons, and search
-entries. See [canvas search](canvas-search.md) for bringing work into view
+entries. [CanvasTools styles](../src/components/CanvasTools.module.css) keep
+the picker chevrons aligned across desktop, side, and compact toolbars.
+See [canvas search](canvas-search.md) for bringing work into view
 without manually traveling to it.

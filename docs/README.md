@@ -7,7 +7,7 @@ interaction and points to its implementation.
 
 ## Canvas and windows
 
-- [Canvas navigation](canvas-navigation.md): panning, temporary drag navigation, and Overview.
+- [Canvas navigation](canvas-navigation.md): panning, tool pickers, temporary drag navigation, and Overview.
 - [Desktop items](desktop-items.md): permanent app shortcuts, sample files and folders, and movable canvas controls.
 - [Window management](window-management.md): movement, resizing, Arrange, ordinary maximization, and focused view.
 - [Window selection](window-selection.md): rectangle/lasso selection, grouped dragging, and inert app contents.

@@ -35,8 +35,8 @@
 
 .expandIndicator {
   position: absolute;
-  top: 3px;
-  right: 3px;
+  top: 6px;
+  right: 6px;
   opacity: 0.85;
   transition: transform 150ms ease;
 }
