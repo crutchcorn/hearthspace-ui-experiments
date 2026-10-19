@@ -11,6 +11,7 @@ import styles from './DesktopItems.module.css'
 interface DesktopItemsProps {
   items: DesktopItem[]
   selectedIds: string[]
+  returningIds?: string[]
   placements?: Map<string, SearchPlacement>
   frameLayout?: FrameLayout
   view?: Bounds
@@ -28,6 +29,7 @@ interface DesktopItemsProps {
 export default function DesktopItems({
   items,
   selectedIds,
+  returningIds = [],
   placements,
   frameLayout,
   view,
@@ -64,6 +66,7 @@ export default function DesktopItems({
             className={styles.item}
             data-desktop-item-id={item.id}
             data-item-kind={item.kind}
+            data-favorite-returning={returningIds.includes(item.id)}
             data-group-member={inline || undefined}
             data-surface={placements ? 'canvas' : layout.surface}
             data-frame-attached={Boolean(framed)}

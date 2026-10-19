@@ -57,6 +57,7 @@ import {
 } from './drawings'
 import AppLauncher from './components/AppLauncher'
 import LauncherDock from './components/LauncherDock'
+import { loadFavoriteApps, saveFavoriteApps, addFavoriteApp } from './favorites'
 import AppIcon from './components/AppIcon'
 import WindowContent from './components/WindowContent'
 import type { SettingsNavigationRequest } from './components/Settings'
@@ -159,6 +160,15 @@ function App() {
   const [gestureShortcuts, setGestureShortcuts] = useState(loadGestureShortcuts)
   const accent =
     ACCENT_THEMES.find((theme) => theme.id === accentTheme) ?? ACCENT_THEMES[0]
+  const [favoriteAppIds, setFavoriteAppIds] = useState(loadFavoriteApps)
+  const [favoriteDropActive, setFavoriteDropActive] = useState(false)
+  const [justFavoritedAppId, setJustFavoritedAppId] = useState<string | null>(
+    null,
+  )
+  const [returningFavoriteIds, setReturningFavoriteIds] = useState<string[]>([])
+  const favoriteTimer = useRef<number | undefined>(undefined)
+  useEffect(() => saveFavoriteApps(favoriteAppIds), [favoriteAppIds])
+  useEffect(() => () => window.clearTimeout(favoriteTimer.current), [])
   const [workspace, setWorkspace] = useState(() =>
     transformCanvasWorkspace(
       loadWorkspace(),
@@ -354,6 +364,7 @@ function App() {
       preparePeekMotion({
         excludedWindowId: target.kind === 'window' ? target.id : undefined,
       }),
+    { hover: hoverFavoriteDrop, drop: dropFavorite },
   )
   const restoreBackgroundItems = useCallback(
     (current: typeof workspace) =>
@@ -900,6 +911,7 @@ function App() {
     const dx = clientX - current.startX + canvas.scrollLeft - current.scrollX
     const dy = clientY - current.startY + canvas.scrollTop - current.scrollY
     if (current.type === 'item-move') {
+      hoverFavoriteDrop(current.id ?? null, clientX, clientY)
       // Move the whole selection by one bounded delta, preserving its spacing.
       if (!current.moved && Math.hypot(dx, dy) < 4) return
       current.moved = true
@@ -1020,7 +1032,16 @@ function App() {
   }, [])
 
   const panAtEdge = useEffectEvent(() => {
-    if (focusView) return
+    if (
+      focusView ||
+      (gesture.current?.type === 'item-move' &&
+        isFavoriteDrop(
+          gesture.current.id ?? null,
+          latestPointer.current.x,
+          latestPointer.current.y,
+        ))
+    )
+      return
     const canvas = viewport.current
     if (
       canvas &&
@@ -1202,6 +1223,42 @@ function App() {
     selectDrawing(id)
   }
 
+  function isFavoriteDrop(itemId: string | null, x: number, y: number) {
+    const item = workspace.items.find((item) => item.id === itemId)
+    if (item?.kind !== 'app') return false
+    const target = launcherTrigger.current
+    if (!target || target.closest('[hidden]')) return false
+    const bounds = target.getBoundingClientRect()
+    return (
+      bounds.width > 0 &&
+      x >= bounds.left - 10 &&
+      x <= bounds.right + 10 &&
+      y >= bounds.top - 10 &&
+      y <= bounds.bottom + 10
+    )
+  }
+
+  function hoverFavoriteDrop(itemId: string | null, x: number, y: number) {
+    const active = isFavoriteDrop(itemId, x, y)
+    setFavoriteDropActive(active)
+    return active
+  }
+
+  function dropFavorite(itemId: string, x: number, y: number) {
+    if (!isFavoriteDrop(itemId, x, y)) return false
+    const item = workspace.items.find((item) => item.id === itemId)!
+    setFavoriteAppIds((current) => addFavoriteApp(current, item.appId))
+    setJustFavoritedAppId(item.appId)
+    setReturningFavoriteIds([itemId])
+    setFavoriteDropActive(false)
+    window.clearTimeout(favoriteTimer.current)
+    favoriteTimer.current = window.setTimeout(() => {
+      setJustFavoritedAppId(null)
+      setReturningFavoriteIds([])
+    }, 700)
+    return true
+  }
+
   function openDesktopItem(item: DesktopItem) {
     if (canvasSearch) {
       activateSearchResult({ kind: 'item', id: item.id })
@@ -1282,8 +1339,21 @@ function App() {
         completed.type === 'item-move' ||
         completed.type === 'drawing-move')
     ) {
-      applyGesture(event.clientX, event.clientY)
-      if (completed.moved) {
+      const favorited =
+        completed.type === 'item-move' &&
+        completed.moved &&
+        completed.id &&
+        dropFavorite(completed.id, event.clientX, event.clientY)
+      if (favorited) {
+        const originals = new Map(
+          completed.items!.map((item) => [item.id, item]),
+        )
+        setWorkspace((current) => ({
+          ...current,
+          items: current.items.map((item) => originals.get(item.id) ?? item),
+        }))
+      } else applyGesture(event.clientX, event.clientY)
+      if (completed.moved && !favorited) {
         preparePeekMotion({
           excludedWindowId:
             completed.type === 'move' || completed.type === 'resize'
@@ -1329,6 +1399,7 @@ function App() {
     }
     gesture.current = null
     setDragging(false)
+    setFavoriteDropActive(false)
     setSelection(null)
     if (captureTarget.current?.hasPointerCapture(event.pointerId))
       captureTarget.current.releasePointerCapture(event.pointerId)
@@ -1842,6 +1913,9 @@ function App() {
     ),
     apps: (
       <LauncherDock
+        favoriteAppIds={favoriteAppIds}
+        favoriteDropActive={favoriteDropActive}
+        justFavoritedAppId={justFavoritedAppId}
         open={launcher !== null}
         triggerRef={launcherTrigger}
         onToggle={toggleLauncher}
@@ -2145,6 +2219,7 @@ function App() {
               frameHost={frameHost}
               view={view}
               selectedIds={selectedItemIds}
+              returningIds={returningFavoriteIds}
               placements={previewLayout?.items}
               previewSelectedId={
                 searchResult?.kind === 'item' ? searchResult.id : undefined

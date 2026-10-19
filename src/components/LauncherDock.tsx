@@ -14,10 +14,8 @@ import { APP_CATALOG, type LauncherApp } from './launcher-apps'
 import shellStyles from './ShellControls.module.css'
 import styles from './LauncherDock.module.css'
 
-const FAVORITE_IDS = ['browser', 'files', 'notes']
 const DOCK_APPS: LauncherApp[] = [
-  ...APP_CATALOG.filter((app) => FAVORITE_IDS.includes(app.id)),
-  ...APP_CATALOG.filter((app) => !FAVORITE_IDS.includes(app.id)),
+  ...APP_CATALOG,
   {
     id: 'workspace-windows',
     name: 'Windows',
@@ -235,6 +233,9 @@ function WindowInstanceList({
 
 interface LauncherDockProps {
   open: boolean
+  favoriteAppIds: string[]
+  favoriteDropActive?: boolean
+  justFavoritedAppId?: string | null
   triggerRef: Ref<HTMLButtonElement>
   onToggle: () => void
   onLaunch: (app: LauncherApp) => void
@@ -248,6 +249,9 @@ interface LauncherDockProps {
 
 export default function LauncherDock({
   open,
+  favoriteAppIds,
+  favoriteDropActive = false,
+  justFavoritedAppId = null,
   triggerRef,
   onToggle,
   onLaunch,
@@ -263,20 +267,29 @@ export default function LauncherDock({
   const appTriggers = useRef(new Map<string, HTMLButtonElement>())
   const firstInstance = useRef<HTMLButtonElement>(null)
   const focusOnOpen = useRef<string | null>(null)
-  const groups = DOCK_APPS.map((app) => ({
-    app,
-    windows: windows
-      .filter((item) => windowAppId(item) === app.id)
-      .toSorted(
-        (a, b) =>
-          (a.dockOrder ?? Infinity) - (b.dockOrder ?? Infinity) ||
-          a.title.localeCompare(b.title) ||
-          a.id.localeCompare(b.id),
-      ),
-  })).filter(
-    ({ app, windows: instances }) =>
-      FAVORITE_IDS.includes(app.id) || instances.length > 0,
-  )
+  const groups = DOCK_APPS.toSorted((a, b) => {
+    const firstIndex = favoriteAppIds.indexOf(a.id)
+    const secondIndex = favoriteAppIds.indexOf(b.id)
+    return (
+      (firstIndex < 0 ? favoriteAppIds.length : firstIndex) -
+      (secondIndex < 0 ? favoriteAppIds.length : secondIndex)
+    )
+  })
+    .map((app) => ({
+      app,
+      windows: windows
+        .filter((item) => windowAppId(item) === app.id)
+        .toSorted(
+          (a, b) =>
+            (a.dockOrder ?? Infinity) - (b.dockOrder ?? Infinity) ||
+            a.title.localeCompare(b.title) ||
+            a.id.localeCompare(b.id),
+        ),
+    }))
+    .filter(
+      ({ app, windows: instances }) =>
+        favoriteAppIds.includes(app.id) || instances.length > 0,
+    )
   const selectedGroup = groups.find(
     ({ app, windows: instances }) =>
       app.id === selectedAppId && instances.length > 0,
@@ -355,6 +368,8 @@ export default function LauncherDock({
                 }
                 data-active={active}
                 data-running={running}
+                data-favorite-app-id={app.id}
+                data-just-favorited={justFavoritedAppId === app.id}
                 onClick={() => {
                   if (running)
                     onSelectApp(selectedAppId === app.id ? null : app.id)
@@ -391,7 +406,9 @@ export default function LauncherDock({
           className={`${shellStyles.control} ${styles.launcher}`}
           aria-label="Open app launcher"
           aria-expanded={open}
-          title="Open app launcher"
+          data-favorite-drop-target
+          data-favorite-drop-active={favoriteDropActive}
+          title={favoriteDropActive ? 'Add to favorites' : 'Open app launcher'}
           onClick={onToggle}
         >
           <LayoutGrid size={22} aria-hidden="true" />

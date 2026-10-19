@@ -155,3 +155,33 @@
   backdrop-filter: none;
   animation: none;
 }
+
+.item[data-favorite-returning='true'] {
+  animation: favorite-source-return 600ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes favorite-source-return {
+  0% {
+    opacity: 0;
+    translate: 0 16px;
+    scale: 0.55;
+  }
+
+  65% {
+    opacity: 1;
+    translate: 0 -3px;
+    scale: 1.06;
+  }
+
+  100% {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .item[data-favorite-returning='true'] {
+    animation: none;
+  }
+}
