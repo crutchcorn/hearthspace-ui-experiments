@@ -710,3 +710,89 @@ test('background drop proxies do not displace raised decorations or ordinary win
   assert.deepEqual(result.drawings, before.drawings)
   assert.equal(result.windows[0], before.windows[0])
 })
+
+test('settling canvas work excludes pinned and grouped controls from the calculation', () => {
+  const controls = ['battery', 'wifi'].map((id) => ({
+    id,
+    surface: 'canvas' as const,
+    x: 150,
+    y: 150,
+    width: 54,
+    height: 54,
+    peekOrigin: { x: 160, y: 160 },
+  }))
+  const before = { ...workspace, items: [], drawings: [], controls }
+  const layout: FrameLayout = {
+    ...defaults,
+    placements: { 'widget:battery': frame, 'group:status': frame },
+    groups: {
+      status: {
+        id: 'status',
+        members: [
+          { kind: 'widget', id: 'wifi' },
+          { kind: 'widget', id: 'volume' },
+        ],
+      },
+    },
+  }
+  assert.equal(
+    transformCanvasWorkspace(before, layout, settleCoveredItems),
+    before,
+  )
+})
+
+test('dropping a canvas control under a window makes it peek without moving the window', () => {
+  const control = {
+    id: 'battery',
+    surface: 'canvas' as const,
+    x: 150,
+    y: 150,
+    width: 54,
+    height: 54,
+  }
+  const before = { ...workspace, items: [], drawings: [], controls: [control] }
+  const layout = setObjectPlacement(
+    defaults,
+    { kind: 'widget', id: 'battery' },
+    control,
+  )
+  const result = settleLayoutDrop(before, layout, {
+    kind: 'widget',
+    id: 'battery',
+  })
+  assert.equal(result.windows[0], before.windows[0])
+  assert.notDeepEqual(result.controls![0], control)
+  assert.deepEqual(result.controls![0].peekOrigin, { x: 150, y: 150 })
+})
+
+test('a background window drop commits the new home of displaced controls', () => {
+  const control = {
+    id: 'battery',
+    surface: 'background' as const,
+    x: 150,
+    y: 150,
+    width: 54,
+    height: 54,
+  }
+  const before = { ...workspace, items: [], drawings: [], controls: [control] }
+  let layout = setObjectPlacement(
+    defaults,
+    { kind: 'widget', id: 'battery' },
+    control,
+  )
+  layout = setObjectPlacement(
+    layout,
+    { kind: 'window', id: 'notes' },
+    { surface: 'background' },
+  )
+  const result = settleLayoutDrop(before, layout, {
+    kind: 'window',
+    id: 'notes',
+  })
+  assert.notDeepEqual(result.controls![0], control)
+  assert.equal(result.controls![0].peekOrigin, undefined)
+  assert.deepEqual(
+    restoreBackgroundItems({ ...result, windows: [] }).controls,
+    result.controls,
+  )
+})

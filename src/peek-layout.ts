@@ -1,4 +1,10 @@
-import type { Bounds, DesktopItem, DesktopWindow, Workspace } from './desktop'
+import type {
+  Bounds,
+  CanvasControl,
+  DesktopItem,
+  DesktopWindow,
+  Workspace,
+} from './desktop'
 import type { CanvasDrawing } from './drawings'
 import type { GesturePoint } from './gestures'
 
@@ -29,14 +35,24 @@ function coveringWindows(
     : workspace.windows
 }
 
+type Decoration = DesktopItem | CanvasControl
+
+function isRaised(item: Decoration, layers: PeekLayers): boolean {
+  return 'surface' in item
+    ? item.surface === 'canvas'
+    : (layers.raisedItemIds?.has(item.id) ?? false)
+}
+
+function decorationBody(item: Decoration): Bounds {
+  return 'surface' in item ? item : iconBody(item)
+}
+
 function coveringIcons(
-  items: DesktopItem[],
+  items: Decoration[],
   raised: boolean,
   layers: PeekLayers,
-): DesktopItem[] {
-  return raised
-    ? items.filter((item) => layers.raisedItemIds?.has(item.id))
-    : items
+): Decoration[] {
+  return raised ? items.filter((item) => isRaised(item, layers)) : items
 }
 
 function intersect(a: Bounds, b: Bounds): Bounds | null {
@@ -208,7 +224,7 @@ function moveWindow(
   }
 }
 
-type BackgroundItem = DesktopItem | CanvasDrawing
+type BackgroundItem = Decoration | CanvasDrawing
 
 function moveBackground<T extends BackgroundItem>(
   item: T,
@@ -242,7 +258,7 @@ function homeBlocked(
 ): boolean {
   // Windows must clear the whole object, including its label. Neighboring
   // icons only block artwork, so tightly spaced desktop layouts can return.
-  const body = 'strokes' in home ? home : iconBody(home)
+  const body = 'strokes' in home ? home : decorationBody(home)
   return (
     windows.some((other) => intersect(home, other)) ||
     icons.some((other) => intersect(body, other))
@@ -254,7 +270,10 @@ export function restoreBackgroundItems(
   workspace: Workspace,
   layers: PeekLayers = {},
 ): Workspace {
-  const items = [...workspace.items]
+  const items: Decoration[] = [
+    ...workspace.items,
+    ...(workspace.controls ?? []),
+  ]
   let changed = false
   let restored: boolean
   do {
@@ -269,14 +288,14 @@ export function restoreBackgroundItems(
     do {
       blocked = false
       for (const index of returning) {
-        const raised = layers.raisedItemIds?.has(homes[index].id) ?? false
+        const raised = isRaised(homes[index], layers)
         const icons = coveringIcons(
           items.flatMap((item, other) =>
             other === index ? [] : [returning.has(other) ? homes[other] : item],
           ),
           raised,
           layers,
-        ).map(iconBody)
+        ).map(decorationBody)
         if (
           homeBlocked(
             homes[index],
@@ -304,12 +323,12 @@ export function restoreBackgroundItems(
     for (let index = items.length - 1; index >= 0; index--) {
       const item = items[index]
       if (!item.peekOrigin) continue
-      const raised = layers.raisedItemIds?.has(item.id) ?? false
+      const raised = isRaised(item, layers)
       const icons = coveringIcons(
         items.filter((_, other) => other !== index),
         raised,
         layers,
-      ).map(iconBody)
+      ).map(decorationBody)
       items[index] = restoreBackground(
         item,
         coveringWindows(workspace, raised, layers),
@@ -329,12 +348,23 @@ export function restoreBackgroundItems(
     const result = restoreBackground(
       drawing,
       coveringWindows(workspace, raised, layers),
-      coveringIcons(items, raised, layers).map(iconBody),
+      coveringIcons(items, raised, layers).map(decorationBody),
     )
     changed ||= result !== drawing
     return result
   })
-  return changed ? { ...workspace, items, drawings } : workspace
+  return changed
+    ? {
+        ...workspace,
+        items: items.filter(
+          (item): item is DesktopItem => !('surface' in item),
+        ),
+        controls: workspace.controls
+          ? items.filter((item): item is CanvasControl => 'surface' in item)
+          : undefined,
+        drawings,
+      }
+    : workspace
 }
 
 function segmentCovered(
@@ -453,24 +483,24 @@ export function settleBackgroundItems(
   layers: PeekLayers = {},
 ): Workspace {
   const restored = restoreBackgroundItems(workspace, layers)
-  const items = [...restored.items]
+  const items: Decoration[] = [...restored.items, ...(restored.controls ?? [])]
   const ordered = items
     .map((item, index) => ({
       index,
-      raised: layers.raisedItemIds?.has(item.id) ?? false,
+      raised: isRaised(item, layers),
     }))
     .toSorted(
       (a, b) => Number(b.raised) - Number(a.raised) || b.index - a.index,
     )
-  const higherIcons: DesktopItem[] = []
+  const higherIcons: Decoration[] = []
   let changed = false
   // Raised decorations cover background work, but stay below ordinary windows.
   for (const { index, raised } of ordered) {
     const item = items[index]
-    const body = iconBody(item)
+    const body = decorationBody(item)
     const higher = [
       ...coveringWindows(restored, raised, layers),
-      ...coveringIcons(higherIcons, raised, layers).map(iconBody),
+      ...coveringIcons(higherIcons, raised, layers).map(decorationBody),
     ]
     if (fullyCovered(body, higher)) {
       const position = revealPosition(item, body, higher, restored, iconPeek)
@@ -485,7 +515,7 @@ export function settleBackgroundItems(
     const raised = layers.raisedDrawingIds?.has(drawing.id) ?? false
     const higher = [
       ...coveringWindows(restored, raised, layers),
-      ...coveringIcons(items, raised, layers).map(iconBody),
+      ...coveringIcons(items, raised, layers).map(decorationBody),
     ]
     if (drawing.layer !== 'below' || !drawingCovered(drawing, higher))
       return drawing
@@ -495,7 +525,18 @@ export function settleBackgroundItems(
     changed ||= moved !== drawing
     return moved
   })
-  return changed ? { ...restored, items, drawings } : restored
+  return changed
+    ? {
+        ...restored,
+        items: items.filter(
+          (item): item is DesktopItem => !('surface' in item),
+        ),
+        controls: restored.controls
+          ? items.filter((item): item is CanvasControl => 'surface' in item)
+          : undefined,
+        drawings,
+      }
+    : restored
 }
 
 /** Reveal fully covered bodies without changing their size or stacking order. */

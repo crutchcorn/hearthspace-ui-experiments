@@ -17,6 +17,7 @@ import {
   updateSceneLayout,
   updateSceneWorkspace,
 } from '../src/scene.ts'
+import { transformCanvasWorkspace } from '../src/layout-workspace.ts'
 
 const view: Bounds = { x: 1000, y: 800, width: 1280, height: 720 }
 const defaults: FrameLayout = { placements: {}, allowHideTools: false }
@@ -395,4 +396,146 @@ test('equivalent workspace and layout updates retain scene identity', () => {
     updateSceneWorkspace(scene, (current) => current, view),
     scene,
   )
+})
+
+test('canvas controls keep one layout position while repeated peeks retain their first home', () => {
+  const battery = { kind: 'widget', id: 'battery' } as const
+  const layout = setObjectPlacement(defaults, battery, {
+    surface: 'canvas',
+    x: 150,
+    y: 150,
+    width: 54,
+    height: 54,
+  })
+  const initial = createScene({ ...workspace, items: [], drawings: [] }, layout)
+  const settle = (current: typeof initial) =>
+    updateSceneWorkspace(
+      current,
+      (canvas) =>
+        transformCanvasWorkspace(
+          canvas,
+          projectScene(current, view).layout,
+          settleCoveredItems,
+        ),
+      view,
+    )
+  const first = settle(initial)
+  const firstControl = projectScene(first, view).workspace.controls![0]
+  assert.notEqual(firstControl.y, 150)
+  assert.deepEqual(firstControl.peekOrigin, { x: 150, y: 150 })
+  const coveredAgain = updateSceneWorkspace(
+    first,
+    (current) => ({
+      ...current,
+      windows: [
+        ...current.windows,
+        {
+          ...current.windows[0],
+          id: 'second',
+          x: firstControl.x - 10,
+          y: firstControl.y - 10,
+        },
+      ],
+    }),
+    view,
+  )
+  const second = settle(coveredAgain)
+  const secondControl = projectScene(second, view).workspace.controls![0]
+  assert.notDeepEqual(
+    { x: secondControl.x, y: secondControl.y },
+    { x: firstControl.x, y: firstControl.y },
+  )
+  assert.deepEqual(secondControl.peekOrigin, { x: 150, y: 150 })
+  assert.equal('controls' in second.workspace, false)
+  assert.deepEqual(second.layout.placements['widget:battery'], {
+    surface: 'canvas',
+    x: secondControl.x,
+    y: secondControl.y,
+    width: 54,
+    height: 54,
+    peekOrigin: { x: 150, y: 150 },
+  })
+  const restored = updateSceneWorkspace(
+    second,
+    (current) => restoreBackgroundItems({ ...current, windows: [] }),
+    view,
+  )
+  assert.deepEqual(restored.layout.placements['widget:battery'], {
+    surface: 'canvas',
+    x: 150,
+    y: 150,
+    width: 54,
+    height: 54,
+  })
+})
+
+test('direct control movement establishes a new home and layout edits remain authoritative', () => {
+  const target = { kind: 'widget', id: 'battery' } as const
+  const initial = createScene(
+    workspace,
+    setObjectPlacement(defaults, target, {
+      surface: 'canvas',
+      x: 100,
+      y: 80,
+      width: 64,
+      height: 54,
+      peekOrigin: { x: 150, y: 150 },
+    }),
+  )
+  const dragged = updateSceneWorkspace(
+    initial,
+    (current) => ({
+      ...current,
+      controls: current.controls?.map((control) => ({
+        ...control,
+        x: 900,
+        y: 700,
+        peekOrigin: undefined,
+      })),
+    }),
+    view,
+  )
+  assert.deepEqual(dragged.layout.placements['widget:battery'], {
+    surface: 'canvas',
+    x: 900,
+    y: 700,
+    width: 64,
+    height: 54,
+  })
+  const resized = updateSceneLayout(
+    dragged,
+    (layout) =>
+      setObjectPlacement(layout, target, {
+        surface: 'canvas',
+        x: 920,
+        y: 720,
+        width: 110,
+        height: 54,
+      }),
+    view,
+  )
+  assert.deepEqual(projectScene(resized, view).workspace.controls![0], {
+    id: 'battery',
+    surface: 'canvas',
+    x: 920,
+    y: 720,
+    width: 110,
+    height: 54,
+  })
+  const attached = updateSceneLayout(
+    resized,
+    (layout) =>
+      setObjectPlacement(layout, target, {
+        surface: 'frame',
+        edge: 'right',
+        position: 0.5,
+      }),
+    view,
+  )
+  assert.deepEqual(projectScene(attached, view).workspace.controls, [])
+  assert.deepEqual(attached.layout.placements['widget:battery'], {
+    surface: 'frame',
+    edge: 'right',
+    position: 0.5,
+  })
 })

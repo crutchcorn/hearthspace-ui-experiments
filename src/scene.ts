@@ -1,7 +1,14 @@
-import type { Bounds, DesktopItem, Workspace } from './desktop.ts'
+import {
+  clamp,
+  type Bounds,
+  type CanvasControl,
+  type DesktopItem,
+  type Workspace,
+} from './desktop.ts'
 import type { CanvasDrawing } from './drawings.ts'
 import {
   getFrameBounds,
+  FRAME_WIDGETS,
   getPlacement,
   getTargetGroup,
   targetKey,
@@ -29,7 +36,7 @@ type SceneDrawing = Omit<CanvasDrawing, 'x' | 'y' | 'peekOrigin' | 'layer'> & {
   location: SceneLocation
 }
 export type Scene = {
-  workspace: Omit<Workspace, 'items' | 'drawings'>
+  workspace: Omit<Workspace, 'items' | 'drawings' | 'controls'>
   items: SceneItem[]
   drawings: SceneDrawing[]
   layout: FrameLayout
@@ -88,6 +95,24 @@ export function createScene(workspace: Workspace, layout: FrameLayout): Scene {
       ([key]) => !key.startsWith('item:') && !key.startsWith('drawing:'),
     ),
   )
+  for (const control of workspace.controls ?? []) {
+    const target = { kind: 'widget' as const, id: control.id }
+    const placement = getPlacement(cleanLayout, target)
+    if (
+      getTargetGroup(cleanLayout, target) ||
+      (placement.surface !== 'canvas' && placement.surface !== 'background')
+    )
+      continue
+    // Controls own their geometry in the layout, never in a second scene array.
+    placements[targetKey(target)] = {
+      surface: placement.surface,
+      x: control.x,
+      y: control.y,
+      width: control.width,
+      height: control.height,
+      ...(control.peekOrigin ? { peekOrigin: control.peekOrigin } : {}),
+    }
+  }
   return {
     workspace: {
       width: workspace.width,
@@ -197,6 +222,47 @@ export function projectScene(scene: Scene, view: Bounds) {
   const layout: FrameLayout = { ...scene.layout, placements }
   const workspace: Workspace = {
     ...scene.workspace,
+    controls: FRAME_WIDGETS.flatMap((widget): CanvasControl[] => {
+      const target = { kind: 'widget' as const, id: widget.id }
+      const placement = getPlacement(layout, target)
+      if (
+        getTargetGroup(layout, target) ||
+        (placement.surface !== 'canvas' && placement.surface !== 'background')
+      )
+        return []
+      const width = Math.min(
+        placement.width ??
+          (widget.id === 'tools' ? 299 : widget.id === 'apps' ? 320 : 54),
+        scene.workspace.width,
+      )
+      const height = Math.min(placement.height ?? 54, scene.workspace.height)
+      const origin = placement.peekOrigin
+      const peekOrigin =
+        origin &&
+        origin.x + width <= scene.workspace.width &&
+        origin.y + height <= scene.workspace.height
+          ? origin
+          : undefined
+      return [
+        {
+          id: widget.id,
+          surface: placement.surface,
+          x: clamp(
+            placement.x ?? scene.workspace.home.x + 100,
+            0,
+            scene.workspace.width - width,
+          ),
+          y: clamp(
+            placement.y ?? scene.workspace.home.y + 120,
+            0,
+            scene.workspace.height - height,
+          ),
+          width,
+          height,
+          ...(peekOrigin ? { peekOrigin } : {}),
+        },
+      ]
+    }),
     items: scene.items.map((item) => {
       const bounds = projectLocation(item, layout, view, true)
       return {
@@ -285,5 +351,8 @@ export function updateSceneLayout(
   const layout =
     typeof action === 'function' ? action(projection.layout) : action
   if (layout === projection.layout) return scene
-  return reconcileScene(scene, createScene(projection.workspace, layout))
+  return reconcileScene(
+    scene,
+    createScene({ ...projection.workspace, controls: undefined }, layout),
+  )
 }

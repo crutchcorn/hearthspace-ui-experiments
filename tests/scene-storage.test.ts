@@ -8,6 +8,8 @@ import {
   saveScene,
   SCENE_STORAGE_KEY,
 } from '../src/scene-storage.ts'
+import { transformCanvasWorkspace } from '../src/layout-workspace.ts'
+import { restoreBackgroundItems } from '../src/peek-layout.ts'
 
 const storage = new Map<string, string>()
 Object.defineProperty(globalThis, 'localStorage', {
@@ -107,4 +109,57 @@ test('unreadable or invalid locations reset the scene safely', () => {
     storage.set(SCENE_STORAGE_KEY, JSON.stringify(invalid))
     assert.equal(loadScene().items[0].location.surface, 'background')
   }
+})
+
+test('detached controls retain measured bounds and their first home across reload', () => {
+  const workspace = createWorkspace()
+  const layout = setObjectPlacement(
+    readFrameLayout(undefined),
+    { kind: 'widget', id: 'battery' },
+    {
+      surface: 'canvas',
+      x: 400,
+      y: 300,
+      width: 104,
+      height: 54,
+      peekOrigin: { x: 200, y: 200 },
+    },
+  )
+  saveScene(createScene({ ...workspace, windows: [], items: [] }, layout))
+  const loaded = loadScene()
+  const projection = projectScene(loaded, {
+    ...workspace.home,
+    width: 960,
+    height: 720,
+  })
+  assert.deepEqual(projection.workspace.controls, [
+    {
+      id: 'battery',
+      surface: 'canvas',
+      x: 400,
+      y: 300,
+      width: 104,
+      height: 54,
+      peekOrigin: { x: 200, y: 200 },
+    },
+  ])
+  const restored = createScene(
+    transformCanvasWorkspace(
+      projection.workspace,
+      projection.layout,
+      restoreBackgroundItems,
+    ),
+    projection.layout,
+  )
+  assert.deepEqual(restored.layout.placements['widget:battery'], {
+    surface: 'canvas',
+    x: 200,
+    y: 200,
+    width: 104,
+    height: 54,
+  })
+  assert.equal(
+    'controls' in JSON.parse(storage.get(SCENE_STORAGE_KEY)!).workspace,
+    false,
+  )
 })

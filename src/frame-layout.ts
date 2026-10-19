@@ -6,7 +6,14 @@ export type LayoutTarget = {
   id: string
 }
 export type ObjectPlacement =
-  | { surface: 'canvas' | 'background'; x?: number; y?: number }
+  | {
+      surface: 'canvas' | 'background'
+      x?: number
+      y?: number
+      width?: number
+      height?: number
+      peekOrigin?: Pick<Bounds, 'x' | 'y'>
+    }
   | { surface: 'frame'; edge: FrameEdge; position: number }
   | { surface: 'hidden' }
 export type FrameGroup = {
@@ -166,6 +173,20 @@ export function setObjectPlacement(
   target: LayoutTarget,
   placement: ObjectPlacement,
 ): FrameLayout {
+  const previous = getPlacement(layout, target)
+  if (
+    target.kind === 'widget' &&
+    (placement.surface === 'canvas' || placement.surface === 'background') &&
+    (previous.surface === 'canvas' || previous.surface === 'background')
+  ) {
+    // A coordinate-only drag retains the measured control body. Its home is
+    // carried only when the caller deliberately supplies it (for resizing).
+    placement = {
+      ...(previous.width === undefined ? {} : { width: previous.width }),
+      ...(previous.height === undefined ? {} : { height: previous.height }),
+      ...placement,
+    }
+  }
   if (target.kind === 'group' && placement.surface === 'hidden') {
     const group = getTargetGroup(layout, target)
     if (!group) return layout
@@ -311,6 +332,26 @@ function readPlacement(value: unknown): ObjectPlacement | null {
       if (typeof value.y !== 'number' || !Number.isFinite(value.y)) return null
       placement.y = value.y
     }
+    for (const dimension of ['width', 'height'] as const) {
+      if (!(dimension in value)) continue
+      const size = Reflect.get(value, dimension)
+      if (typeof size === 'number' && Number.isFinite(size) && size > 0)
+        placement[dimension] = size
+    }
+    if (
+      'peekOrigin' in value &&
+      isRecord(value.peekOrigin) &&
+      typeof value.peekOrigin.x === 'number' &&
+      Number.isFinite(value.peekOrigin.x) &&
+      value.peekOrigin.x >= 0 &&
+      typeof value.peekOrigin.y === 'number' &&
+      Number.isFinite(value.peekOrigin.y) &&
+      value.peekOrigin.y >= 0
+    )
+      placement.peekOrigin = {
+        x: value.peekOrigin.x,
+        y: value.peekOrigin.y,
+      }
     return placement
   }
   if (

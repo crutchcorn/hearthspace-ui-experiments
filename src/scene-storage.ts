@@ -81,7 +81,13 @@ export function loadScene(): Scene {
           height: typeof window === 'undefined' ? 720 : window.innerHeight,
         }
         const projected = projectScene(candidate, view)
-        return createScene(readWorkspace(projected.workspace), projected.layout)
+        return createScene(
+          {
+            ...readWorkspace(projected.workspace),
+            controls: projected.workspace.controls,
+          },
+          projected.layout,
+        )
       }
     }
   } catch {

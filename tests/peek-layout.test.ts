@@ -1,6 +1,11 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import type { DesktopItem, DesktopWindow, Workspace } from '../src/desktop.ts'
+import type {
+  CanvasControl,
+  DesktopItem,
+  DesktopWindow,
+  Workspace,
+} from '../src/desktop.ts'
 import type { CanvasDrawing } from '../src/drawings.ts'
 import {
   restoreBackgroundItems,
@@ -71,6 +76,46 @@ function drawing(overrides: Partial<CanvasDrawing> = {}): CanvasDrawing {
     ...overrides,
   }
 }
+
+const battery: CanvasControl = {
+  id: 'battery',
+  surface: 'canvas',
+  x: 140,
+  y: 140,
+  width: 54,
+  height: 54,
+}
+
+test('a covered canvas control exposes its full control body and returns home', () => {
+  const before = { ...workspace([window('front')]), controls: [battery] }
+  const peeked = settleCoveredItems(before)
+  assert.equal(peeked.controls![0].y, 68)
+  assert.deepEqual(peeked.controls![0].peekOrigin, { x: 140, y: 140 })
+  const restored = restoreBackgroundItems({ ...peeked, windows: [] })
+  assert.deepEqual(restored.controls, [battery])
+})
+
+test('a wide canvas toolbar with its outer edge exposed stays in place', () => {
+  const control = { ...battery, width: 240 }
+  const before = { ...workspace([window('front')]), controls: [control] }
+  // A fake centered icon body would be covered, but the toolbar itself is visible.
+  assert.equal(settleCoveredItems(before), before)
+})
+
+test('background windows only displace controls on the background layer', () => {
+  const before = {
+    ...workspace([window('background')]),
+    controls: [
+      battery,
+      { ...battery, id: 'volume', surface: 'background' as const },
+    ],
+  }
+  const result = settleCoveredItems(before, {
+    backgroundWindowIds: new Set(['background']),
+  })
+  assert.equal(result.controls![0], battery)
+  assert.notDeepEqual(result.controls![1], before.controls[1])
+})
 
 test('a covered window peeks out while the dropped front window stays put', () => {
   const before = workspace([window('back'), window('front')])

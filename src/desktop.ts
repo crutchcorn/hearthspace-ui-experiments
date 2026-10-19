@@ -20,6 +20,11 @@ export type DesktopWindow = Bounds & {
   dockOrder?: number
   restore?: Bounds
 }
+export type CanvasControl = Bounds & {
+  id: string
+  surface: 'canvas' | 'background'
+  peekOrigin?: Pick<Bounds, 'x' | 'y'>
+}
 export type Workspace = {
   width: number
   height: number
@@ -27,6 +32,7 @@ export type Workspace = {
   windows: DesktopWindow[]
   items: DesktopItem[]
   drawings: CanvasDrawing[]
+  controls?: CanvasControl[]
   note: string
 }
 

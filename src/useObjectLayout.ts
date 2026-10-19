@@ -465,9 +465,7 @@ export default function useObjectLayout(
       for (const destination of destinations)
         nextLayout = setObjectPlacement(nextLayout, destination.target, {
           surface,
-          ...(destination.target.kind === 'widget'
-            ? { x: destination.bounds.x, y: destination.bounds.y }
-            : {}),
+          ...(destination.target.kind === 'widget' ? destination.bounds : {}),
         })
       beforeSettle(target)
       setLayout(nextLayout)
@@ -519,14 +517,11 @@ export default function useObjectLayout(
     }
     if (
       (next.surface === 'canvas' || next.surface === 'background') &&
-      isToolbar(target) &&
-      (next.x === undefined || next.y === undefined)
-    )
-      next = {
-        ...next,
-        x: next.x ?? view.x + 100,
-        y: next.y ?? view.y + 120,
-      }
+      isToolbar(target)
+    ) {
+      const bounds = widgetBounds(target, next)!
+      next = { surface: next.surface, ...bounds }
+    }
     const previous = placement(target)
     if (
       settle &&
@@ -789,19 +784,16 @@ export default function useObjectLayout(
           place(current.target, { surface: 'canvas' }, false)
         move(current.target, view.x + movingBounds.x, view.y + movingBounds.y)
         const previous = placement(current.target)
-        const nextPlacement = {
-          ...previous,
-          surface:
-            previous.surface === 'background'
-              ? ('background' as const)
-              : ('canvas' as const),
-          ...(isToolbar(current.target)
-            ? {
-                x: view.x + movingBounds.x,
-                y: view.y + movingBounds.y,
-              }
-            : {}),
-        }
+        const surface =
+          previous.surface === 'background' ? 'background' : 'canvas'
+        const nextPlacement: ObjectPlacement = isToolbar(current.target)
+          ? {
+              surface,
+              ...movingBounds,
+              x: view.x + movingBounds.x,
+              y: view.y + movingBounds.y,
+            }
+          : { ...previous, surface }
         const nextLayout = setObjectPlacement(
           layout,
           current.target,
@@ -865,16 +857,17 @@ export default function useObjectLayout(
       (next.surface !== 'canvas' && next.surface !== 'background')
     )
       return undefined
-    const rect = document
-      .querySelector(
-        `[${target.kind === 'group' ? 'data-layout-group' : 'data-layout-widget'}="${CSS.escape(target.id)}"]`,
-      )
-      ?.getBoundingClientRect()
+    const element = targetElement(target)
+    const previous = placement(target)
+    const canvas =
+      previous.surface === 'canvas' || previous.surface === 'background'
+        ? previous
+        : undefined
     return {
       x: next.x ?? view.x + 100,
       y: next.y ?? view.y + 120,
-      width: rect?.width ?? 240,
-      height: rect?.height ?? 54,
+      width: next.width ?? (element?.offsetWidth || canvas?.width || 54),
+      height: next.height ?? (element?.offsetHeight || canvas?.height || 54),
     }
   }
   function attachSelected() {

@@ -39,6 +39,48 @@ const loadedDefaults: FrameLayout = {
   groups: { system: defaultSystemGroup },
 }
 
+test('moving a detached toolbar retains its measured body while discarding the prior peek home', () => {
+  const before = setObjectPlacement(defaults, tools, {
+    surface: 'canvas',
+    x: 150,
+    y: 120,
+    width: 307,
+    height: 64,
+    peekOrigin: { x: 180, y: 180 },
+  })
+  const first = setObjectPlacement(before, tools, {
+    surface: 'canvas',
+    x: 500,
+    y: 400,
+  })
+  const second = setObjectPlacement(first, tools, {
+    surface: 'canvas',
+    x: 520,
+    y: 420,
+  })
+  assert.deepEqual(getPlacement(second, tools), {
+    surface: 'canvas',
+    x: 520,
+    y: 420,
+    width: 307,
+    height: 64,
+  })
+  const turned = setObjectPlacement(second, tools, {
+    surface: 'canvas',
+    x: 520,
+    y: 420,
+    width: 64,
+    height: 307,
+  })
+  assert.deepEqual(getPlacement(turned, tools), {
+    surface: 'canvas',
+    x: 520,
+    y: 420,
+    width: 64,
+    height: 307,
+  })
+})
+
 test('an empty layout keeps the familiar corner controls and canvas objects', () => {
   assert.deepEqual(getPlacement(defaults, notifications), {
     surface: 'frame',

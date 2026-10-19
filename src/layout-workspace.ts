@@ -1,5 +1,10 @@
 import type { Bounds, Workspace } from './desktop.ts'
-import type { FrameLayout, LayoutTarget } from './frame-layout.ts'
+import {
+  getPlacement,
+  getTargetGroup,
+  type FrameLayout,
+  type LayoutTarget,
+} from './frame-layout.ts'
 import { resolveObjectLocation } from './object-location.ts'
 import {
   settleBackgroundItems,
@@ -75,6 +80,20 @@ export function transformCanvasWorkspace(
       return 'bounds' in location ? [atBounds(item, location.bounds)] : []
     }),
     drawings,
+    controls: workspace.controls?.flatMap((control) => {
+      const target = { kind: 'widget' as const, id: control.id }
+      const placement = getPlacement(layout, target)
+      if (
+        getTargetGroup(layout, target) ||
+        (placement.surface !== 'canvas' && placement.surface !== 'background')
+      )
+        return []
+      return [
+        control.surface === placement.surface
+          ? control
+          : { ...control, surface: placement.surface },
+      ]
+    }),
   }
   const layers: PeekLayers = {
     backgroundWindowIds: new Set(
@@ -116,6 +135,9 @@ export function transformCanvasWorkspace(
     windows: mergeById(workspace.windows, result.windows),
     items: mergeById(workspace.items, result.items),
     drawings: mergeById(workspace.drawings, updatedDrawings),
+    controls: workspace.controls
+      ? mergeById(workspace.controls, result.controls ?? [])
+      : undefined,
   }
 }
 
@@ -135,7 +157,10 @@ export function settleLayoutDrop(
       ? workspace.windows.find((item) => item.id === target.id)
       : target.kind === 'item'
         ? workspace.items.find((item) => item.id === target.id)
-        : (drawing ?? extraBounds)
+        : target.kind === 'widget'
+          ? (extraBounds ??
+            workspace.controls?.find((control) => control.id === target.id))
+          : (drawing ?? extraBounds)
   if (!storedBounds)
     return transformCanvasWorkspace(workspace, layout, settleCoveredItems)
   const location = resolveObjectLocation(
@@ -167,6 +192,9 @@ export function settleLayoutDrop(
         drawings: canvas.drawings.filter(
           (item) => target.kind !== 'drawing' || item.id !== target.id,
         ),
+        controls: canvas.controls?.filter(
+          (control) => target.kind !== 'widget' || control.id !== target.id,
+        ),
       },
       {
         ...layers,
@@ -178,12 +206,15 @@ export function settleLayoutDrop(
     const windows = new Map(result.windows.map((item) => [item.id, item]))
     const items = new Map(result.items.map((item) => [item.id, item]))
     const drawings = new Map(result.drawings.map((item) => [item.id, item]))
+    const controls = new Map(
+      result.controls?.map((control) => [control.id, control]),
+    )
     const commitPosition = <
       T extends Bounds & { id: string; peekOrigin?: Pick<Bounds, 'x' | 'y'> },
     >(
       original: T,
       updated: T,
-      kind: 'item' | 'drawing',
+      kind: 'item' | 'drawing' | 'widget',
     ): T => {
       const home = updated.peekOrigin
       // Lowering a window can make its existing peeks permanent without another move.
@@ -215,7 +246,8 @@ export function settleLayoutDrop(
         if (
           (backgroundDrop ||
             target.kind === 'item' ||
-            target.kind === 'drawing') &&
+            target.kind === 'drawing' ||
+            target.kind === 'widget') &&
           resolveObjectLocation(layout, { kind: 'window', id: item.id }, item)
             .surface !== 'background'
         )
@@ -228,8 +260,13 @@ export function settleLayoutDrop(
       drawings: canvas.drawings.map((item) =>
         commitPosition(item, drawings.get(item.id) ?? item, 'drawing'),
       ),
+      controls: canvas.controls?.map((control) =>
+        commitPosition(control, controls.get(control.id) ?? control, 'widget'),
+      ),
     }
-    return target.kind === 'item' || target.kind === 'drawing'
+    return target.kind === 'item' ||
+      target.kind === 'drawing' ||
+      target.kind === 'widget'
       ? settleBackgroundItems(settled, layers)
       : settled
   })
