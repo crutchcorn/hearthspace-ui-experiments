@@ -82,16 +82,22 @@ function readLocation(
     value.position <= 1
   )
     return { surface: 'frame', edge: value.edge, position: value.position }
-  if (
-    value.surface === 'group' &&
-    typeof value.groupId === 'string' &&
-    layout.groups &&
-    Object.hasOwn(layout.groups, value.groupId) &&
-    layout.groups[value.groupId].members.some(
-      (member) => targetKey(member) === targetKey(target),
-    )
-  )
-    return { surface: 'group', groupId: value.groupId }
+  if (value.surface === 'group' && typeof value.groupId === 'string') {
+    const group =
+      layout.groups && Object.hasOwn(layout.groups, value.groupId)
+        ? layout.groups[value.groupId]
+        : undefined
+    if (group)
+      return group.members.some(
+        (member) => targetKey(member) === targetKey(target),
+      )
+        ? { surface: 'group', groupId: value.groupId }
+        : null
+    // Layout parsing dissolves a group with one valid member and gives that
+    // survivor its own placement. Keep the object when its group is removed.
+    const placement = layout.placements[targetKey(target)]
+    if (placement) return readLocation(placement, size, world, layout, target)
+  }
   return null
 }
 

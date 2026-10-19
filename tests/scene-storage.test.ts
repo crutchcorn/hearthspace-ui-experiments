@@ -555,3 +555,58 @@ test('groups retain valid members and release a lone survivor onto the same fram
   )
   assert.equal(`group:${group.id}` in loaded.layout.placements, false)
 })
+
+test('a drawing survives a saved frame group with only one member', () => {
+  const scene = freshScene()
+  const placement = { surface: 'frame', edge: 'left', position: 0.4 } as const
+  scene.drawings = [
+    { ...drawing, location: { surface: 'group', groupId: 'art' } },
+  ]
+  scene.layout = {
+    ...scene.layout,
+    groups: {
+      art: { id: 'art', members: [{ kind: 'drawing', id: drawing.id }] },
+    },
+    placements: { 'group:art': placement },
+  }
+
+  const loaded = readScene(scene)
+
+  assert.deepEqual(loaded.drawings, [{ ...drawing, location: placement }])
+  assert.deepEqual(loaded.layout.groups, {})
+  assert.equal('drawing:ink' in loaded.layout.placements, false)
+  assert.equal('group:art' in loaded.layout.placements, false)
+})
+
+test('a file survives when its other frame group member is invalid', () => {
+  const scene = freshScene()
+  const file = scene.items.find((item) => item.kind === 'file')!
+  const placement = { surface: 'frame', edge: 'bottom', position: 0.6 } as const
+  file.location = { surface: 'group', groupId: 'files' }
+  scene.layout = {
+    ...scene.layout,
+    groups: {
+      files: {
+        id: 'files',
+        members: [
+          { kind: 'item', id: file.id },
+          { kind: 'widget', id: 'unknown-widget' },
+        ],
+      },
+    },
+    placements: { 'group:files': placement },
+  }
+
+  const loaded = readScene(scene)
+
+  assert.deepEqual(
+    loaded.items.find((item) => item.id === file.id),
+    {
+      ...file,
+      location: placement,
+    },
+  )
+  assert.deepEqual(loaded.layout.groups, {})
+  assert.equal(`item:${file.id}` in loaded.layout.placements, false)
+  assert.equal('group:files' in loaded.layout.placements, false)
+})

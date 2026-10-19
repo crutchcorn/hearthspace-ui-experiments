@@ -655,8 +655,9 @@ Validation checks supported object identities and locations, finite geometry,
 frame bounds, group membership, and local drawing strokes. Invalid individual
 records are discarded while valid neighboring work remains. Duplicate app
 shortcuts are removed and missing catalog shortcuts are restored without
-reusing existing IDs. Groups lose missing members; a lone surviving member
-retains the group's frame edge. Valid canvas peek homes remain attached to
+reusing existing IDs. Groups lose missing or invalid members; a lone surviving
+member retains the group's frame edge, including its file or drawing content.
+Valid canvas peek homes remain attached to
 their objects. Only widgets may be hidden, and Canvas tools cannot load hidden
 while their hide-able preference is off. Missing, unreadable, or structurally
 invalid scene storage starts with the default desktop and frame arrangement.
