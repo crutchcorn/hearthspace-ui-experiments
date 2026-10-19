@@ -164,7 +164,7 @@
   }
 }
 
-:global([data-layout-widget]) .toolMenu {
+:global(:is([data-layout-widget], [data-widget-popover])) .toolMenu {
   position: absolute;
   inset: var(--widget-popover-top) auto var(--widget-popover-bottom)
     clamp(
@@ -177,7 +177,7 @@
   overscroll-behavior: contain;
 }
 
-:global([data-layout-widget]) .tooltip {
+:global(:is([data-layout-widget], [data-widget-popover])) .tooltip {
   top: var(--widget-popover-top);
   bottom: var(--widget-popover-bottom);
   max-width: calc(100vw - 24px);

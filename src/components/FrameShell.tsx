@@ -1,5 +1,5 @@
 import { Grip } from 'lucide-react'
-import type { ReactNode } from 'react'
+import type { PointerEvent, ReactNode } from 'react'
 import type { Bounds } from '../desktop'
 import {
   FRAME_WIDGETS,
@@ -18,10 +18,20 @@ import styles from './FrameShell.module.css'
 
 interface FrameShellProps {
   canvasHost: HTMLElement | null
+  popoverHost: HTMLElement | null
   layout: FrameLayout
   view: Bounds
   editing: boolean
   selected: LayoutTarget | null
+  selectedControlIds: string[]
+  onControlPointerDown: (
+    event: PointerEvent<HTMLDivElement>,
+    id: string,
+  ) => void
+  onControlSizeChange: (
+    id: string,
+    size: { width: number; height: number },
+  ) => void
   draggingWidget: {
     id: string
     edge?: FrameEdge
@@ -36,10 +46,14 @@ interface FrameShellProps {
 
 export default function FrameShell({
   canvasHost,
+  popoverHost,
   layout,
   view,
   editing,
   selected,
+  selectedControlIds,
+  onControlPointerDown,
+  onControlSizeChange,
   draggingWidget,
   groupDropTarget,
   hidden,
@@ -84,12 +98,16 @@ export default function FrameShell({
     return (
       <PlacedWidget
         canvasHost={canvasHost}
+        popoverHost={popoverHost}
         key={targetKey(target)}
         id={id}
         placement={getPlacement(layout, target)}
         view={view}
         editing={editing}
         selected={matches(selected, target)}
+        canvasSelected={selectedControlIds.includes(id)}
+        onControlPointerDown={onControlPointerDown}
+        onControlSizeChange={onControlSizeChange}
         dropTarget={matches(groupDropTarget, target)}
         hidden={hidden}
         merged={merged}
@@ -114,6 +132,7 @@ export default function FrameShell({
     return (
       <PlacedWidget
         canvasHost={canvasHost}
+        popoverHost={popoverHost}
         key={targetKey(target)}
         kind="group"
         id={group.id}

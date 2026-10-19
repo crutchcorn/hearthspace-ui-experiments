@@ -317,13 +317,13 @@
   }
 }
 
-:global([data-layout-widget]) .bar {
+:global(:is([data-layout-widget], [data-widget-popover])) .bar {
   position: relative;
   inset: auto;
   max-width: 100%;
 }
 
-:global([data-layout-widget]) .popover {
+:global(:is([data-layout-widget], [data-widget-popover])) .popover {
   position: absolute;
   inset: var(--widget-popover-top) auto var(--widget-popover-bottom)
     clamp(

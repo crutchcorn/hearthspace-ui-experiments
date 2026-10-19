@@ -51,6 +51,10 @@
   opacity: 0.35;
 }
 
+:global([data-canvas-control-id]) .control {
+  touch-action: none;
+}
+
 @media (width <= 760px) {
   .mobileSurface {
     --shell-padding: 4px;

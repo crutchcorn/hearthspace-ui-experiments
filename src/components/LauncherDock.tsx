@@ -10,6 +10,7 @@ import {
 } from 'react'
 import type { DesktopWindow } from '../desktop'
 import AppIcon from './AppIcon'
+import WidgetPopover from './WidgetPopover'
 import { APP_CATALOG, type LauncherApp } from './launcher-apps'
 import shellStyles from './ShellControls.module.css'
 import styles from './LauncherDock.module.css'
@@ -264,6 +265,7 @@ export default function LauncherDock({
 }: LauncherDockProps) {
   const panelId = useId()
   const dockRef = useRef<HTMLElement>(null)
+  const panelRef = useRef<HTMLElement>(null)
   const appTriggers = useRef(new Map<string, HTMLButtonElement>())
   const firstInstance = useRef<HTMLButtonElement>(null)
   const focusOnOpen = useRef<string | null>(null)
@@ -304,7 +306,8 @@ export default function LauncherDock({
     function dismissOutside(event: globalThis.PointerEvent) {
       if (
         event.target instanceof Node &&
-        !dockRef.current?.contains(event.target)
+        !dockRef.current?.contains(event.target) &&
+        !panelRef.current?.contains(event.target)
       )
         onSelectApp(null)
     }
@@ -415,47 +418,50 @@ export default function LauncherDock({
         </button>
       </div>
       {selectedGroup && (
-        <section
-          id={panelId}
-          className={styles.windowPopover}
-          aria-labelledby={`${panelId}-heading`}
-        >
-          <header className={styles.popoverHeading}>
-            <h2 id={`${panelId}-heading`}>{selectedGroup.app.name}</h2>
-            <button
-              type="button"
-              className={styles.closeButton}
-              aria-label="Close window list"
-              onClick={() => {
-                onSelectApp(null)
-                appTriggers.current.get(selectedGroup.app.id)?.focus()
-              }}
-            >
-              <X size={17} aria-hidden="true" />
-            </button>
-          </header>
-          <WindowInstanceList
-            key={selectedGroup.app.id}
-            app={selectedGroup.app}
-            windows={selectedGroup.windows}
-            activeWindowId={activeWindowId}
-            firstInstance={firstInstance}
-            onFocusWindow={onFocusWindow}
-            onReorderWindows={onReorderWindows}
-          />
-          {selectedCatalogApp && (
-            <footer className={styles.popoverFooter}>
+        <WidgetPopover>
+          <section
+            ref={panelRef}
+            id={panelId}
+            className={styles.windowPopover}
+            aria-labelledby={`${panelId}-heading`}
+          >
+            <header className={styles.popoverHeading}>
+              <h2 id={`${panelId}-heading`}>{selectedGroup.app.name}</h2>
               <button
                 type="button"
-                className={styles.newWindow}
-                onClick={() => onLaunch(selectedCatalogApp)}
+                className={styles.closeButton}
+                aria-label="Close window list"
+                onClick={() => {
+                  onSelectApp(null)
+                  appTriggers.current.get(selectedGroup.app.id)?.focus()
+                }}
               >
-                <Plus size={16} aria-hidden="true" />
-                New window
+                <X size={17} aria-hidden="true" />
               </button>
-            </footer>
-          )}
-        </section>
+            </header>
+            <WindowInstanceList
+              key={selectedGroup.app.id}
+              app={selectedGroup.app}
+              windows={selectedGroup.windows}
+              activeWindowId={activeWindowId}
+              firstInstance={firstInstance}
+              onFocusWindow={onFocusWindow}
+              onReorderWindows={onReorderWindows}
+            />
+            {selectedCatalogApp && (
+              <footer className={styles.popoverFooter}>
+                <button
+                  type="button"
+                  className={styles.newWindow}
+                  onClick={() => onLaunch(selectedCatalogApp)}
+                >
+                  <Plus size={16} aria-hidden="true" />
+                  New window
+                </button>
+              </footer>
+            )}
+          </section>
+        </WidgetPopover>
       )}
     </nav>
   )

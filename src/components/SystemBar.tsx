@@ -9,6 +9,7 @@ import {
   WifiOff,
 } from 'lucide-react'
 import type { SystemStatus } from '../useSystemStatus'
+import WidgetPopover from './WidgetPopover'
 import styles from './SystemBar.module.css'
 import shellStyles from './ShellControls.module.css'
 
@@ -30,6 +31,7 @@ export default function SystemBar({
   expanded,
 }: SystemBarProps) {
   const root = useRef<HTMLElement>(null)
+  const panelRef = useRef<HTMLDivElement>(null)
   const {
     wifiEnabled,
     setWifiEnabled,
@@ -41,9 +43,7 @@ export default function SystemBar({
 
   useEffect(() => {
     if (openPanel !== id) return
-    const panel = root.current?.querySelector<HTMLElement>(
-      '[data-system-panel]',
-    )
+    const panel = panelRef.current
     const control = panel?.querySelector<HTMLElement>(
       'button:not(:disabled), input:not(:disabled), select:not(:disabled)',
     )
@@ -56,7 +56,8 @@ export default function SystemBar({
     function dismissOnPointer(event: PointerEvent) {
       if (
         event.target instanceof Element &&
-        !event.target.closest('[data-system-popover-root]')
+        !root.current?.contains(event.target) &&
+        !panelRef.current?.contains(event.target)
       ) {
         onPanelChange(null)
       }
@@ -170,132 +171,146 @@ export default function SystemBar({
         </button>
       )}
 
-      {id === 'wifi' && openPanel === id && (
-        <div
-          className={`${styles.popover} ${styles.systemPopover}`}
-          data-system-panel
-          tabIndex={-1}
-        >
-          <label className={styles.toggleRow}>
-            <strong>Wi-Fi</strong>
-            <input
-              className={styles.toggle}
-              type="checkbox"
-              checked={wifiEnabled}
-              onChange={(event) => setWifiEnabled(event.target.checked)}
-            />
-          </label>
-          <div className={styles.networkRow}>
-            <div>
-              <strong>{wifiEnabled ? 'Studio network' : 'Disconnected'}</strong>
-              <span>
-                {wifiEnabled
-                  ? 'Connected · Private network'
-                  : 'Enable Wi-Fi to connect'}
-              </span>
+      {openPanel === id && (
+        <WidgetPopover>
+          {id === 'wifi' && openPanel === id && (
+            <div
+              className={`${styles.popover} ${styles.systemPopover}`}
+              ref={panelRef}
+              data-system-panel
+              tabIndex={-1}
+            >
+              <label className={styles.toggleRow}>
+                <strong>Wi-Fi</strong>
+                <input
+                  className={styles.toggle}
+                  type="checkbox"
+                  checked={wifiEnabled}
+                  onChange={(event) => setWifiEnabled(event.target.checked)}
+                />
+              </label>
+              <div className={styles.networkRow}>
+                <div>
+                  <strong>
+                    {wifiEnabled ? 'Studio network' : 'Disconnected'}
+                  </strong>
+                  <span>
+                    {wifiEnabled
+                      ? 'Connected · Private network'
+                      : 'Enable Wi-Fi to connect'}
+                  </span>
+                </div>
+                {wifiEnabled && (
+                  <Check size={18} className={styles.networkCheck} />
+                )}
+              </div>
+              <p className={styles.previewNote}>Simulated connection</p>
             </div>
-            {wifiEnabled && <Check size={18} className={styles.networkCheck} />}
-          </div>
-          <p className={styles.previewNote}>Simulated connection</p>
-        </div>
-      )}
+          )}
 
-      {id === 'volume' && openPanel === id && (
-        <div
-          className={`${styles.popover} ${styles.systemPopover}`}
-          data-system-panel
-          tabIndex={-1}
-        >
-          <div className={styles.settingHeading}>
-            <label htmlFor="system-volume">Sound</label>
-            <span>
-              {volume}
-              <small>%</small>
-            </span>
-          </div>
-          <div className={styles.volumeRow}>
-            <VolumeX size={16} />
-            <input
-              id="system-volume"
-              className={styles.volumeSlider}
-              type="range"
-              min="0"
-              max="100"
-              value={volume}
-              onChange={(event) => setVolume(Number(event.target.value))}
-            />
-            <Volume2 size={17} />
-          </div>
-          <p className={styles.previewNote}>Built-in speakers · Simulated</p>
-        </div>
-      )}
-
-      {id === 'battery' && openPanel === id && (
-        <div
-          className={`${styles.popover} ${styles.systemPopover}`}
-          data-system-panel
-          tabIndex={-1}
-        >
-          <div className={styles.settingHeading}>
-            <strong>Battery</strong>
-            <span>
-              {batteryPercentage}
-              <small>%</small>
-            </span>
-          </div>
-          <div className={styles.batteryMeter}>
-            <span />
-          </div>
-          <p className={styles.batteryDescription}>On battery power</p>
-          <p className={styles.previewNote}>Simulated battery status</p>
-        </div>
-      )}
-
-      {id === 'clock' && openPanel === id && (
-        <div
-          className={`${styles.popover} ${styles.calendarPopover}`}
-          data-system-panel
-          tabIndex={-1}
-        >
-          <div className={styles.calendarHeading}>
-            <div>
-              <strong>
-                {now.toLocaleDateString(undefined, {
-                  month: 'long',
-                  year: 'numeric',
-                })}
-              </strong>
-              <span>
-                {now.toLocaleDateString(undefined, {
-                  weekday: 'long',
-                  month: 'long',
-                  day: 'numeric',
-                })}
-              </span>
+          {id === 'volume' && openPanel === id && (
+            <div
+              className={`${styles.popover} ${styles.systemPopover}`}
+              ref={panelRef}
+              data-system-panel
+              tabIndex={-1}
+            >
+              <div className={styles.settingHeading}>
+                <label htmlFor="system-volume">Sound</label>
+                <span>
+                  {volume}
+                  <small>%</small>
+                </span>
+              </div>
+              <div className={styles.volumeRow}>
+                <VolumeX size={16} />
+                <input
+                  id="system-volume"
+                  className={styles.volumeSlider}
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={volume}
+                  onChange={(event) => setVolume(Number(event.target.value))}
+                />
+                <Volume2 size={17} />
+              </div>
+              <p className={styles.previewNote}>
+                Built-in speakers · Simulated
+              </p>
             </div>
-          </div>
-          <div className={styles.calendar} aria-label="Current month">
-            {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, index) => (
-              <span key={`weekday-${index}`} className={styles.weekday}>
-                {day}
-              </span>
-            ))}
-            {Array.from({ length: monthStart }, (_, index) => (
-              <span key={`blank-${index}`} />
-            ))}
-            {Array.from({ length: daysInMonth }, (_, index) => (
-              <span
-                key={index + 1}
-                className={
-                  index + 1 === now.getDate() ? styles.today : undefined
-                }
-              >
-                {index + 1}
-              </span>
-            ))}
-          </div>
-          <p className={styles.calendarFooter}>Local date and time</p>
-        </div>
+          )}
+
+          {id === 'battery' && openPanel === id && (
+            <div
+              className={`${styles.popover} ${styles.systemPopover}`}
+              ref={panelRef}
+              data-system-panel
+              tabIndex={-1}
+            >
+              <div className={styles.settingHeading}>
+                <strong>Battery</strong>
+                <span>
+                  {batteryPercentage}
+                  <small>%</small>
+                </span>
+              </div>
+              <div className={styles.batteryMeter}>
+                <span />
+              </div>
+              <p className={styles.batteryDescription}>On battery power</p>
+              <p className={styles.previewNote}>Simulated battery status</p>
+            </div>
+          )}
+
+          {id === 'clock' && openPanel === id && (
+            <div
+              className={`${styles.popover} ${styles.calendarPopover}`}
+              ref={panelRef}
+              data-system-panel
+              tabIndex={-1}
+            >
+              <div className={styles.calendarHeading}>
+                <div>
+                  <strong>
+                    {now.toLocaleDateString(undefined, {
+                      month: 'long',
+                      year: 'numeric',
+                    })}
+                  </strong>
+                  <span>
+                    {now.toLocaleDateString(undefined, {
+                      weekday: 'long',
+                      month: 'long',
+                      day: 'numeric',
+                    })}
+                  </span>
+                </div>
+              </div>
+              <div className={styles.calendar} aria-label="Current month">
+                {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, index) => (
+                  <span key={`weekday-${index}`} className={styles.weekday}>
+                    {day}
+                  </span>
+                ))}
+                {Array.from({ length: monthStart }, (_, index) => (
+                  <span key={`blank-${index}`} />
+                ))}
+                {Array.from({ length: daysInMonth }, (_, index) => (
+                  <span
+                    key={index + 1}
+                    className={
+                      index + 1 === now.getDate() ? styles.today : undefined
+                    }
+                  >
+                    {index + 1}
+                  </span>
+                ))}
+              </div>
+              <p className={styles.calendarFooter}>Local date and time</p>
+            </div>
+          )}
+        </WidgetPopover>
       )}
     </header>
   )

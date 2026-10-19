@@ -1,8 +1,10 @@
 import {
+  useEffectEvent,
   useLayoutEffect,
   useRef,
   useState,
   type CSSProperties,
+  type PointerEvent,
   type ReactNode,
 } from 'react'
 import { createPortal } from 'react-dom'
@@ -13,10 +15,12 @@ import {
   type ObjectPlacement,
 } from '../frame-layout'
 import type { Bounds } from '../desktop'
+import { WidgetPopoverContext } from './widget-popover-context'
 import styles from './PlacedWidget.module.css'
 
 interface PlacedWidgetProps {
   canvasHost: HTMLElement | null
+  popoverHost: HTMLElement | null
   id: string
   kind?: 'widget' | 'group'
   inline?: boolean
@@ -26,6 +30,15 @@ interface PlacedWidgetProps {
   view: Bounds
   editing: boolean
   selected: boolean
+  canvasSelected?: boolean
+  onControlPointerDown?: (
+    event: PointerEvent<HTMLDivElement>,
+    id: string,
+  ) => void
+  onControlSizeChange?: (
+    id: string,
+    size: { width: number; height: number },
+  ) => void
   hidden?: boolean
   merged?: 'top' | 'bottom'
   draggingWidget: {
@@ -38,6 +51,7 @@ interface PlacedWidgetProps {
 
 export default function PlacedWidget({
   canvasHost,
+  popoverHost,
   id,
   kind = 'widget',
   inline = false,
@@ -47,6 +61,9 @@ export default function PlacedWidget({
   view,
   editing,
   selected,
+  canvasSelected = false,
+  onControlPointerDown,
+  onControlSizeChange,
   hidden = false,
   merged,
   draggingWidget,
@@ -57,7 +74,28 @@ export default function PlacedWidget({
   const [origin] = useState(() => ({ x: view.x + 100, y: view.y + 100 }))
   const [size, setSize] = useState({ width: 300, height: 54 })
   const [measured, setMeasured] = useState<Bounds | null>(null)
+  const reportedSize = useRef<{
+    id: string
+    width: number
+    height: number
+  } | null>(null)
   const onFrame = placement.surface === 'frame'
+  const canvasControl =
+    kind === 'widget' &&
+    !inline &&
+    !hidden &&
+    (placement.surface === 'canvas' || placement.surface === 'background')
+  const reportControlSize = useEffectEvent((width: number, height: number) => {
+    if (
+      !canvasControl ||
+      (reportedSize.current?.id === id &&
+        reportedSize.current.width === width &&
+        reportedSize.current.height === height)
+    )
+      return
+    reportedSize.current = { id, width, height }
+    onControlSizeChange?.(id, { width, height })
+  })
   const dragged = draggingWidget?.id === id ? draggingWidget : null
   const edge = inline
     ? orientationEdge
@@ -68,6 +106,7 @@ export default function PlacedWidget({
         : undefined
 
   useLayoutEffect(() => {
+    if (!canvasControl) reportedSize.current = null
     const element = content.current
     if (!element) return
     function measure() {
@@ -75,6 +114,7 @@ export default function PlacedWidget({
       const width = element.offsetWidth
       const height = element.offsetHeight
       if (!width || !height) return
+      reportControlSize(width, height)
       setSize((current) =>
         current.width === width && current.height === height
           ? current
@@ -112,6 +152,7 @@ export default function PlacedWidget({
     }
   }, [
     edge,
+    canvasControl,
     merged,
     inline,
     placement,
@@ -194,15 +235,39 @@ export default function PlacedWidget({
       data-layout-surface={placement.surface}
       data-layout-editing={editing}
       data-layout-selected={editing && selected}
+      data-canvas-control-id={canvasControl ? id : undefined}
+      data-canvas-control-selected={canvasControl && canvasSelected}
       data-frame-edge={edge}
       data-shell-controls
+      onPointerDownCapture={
+        canvasControl ? (event) => onControlPointerDown?.(event, id) : undefined
+      }
     >
       <div
         ref={content}
         className={styles.content}
         inert={editing && kind === 'widget'}
       >
-        {children}
+        <WidgetPopoverContext
+          value={
+            canvasControl
+              ? {
+                  id,
+                  host: popoverHost,
+                  style: {
+                    ...style,
+                    left: anchorX,
+                    top: anchorY,
+                    width: size.width,
+                    height: anchorHeight,
+                    pointerEvents: 'none',
+                  },
+                }
+              : null
+          }
+        >
+          {children}
+        </WidgetPopoverContext>
       </div>
     </div>
   )

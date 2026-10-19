@@ -496,13 +496,13 @@
   }
 }
 
-:global([data-layout-widget]) .corner {
+:global(:is([data-layout-widget], [data-widget-popover])) .corner {
   position: relative;
   inset: auto;
   max-width: 100%;
 }
 
-:global([data-layout-widget]) :is(.panel, .toast) {
+:global(:is([data-layout-widget], [data-widget-popover])) :is(.panel, .toast) {
   position: absolute;
   inset: var(--widget-popover-top) auto var(--widget-popover-bottom)
     clamp(
@@ -514,7 +514,7 @@
 }
 
 @media (width <= 760px) {
-  :global([data-layout-widget]) .corner .bar {
+  :global(:is([data-layout-widget], [data-widget-popover])) .corner .bar {
     height: 54px;
     padding: var(--shell-padding);
     border: var(--shell-border-width) solid var(--chrome-border);

@@ -507,13 +507,13 @@
   }
 }
 
-:global([data-layout-widget]) .dock {
+:global(:is([data-layout-widget], [data-widget-popover])) .dock {
   position: relative;
   inset: auto;
   max-width: 100%;
 }
 
-:global([data-layout-widget]) .windowPopover {
+:global(:is([data-layout-widget], [data-widget-popover])) .windowPopover {
   position: absolute;
   inset: var(--widget-popover-top) auto var(--widget-popover-bottom)
     clamp(
@@ -525,12 +525,12 @@
 }
 
 @media (width <= 760px) {
-  :global([data-layout-widget]) .dock {
+  :global(:is([data-layout-widget], [data-widget-popover])) .dock {
     height: 54px;
     flex: none;
   }
 
-  :global([data-layout-widget]) .dock .bar {
+  :global(:is([data-layout-widget], [data-widget-popover])) .dock .bar {
     height: 54px;
     padding: var(--shell-padding);
     border: var(--shell-border-width) solid var(--chrome-border);

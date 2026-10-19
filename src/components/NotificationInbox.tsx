@@ -19,6 +19,7 @@ import {
   type NotificationTarget,
 } from '../useNotifications'
 import AppIcon from './AppIcon'
+import WidgetPopover from './WidgetPopover'
 import shellStyles from './ShellControls.module.css'
 import styles from './NotificationInbox.module.css'
 
@@ -60,6 +61,8 @@ export default function NotificationInbox({
   const { notifications, setNotifications, unreadCount } = state
   const [toast, setToast] = useState<Notification | null>(null)
   const root = useRef<HTMLDivElement>(null)
+  const panel = useRef<HTMLElement>(null)
+  const toastElement = useRef<HTMLElement>(null)
   const trigger = useRef<HTMLButtonElement>(null)
   const previewCount = useRef(0)
 
@@ -73,7 +76,9 @@ export default function NotificationInbox({
     function dismissOutside(event: PointerEvent) {
       if (
         event.target instanceof Node &&
-        !root.current?.contains(event.target)
+        !root.current?.contains(event.target) &&
+        !panel.current?.contains(event.target) &&
+        !toastElement.current?.contains(event.target)
       ) {
         if (open) onClose()
         setToast(null)
@@ -173,138 +178,148 @@ export default function NotificationInbox({
       </div>
 
       {open && (
-        <section
-          id="notification-inbox"
-          className={styles.panel}
-          aria-labelledby="notification-heading"
-        >
-          <header className={styles.heading}>
-            <h2 id="notification-heading">Notifications</h2>
-            <button
-              type="button"
-              className={styles.markRead}
-              disabled={unreadCount === 0}
-              onClick={() =>
-                setNotifications((current) =>
-                  current.map((item) => ({ ...item, unread: false })),
-                )
-              }
-            >
-              <CheckCheck size={15} /> Mark all read
-            </button>
-          </header>
+        <WidgetPopover>
+          <section
+            ref={panel}
+            id="notification-inbox"
+            className={styles.panel}
+            aria-labelledby="notification-heading"
+          >
+            <header className={styles.heading}>
+              <h2 id="notification-heading">Notifications</h2>
+              <button
+                type="button"
+                className={styles.markRead}
+                disabled={unreadCount === 0}
+                onClick={() =>
+                  setNotifications((current) =>
+                    current.map((item) => ({ ...item, unread: false })),
+                  )
+                }
+              >
+                <CheckCheck size={15} /> Mark all read
+              </button>
+            </header>
 
-          <div className={styles.list}>
-            {notifications.length ? (
-              notifications.map((item) => {
-                const { name, Icon, action } = APPS[item.target]
-                return (
-                  <article
-                    key={item.id}
-                    className={styles.notification}
-                    data-unread={item.unread}
-                  >
-                    <div className={styles.itemIcon}>
-                      <AppIcon
-                        appId={item.target}
-                        icon={Icon}
-                        size={17}
-                        strokeWidth={1.6}
-                      />
-                    </div>
-                    <div className={styles.itemContent}>
-                      <div className={styles.itemMeta}>
-                        <span>{name}</span>
-                        <span>{item.time}</span>
-                        {item.unread && (
-                          <span
-                            className={styles.unreadDot}
-                            aria-label="Unread"
-                          />
-                        )}
+            <div className={styles.list}>
+              {notifications.length ? (
+                notifications.map((item) => {
+                  const { name, Icon, action } = APPS[item.target]
+                  return (
+                    <article
+                      key={item.id}
+                      className={styles.notification}
+                      data-unread={item.unread}
+                    >
+                      <div className={styles.itemIcon}>
+                        <AppIcon
+                          appId={item.target}
+                          icon={Icon}
+                          size={17}
+                          strokeWidth={1.6}
+                        />
                       </div>
-                      <h3>{item.title}</h3>
-                      <p>{item.body}</p>
+                      <div className={styles.itemContent}>
+                        <div className={styles.itemMeta}>
+                          <span>{name}</span>
+                          <span>{item.time}</span>
+                          {item.unread && (
+                            <span
+                              className={styles.unreadDot}
+                              aria-label="Unread"
+                            />
+                          )}
+                        </div>
+                        <h3>{item.title}</h3>
+                        <p>{item.body}</p>
+                        <button
+                          type="button"
+                          className={styles.openButton}
+                          onClick={() => openNotification(item)}
+                        >
+                          {action ?? `Open ${name}`}
+                          <ArrowUpRight size={13} />
+                        </button>
+                      </div>
                       <button
                         type="button"
-                        className={styles.openButton}
-                        onClick={() => openNotification(item)}
+                        className={styles.dismissButton}
+                        aria-label={`Dismiss ${item.title}`}
+                        onClick={() => dismissNotification(item.id)}
                       >
-                        {action ?? `Open ${name}`}
-                        <ArrowUpRight size={13} />
+                        <X size={13} />
                       </button>
-                    </div>
-                    <button
-                      type="button"
-                      className={styles.dismissButton}
-                      aria-label={`Dismiss ${item.title}`}
-                      onClick={() => dismissNotification(item.id)}
-                    >
-                      <X size={13} />
-                    </button>
-                  </article>
-                )
-              })
-            ) : (
-              <div className={styles.empty}>
-                <span>
-                  <Bell size={23} strokeWidth={1.3} />
-                </span>
-                <h3>No notifications</h3>
-                <p>New activity will appear here.</p>
-              </div>
-            )}
-          </div>
+                    </article>
+                  )
+                })
+              ) : (
+                <div className={styles.empty}>
+                  <span>
+                    <Bell size={23} strokeWidth={1.3} />
+                  </span>
+                  <h3>No notifications</h3>
+                  <p>New activity will appear here.</p>
+                </div>
+              )}
+            </div>
 
-          {/* Prototype-only control; remove this footer for the OS shell. */}
-          <footer className={styles.previewTools}>
-            <button
-              type="button"
-              className={styles.previewButton}
-              onClick={previewNotification}
-            >
-              <Plus size={14} /> Preview notification
-            </button>
-          </footer>
-        </section>
+            {/* Prototype-only control; remove this footer for the OS shell. */}
+            <footer className={styles.previewTools}>
+              <button
+                type="button"
+                className={styles.previewButton}
+                onClick={previewNotification}
+              >
+                <Plus size={14} /> Preview notification
+              </button>
+            </footer>
+          </section>
+        </WidgetPopover>
       )}
 
       {toast && !open && previewVisible && (
-        <aside className={styles.toast} role="status" aria-live="polite">
-          <div className={styles.toastTop}>
-            <span>
-              <BellRing size={13} /> Notification preview
-            </span>
-            <button
-              type="button"
-              className={styles.toastDismiss}
-              aria-label="Dismiss notification preview"
-              onClick={() => setToast(null)}
-            >
-              <X size={14} />
-            </button>
-          </div>
-          <h3>{toast.title}</h3>
-          <p>{toast.body}</p>
-          <div className={styles.toastFooter}>
-            <span>
-              <AppIcon
-                appId={toast.target}
-                icon={APPS[toast.target].Icon}
-                size={16}
-              />
-              {APPS[toast.target].name} · Simulated
-            </span>
-            <button
-              type="button"
-              className={styles.toastOpen}
-              onClick={() => openNotification(toast)}
-            >
-              {APPS[toast.target].action ?? `Open ${APPS[toast.target].name}`}{' '}
-              <ArrowUpRight size={14} />
-            </button>
-          </div>
-        </aside>
+        <WidgetPopover>
+          <aside
+            ref={toastElement}
+            className={styles.toast}
+            role="status"
+            aria-live="polite"
+          >
+            <div className={styles.toastTop}>
+              <span>
+                <BellRing size={13} /> Notification preview
+              </span>
+              <button
+                type="button"
+                className={styles.toastDismiss}
+                aria-label="Dismiss notification preview"
+                onClick={() => setToast(null)}
+              >
+                <X size={14} />
+              </button>
+            </div>
+            <h3>{toast.title}</h3>
+            <p>{toast.body}</p>
+            <div className={styles.toastFooter}>
+              <span>
+                <AppIcon
+                  appId={toast.target}
+                  icon={APPS[toast.target].Icon}
+                  size={16}
+                />
+                {APPS[toast.target].name} · Simulated
+              </span>
+              <button
+                type="button"
+                className={styles.toastOpen}
+                onClick={() => openNotification(toast)}
+              >
+                {APPS[toast.target].action ?? `Open ${APPS[toast.target].name}`}{' '}
+                <ArrowUpRight size={14} />
+              </button>
+            </div>
+          </aside>
+        </WidgetPopover>
       )}
     </div>
   )

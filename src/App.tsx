@@ -92,6 +92,8 @@ import {
   type Bounds,
   type DesktopWindow,
   type DesktopItem,
+  type CanvasControl,
+  type Workspace,
   type WindowSelectionShape,
 } from './desktop'
 import { polygonIntersectsBounds, type SelectionPoint } from './selection'
@@ -145,12 +147,29 @@ type Gesture = {
   bounds?: Bounds
   edge?: string
   items?: DesktopItem[]
+  controls?: CanvasControl[]
+  controlId?: string
   windows?: DesktopWindow[]
   selectedItemIds?: string[]
+  selectedControlIds?: string[]
   moved?: boolean
   selectionShape?: WindowSelectionShape
   points?: SelectionPoint[]
   drawingLayer?: DrawingLayerName
+}
+
+function restoreDesktopDrag(workspace: Workspace, gesture: Gesture): Workspace {
+  const items = new Map(gesture.items?.map((item) => [item.id, item]))
+  const controls = new Map(
+    gesture.controls?.map((control) => [control.id, control]),
+  )
+  return {
+    ...workspace,
+    items: workspace.items.map((item) => items.get(item.id) ?? item),
+    controls: workspace.controls?.map(
+      (control) => controls.get(control.id) ?? control,
+    ),
+  }
 }
 
 const edges = ['n', 'e', 's', 'w', 'ne', 'se', 'sw', 'nw']
@@ -272,6 +291,8 @@ function App() {
   const [selectionShape, setSelectionShape] = useState(loadWindowSelectionShape)
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [selectedItemIds, setSelectedItemIds] = useState<string[]>([])
+  const [selectedControlIds, setSelectedControlIds] = useState<string[]>([])
+  const suppressedControlClick = useRef<string | null>(null)
   const [selection, setSelection] = useState<
     (Bounds & { target: 'windows' | 'items'; points?: SelectionPoint[] }) | null
   >(null)
@@ -336,6 +357,9 @@ function App() {
         top: canvas.scrollTop,
         behavior: 'instant',
       })
+      const interrupted = gesture.current
+      if (interrupted?.type === 'item-move' && interrupted.moved)
+        setWorkspace((current) => restoreDesktopDrag(current, interrupted))
       const pointerId = gesture.current?.pointerId
       gesture.current = null
       if (
@@ -369,6 +393,29 @@ function App() {
         excludedWindowId: target.kind === 'window' ? target.id : undefined,
       }),
     { hover: hoverFavoriteDrop, drop: dropFavorite },
+  )
+  const measureControl = useCallback(
+    (id: string, size: { width: number; height: number }) => {
+      setLayout((current) => {
+        const key = targetKey({ kind: 'widget', id })
+        const placement = current.placements[key]
+        if (
+          !placement ||
+          (placement.surface !== 'canvas' &&
+            placement.surface !== 'background') ||
+          (placement.width === size.width && placement.height === size.height)
+        )
+          return current
+        return {
+          ...current,
+          placements: {
+            ...current.placements,
+            [key]: { ...placement, ...size },
+          },
+        }
+      })
+    },
+    [setLayout],
   )
   const restoreBackgroundItems = useCallback(
     (current: typeof workspace) =>
@@ -452,10 +499,14 @@ function App() {
       setSelection(null)
       setSelectedIds([])
       setSelectedItemIds([])
+      setSelectedControlIds([])
       setDrawingDraft(null)
       setSelectedDrawingId(null)
       setTool('search')
       setRevealRequest(null)
+      const interrupted = gesture.current
+      if (interrupted?.type === 'item-move' && interrupted.moved)
+        setWorkspace((current) => restoreDesktopDrag(current, interrupted))
       const pointerId = gesture.current?.pointerId
       gesture.current = null
       if (
@@ -483,6 +534,7 @@ function App() {
       setLauncher,
       setSelectedIds,
       setSelectedItemIds,
+      setWorkspace,
     ],
   )
 
@@ -509,6 +561,7 @@ function App() {
     setSelectedDrawingId(null)
     setSelectedIds([])
     setSelectedItemIds([])
+    setSelectedControlIds([])
     setShowMap(false)
     setLauncher(null)
     closePopovers()
@@ -723,6 +776,8 @@ function App() {
         return
       }
       if (event.key === 'Escape') {
+        if (gesture.current?.controlId)
+          suppressedControlClick.current = gesture.current.controlId
         if (tool === 'layout') setTool('cursor')
         if (canvasSearch) {
           event.preventDefault()
@@ -734,15 +789,20 @@ function App() {
         closePopovers()
         setSelectedIds([])
         setSelectedItemIds([])
+        setSelectedControlIds([])
         setSelection(null)
         setDrawingDraft(null)
         setSelectedDrawingId(null)
         if (
           gesture.current?.type === 'window-select' ||
           gesture.current?.type === 'item-select' ||
+          gesture.current?.type === 'item-move' ||
           gesture.current?.type === 'draw' ||
           gesture.current?.type === 'drawing-move'
         ) {
+          const interrupted = gesture.current
+          if (interrupted.type === 'item-move' && interrupted.moved)
+            setWorkspace((current) => restoreDesktopDrag(current, interrupted))
           const pointerId = gesture.current.pointerId
           gesture.current = null
           if (captureTarget.current?.hasPointerCapture(pointerId))
@@ -778,6 +838,7 @@ function App() {
         setTool('pan')
         setSelectedIds([])
         setSelectedItemIds([])
+        setSelectedControlIds([])
       }
       if (event.key.toLowerCase() === 'v') {
         closePopovers()
@@ -792,6 +853,7 @@ function App() {
           event.key.toLowerCase() === 'l' ? 'freeform' : 'rectangle',
         )
         setSelectedItemIds([])
+        setSelectedControlIds([])
         setShowMap(false)
       }
       if (event.key.toLowerCase() === 'd') {
@@ -799,6 +861,7 @@ function App() {
         setTool('draw')
         setSelectedIds([])
         setSelectedItemIds([])
+        setSelectedControlIds([])
         setShowMap(false)
       }
       if (event.key.toLowerCase() === 'm') {
@@ -831,6 +894,9 @@ function App() {
       }
     }
     const release = () => {
+      const interrupted = gesture.current
+      if (interrupted?.type === 'item-move' && interrupted.moved)
+        setWorkspace((current) => restoreDesktopDrag(current, interrupted))
       setSpaceHeld(false)
       setDragging(false)
       if (gesture.current?.selectionShape === 'freeform') setSelectedIds([])
@@ -855,6 +921,7 @@ function App() {
     home.x,
     home.y,
     setView,
+    setWorkspace,
     tool,
     launcher,
     closePopovers,
@@ -1013,9 +1080,21 @@ function App() {
             item.y + item.height > area.y,
         )
         .map((item) => item.id)
-      if (isDesktopSelection)
+      if (isDesktopSelection) {
         setSelectedItemIds([...new Set([...current.selectedItemIds!, ...ids])])
-      else setSelectedIds(ids)
+        const controls = (workspace.controls ?? [])
+          .filter(
+            (control) =>
+              control.x < area.x + area.width &&
+              control.x + control.width > area.x &&
+              control.y < area.y + area.height &&
+              control.y + control.height > area.y,
+          )
+          .map((control) => control.id)
+        setSelectedControlIds([
+          ...new Set([...current.selectedControlIds!, ...controls]),
+        ])
+      } else setSelectedIds(ids)
       return
     }
     const dx = clientX - current.startX + canvas.scrollLeft - current.scrollX
@@ -1024,16 +1103,28 @@ function App() {
       hoverFavoriteDrop(current.id ?? null, clientX, clientY)
       // Move the whole selection by one bounded delta, preserving its spacing.
       if (!current.moved && Math.hypot(dx, dy) < 4) return
+      if (!current.moved && current.controlId) {
+        suppressedControlClick.current = current.controlId
+        captureTarget.current?.setPointerCapture(current.pointerId)
+        closePopovers()
+        setLauncher(null)
+        setShowMap(false)
+        setDragging(true)
+      }
       current.moved = true
-      const items = current.items!
+      const items = current.items ?? []
+      const controls = current.controls ?? []
       const { x: moveX, y: moveY } = getCanvasMoveDelta(
-        items,
+        [...items, ...controls],
         current.bounds!,
         { x: dx, y: dy },
         workspace,
         latestPointer.current.altKey,
       )
       const origins = new Map(items.map((item) => [item.id, item]))
+      const controlOrigins = new Map(
+        controls.map((control) => [control.id, control]),
+      )
       setWorkspace((previous) => ({
         ...previous,
         items: previous.items.map((item) => {
@@ -1046,6 +1137,17 @@ function App() {
                 y: origin.y + moveY,
               }
             : item
+        }),
+        controls: previous.controls?.map((control) => {
+          const origin = controlOrigins.get(control.id)
+          return origin
+            ? {
+                ...control,
+                peekOrigin: undefined,
+                x: origin.x + moveX,
+                y: origin.y + moveY,
+              }
+            : control
         }),
       }))
       return
@@ -1186,6 +1288,7 @@ function App() {
     type: Gesture['type'],
     item?: DesktopWindow,
     edge?: string,
+    preserveClick = false,
   ) {
     const group =
       type === 'move' &&
@@ -1206,9 +1309,11 @@ function App() {
     cancelPeekMotion()
     const canvas = viewport.current!
     setSelectedDrawingId(null)
-    event.preventDefault()
-    event.stopPropagation()
-    event.currentTarget.setPointerCapture(event.pointerId)
+    if (!preserveClick) {
+      event.preventDefault()
+      event.stopPropagation()
+      event.currentTarget.setPointerCapture(event.pointerId)
+    }
     captureTarget.current = event.currentTarget
     latestPointer.current = {
       x: event.clientX,
@@ -1241,13 +1346,21 @@ function App() {
         (event.shiftKey || event.metaKey || event.ctrlKey)
           ? selectedItemIds
           : [],
+      selectedControlIds:
+        type === 'item-select' &&
+        (event.shiftKey || event.metaKey || event.ctrlKey)
+          ? selectedControlIds
+          : [],
     }
-    setDragging(type !== 'window-select' && type !== 'item-select')
+    setDragging(
+      !preserveClick && type !== 'window-select' && type !== 'item-select',
+    )
     if (type === 'window-select' || type === 'item-select') {
       if (type === 'window-select') setSelectedIds([])
       else {
         setSelectedIds([])
         setSelectedItemIds(gesture.current.selectedItemIds!)
+        setSelectedControlIds(gesture.current.selectedControlIds!)
       }
       setSelection({
         target: type === 'window-select' ? 'windows' : 'items',
@@ -1295,6 +1408,7 @@ function App() {
     }
     setSelectedIds([])
     setSelectedItemIds([])
+    setSelectedControlIds([])
     setDrawingDraft({ points, layer })
     closePopovers()
   }
@@ -1303,6 +1417,7 @@ function App() {
     setSelectedDrawingId(id)
     setSelectedIds([])
     setSelectedItemIds([])
+    setSelectedControlIds([])
     closePopovers()
   }
 
@@ -1381,6 +1496,7 @@ function App() {
   function selectDesktopItem(item: DesktopItem, additive: boolean) {
     setSelectedDrawingId(null)
     setSelectedIds([])
+    if (!additive) setSelectedControlIds([])
     setSelectedItemIds((current) =>
       additive
         ? current.includes(item.id)
@@ -1423,6 +1539,8 @@ function App() {
         : [item.id]
     setSelectedIds([])
     setSelectedItemIds(ids)
+    const controlIds = additive || selected ? selectedControlIds : []
+    setSelectedControlIds(controlIds)
     event.currentTarget.focus({ preventScroll: true })
     if (!ids.includes(item.id)) {
       event.preventDefault()
@@ -1436,12 +1554,79 @@ function App() {
     current.items = workspace.items.filter(
       (entry) => ids.includes(entry.id) && onCanvas('item', entry.id),
     )
+    current.controls = (workspace.controls ?? []).filter((control) =>
+      controlIds.includes(control.id),
+    )
+  }
+
+  function startControlGesture(
+    event: ReactPointerEvent<HTMLDivElement>,
+    id: string,
+  ) {
+    if (
+      tool !== 'cursor' ||
+      focusView ||
+      previewLayout ||
+      previewExiting ||
+      event.button !== 0 ||
+      gesture.current ||
+      spaceHeld
+    )
+      return
+    const control = workspace.controls?.find((entry) => entry.id === id)
+    if (!control) return
+    // Popovers belong to the control, but only its resting bar is draggable.
+    const bounds = event.currentTarget.getBoundingClientRect()
+    if (
+      event.clientX < bounds.left ||
+      event.clientX > bounds.right ||
+      event.clientY < bounds.top ||
+      event.clientY > bounds.bottom ||
+      (event.target as Element).closest(
+        '[data-widget-popover], input, textarea, select, [contenteditable="true"]',
+      )
+    )
+      return
+    const additive = event.shiftKey || event.metaKey || event.ctrlKey
+    const selected = selectedControlIds.includes(id)
+    const ids = additive
+      ? selected
+        ? selectedControlIds.filter((entry) => entry !== id)
+        : [...selectedControlIds, id]
+      : selected
+        ? selectedControlIds
+        : [id]
+    const itemIds = additive || selected ? selectedItemIds : []
+    setSelectedIds([])
+    setSelectedControlIds(ids)
+    setSelectedItemIds(itemIds)
+    if (additive) suppressedControlClick.current = id
+    if (!ids.includes(id)) return
+    const current = startGesture(event, 'item-move', undefined, undefined, true)
+    if (!current) return
+    current.controlId = id
+    current.bounds = control
+    current.items = workspace.items.filter(
+      (item) => itemIds.includes(item.id) && onCanvas('item', item.id),
+    )
+    current.controls = (workspace.controls ?? []).filter((entry) =>
+      ids.includes(entry.id),
+    )
   }
 
   function endGesture(event: ReactPointerEvent) {
     if (gesture.current?.pointerId !== event.pointerId) return
     latestPointer.current.altKey = event.altKey
     const completed = gesture.current
+    if (
+      event.type !== 'pointerup' &&
+      completed.type === 'item-move' &&
+      completed.moved
+    ) {
+      if (completed.controlId)
+        suppressedControlClick.current = completed.controlId
+      setWorkspace((current) => restoreDesktopDrag(current, completed))
+    }
     if (
       event.type === 'pointerup' &&
       (completed.type === 'move' ||
@@ -1455,13 +1640,7 @@ function App() {
         completed.id &&
         dropFavorite(completed.id, event.clientX, event.clientY)
       if (favorited) {
-        const originals = new Map(
-          completed.items!.map((item) => [item.id, item]),
-        )
-        setWorkspace((current) => ({
-          ...current,
-          items: current.items.map((item) => originals.get(item.id) ?? item),
-        }))
+        setWorkspace((current) => restoreDesktopDrag(current, completed))
       } else applyGesture(event.clientX, event.clientY)
       if (completed.moved && !favorited) {
         preparePeekMotion({
@@ -1594,6 +1773,7 @@ function App() {
     setSelection(null)
     setSelectedIds([])
     setSelectedItemIds([])
+    setSelectedControlIds([])
     setRevealRequest(null)
     setShowMap(false)
     setLauncher(null)
@@ -1798,6 +1978,7 @@ function App() {
     setSpaceHeld(false)
     setSelectedIds([])
     setSelectedItemIds([])
+    setSelectedControlIds([])
   }
 
   function revealWindow(id: string, options?: { center: boolean }) {
@@ -1830,6 +2011,7 @@ function App() {
     setShowMap(false)
     setSelectedIds([])
     setSelectedItemIds([])
+    setSelectedControlIds([])
     setSpaceHeld(false)
     focusWindow(item.id)
     if (focusView?.id === item.id) {
@@ -1901,6 +2083,7 @@ function App() {
     setSelectedDrawingId(null)
     setSelectedIds([])
     setSelectedItemIds([])
+    setSelectedControlIds([])
     if ('mode' in entry) {
       if (entry.mode === 'layout') changeLayout()
       else {
@@ -2024,10 +2207,12 @@ function App() {
           setTool('select')
           setSelectedIds([])
           setSelectedItemIds([])
+          setSelectedControlIds([])
           setShowMap(false)
           setLauncher(null)
         }}
         menusAllowed={
+          !dragging &&
           !previewLayout &&
           !showMap &&
           !launcher &&
@@ -2044,6 +2229,7 @@ function App() {
           setTool(mode)
           if (mode !== 'select') setSelectedIds([])
           if (mode !== 'cursor') setSelectedItemIds([])
+          setSelectedControlIds([])
           setShowMap(false)
           setLauncher(null)
         }}
@@ -2124,6 +2310,7 @@ function App() {
       className={styles.desktop}
       data-layout-editing={tool === 'layout'}
       onPointerDownCapture={(event) => {
+        suppressedControlClick.current = null
         objectLayout.events.onPointerDownCapture(event)
         if (
           tool !== 'layout' &&
@@ -2143,11 +2330,41 @@ function App() {
         )
           setExpandedPinnedId(null)
       }}
-      onPointerMove={objectLayout.events.onPointerMove}
-      onPointerUp={objectLayout.events.onPointerUp}
-      onPointerCancel={objectLayout.events.onPointerCancel}
-      onLostPointerCapture={objectLayout.events.onLostPointerCapture}
+      onPointerMove={(event) => {
+        objectLayout.events.onPointerMove(event)
+        if (gesture.current?.pointerId !== event.pointerId) return
+        latestPointer.current = {
+          x: event.clientX,
+          y: event.clientY,
+          altKey: event.altKey,
+        }
+        applyGesture(event.clientX, event.clientY)
+      }}
+      onPointerUp={(event) => {
+        objectLayout.events.onPointerUp(event)
+        endGesture(event)
+      }}
+      onPointerCancel={(event) => {
+        objectLayout.events.onPointerCancel(event)
+        endGesture(event)
+      }}
+      onLostPointerCapture={(event) => {
+        objectLayout.events.onLostPointerCapture(event)
+        if (event.target === captureTarget.current) endGesture(event)
+      }}
       onClickCapture={(event) => {
+        const control = (event.target as Element).closest<HTMLElement>(
+          '[data-canvas-control-id]',
+        )
+        if (
+          control &&
+          control.dataset.canvasControlId === suppressedControlClick.current
+        ) {
+          suppressedControlClick.current = null
+          event.preventDefault()
+          event.stopPropagation()
+          return
+        }
         if (
           tool === 'layout' &&
           !(event.target as Element).closest('[data-layout-editor]')
@@ -2300,7 +2517,7 @@ function App() {
         onPointerDown={(event) => {
           if (
             !(event.target as HTMLElement).closest(
-              '[data-window-id], [data-desktop-item-id], [data-drawing-id]',
+              '[data-window-id], [data-desktop-item-id], [data-drawing-id], [data-canvas-control-id]',
             )
           ) {
             if (windowSwitcher.open) {
@@ -2321,18 +2538,6 @@ function App() {
               startGesture(event, tool === 'cursor' ? 'item-select' : 'pan')
           }
         }}
-        onPointerMove={(event) => {
-          if (gesture.current?.pointerId !== event.pointerId) return
-          latestPointer.current = {
-            x: event.clientX,
-            y: event.clientY,
-            altKey: event.altKey,
-          }
-          applyGesture(event.clientX, event.clientY)
-        }}
-        onPointerUp={endGesture}
-        onPointerCancel={endGesture}
-        onLostPointerCapture={endGesture}
         onAuxClick={(event) => event.preventDefault()}
       >
         <div
@@ -2988,6 +3193,10 @@ function App() {
         )}
       <FrameShell
         canvasHost={canvasHost}
+        popoverHost={frameHost}
+        selectedControlIds={selectedControlIds}
+        onControlPointerDown={startControlGesture}
+        onControlSizeChange={measureControl}
         layout={objectLayout.layout}
         view={view}
         editing={tool === 'layout'}
