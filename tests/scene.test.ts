@@ -944,8 +944,59 @@ test('workspace edits retain and move pinned drawing anchors using projected coo
     { settle: false },
   )
   assert.deepEqual(lowered.drawings[0].location, {
-    surface: 'canvas',
+    surface: 'background',
     x: scrolled.x + 120,
     y: scrolled.y + 70,
+  })
+})
+
+test('drawing creation, workspace patches, and Canvas requests cannot retain a middle canvas layer', () => {
+  const raisedWorkspace: Workspace = {
+    ...workspace,
+    drawings: workspace.drawings.map((item) => ({ ...item, layer: 'above' })),
+  }
+  const scene = createScene(raisedWorkspace, {
+    ...defaults,
+    placements: { 'drawing:sketch': { surface: 'canvas', x: 400, y: 500 } },
+  })
+  assert.deepEqual(scene.drawings[0].location, {
+    surface: 'background',
+    x: 400,
+    y: 500,
+  })
+  const edited = updateSceneWorkspace(
+    scene,
+    (current) => ({
+      ...current,
+      drawings: current.drawings.map((item) => ({
+        ...item,
+        layer: 'above',
+        x: 600,
+        y: 700,
+      })),
+    }),
+    view,
+  )
+  assert.deepEqual(edited.drawings[0].location, {
+    surface: 'background',
+    x: 600,
+    y: 700,
+  })
+  const placed = placeSceneObject(
+    edited,
+    drawing,
+    { surface: 'canvas', x: 800, y: 900 },
+    view,
+    { settle: false },
+  )
+  assert.deepEqual(placed.drawings[0].location, {
+    surface: 'background',
+    x: 800,
+    y: 900,
+  })
+  const projected = projectScene(placed, view)
+  assert.equal(projected.workspace.drawings[0].layer, 'below')
+  assert.deepEqual(getPlacement(projected.layout, drawing), {
+    surface: 'background',
   })
 })

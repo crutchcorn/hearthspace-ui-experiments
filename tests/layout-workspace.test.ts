@@ -497,7 +497,7 @@ test('a detached canvas shortcut retains its first home across repeated window c
   })
 })
 
-test('a detached canvas drawing peeks repeatedly and returns without rewriting its legacy layer', () => {
+test('a background drawing peeks repeatedly and returns without rewriting its legacy layer', () => {
   const before: Workspace = {
     ...workspace,
     items: [],
@@ -542,7 +542,9 @@ test('a detached canvas drawing peeks repeatedly and returns without rewriting i
     restoreBackgroundItems,
   )
   assert.deepEqual(restored.drawings, before.drawings)
-  assert.deepEqual(layout.placements['drawing:sketch'], { surface: 'canvas' })
+  assert.deepEqual(layout.placements['drawing:sketch'], {
+    surface: 'background',
+  })
 })
 
 test('background windows only displace background shortcuts', () => {
@@ -566,7 +568,7 @@ test('background windows only displace background shortcuts', () => {
   assert.equal(result.items[1], before.items[1])
 })
 
-test('background windows only displace background drawings', () => {
+test('background windows displace background drawings while pinned drawings stay still', () => {
   const before: Workspace = {
     ...workspace,
     items: [],
@@ -579,7 +581,7 @@ test('background windows only displace background drawings', () => {
     ...defaults,
     placements: {
       'window:notes': { surface: 'background' },
-      'drawing:raised-sketch': { surface: 'canvas' },
+      'drawing:raised-sketch': { surface: 'pinned', x: 240, y: 140 },
     },
   }
   const result = transformCanvasWorkspace(before, layout, settleCoveredItems)
@@ -587,12 +589,12 @@ test('background windows only displace background drawings', () => {
   assert.equal(result.drawings[1], before.drawings[1])
 })
 
-test('raised shortcuts and drawings return over a window moved to the background', () => {
+test('raised shortcuts return over a lowered window while background drawings remain exposed', () => {
   const layout: FrameLayout = {
     ...defaults,
     placements: {
       'item:notes-shortcut': { surface: 'canvas' },
-      'drawing:sketch': { surface: 'canvas' },
+      'drawing:sketch': { surface: 'background' },
     },
   }
   const first = transformCanvasWorkspace(workspace, layout, settleCoveredItems)
@@ -609,7 +611,7 @@ test('raised shortcuts and drawings return over a window moved to the background
     restoreBackgroundItems,
   )
   assert.deepEqual(restored.items, workspace.items)
-  assert.deepEqual(restored.drawings, workspace.drawings)
+  assert.deepEqual(restored.drawings, first.drawings)
 })
 
 test('raised icons cover background icons regardless of their saved array order', () => {
@@ -631,7 +633,7 @@ test('raised icons cover background icons regardless of their saved array order'
   assert.notDeepEqual(result.items[1], before.items[1])
 })
 
-test('background icon glyphs do not displace raised drawings', () => {
+test('background icon glyphs do not displace pinned drawings', () => {
   const before: Workspace = {
     ...workspace,
     windows: [],
@@ -652,7 +654,14 @@ test('background icon glyphs do not displace raised drawings', () => {
       },
     ],
   }
-  const result = transformCanvasWorkspace(before, defaults, settleCoveredItems)
+  const result = transformCanvasWorkspace(
+    before,
+    {
+      ...defaults,
+      placements: { 'drawing:sketch': { surface: 'pinned', x: 166, y: 160 } },
+    },
+    settleCoveredItems,
+  )
   assert.equal(result, before)
 })
 
@@ -672,7 +681,7 @@ test('a shortcut dropped from the frame under a window peeks immediately', () =>
   assert.equal(result.windows[0], before.windows[0])
 })
 
-test('unpinning a drawing to the canvas under a window makes it peek immediately', () => {
+test('unpinning a drawing to the background under a window makes it peek immediately', () => {
   const before: Workspace = {
     ...workspace,
     items: [],
@@ -702,7 +711,7 @@ test('background drop obstacles do not displace raised decorations or ordinary w
     placements: {
       'widget:notifications': { surface: 'background', x: 100, y: 100 },
       'item:notes-shortcut': { surface: 'canvas' },
-      'drawing:sketch': { surface: 'canvas' },
+      'drawing:sketch': { surface: 'pinned', x: 240, y: 140 },
     },
   }
   const before = {

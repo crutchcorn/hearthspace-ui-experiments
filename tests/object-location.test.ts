@@ -80,7 +80,7 @@ test('unplaced desktop items remain on the background at their current canvas po
   })
 })
 
-test('legacy drawing layers supply the default only until a location is assigned', () => {
+test('unpinned drawing locations always resolve to the background', () => {
   assert.deepEqual(
     resolveObjectLocation(emptyLayout, drawing, savedBounds, 'background'),
     {
@@ -92,7 +92,7 @@ test('legacy drawing layers supply the default only until a location is assigned
   assert.deepEqual(
     resolveObjectLocation(raised, drawing, savedBounds, 'background'),
     {
-      surface: 'canvas',
+      surface: 'background',
       bounds: { x: 900, y: 600, width: 88, height: 96 },
     },
   )

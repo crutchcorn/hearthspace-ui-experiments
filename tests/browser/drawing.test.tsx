@@ -1,8 +1,8 @@
 import { expect, test } from 'vitest'
 import { commands, page, userEvent } from 'vitest/browser'
-import { renderDesktop } from './desktop'
+import { renderDesktop, windowElement } from './desktop'
 
-test('choosing Draw continues a selected drawing instead of creating a separate one', async () => {
+test('new ink is pinned and continuing it after panning keeps its earlier strokes in place', async () => {
   await renderDesktop()
   await page.getByRole('button', { name: 'Draw', exact: true }).click()
   await commands.drawCanvasStroke([
@@ -12,6 +12,28 @@ test('choosing Draw continues a selected drawing instead of creating a separate 
   await expect
     .element(page.getByRole('button', { name: 'Finish drawing' }))
     .toBeVisible()
+
+  const ink = page.getByRole('img', { name: 'Drawing 1', exact: true })
+  await expect.element(ink).toHaveAttribute('data-surface', 'pinned')
+  const drawingId = ink.element().getAttribute('data-drawing-id')!
+  const strokePosition = () => {
+    const stroke = document.querySelector(
+      `[data-drawing-id="${drawingId}"] polyline`,
+    )!
+    const { x, y } = stroke.getBoundingClientRect()
+    return { x, y }
+  }
+  const before = strokePosition()
+  const windowBefore = windowElement('Scratchpad').getBoundingClientRect().x
+  await userEvent.keyboard('h')
+  await commands.drawCanvasStroke([
+    { x: 1000, y: 750 },
+    { x: 1100, y: 780 },
+  ])
+  await expect
+    .poll(() => windowElement('Scratchpad').getBoundingClientRect().x)
+    .toBeGreaterThan(windowBefore + 90)
+  expect(strokePosition()).toEqual(before)
 
   await userEvent.keyboard('v')
   const drawing = page.getByRole('button', { name: 'Drawing 1', exact: true })
@@ -33,6 +55,8 @@ test('choosing Draw continues a selected drawing instead of creating a separate 
   await expect
     .poll(() => drawing.element().getBoundingClientRect().width)
     .toBeGreaterThan(widthBefore)
+  await expect.element(drawing).toHaveAttribute('data-surface', 'pinned')
+  expect(strokePosition()).toEqual(before)
 })
 
 test('Enter finishes a drawing and leaves Draw ready to start a separate one', async () => {
@@ -66,9 +90,12 @@ test('Enter finishes a drawing and leaves Draw ready to start a separate one', a
   await expect
     .element(page.getByRole('img', { name: 'Drawing 2', exact: true }))
     .toBeVisible()
+  await expect
+    .element(page.getByRole('img', { name: 'Drawing 2', exact: true }))
+    .toHaveAttribute('data-surface', 'pinned')
 })
 
-test('Delete removes the selected drawing on the canvas or pinned above it', async () => {
+test('Delete removes the selected pinned or background drawing', async () => {
   await renderDesktop()
   await page.getByRole('button', { name: 'Draw', exact: true }).click()
   await commands.drawCanvasStroke([
@@ -88,10 +115,10 @@ test('Delete removes the selected drawing on the canvas or pinned above it', asy
     .getByRole('group', { name: 'Drawing actions' })
     .getByRole('button', { name: 'Change layout', exact: true })
     .click()
-  await page.getByRole('button', { name: 'Pin to top', exact: true }).click()
+  await page.getByRole('button', { name: 'Background', exact: true }).click()
   await page.getByRole('button', { name: 'Done changing layout' }).click()
   const drawing = page.getByRole('button', { name: 'Drawing 1', exact: true })
-  await expect.element(drawing).toHaveAttribute('data-surface', 'pinned')
+  await expect.element(drawing).toHaveAttribute('data-surface', 'background')
   await drawing.click()
   await userEvent.keyboard('{Delete}')
   await expect.element(drawing).not.toBeInTheDocument()

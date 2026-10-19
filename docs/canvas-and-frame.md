@@ -85,7 +85,8 @@ show a battery percentage.
 
 Use this tool to attach an item to a frame edge, return it to the canvas, or
 affix it to the canvas background. Drawings use **Pin to top** in place of
-Frame; Canvas and Background return them to the painting. Placement belongs
+Frame and start there. Their only other choice, Background, puts the ink on
+the painting. Placement belongs
 to the object, rather than to a separate drawing mode or a special version of
 an app.
 
@@ -124,10 +125,10 @@ information fits alongside the work.
 
 Drawing therefore has one job: create ink. **Change layout** replaces the
 above/below drawing modes and the separate drawing pinning controls. A drawing
-can later become a background annotation, move with other raised work, or stay
-pinned above canvas windows. Its strokes remain one object through those
-changes. Dragging a drawing never changes that placement: you choose Canvas,
-Background, or Pin to top deliberately in the editor.
+starts pinned above canvas windows and can later become a background
+annotation. Its strokes remain one object through that change. Dragging a
+drawing never changes its placement: you choose Background or Pin to top
+deliberately in the editor. Drawings don't use the raised Canvas layer.
 
 Ordinary dragging still moves an object within its chosen place. The layout
 tool is the deliberate way to change that place, so a window dragged near an
@@ -145,8 +146,9 @@ covering a large part of the painting.
 
 ## A raised painting has layers
 
-The painting has depth. Background work sits lowest. Raised canvas icons,
-drawings, and widgets sit above it, with ordinary windows above those objects.
+The painting has depth. Background work, including background drawings, sits
+lowest. Raised canvas icons and widgets sit above it, with ordinary windows
+above those objects.
 All of that work remains beneath the frame.
 
 | Place             | What moving the canvas does       | Why something belongs there                                              |
@@ -158,16 +160,16 @@ All of that work remains beneath the frame.
 
 Desktop items begin on the background, and windows begin above it. These are
 starting placements the user can change. A background window is still a
-window; a raised drawing is still a drawing. Raising an icon or drawing above
-the background doesn't put it in front of ordinary windows. **Pin to top**
-places a drawing above those windows; attaching an icon to the frame keeps
+window. Raising an icon above the background doesn't put it in front of
+ordinary windows. Drawings instead start at **Pin to top**, above those
+windows; attaching an icon to the frame keeps
 that icon above the canvas too. Opening a canvas control leaves its
 icon on that layer; only its temporary panel appears above windows. For example,
 opening Battery never raises the battery icon through a window covering it.
 
 Existing movement gives that depth a useful purpose. Fully covered work can
-peek into view, and displaced icons, controls, and drawings on either canvas
-layer return home when their space clears. Moving one yourself establishes a
+peek into view, and displaced icons, controls, and background drawings return
+home when their space clears. Moving one yourself establishes a
 new home; another window pushing it aside preserves that intended position.
 Frame attachments stay above and outside those arrangements. Search can
 temporarily borrow the visible canvas without rewriting the places the user chose.

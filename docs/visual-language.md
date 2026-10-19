@@ -235,9 +235,9 @@ during a drag, then slide fully hidden windows, desktop icons, and canvas
 drawings toward the nearest opening when the drag ends. Opening a new window
 does the same, keeping that window where it launched while covered work moves
 into view. A small exposed piece is enough; leave partly visible work where it
-is. Icons and drawings on either canvas layer keep their place underneath
-windows and slide home once their original space is clear. Frame attachments
-stay outside this rearrangement.
+is. Icons on either canvas layer and background drawings keep their place
+underneath windows and slide home once their original space is clear. Frame
+attachments and drawings set to Pin to top stay outside this rearrangement.
 This temporary movement keeps a shortcut or piece of art from losing the place
 the user chose for it. Moving or editing it intentionally establishes a new
 home, while windows keep their adjusted positions. The movement itself explains

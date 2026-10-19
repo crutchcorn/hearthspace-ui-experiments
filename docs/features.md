@@ -44,15 +44,15 @@ setting before removal; keyboard search remains available to find them again.
 
 ## Find, launch, and draw
 
-| Feature                                              | Start here                                                                                         |
-| ---------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| [Canvas search](canvas-search.md)                    | Search apps, files, folders, windows, drawings, controls, and tools in one temporary arrangement.  |
-| [Keyboard window switching](window-switching.md)     | Hold Ctrl and press 1, or Shift+1 for reverse, then release Ctrl to choose a window.               |
-| [App launcher](app-launcher.md)                      | Browse gallery/list views, filter apps, or open the dedicated gesture pad.                         |
-| [Favorites and running windows](dock-favorites.md)   | Drag shortcuts onto Apps to favorite them; use window dots, instance pickers, and reorder handles. |
-| [Canvas drawing](drawing.md)                         | Keep artwork on the canvas or pin it above windows, move it, and play it as an app gesture.        |
-| [Gesture launching and editing](gesture-launcher.md) | Record custom shapes, assign apps with the searchable picker, and match rough strokes locally.     |
-| [Handwritten search](handwritten-search.md)          | Read a line of ink locally and append the recognized text to the editable search query.            |
+| Feature                                              | Start here                                                                                          |
+| ---------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| [Canvas search](canvas-search.md)                    | Search apps, files, folders, windows, drawings, controls, and tools in one temporary arrangement.   |
+| [Keyboard window switching](window-switching.md)     | Hold Ctrl and press 1, or Shift+1 for reverse, then release Ctrl to choose a window.                |
+| [App launcher](app-launcher.md)                      | Browse gallery/list views, filter apps, or open the dedicated gesture pad.                          |
+| [Favorites and running windows](dock-favorites.md)   | Drag shortcuts onto Apps to favorite them; use window dots, instance pickers, and reorder handles.  |
+| [Canvas drawing](drawing.md)                         | Draw above windows by default, affix ink to the background, move it, and play it as an app gesture. |
+| [Gesture launching and editing](gesture-launcher.md) | Record custom shapes, assign apps with the searchable picker, and match rough strokes locally.      |
+| [Handwritten search](handwritten-search.md)          | Read a line of ink locally and append the recognized text to the editable search query.             |
 
 Search and switching temporarily move the actual windows. Choosing a result
 restores the arrangement and opens or reveals that work. [Arrange](window-management.md)
@@ -90,18 +90,18 @@ extending the experiment, while the shell itself stays concise.
 
 ## Understand revisions in older discussions
 
-| Earlier experiment                                                   | Current behavior                                                                                                            |
-| -------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| Alt+Tab, then Ctrl+Tab                                               | Ctrl+1 and Ctrl+Shift+1 avoid the original shortcut choices.                                                                |
-| A dock-attached keyboard switcher with app/instance arrow navigation | A later request moved switching onto the canvas. The current switcher cycles windows in a temporary grid.                   |
-| Any launcher stroke starts a hardcoded app                           | Saved assignments now drive actual gesture recognition. Unmatched strokes don't launch.                                     |
-| Above/below drawing modes                                            | Change layout chooses placement for drawings and other objects. Both canvas drawing layers remain beneath ordinary windows. |
-| Drawings attached to frame edges or groups                           | Pin to top gives drawings a free screen position above windows and below frame controls; dragging never changes that layer. |
-| Ideal/Realistic appearance toggle                                    | Varied app presentation is always active; no appearance-mode selector remains.                                              |
-| Battery-percentage setting                                           | Show details/Icon only in Change layout controls battery detail like other status items.                                    |
-| A Workspace app and new-workspace action                             | Removed. One saved spatial scene remains; there is no workspace-switching feature.                                          |
-| Fixed, inseparable corner toolbars                                   | Four-corner defaults can be split, moved, hidden, and grouped.                                                              |
-| Separate canvas coordinates and frame placement for the same item    | One scene location determines where each item belongs. Old split layout saves are deliberately ignored.                     |
+| Earlier experiment                                                   | Current behavior                                                                                                               |
+| -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| Alt+Tab, then Ctrl+Tab                                               | Ctrl+1 and Ctrl+Shift+1 avoid the original shortcut choices.                                                                   |
+| A dock-attached keyboard switcher with app/instance arrow navigation | A later request moved switching onto the canvas. The current switcher cycles windows in a temporary grid.                      |
+| Any launcher stroke starts a hardcoded app                           | Saved assignments now drive actual gesture recognition. Unmatched strokes don't launch.                                        |
+| Above/below drawing modes                                            | New drawings use Pin to top. Change layout chooses between that foreground placement and Background; raised Canvas is removed. |
+| Drawings attached to frame edges or groups                           | Pin to top gives drawings a free screen position above windows and below frame controls; dragging never changes that layer.    |
+| Ideal/Realistic appearance toggle                                    | Varied app presentation is always active; no appearance-mode selector remains.                                                 |
+| Battery-percentage setting                                           | Show details/Icon only in Change layout controls battery detail like other status items.                                       |
+| A Workspace app and new-workspace action                             | Removed. One saved spatial scene remains; there is no workspace-switching feature.                                             |
+| Fixed, inseparable corner toolbars                                   | Four-corner defaults can be split, moved, hidden, and grouped.                                                                 |
+| Separate canvas coordinates and frame placement for the same item    | One scene location determines where each item belongs. Old split layout saves are deliberately ignored.                        |
 
 Styling refinements such as shorter captions, joined window chrome, padded
 frame icons, the uneven Arrange icon, and consistent hover radii belong to

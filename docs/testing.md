@@ -21,8 +21,8 @@ where individually correct pieces don't work together.
 The flows protect shell panel exclusivity, tool choices across entry points,
 search and window-switcher
 cancellation, interrupted desktop dragging, and app state across canvas/frame
-placement. A drawing flow also checks that returning to Draw appends strokes
-to the selected piece. The tests check that edited note text, window positions, keyboard
+placement. A drawing flow checks that new ink starts pinned, remains at its
+screen position while panning, and accepts more strokes when returning to Draw. The tests check that edited note text, window positions, keyboard
 focus, and the selected Settings category survive temporary arrangements.
 An interrupted drag must restore the icon's position and leave the next
 drag usable. Assertions wait for the observable result instead of sleeping
@@ -42,8 +42,10 @@ that releasing or canceling a layout drag restores ordinary layering, including
 returning a frame shortcut to the canvas beneath windows. Drawing cases check
 that Pin to top keeps ink above canvas windows and below frame tools, permits
 free placement without grouping, and preserves screen coordinates through
-panning and reload. Returning that drawing to Canvas makes it move with the
-painting again.
+panning and reload. Moving that drawing to Background makes it move with the
+painting again. Its editor offers Background and Pin to top, while windows
+retain their Canvas choice. Keyboard checks cover finishing and deleting ink
+in both drawing placements.
 
 ## Isolation and limits
 

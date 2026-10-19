@@ -1427,7 +1427,7 @@ function App() {
       pinned: existing
         ? objectLayout.placement({ kind: 'drawing', id: existing.id })
             .surface === 'pinned'
-        : false,
+        : true,
     })
     closePopovers()
   }
@@ -1674,17 +1674,29 @@ function App() {
           current.drawingLayer,
           workspace,
         )
-        preparePeekMotion({ backgroundOnly: true, drawingOrigin: drawing })
-        setWorkspace((previous) =>
-          settleBackgroundItems({
+        const pinned =
+          !existing ||
+          objectLayout.placement({ kind: 'drawing', id: existing.id })
+            .surface === 'pinned'
+        if (!pinned)
+          preparePeekMotion({ backgroundOnly: true, drawingOrigin: drawing })
+        setWorkspace((previous) => {
+          const next = {
             ...previous,
             drawings: existing
               ? previous.drawings.map((item) =>
                   item.id === drawing.id ? drawing : item,
                 )
               : [...previous.drawings, drawing],
-          }),
-        )
+          }
+          return pinned ? next : settleBackgroundItems(next)
+        })
+        if (!existing)
+          sceneActions.place(
+            { kind: 'drawing', id: drawing.id },
+            { surface: 'pinned', x: drawing.x - view.x, y: drawing.y - view.y },
+            { settle: false },
+          )
         setSelectedDrawingId(drawing.id)
       }
       setDrawingDraft(null)

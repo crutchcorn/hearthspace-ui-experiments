@@ -31,7 +31,7 @@ interaction and points to its implementation.
 - [Window switching](window-switching.md): Ctrl+1 selection, confirmation/cancellation, and viewport recovery.
 - [App launcher](app-launcher.md): gallery/list browsing, filtering, and app preview launches.
 - [Dock and favorites](dock-favorites.md): drag-to-favorite, running dots, instance lists, and row ordering.
-- [Canvas drawing](drawing.md): strokes, selection, Delete/Enter actions, free placement above windows with Pin to top, and explicit Play actions.
+- [Canvas drawing](drawing.md): strokes, selection, Delete/Enter actions, Pin to top by default, background placement, and explicit Play actions.
 - [Gesture launching](gesture-launcher.md): recording and editing app assignments and matching rough gestures.
 - [Handwritten search](handwritten-search.md): recognizing query text, retries, cancellation, and the real model download.
 

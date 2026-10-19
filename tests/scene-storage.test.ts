@@ -458,7 +458,7 @@ test('invalid peek homes are discarded while icons and artwork remain intact', (
   }
 })
 
-test('both canvas drawing layers keep first homes at the world boundary', () => {
+test('old Canvas drawings become Background while retaining their first homes', () => {
   const scene = freshScene()
   const peekOrigin = {
     x: scene.workspace.width - drawing.width,
@@ -477,7 +477,10 @@ test('both canvas drawing layers keep first homes at the world boundary', () => 
   ]
   assert.deepEqual(
     readScene(JSON.parse(JSON.stringify(scene))).drawings,
-    scene.drawings,
+    scene.drawings.map((item) => ({
+      ...item,
+      location: { ...item.location, surface: 'background' },
+    })),
   )
 })
 

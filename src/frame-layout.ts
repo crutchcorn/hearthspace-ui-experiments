@@ -95,7 +95,10 @@ function defaultPlacement(target: LayoutTarget): ObjectPlacement {
       ? FRAME_WIDGETS.find((widget) => widget.id === target.id)
           ?.defaultPlacement
       : undefined) ?? {
-      surface: target.kind === 'item' ? 'background' : 'canvas',
+      surface:
+        target.kind === 'item' || target.kind === 'drawing'
+          ? 'background'
+          : 'canvas',
     }
   )
 }
@@ -113,6 +116,8 @@ function protectPlacement(
   placement: ObjectPlacement,
 ): ObjectPlacement {
   if (!allowsPlacement(target, placement)) return defaultPlacement(target)
+  if (target.kind === 'drawing' && placement.surface === 'canvas')
+    return { ...placement, surface: 'background' }
   if (placement.surface !== 'hidden') return placement
   if (target.kind !== 'widget') return defaultPlacement(target)
   if (target.id === 'tools' && !layout.allowHideTools)

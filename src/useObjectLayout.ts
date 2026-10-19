@@ -482,13 +482,7 @@ export default function useObjectLayout(
       !layout.placements[targetKey(target)] &&
       !getTargetGroup(layout, target)
     )
-      return {
-        surface:
-          workspace.drawings.find((item) => item.id === target.id)?.layer ===
-          'below'
-            ? 'background'
-            : 'canvas',
-      }
+      return { surface: 'background' }
     return saved
   }
   function place(target: LayoutTarget, next: ObjectPlacement, settle = true) {

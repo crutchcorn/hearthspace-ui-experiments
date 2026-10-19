@@ -6,7 +6,7 @@ This experiment explores a desktop as a place to arrange icons, folders, drawing
 
 A native scroll container fills the viewport and hides its scrollbars. Its world starts ten screens wide and ten screens tall. At creation, one screen is the browser’s initial viewport size, with a minimum of 960 × 720 pixels. Arranging windows can expand the world to fit the result. The saved world keeps its dimensions across reloads.
 
-The home viewport starts at 4.5 screen widths and heights into that world. Desktop items, drawings, and windows use absolute world coordinates, so ordinary scroll movement also moves the dotted wallpaper. At desktop widths, the default frame controls sit above the scrolling viewport in four corners: notifications at top left, device status at top right, canvas tools at bottom left, and the app launcher at bottom right. Device status combines the clock and three icon buttons in one compact glass row. At 760 pixels or less, pairs still in their default positions join into top and bottom bars, preserving their left-to-right roles. Custom placements remain independent attachments.
+The home viewport starts at 4.5 screen widths and heights into that world. Desktop items, background drawings, and windows use absolute world coordinates, so ordinary scroll movement also moves the dotted wallpaper. At desktop widths, the default frame controls sit above the scrolling viewport in four corners: notifications at top left, device status at top right, canvas tools at bottom left, and the app launcher at bottom right. Device status combines the clock and three icon buttons in one compact glass row. At 760 pixels or less, pairs still in their default positions join into top and bottom bars, preserving their left-to-right roles. Custom placements remain independent attachments.
 
 The minimap translates pointer positions into world coordinates. Grabbing its visible-area rectangle preserves the pointer’s offset within the viewport; pressing elsewhere centers the viewport there. Pointer capture keeps navigation continuous outside the map until release, and the native scroll container clamps travel at the world edges. The Overview panel contains the map without a window count, dragging hint, or Home button; the Home key still returns to the starting viewport. Icon-only zoom-out and zoom-in buttons sit beside its heading. They are presentational placeholders and do not change the map scale or canvas viewport.
 
@@ -20,7 +20,9 @@ placement during the drag; releasing it resumes free movement immediately.
 Selected windows or a mixed selection of desktop items and canvas controls
 preserve their offsets and use the grabbed object as the anchor. Placement
 stays within the world bounds; if a group has no valid dot position on an axis, the boundary takes precedence. The grid remains
-available with a photo background and applies to drawings on either layer.
+available with a photo background and applies to background and pinned
+drawings. Pinned ink aligns with the currently visible dots without moving
+with them afterward.
 Deliberate moves still clear an icon, control, or drawing's `peekOrigin`.
 
 Holding Alt during a window resize snaps only the moving edges to the same dot
@@ -94,7 +96,7 @@ from its placement. `scene.ts` owns one source of state for the workspace,
 frame layout, desktop items, and drawings. Each object has one location.
 Desktop items use canvas or background coordinates with an optional return-home
 position, a frame edge and position, or a reference to a frame group. Drawings
-use canvas/background coordinates or a pinned screen position; they never
+use background coordinates or a pinned screen position; they never
 attach to edges or join groups. A frame, group, or pinned location has no
 leftover canvas coordinates. Drawing bounds and strokes describe its content;
 its location determines where that content belongs.
@@ -124,9 +126,9 @@ item preferences and other layout metadata through the same state queue. Neither
 view saves an independent copy of an item's position, so moving it between
 canvas and frame cannot leave two competing locations behind.
 
-Background objects occupy the lowest canvas layer. Raised icons, drawings,
-and widgets sit above them but below ordinary windows. Frame attachments sit
-above all canvas work. A `canvas` placement for an icon or drawing doesn't
+Background objects occupy the lowest canvas layer, including background
+ink. Raised icons and widgets sit above them but below ordinary windows.
+Frame attachments sit above all canvas work. A `canvas` placement for an icon doesn't
 give it the frame's foreground position. Selecting or activating a canvas
 control also leaves its surface beneath ordinary windows. Only its open panel
 uses a foreground layer, anchored to the control without raising the icon.
@@ -175,7 +177,7 @@ have no edge targets; dragging preserves their selected placement.
 
 Groups store ordered member targets and have their own placement. Members
 retain their identity and use the group's placement while joined. Groups can
-contain desktop items, shell widgets, windows, and drawings, including the dock
+contain desktop items, shell widgets, and windows, including the dock
 and canvas tools. Dropping a group onto another
 group combines their members in one row or column rather than nesting surfaces.
 Dragging an individual member out leaves the others together. A group with
@@ -225,14 +227,15 @@ If changing an option grows an item into a neighbor, automatic grouping keeps
 that item selected so its controls stay open.
 
 `useObjectLayout` owns the selected object and the Change layout pointer
-gesture. Selecting an object exposes the compact `LayoutEditor`; dragging it
-toward an edge previews attachment, with distinct animated corner targets
+gesture. Selecting an object exposes the compact `LayoutEditor`; dragging
+a window, item, or control toward an edge previews attachment, with distinct animated corner targets
 providing alignment points.
 Dragging an attachment out of an edge area gives it a canvas placement.
 Releasing in the interior keeps that placement; entering another edge area
 previews attachment there. The starting surface doesn't force an interior
-drop back to the frame. The editor has Canvas, Background, and Frame choices,
-contextual removal, and Done. Canvas or Background sets the layer directly;
+drop back to the frame. The editor has Canvas, Background, and Frame choices
+for those objects, with contextual removal and Done. Drawings instead choose
+between Background and Pin to top, retaining that placement throughout a drag. Canvas or Background sets the layer directly;
 Frame attaches to the nearest
 edge; dragging selects a specific edge or corner. There are no individual edge
 buttons or position sliders. Pointer cancellation, Escape,
@@ -281,8 +284,8 @@ without crowding the surrounding glass.
 
 `transformCanvasWorkspace` applies arrangement, peeking, and gathering to a
 projection of the canvas objects, then merges the changed geometry back by ID.
-Frame attachments remain outside those calculations. Icons, controls, and
-drawings on both canvas layers participate in peeking and return-home
+Frame attachments and pinned drawings remain outside those calculations.
+Icons and controls on both canvas layers, and background drawings, participate in peeking and return-home
 calculations while keeping their chosen layer. Background windows precede ordinary windows in
 overlap calculations.
 This keeps canvas movement from changing a frame attachment's saved geometry.
@@ -325,13 +328,13 @@ Item locations persist with the scene. Icons on either canvas layer can move asi
 
 ## Canvas drawings
 
-The pencil tool (D) draws directly on the raised canvas, above background work
-and beneath ordinary windows. Change layout offers Background, Canvas, and
-Pin to top; the pencil has no separate placement modes. Pin to top preserves
-the drawing's visible position in screen coordinates, above canvas windows
-and below frame attachments, including pinned windows. Dragging pinned ink
-keeps it pinned anywhere on the screen; only choosing Canvas or Background
-returns it to the painting. Drawings never snap to frame edges or join frame
+The pencil tool (D) creates drawings with Pin to top, above canvas windows
+and below frame attachments, including pinned windows. Change layout offers
+only Background and Pin to top; drawings don't use the raised Canvas layer.
+Pin to top stores the drawing's visible position in screen coordinates.
+Dragging pinned ink keeps it pinned anywhere on the screen; choosing
+Background puts it on the painting at its current visible position. Adding
+strokes to a selected background drawing keeps that placement. Drawings never snap to frame edges or join frame
 groups.
 Primary pointer input draws even over a window; Space-drag and middle-button
 drag retain temporary panning. Each completed stroke joins the selected drawing
@@ -339,8 +342,10 @@ until the floating check finishes it. A later stroke then starts another drawing
 Escape or pointer cancellation discards the unfinished stroke while preserving
 completed strokes.
 
-The cursor (V) selects a drawing by its ink and drags the whole object, with
-world-bound clamping and the same edge panning used for other canvas objects.
+The cursor (V) selects a drawing by its ink and drags the whole object.
+Background drawings use world-bound clamping and the same edge panning as
+other canvas objects. Pinned drawings move in screen space without edge
+panning.
 Selection uses a dashed outline. A compact vertical toolbar sits beside the
 selected drawing, stays within the work area, and hides when the art is offscreen.
 It offers Change layout and delete; the finish check appears while drawing.
@@ -357,11 +362,11 @@ or ambiguous match shows **No match found** briefly and leaves the drawing
 unchanged. Without saved assignments, Play is absent. Reduced motion makes
 the visual change immediate. Simply drawing does not trigger recognition.
 
-`App` owns the active draft and selected drawing. `DrawingLayer` renders saved
-strokes in separate background and raised canvas layers, both beneath ordinary
-windows, with pointer targets following the ink rather than filling each
-drawing's bounding box. The scene location supplies the derived drawing's
-placement and layer: `below` means Background and `above` means raised Canvas.
+`App` owns the active draft and selected drawing. `DrawingLayer` renders
+background strokes beneath the other canvas work, with pointer targets
+following the ink rather than filling each drawing's bounding box. The scene
+location supplies the derived drawing's placement and layer: `below` means
+Background and `above` means Pin to top.
 Pinned drawings portal into a dedicated screen layer beneath the frame;
 each drawing has only one rendered SVG. The pinned layer stays in that order
 even while dragging. Panning doesn't move pinned ink, and covered-item peeking
@@ -369,7 +374,7 @@ doesn't reposition it. Alt movement aligns it with the visible canvas dots on
 both axes without using frame-edge rules. Search temporarily renders matching
 drawings with the result grid, while window switching and focused view hide
 them.
-Covered drawings on either canvas layer can peek out and return home when their
+Covered background drawings can peek out and return home when their
 original space is clear. Arrange preserves the chosen placement of drawings,
 while allowing displaced canvas drawings to return home.
 
@@ -643,9 +648,11 @@ drawings, frame groups and placements, status detail, item-specific options,
 the tools-hiding preference, window list order, and the scratchpad. Items and drawings each
 save one location. Canvas and background locations can retain a `peekOrigin`;
 frame locations store an edge and position, and group members refer to their
-group. Drawings instead support a `pinned` location with screen-space `x` and
-`y`; drawing frame/group locations are invalid. The frame layout does not also
-save item or drawing positions.
+group. Drawings support only Background or a `pinned` location with
+screen-space `x` and `y`; drawing frame/group locations are invalid. Existing
+Canvas drawing locations normalize to Background at the same world position,
+keeping their strokes. This change keeps the v3 save and doesn't reset it.
+The frame layout does not also save item or drawing positions.
 `useScene` debounces the single save by 200 milliseconds.
 
 `FrameLayout.options` stores item preferences by target key, independently of
@@ -691,8 +698,8 @@ Handwriting model assets use the browser cache when available, separately from w
 
 Photo backgrounds are stored in IndexedDB database `hearthspace-background-v1`, in the `background` store’s `photo` record. The record holds the original image Blob, filename, and allowed fit value, independently of the workspace and other appearance settings. The image is decoded before use and is not sent to a server. Resetting deletes this record. If saving or deleting fails, the current session still shows the selected background and Settings explains that the change could not be saved. An unavailable or unreadable saved photo falls back to the default dots.
 
-Desktop items, controls, and drawings on either canvas layer can store a
-`peekOrigin`. It preserves the intended position while an object temporarily peeks out. Loading
+Desktop items and controls on either canvas layer, and background drawings,
+can store a `peekOrigin`. It preserves the intended position while an object temporarily peeks out. Loading
 validates this optional origin independently, discarding an invalid origin
 without losing the object.
 

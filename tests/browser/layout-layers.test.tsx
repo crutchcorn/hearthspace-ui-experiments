@@ -172,7 +172,7 @@ function prepareDrawing() {
       y: workspace.home.y + 500,
       width: 120,
       height: 80,
-      layer: 'above',
+      layer: 'below',
       strokes: [
         [
           { x: 0, y: 0 },
@@ -206,6 +206,9 @@ async function pinDrawing() {
   await page.getByRole('button', { name: 'Drawing 1', exact: true }).click()
   await expect
     .element(page.getByRole('button', { name: 'Frame', exact: true }))
+    .not.toBeInTheDocument()
+  await expect
+    .element(page.getByRole('button', { name: 'Canvas', exact: true }))
     .not.toBeInTheDocument()
   await page.getByRole('button', { name: 'Pin to top', exact: true }).click()
   await expect
@@ -253,7 +256,7 @@ test('pinned drawings move freely over windows and stay below frame tools withou
   expect(drawingPosition().y).toBeCloseTo(point.y - 40, 0)
 })
 
-test('pinned drawings keep their screen position through panning and reload until returned to the canvas', async () => {
+test('pinned drawings keep their screen position through panning and reload until placed in the background', async () => {
   prepareDrawing()
   await renderDesktop()
   await pinDrawing()
@@ -290,12 +293,12 @@ test('pinned drawings keep their screen position through panning and reload unti
 
   await page.getByRole('button', { name: 'Change layout', exact: true }).click()
   await page.getByRole('button', { name: 'Drawing 1', exact: true }).click()
-  await page.getByRole('button', { name: 'Canvas', exact: true }).click()
+  await page.getByRole('button', { name: 'Background', exact: true }).click()
   await expect
     .element(page.elementLocator(drawing()))
-    .toHaveAttribute('data-surface', 'canvas')
+    .toHaveAttribute('data-surface', 'background')
   await page.getByRole('button', { name: 'Done changing layout' }).click()
-  const canvasPosition = drawingPosition()
+  const backgroundPosition = drawingPosition()
   await userEvent.keyboard('h')
   await commands.drawCanvasStroke([
     { x: 1000, y: 650 },
@@ -303,10 +306,20 @@ test('pinned drawings keep their screen position through panning and reload unti
   ])
   await expect
     .poll(() => drawingPosition().x)
-    .toBeCloseTo(canvasPosition.x + 100, 0)
+    .toBeCloseTo(backgroundPosition.x + 100, 0)
   await expect
     .poll(() => drawingPosition().y)
-    .toBeCloseTo(canvasPosition.y + 50, 0)
+    .toBeCloseTo(backgroundPosition.y + 50, 0)
+
+  await pinDrawing()
+  await page.getByRole('button', { name: 'Done changing layout' }).click()
+  const pinnedAgain = drawingPosition()
+  await userEvent.keyboard('h')
+  await commands.drawCanvasStroke([
+    { x: 1000, y: 650 },
+    { x: 1100, y: 700 },
+  ])
+  expect(drawingPosition()).toEqual(pinnedAgain)
 })
 
 test('a pinned window preview stays above its group strip while it moves', async () => {

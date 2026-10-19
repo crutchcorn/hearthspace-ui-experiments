@@ -49,7 +49,9 @@ export default function LayoutEditor({
   children,
 }: LayoutEditorProps) {
   const choices = [
-    ...canvasChoices,
+    ...canvasChoices.filter(
+      (choice) => target?.kind !== 'drawing' || choice.surface === 'background',
+    ),
     target?.kind === 'drawing'
       ? ({ label: 'Pin to top', Icon: Pin, surface: 'pinned' } as const)
       : ({ label: 'Frame', Icon: PanelsTopLeft, surface: 'frame' } as const),

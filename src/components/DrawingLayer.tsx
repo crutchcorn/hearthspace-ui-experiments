@@ -117,9 +117,7 @@ export default function DrawingLayer({
           targetKey({ kind: 'drawing', id: drawing.id })
         ]
           ? getPlacement(frameLayout, { kind: 'drawing', id: drawing.id })
-          : {
-              surface: drawing.layer === 'below' ? 'background' : 'canvas',
-            }
+          : { surface: 'background' }
         const effectiveLayer = placements
           ? 'above'
           : layout.surface === 'background'

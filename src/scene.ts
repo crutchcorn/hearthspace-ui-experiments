@@ -95,7 +95,7 @@ function canonicalLocation(
       ? placement
       : { surface: defaultSurface }
   return {
-    surface: canvas.surface,
+    surface: target.kind === 'drawing' ? 'background' : canvas.surface,
     x: canvas.x ?? object.x,
     y: canvas.y ?? object.y,
     ...(object.peekOrigin

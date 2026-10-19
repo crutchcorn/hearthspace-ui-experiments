@@ -30,7 +30,7 @@ export function resolveObjectLocation(
     fallbackSurface &&
     !getTargetGroup(frameLayout, target) &&
     !frameLayout.placements[targetKey(target)]
-      ? { surface: fallbackSurface }
+      ? { surface: target.kind === 'drawing' ? 'background' : fallbackSurface }
       : getPlacement(frameLayout, target)
 
   if (placement.surface === 'frame')

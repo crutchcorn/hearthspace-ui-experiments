@@ -9,17 +9,20 @@ toolbar implementation.
 ## Put an item where it belongs
 
 Open **Change layout** from canvas tools, **Settings → System**, or canvas search.
-Select an object, then drag it or use the editor's three placement buttons:
+Select an object, then drag it or use the editor's placement buttons:
 
-- **Canvas** puts it on the raised canvas layer. Icons, drawings, and controls
+- **Canvas** puts it on the raised canvas layer. Icons and controls
   still sit below ordinary windows.
 - **Background** affixes it to the lower layer of the painting.
-- **Frame** attaches it to the nearest screen edge. Drawings instead offer
-  **Pin to top**, keeping their ink above windows at any screen position.
+- **Frame** attaches it to the nearest screen edge.
+
+Drawings offer only **Background** and **Pin to top**. They start pinned above
+canvas windows at a free screen position, beneath frame attachments. Background
+puts the ink beneath the other canvas work.
 
 Dragging a drawing keeps its selected placement. Drawings don't snap to edges
 or join frame groups. A pinned drawing stays pinned when moved into the middle
-of the screen; choose Canvas or Background to unpin it. See
+of the screen; choose Background to unpin it. See
 [drawing placement](drawing.md#choose-where-it-belongs).
 
 For other objects, dragging near an edge attaches the object there; each corner

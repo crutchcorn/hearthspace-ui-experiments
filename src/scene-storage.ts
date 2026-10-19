@@ -69,7 +69,7 @@ function readLocation(
     if (!point(value)) return null
     const peekOrigin = readPeekOrigin(value.peekOrigin, size, world)
     return {
-      surface: value.surface,
+      surface: target.kind === 'drawing' ? 'background' : value.surface,
       x: clamp(value.x, 0, world.width - size.width),
       y: clamp(value.y, 0, world.height - size.height),
       ...(peekOrigin ? { peekOrigin } : {}),

@@ -55,9 +55,9 @@ temporary homes across reloads.
 
 [peek-layout.ts](../src/peek-layout.ts) calculates coverage and restoration.
 [layout-workspace.ts](../src/layout-workspace.ts) applies layer rules and excludes
-frame work and pinned drawings. It passes each drawing's resolved surface separately from the drawing
-content, so both canvas layers participate without temporarily rewriting the
-drawing's layer or strokes.
+frame work and pinned drawings. It passes each drawing's resolved surface
+separately from the drawing content, so background ink participates without
+temporarily rewriting its layer or strokes.
 
 A layout drop supplies a fixed rectangular obstacle to the calculation. It
 doesn't create a pretend window or add an identity to the window list. The dropped

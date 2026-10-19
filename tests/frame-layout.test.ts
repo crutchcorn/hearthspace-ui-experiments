@@ -125,7 +125,7 @@ test('removing attachments hides widgets but returns work to the canvas', () => 
     const target = { kind, id: 'personal-work' }
     const layout = setObjectPlacement(defaults, target, { surface: 'hidden' })
     assert.deepEqual(getPlacement(layout, target), {
-      surface: kind === 'item' ? 'background' : 'canvas',
+      surface: kind === 'window' ? 'canvas' : 'background',
     })
   }
 })
@@ -139,7 +139,7 @@ test('frame and background placements survive a saved-layout round trip', () => 
       'widget:wifi': { surface: 'frame', edge: 'left', position: 0.7 },
       'window:notes': { surface: 'frame', edge: 'right', position: 0.25 },
       'item:projects': { surface: 'background', x: 4320, y: 3690 },
-      'drawing:my:sketch': { surface: 'canvas', x: 4500, y: 3700 },
+      'drawing:my:sketch': { surface: 'background', x: 4500, y: 3700 },
     },
   }
   assert.deepEqual(readFrameLayout(JSON.parse(JSON.stringify(layout))), layout)
@@ -382,7 +382,7 @@ test('removing a mixed group returns windows to the canvas without affecting dra
   )
   assert.deepEqual(getFrameGroups(removed), [])
   assert.deepEqual(getPlacement(removed, window), { surface: 'canvas' })
-  assert.deepEqual(getPlacement(removed, drawing), { surface: 'canvas' })
+  assert.deepEqual(getPlacement(removed, drawing), { surface: 'background' })
   assert.deepEqual(getPlacement(removed, apps), { surface: 'hidden' })
   assert.deepEqual(
     readFrameLayout(JSON.parse(JSON.stringify(removed))),
