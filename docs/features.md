@@ -82,6 +82,12 @@ The editor labels these choices **Show details** and **Icon only**.
 Expanded notification text follows a vertical edge when placed on either side
 of the screen, keeping the group narrow while its bell stays upright.
 
+Select Clock in Change layout to choose **Time only**, **Weekday**, **Short date**,
+**Numeric date**, or **Long date**. Live previews show the chosen date format
+alongside 24-hour time using your browser's locale. The expanded clock and its search
+preview update immediately. Time only is the default; the choice stays saved
+when you move, group, hide, or shrink the clock.
+
 Finishing a layout move reveals work that the placement fully covers. Placing
 an object on the background also moves blocked background objects aside; those
 adjusted positions become their new homes. This differs from a window
@@ -325,7 +331,7 @@ Prototype boundaries:
   dragging; there is no separate favorites-management screen.
 
 The browser saves window layouts and stacking, desktop-item positions, drawings,
-frame attachments and groups, status detail, favorites, canvas layers, hidden widgets, the tools-hiding preference,
+frame attachments and groups, status detail and clock date format, favorites, canvas layers, hidden widgets, the tools-hiding preference,
 window list order, the scratchpad, tool choices, gesture assignments, appearance,
 background, and completed AI opt-in. Panels,
 selections, unfinished pointer strokes, temporary search arrangements, viewport

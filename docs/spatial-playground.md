@@ -182,6 +182,25 @@ The editor's detail action switches between **Show details** and **Icon only**.
 Expanded notification text uses vertical writing on left and right edges;
 the trigger stacks its upright bell and text in a 44-pixel-wide control.
 
+Selecting Clock also opens its date-format choices in Change layout. Native
+radio cards preview **Time only**, **Weekday**, **Short date**, **Numeric date**,
+and **Long date** using the current shared clock value. `formatClock` applies
+the browser locale to the date and keeps 24-hour time with the `h23` hour cycle.
+The expanded clock and its search preview use the same formatter and preference,
+so choosing a format updates both immediately. Icon-only presentation keeps
+its compact icon and preserves the chosen format for the next expansion.
+
+`LayoutEditor` provides a children slot for controls specific to the selected
+item. `LayoutItemControls` looks up an editor by `targetKey`, currently mapping
+`widget:clock` to `ClockLayoutControls`. The typed `LayoutItemOptionsMap` in
+`layout-item-options.ts` pairs that key with `{ dateFormat }`; its definition
+supplies the default and reader for saved values. To add another item's options,
+extend that map and definition, register its editor, and pass its saved values
+to the components that render the item. Each editor owns its controls while
+the shared editor continues to own placement and removal.
+If changing an option grows an item into a neighbor, automatic grouping keeps
+that item selected so its controls stay open.
+
 `useObjectLayout` owns the selected object and the Change layout pointer
 gesture. Selecting an object exposes the compact `LayoutEditor`; dragging it
 toward an edge previews attachment, with distinct animated corner targets
@@ -387,7 +406,7 @@ At desktop widths, canvas tools start at the bottom left, with dropdowns for bac
 
 Default horizontal corner surfaces are 54 pixels high and sit 24 pixels inside the viewport edges. At 760 pixels or less, unchanged default attachments form two shared 54-pixel bars with a 12-pixel screen inset. Customized attachments keep their chosen edge and position with the same inset. The bottom bar contains one canvas-tool selector, the horizontally scrollable app strip, and the Apps launcher. The selector opens a single flat menu containing desktop-item selection, pan, search, rectangle select, freeform lasso, Draw, Change layout, Overview, and Arrange windows, without submenus. Choosing a tool or action closes the menu.
 
-The notification trigger defaults to a bell with a single-line unread status. Its expanded contents remain left-aligned at their natural width, preserving the full label on narrow screens; compact mode shows only the bell and its unread treatment. Clock, network, sound, and battery begin in one group on the right but can move independently. Their compact forms show icons; expanded forms show the time, network name, volume, or battery percentage. The full date and simulated device values remain available in hover titles and panels in either form.
+The notification trigger defaults to a bell with a single-line unread status. Its expanded contents remain left-aligned at their natural width, preserving the full label on narrow screens; compact mode shows only the bell and its unread treatment. Clock, network, sound, and battery begin in one group on the right but can move independently. Their compact forms show icons; expanded forms show the chosen date/time format, network name, volume, or battery percentage. The full date and simulated device values remain available in hover titles and panels in either form.
 
 Placed widgets measure their actual size and available space to open panels above or below their current position. Default merged bars retain their compact mobile layout; relocated widgets clamp popovers within the viewport and scroll the panel internally when needed.
 
@@ -519,10 +538,14 @@ across Settings windows.
 | [`src/useScene.ts`](../src/useScene.ts)                                                                                                               | Shared scene state queue, workspace and layout adapters, viewport state, and saving.                         |
 | [`src/desktop.ts`](../src/desktop.ts)                                                                                                                 | Workspace geometry types, starter desktop items, window resizing, and arrangement.                           |
 | [`src/frame-layout.ts`](../src/frame-layout.ts)                                                                                                       | Frame placements, ordered groups, widget catalog, status detail, frame bounds, offsets, and validation.      |
+| [`src/clock-format.ts`](../src/clock-format.ts)                                                                                                       | Allowed date formats and shared locale-aware clock formatting.                                               |
+| [`src/layout-item-options.ts`](../src/layout-item-options.ts)                                                                                         | Typed item preferences, defaults, saved-value readers, and immutable option updates.                         |
 | [`src/frame-collisions.ts`](../src/frame-collisions.ts)                                                                                               | Positive-area attachment overlap and transitive group merging.                                               |
 | [`src/useObjectLayout.ts`](../src/useObjectLayout.ts)                                                                                                 | Layout editing, grouping, cancellation, placement and detail choices, removal protection, and tool recovery. |
 | [`src/layout-workspace.ts`](../src/layout-workspace.ts)                                                                                               | Apply geometry operations to canvas objects while preserving frame attachments.                              |
 | [`src/components/LayoutEditor.tsx`](../src/components/LayoutEditor.tsx)                                                                               | Selected-object title, placement and detail choices, separation, removal, and Done.                          |
+| [`src/components/LayoutItemControls.tsx`](../src/components/LayoutItemControls.tsx)                                                                   | Target-key registry for item-specific layout editors.                                                        |
+| [`src/components/ClockLayoutControls.tsx`](../src/components/ClockLayoutControls.tsx)                                                                 | Clock date-format choices with live radio-card previews.                                                     |
 | [`src/components/FrameShell.tsx`](../src/components/FrameShell.tsx)                                                                                   | Shared frame-group surfaces, member rendering, whole-group grips, and default mobile bars.                   |
 | [`src/components/FramePreviewSlot.tsx`](../src/components/FramePreviewSlot.tsx)                                                                       | Measured slots and group bounds for existing window and drawing surfaces.                                    |
 | [`src/components/PlacedWidget.tsx`](../src/components/PlacedWidget.tsx)                                                                               | Measured shell-widget positioning, canvas selection and dragging, responsive merging, and popover placement. |
@@ -586,12 +609,19 @@ across Settings windows.
 
 The whole scene is saved under `hearthspace-scene-v1`. It contains world
 dimensions and home coordinates, windows and their stacking, desktop items,
-drawings, frame groups and placements, status detail, the tools-hiding
-preference, window list order, and the scratchpad. Items and drawings each
+drawings, frame groups and placements, status detail, item-specific options,
+the tools-hiding preference, window list order, and the scratchpad. Items and drawings each
 save one location. Canvas and background locations can retain a `peekOrigin`;
 frame locations store an edge and position, and group members refer to their
 group. The frame layout does not also save item or drawing positions.
 `useScene` debounces the single save by 200 milliseconds.
+
+`FrameLayout.options` stores item preferences by target key, independently of
+placement, group membership, and expanded status. The clock currently saves
+`options['widget:clock'].dateFormat` as `none`, `weekday`, `short`, `numeric`, or
+`long`. Missing or invalid values use `none` (time only); readers discard
+unknown option keys and fields. Moving, grouping, or hiding the clock preserves
+its date format, and reloading restores it from the existing scene save.
 
 Validation checks supported object identities and locations, finite geometry,
 frame bounds, group membership, and drawing content. Only widgets may be
