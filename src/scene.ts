@@ -11,6 +11,8 @@ import {
   FRAME_WIDGETS,
   getPlacement,
   getTargetGroup,
+  setObjectPlacement,
+  mergeFrameTargets,
   targetKey,
   ungroupFrameTarget,
   type FrameEdge,
@@ -18,7 +20,11 @@ import {
   type LayoutTarget,
   type ObjectPlacement,
 } from './frame-layout.ts'
-import { transformCanvasWorkspace } from './layout-workspace.ts'
+import {
+  settleLayoutDrop,
+  transformCanvasWorkspace,
+} from './layout-workspace.ts'
+import { mergeOverlappingFrameItems } from './frame-collisions.ts'
 import { restoreBackgroundItems } from './peek-layout.ts'
 
 export type RemovableSceneTarget = {
@@ -303,42 +309,93 @@ export function projectScene(scene: Scene, view: Bounds) {
   return { workspace, layout }
 }
 
-function equalValue(a: unknown, b: unknown): boolean {
-  if (Object.is(a, b)) return true
-  if (!a || !b || typeof a !== 'object' || typeof b !== 'object') return false
-  const entries = Object.entries(a)
-  if (entries.length !== Object.keys(b).length) return false
-  return entries.every(
-    ([key, value]) =>
-      Object.hasOwn(b, key) && equalValue(value, Reflect.get(b, key)),
+function sameOrigin(a?: Pick<Bounds, 'x' | 'y'>, b?: Pick<Bounds, 'x' | 'y'>) {
+  return a === b || (a?.x === b?.x && a?.y === b?.y)
+}
+
+function sameLocation(a: SceneLocation, b: SceneLocation): boolean {
+  if (a.surface !== b.surface) return false
+  if (a.surface === 'frame' && b.surface === 'frame')
+    return a.edge === b.edge && a.position === b.position
+  if (a.surface === 'group' && b.surface === 'group')
+    return a.groupId === b.groupId
+  return (
+    'x' in a &&
+    'x' in b &&
+    a.x === b.x &&
+    a.y === b.y &&
+    sameOrigin(a.peekOrigin, b.peekOrigin)
   )
 }
 
-function reconcileScene(previous: Scene, next: Scene): Scene {
-  // Unchanged strokes, window objects, and content retain identity, so equality
-  // only visits changed metadata/locations during ordinary pointer movement.
-  if (equalValue(previous, next)) return previous
-  const previousItems = new Map(previous.items.map((item) => [item.id, item]))
-  const previousDrawings = new Map(
-    previous.drawings.map((drawing) => [drawing.id, drawing]),
+function samePlacement(a: ObjectPlacement, b: ObjectPlacement): boolean {
+  if (a === b) return true
+  if (a.surface !== b.surface) return false
+  if (a.surface === 'hidden') return true
+  if (a.surface === 'frame' && b.surface === 'frame')
+    return a.edge === b.edge && a.position === b.position
+  return (
+    (a.surface === 'canvas' || a.surface === 'background') &&
+    (b.surface === 'canvas' || b.surface === 'background') &&
+    a.x === b.x &&
+    a.y === b.y &&
+    a.width === b.width &&
+    a.height === b.height &&
+    sameOrigin(a.peekOrigin, b.peekOrigin)
   )
-  return {
-    ...next,
-    items: next.items.map((item) => {
-      const previousItem = previousItems.get(item.id)
-      return previousItem && equalValue(previousItem, item)
-        ? previousItem
-        : item
-    }),
-    drawings: next.drawings.map((drawing) => {
-      const previousDrawing = previousDrawings.get(drawing.id)
-      return previousDrawing && equalValue(previousDrawing, drawing)
-        ? previousDrawing
-        : drawing
-    }),
+}
+
+function sameRecord<T>(
+  a: Record<string, T> | undefined,
+  b: Record<string, T> | undefined,
+  same: (a: T, b: T) => boolean = Object.is,
+) {
+  if (a === b) return true
+  if (!a || !b) return false
+  const keys = Object.keys(a)
+  return (
+    keys.length === Object.keys(b).length &&
+    keys.every((key) => Object.hasOwn(b, key) && same(a[key], b[key]))
+  )
+}
+
+function retainArray<T>(previous: T[], next: T[]): T[] {
+  return previous.length === next.length &&
+    next.every((item, index) => item === previous[index])
+    ? previous
+    : next
+}
+
+function canonicalLayout(
+  previous: FrameLayout,
+  layout: FrameLayout,
+  workspace: Workspace,
+): FrameLayout {
+  const windows = new Set(workspace.windows.map((window) => window.id))
+  const placements = Object.fromEntries(
+    Object.entries(layout.placements).filter(
+      ([key]) =>
+        !key.startsWith('item:') &&
+        !key.startsWith('drawing:') &&
+        (!key.startsWith('window:') || windows.has(key.slice(7))),
+    ),
+  )
+  const next = {
+    ...layout,
+    placements: sameRecord(previous.placements, placements, samePlacement)
+      ? previous.placements
+      : placements,
   }
+  return next.placements === previous.placements &&
+    next.allowHideTools === previous.allowHideTools &&
+    sameRecord(previous.groups, next.groups) &&
+    sameRecord(previous.expanded, next.expanded) &&
+    sameRecord(previous.options, next.options)
+    ? previous
+    : next
 }
 
+/** Apply geometry/content deltas without converting the scene back into a saved model. */
 export function updateSceneWorkspace(
   scene: Scene,
   action: Workspace | ((workspace: Workspace) => Workspace),
@@ -347,22 +404,484 @@ export function updateSceneWorkspace(
   const projection = projectScene(scene, view)
   const workspace =
     typeof action === 'function' ? action(projection.workspace) : action
-  if (workspace === projection.workspace) return scene
-  return reconcileScene(scene, createScene(workspace, projection.layout))
+  return applyWorkspaceChanges(scene, projection, workspace)
 }
 
+function applyWorkspaceChanges(
+  scene: Scene,
+  projection: ReturnType<typeof projectScene>,
+  workspace: Workspace,
+): Scene {
+  const before = projection.workspace
+  if (workspace === before) return scene
+  let layout = removeMissingMembers(workspace, projection.layout)
+  const oldItems = new Map(scene.items.map((item) => [item.id, item]))
+  const oldDrawings = new Map(
+    scene.drawings.map((drawing) => [drawing.id, drawing]),
+  )
+  const items =
+    workspace.items === before.items && layout === projection.layout
+      ? scene.items
+      : retainArray(
+          scene.items,
+          workspace.items.map((item) => {
+            const previous = oldItems.get(item.id)
+            const location = canonicalLocation(
+              layout,
+              { kind: 'item', id: item.id },
+              item,
+              'background',
+            )
+            if (
+              previous &&
+              previous.title === item.title &&
+              previous.kind === item.kind &&
+              previous.appId === item.appId &&
+              previous.width === item.width &&
+              previous.height === item.height &&
+              sameLocation(previous.location, location)
+            )
+              return previous
+            return {
+              id: item.id,
+              title: item.title,
+              kind: item.kind,
+              appId: item.appId,
+              width: item.width,
+              height: item.height,
+              location,
+            }
+          }),
+        )
+  const drawings =
+    workspace.drawings === before.drawings && layout === projection.layout
+      ? scene.drawings
+      : retainArray(
+          scene.drawings,
+          workspace.drawings.map((drawing) => {
+            const previous = oldDrawings.get(drawing.id)
+            const location = canonicalLocation(
+              layout,
+              { kind: 'drawing', id: drawing.id },
+              drawing,
+              drawing.layer === 'below' ? 'background' : 'canvas',
+            )
+            if (
+              previous &&
+              previous.width === drawing.width &&
+              previous.height === drawing.height &&
+              previous.strokes === drawing.strokes &&
+              sameLocation(previous.location, location)
+            )
+              return previous
+            return {
+              id: drawing.id,
+              width: drawing.width,
+              height: drawing.height,
+              strokes: drawing.strokes,
+              location,
+            }
+          }),
+        )
+  if (workspace.controls !== before.controls) {
+    const placements = { ...layout.placements }
+    for (const control of workspace.controls ?? []) {
+      const target = { kind: 'widget' as const, id: control.id }
+      const placement = getPlacement(layout, target)
+      if (
+        getTargetGroup(layout, target) ||
+        (placement.surface !== 'canvas' && placement.surface !== 'background')
+      )
+        continue
+      placements[targetKey(target)] = {
+        surface: placement.surface,
+        x: control.x,
+        y: control.y,
+        width: control.width,
+        height: control.height,
+        ...(control.peekOrigin ? { peekOrigin: control.peekOrigin } : {}),
+      }
+    }
+    layout = { ...layout, placements }
+  }
+  layout = canonicalLayout(scene.layout, layout, workspace)
+  const geometry =
+    scene.workspace.width === workspace.width &&
+    scene.workspace.height === workspace.height &&
+    scene.workspace.windows === workspace.windows &&
+    scene.workspace.note === workspace.note &&
+    sameOrigin(scene.workspace.home, workspace.home)
+      ? scene.workspace
+      : {
+          width: workspace.width,
+          height: workspace.height,
+          home: workspace.home,
+          windows: workspace.windows,
+          note: workspace.note,
+        }
+  return geometry === scene.workspace &&
+    items === scene.items &&
+    drawings === scene.drawings &&
+    layout === scene.layout
+    ? scene
+    : { ...scene, workspace: geometry, items, drawings, layout }
+}
+
+/** Layout changes only touch the location of affected objects and layout metadata. */
 export function updateSceneLayout(
   scene: Scene,
   action: FrameLayout | ((layout: FrameLayout) => FrameLayout),
   view: Bounds,
 ): Scene {
   const projection = projectScene(scene, view)
-  const layout =
+  const requested =
     typeof action === 'function' ? action(projection.layout) : action
-  if (layout === projection.layout) return scene
-  return reconcileScene(
+  return applyLayoutChanges(scene, projection, requested)
+}
+
+function applyLayoutChanges(
+  scene: Scene,
+  projection: ReturnType<typeof projectScene>,
+  requested: FrameLayout,
+): Scene {
+  if (requested === projection.layout) return scene
+  const layout = removeMissingMembers(projection.workspace, requested)
+  const items = retainArray(
+    scene.items,
+    scene.items.map((item, index) => {
+      const location = canonicalLocation(
+        layout,
+        { kind: 'item', id: item.id },
+        projection.workspace.items[index],
+        'background',
+      )
+      return sameLocation(item.location, location)
+        ? item
+        : { ...item, location }
+    }),
+  )
+  const drawings = retainArray(
+    scene.drawings,
+    scene.drawings.map((drawing, index) => {
+      const projected = projection.workspace.drawings[index]
+      const location = canonicalLocation(
+        layout,
+        { kind: 'drawing', id: drawing.id },
+        projected,
+        projected.layer === 'below' ? 'background' : 'canvas',
+      )
+      return sameLocation(drawing.location, location)
+        ? drawing
+        : { ...drawing, location }
+    }),
+  )
+  const nextLayout = canonicalLayout(scene.layout, layout, projection.workspace)
+  return items === scene.items &&
+    drawings === scene.drawings &&
+    nextLayout === scene.layout
+    ? scene
+    : { ...scene, items, drawings, layout: nextLayout }
+}
+
+export type ScenePlacementOptions = {
+  settle?: boolean
+  bounds?: Bounds
+  position?: Pick<Bounds, 'x' | 'y'>
+}
+export type SceneDestination = { target: LayoutTarget; bounds: Bounds }
+export type SceneDragSnapshot = {
+  target: LayoutTarget
+  layout: FrameLayout
+  object?:
+    | Workspace['windows'][number]
+    | Workspace['items'][number]
+    | Workspace['drawings'][number]
+}
+
+export function restoreSceneBackground(scene: Scene, view: Bounds): Scene {
+  const projection = projectScene(scene, view)
+  return applyWorkspaceChanges(
     scene,
-    createScene({ ...projection.workspace, controls: undefined }, layout),
+    projection,
+    transformCanvasWorkspace(
+      projection.workspace,
+      projection.layout,
+      restoreBackgroundItems,
+    ),
+  )
+}
+
+/** A placement change and the neighboring objects it displaces form one edit. */
+export function placeSceneObject(
+  scene: Scene,
+  target: LayoutTarget,
+  placement: ObjectPlacement,
+  view: Bounds,
+  options: ScenePlacementOptions = {},
+): Scene {
+  const projection = projectScene(scene, view)
+  const previous = getPlacement(projection.layout, target)
+  let placed = applyLayoutChanges(
+    scene,
+    projection,
+    setObjectPlacement(projection.layout, target, placement),
+  )
+  if (options.position && target.kind !== 'widget' && target.kind !== 'group')
+    placed = moveCanvasObject(
+      placed,
+      { kind: target.kind, id: target.id },
+      options.position.x,
+      options.position.y,
+    )
+  if (target.kind === 'drawing') {
+    const drawings = retainArray(
+      placed.drawings,
+      placed.drawings.map((drawing) => {
+        if (
+          drawing.id !== target.id ||
+          !('peekOrigin' in drawing.location) ||
+          !drawing.location.peekOrigin
+        )
+          return drawing
+        const location = { ...drawing.location }
+        delete location.peekOrigin
+        return { ...drawing, location }
+      }),
+    )
+    if (drawings !== placed.drawings) placed = { ...placed, drawings }
+  }
+  if (
+    options.settle === false &&
+    target.kind !== 'drawing' &&
+    previous.surface === placement.surface
+  )
+    return placed
+  const next = projectScene(placed, view)
+  return applyWorkspaceChanges(
+    placed,
+    next,
+    options.settle === false
+      ? transformCanvasWorkspace(
+          next.workspace,
+          next.layout,
+          restoreBackgroundItems,
+        )
+      : settleLayoutDrop(next.workspace, next.layout, target, options.bounds),
+  )
+}
+
+/** Pointer movement only copies the object being moved, not the rendered scene. */
+function moveCanvasObject(
+  scene: Scene,
+  target: RemovableSceneTarget,
+  x: number,
+  y: number,
+): Scene {
+  const position = (object: { width: number; height: number }) => ({
+    x: clamp(x, 0, scene.workspace.width - object.width),
+    y: clamp(y, 0, scene.workspace.height - object.height),
+  })
+  if (target.kind === 'window') {
+    const windows = retainArray(
+      scene.workspace.windows,
+      scene.workspace.windows.map((window) => {
+        if (window.id !== target.id) return window
+        const next = position(window)
+        return window.x === next.x && window.y === next.y
+          ? window
+          : { ...window, ...next }
+      }),
+    )
+    return windows === scene.workspace.windows
+      ? scene
+      : { ...scene, workspace: { ...scene.workspace, windows } }
+  }
+  const move = <T extends SceneItem | SceneDrawing>(object: T): T => {
+    if (
+      object.id !== target.id ||
+      (object.location.surface !== 'canvas' &&
+        object.location.surface !== 'background')
+    )
+      return object
+    const location: SceneLocation = {
+      surface: object.location.surface,
+      ...position(object),
+    }
+    return sameLocation(object.location, location)
+      ? object
+      : { ...object, location }
+  }
+  const field = target.kind === 'item' ? 'items' : 'drawings'
+  const objects =
+    field === 'items'
+      ? retainArray(scene.items, scene.items.map(move))
+      : retainArray(scene.drawings, scene.drawings.map(move))
+  return objects === scene[field] ? scene : { ...scene, [field]: objects }
+}
+
+export function moveSceneObject(
+  scene: Scene,
+  target: LayoutTarget,
+  x: number,
+  y: number,
+  view: Bounds,
+): Scene {
+  const object =
+    target.kind === 'item'
+      ? scene.items.find((item) => item.id === target.id)
+      : target.kind === 'drawing'
+        ? scene.drawings.find((drawing) => drawing.id === target.id)
+        : undefined
+  const placement =
+    object && object.location.surface !== 'group'
+      ? object.location
+      : getPlacement(scene.layout, target)
+  const surface = placement.surface === 'background' ? 'background' : 'canvas'
+  if (target.kind === 'widget' || target.kind === 'group')
+    return placeSceneObject(scene, target, { surface, x, y }, view, {
+      settle: false,
+    })
+  const detached =
+    getTargetGroup(scene.layout, target) || placement.surface === 'frame'
+      ? updateSceneLayout(
+          scene,
+          (layout) => setObjectPlacement(layout, target, { surface }),
+          view,
+        )
+      : scene
+  return moveCanvasObject(detached, { kind: target.kind, id: target.id }, x, y)
+}
+
+export function groupSceneObjects(
+  scene: Scene,
+  source: LayoutTarget,
+  target: LayoutTarget,
+  before: boolean,
+  view: Bounds,
+): Scene {
+  return restoreSceneBackground(
+    updateSceneLayout(
+      scene,
+      (layout) => mergeFrameTargets(layout, source, target, before),
+      view,
+    ),
+    view,
+  )
+}
+
+export function mergeSceneFrameOverlaps(
+  scene: Scene,
+  entries: Parameters<typeof mergeOverlappingFrameItems>[1],
+  view: Bounds,
+): Scene {
+  return restoreSceneBackground(
+    updateSceneLayout(
+      scene,
+      (layout) => mergeOverlappingFrameItems(layout, entries),
+      view,
+    ),
+    view,
+  )
+}
+
+export function releaseSceneGroup(
+  scene: Scene,
+  target: LayoutTarget,
+  surface: 'canvas' | 'background',
+  destinations: SceneDestination[],
+  view: Bounds,
+): Scene {
+  const released = updateSceneLayout(
+    scene,
+    (layout) => {
+      let next = ungroupFrameTarget(layout, target)
+      for (const destination of destinations)
+        next = setObjectPlacement(next, destination.target, {
+          surface,
+          ...(destination.target.kind === 'widget' ? destination.bounds : {}),
+        })
+      return next
+    },
+    view,
+  )
+  const projection = projectScene(released, view)
+  const workspace = projection.workspace
+  const positions = new Map(
+    destinations.map((destination) => [
+      targetKey(destination.target),
+      destination.bounds,
+    ]),
+  )
+  const position = <T extends Bounds & { id: string }>(
+    item: T,
+    kind: LayoutTarget['kind'],
+  ): T => {
+    const bounds = positions.get(targetKey({ kind, id: item.id }))
+    return bounds
+      ? {
+          ...item,
+          x: clamp(bounds.x, 0, workspace.width - item.width),
+          y: clamp(bounds.y, 0, workspace.height - item.height),
+          peekOrigin: undefined,
+        }
+      : item
+  }
+  let next: Workspace = {
+    ...workspace,
+    windows: workspace.windows.map((item) => position(item, 'window')),
+    items: workspace.items.map((item) => position(item, 'item')),
+    drawings: workspace.drawings.map((item) => position(item, 'drawing')),
+  }
+  for (const destination of destinations)
+    next = settleLayoutDrop(
+      next,
+      projection.layout,
+      destination.target,
+      destination.bounds,
+    )
+  return applyWorkspaceChanges(released, projection, next)
+}
+
+export function ungroupSceneObject(
+  scene: Scene,
+  target: LayoutTarget,
+  placements: { target: LayoutTarget; placement: ObjectPlacement }[],
+  view: Bounds,
+): Scene {
+  return updateSceneLayout(
+    scene,
+    (layout) => {
+      let next = ungroupFrameTarget(layout, target)
+      for (const entry of placements)
+        next = setObjectPlacement(next, entry.target, entry.placement)
+      return next
+    },
+    view,
+  )
+}
+
+export function restoreSceneDrag(
+  scene: Scene,
+  snapshot: SceneDragSnapshot,
+  view: Bounds,
+): Scene {
+  const restored = updateSceneLayout(scene, snapshot.layout, view)
+  if (!snapshot.object) return restored
+  const field =
+    snapshot.target.kind === 'window'
+      ? 'windows'
+      : snapshot.target.kind === 'item'
+        ? 'items'
+        : 'drawings'
+  return updateSceneWorkspace(
+    restored,
+    (workspace) => ({
+      ...workspace,
+      [field]: workspace[field].map((item) =>
+        item.id === snapshot.target.id ? snapshot.object : item,
+      ),
+    }),
+    view,
   )
 }
 
@@ -372,25 +891,31 @@ export function removeSceneObject(
   target: RemovableSceneTarget,
   view: Bounds,
 ): Scene {
-  const projection = projectScene(scene, view)
+  const detached = updateSceneLayout(
+    scene,
+    (layout) => {
+      const next = ungroupFrameTarget(layout, target)
+      const placements = { ...next.placements }
+      delete placements[targetKey(target)]
+      return { ...next, placements }
+    },
+    view,
+  )
   const field =
     target.kind === 'window'
       ? 'windows'
       : target.kind === 'item'
         ? 'items'
         : 'drawings'
-  const layout = ungroupFrameTarget(projection.layout, target)
-  const placements = { ...layout.placements }
-  delete placements[targetKey(target)]
-  const nextLayout = { ...layout, placements }
-  const workspace = {
-    ...projection.workspace,
-    [field]: projection.workspace[field].filter(
-      (item) => item.id !== target.id,
+  return restoreSceneBackground(
+    updateSceneWorkspace(
+      detached,
+      (workspace) => ({
+        ...workspace,
+        [field]: workspace[field].filter((item) => item.id !== target.id),
+      }),
+      view,
     ),
-  }
-  return createScene(
-    transformCanvasWorkspace(workspace, nextLayout, restoreBackgroundItems),
-    nextLayout,
+    view,
   )
 }

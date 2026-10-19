@@ -159,6 +159,7 @@ function App() {
     view,
     setView,
     removeObject,
+    sceneActions,
   } = useScene()
   const [activeId, setActiveId] = useState<string | null>(
     workspace.windows.at(-1)?.id ?? null,
@@ -364,7 +365,7 @@ function App() {
     usePeekMotion(viewport, !previewLayout && !focusView)
   const objectLayout = useObjectLayout(
     workspace,
-    setWorkspace,
+    sceneActions,
     layout,
     setLayout,
     view,
@@ -1858,14 +1859,8 @@ function App() {
     setSelectedDrawingId(null)
     setTool('cursor')
     const timer = window.setTimeout(() => {
-      objectLayout.forget({ kind: 'drawing', id: drawingId })
       preparePeekMotion({ backgroundOnly: true })
-      setWorkspace((current) =>
-        restoreBackgroundItems({
-          ...current,
-          drawings: current.drawings.filter((item) => item.id !== drawingId),
-        }),
-      )
+      removeObject({ kind: 'drawing', id: drawingId })
       setConsumingDrawingIds((current) =>
         current.filter((id) => id !== drawingId),
       )
@@ -3070,16 +3065,8 @@ function App() {
               setTool('layout')
             }}
             onDelete={() => {
-              objectLayout.forget({ kind: 'drawing', id: selectedDrawing.id })
               preparePeekMotion({ backgroundOnly: true })
-              setWorkspace((current) =>
-                restoreBackgroundItems({
-                  ...current,
-                  drawings: current.drawings.filter(
-                    (item) => item.id !== selectedDrawing.id,
-                  ),
-                }),
-              )
+              removeObject({ kind: 'drawing', id: selectedDrawing.id })
               setSelectedDrawingId(null)
             }}
             onFinish={() => setSelectedDrawingId(null)}

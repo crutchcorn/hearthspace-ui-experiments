@@ -3,6 +3,8 @@ import { test } from 'node:test'
 import type { Bounds, Workspace } from '../src/desktop.ts'
 import {
   getFrameBounds,
+  getPlacement,
+  getTargetGroup,
   mergeFrameTargets,
   setObjectPlacement,
   type FrameLayout,
@@ -13,8 +15,15 @@ import {
 } from '../src/peek-layout.ts'
 import {
   createScene,
+  groupSceneObjects,
+  mergeSceneFrameOverlaps,
+  moveSceneObject,
+  placeSceneObject,
   projectScene,
+  releaseSceneGroup,
   removeSceneObject,
+  restoreSceneDrag,
+  ungroupSceneObject,
   updateSceneLayout,
   updateSceneWorkspace,
 } from '../src/scene.ts'
@@ -575,5 +584,261 @@ test('direct control movement establishes a new home and layout edits remain aut
     surface: 'frame',
     edge: 'right',
     position: 0.5,
+  })
+})
+
+test('editing a note preserves untouched objects and their locations', () => {
+  const initial = createScene(workspace, defaults)
+  const edited = updateSceneWorkspace(
+    initial,
+    (current) => ({ ...current, note: 'Keep the sketch beside these notes.' }),
+    view,
+  )
+
+  assert.equal(edited.workspace.note, 'Keep the sketch beside these notes.')
+  assert.equal(edited.workspace.windows, initial.workspace.windows)
+  assert.equal(edited.items, initial.items)
+  assert.equal(edited.drawings, initial.drawings)
+  assert.equal(edited.layout, initial.layout)
+})
+
+test('moving a canvas item changes its home without rebuilding other scene objects', () => {
+  const initial = createScene(
+    {
+      ...workspace,
+      items: workspace.items.map((item) => ({
+        ...item,
+        x: 500,
+        peekOrigin: { x: 140, y: 140 },
+      })),
+    },
+    defaults,
+  )
+  const moved = moveSceneObject(initial, icon, 900, 700, view)
+  assert.deepEqual(moved.items[0].location, {
+    surface: 'background',
+    x: 900,
+    y: 700,
+  })
+  assert.equal(moved.workspace, initial.workspace)
+  assert.equal(moved.drawings, initial.drawings)
+  assert.equal(moved.layout, initial.layout)
+  assert.equal(moveSceneObject(moved, icon, 900, 700, view), moved)
+
+  const clamped = moveSceneObject(moved, icon, -100, 9999, view)
+  assert.deepEqual(clamped.items[0].location, {
+    surface: 'background',
+    x: 0,
+    y: workspace.height - workspace.items[0].height,
+  })
+})
+
+test('a final window drop moves and settles its neighbors in one scene edit', () => {
+  const initial = createScene(
+    {
+      ...workspace,
+      windows: workspace.windows.map((window) => ({
+        ...window,
+        x: 900,
+        y: 700,
+      })),
+      drawings: [],
+    },
+    defaults,
+  )
+  const dropped = placeSceneObject(
+    initial,
+    { kind: 'window', id: 'notes' },
+    { surface: 'canvas' },
+    view,
+    { position: { x: 100, y: 100 } },
+  )
+  assert.equal(dropped.workspace.windows[0].x, 100)
+  assert.equal(dropped.workspace.windows[0].y, 100)
+  assert.notEqual(dropped.items[0].location.surface, 'frame')
+  assert.ok('peekOrigin' in dropped.items[0].location)
+  assert.deepEqual(dropped.items[0].location.peekOrigin, { x: 140, y: 140 })
+  assert.deepEqual(initial.items[0].location, {
+    surface: 'background',
+    x: 140,
+    y: 140,
+  })
+})
+
+test('releasing a mixed frame group stores each member at its visible drop position', () => {
+  const battery = { kind: 'widget', id: 'battery' } as const
+  const window = { kind: 'window', id: 'notes' } as const
+  let grouped = groupSceneObjects(
+    createScene(workspace, defaults),
+    icon,
+    battery,
+    false,
+    view,
+  )
+  grouped = groupSceneObjects(grouped, drawing, battery, false, view)
+  grouped = groupSceneObjects(grouped, window, battery, false, view)
+  const group = getTargetGroup(grouped.layout, battery)!
+  const released = releaseSceneGroup(
+    grouped,
+    { kind: 'group', id: group.id },
+    'background',
+    [
+      { target: icon, bounds: { x: 1800, y: 1800, width: 54, height: 54 } },
+      { target: drawing, bounds: { x: 2100, y: 1800, width: 100, height: 80 } },
+      { target: window, bounds: { x: 2400, y: 1800, width: 280, height: 200 } },
+      { target: battery, bounds: { x: 2800, y: 1800, width: 54, height: 54 } },
+    ],
+    view,
+  )
+
+  assert.deepEqual(released.layout.groups, {})
+  assert.deepEqual(released.items[0].location, {
+    surface: 'background',
+    x: 1800,
+    y: 1800,
+  })
+  assert.deepEqual(released.drawings[0].location, {
+    surface: 'background',
+    x: 2100,
+    y: 1800,
+  })
+  assert.equal(released.drawings[0].strokes, grouped.drawings[0].strokes)
+  assert.equal(released.workspace.windows[0].x, 2400)
+  assert.equal(released.workspace.windows[0].y, 1800)
+  assert.equal(getPlacement(released.layout, window).surface, 'background')
+  assert.deepEqual(getPlacement(released.layout, battery), {
+    surface: 'background',
+    x: 2800,
+    y: 1800,
+    width: 54,
+    height: 54,
+  })
+  assert.equal(
+    Object.hasOwn(released.layout.placements, 'item:notes-shortcut'),
+    false,
+  )
+  assert.equal(
+    Object.hasOwn(released.layout.placements, 'drawing:sketch'),
+    false,
+  )
+})
+
+test('canceling a drag restores frame membership without discarding app edits', () => {
+  const apps = { kind: 'widget', id: 'apps' } as const
+  const initial = groupSceneObjects(
+    createScene(workspace, defaults),
+    icon,
+    apps,
+    false,
+    view,
+  )
+  const before = projectScene(initial, view)
+  const moved = moveSceneObject(initial, icon, 1400, 1000, view)
+  assert.equal(moved.items[0].location.surface, 'canvas')
+  const edited = updateSceneWorkspace(
+    moved,
+    (current) => ({
+      ...current,
+      note: 'Keep this edit when the drag is canceled.',
+    }),
+    view,
+  )
+  const canceled = restoreSceneDrag(
+    edited,
+    { target: icon, layout: before.layout, object: before.workspace.items[0] },
+    view,
+  )
+
+  assert.deepEqual(canceled.items[0].location, initial.items[0].location)
+  assert.deepEqual(canceled.layout.groups, initial.layout.groups)
+  assert.equal(
+    canceled.workspace.note,
+    'Keep this edit when the drag is canceled.',
+  )
+  assert.equal(canceled.drawings, edited.drawings)
+})
+
+test('canceling a canvas drag restores both the peek position and its first home', () => {
+  const initial = updateSceneWorkspace(
+    createScene({ ...workspace, drawings: [] }, defaults),
+    settleCoveredItems,
+    view,
+  )
+  const before = projectScene(initial, view)
+  const moved = moveSceneObject(initial, icon, 1900, 1700, view)
+  const canceled = restoreSceneDrag(
+    moved,
+    { target: icon, layout: before.layout, object: before.workspace.items[0] },
+    view,
+  )
+  assert.deepEqual(canceled.items[0].location, initial.items[0].location)
+})
+
+test('separating a frame member retains item options and explicit edge positions', () => {
+  const clock = { kind: 'widget', id: 'clock' } as const
+  const layout: FrameLayout = {
+    ...defaults,
+    options: { 'widget:clock': { dateFormat: 'weekday' } },
+    expanded: { clock: true },
+  }
+  const initial = groupSceneObjects(
+    createScene(workspace, layout),
+    icon,
+    clock,
+    false,
+    view,
+  )
+  const separated = ungroupSceneObject(
+    initial,
+    icon,
+    [
+      {
+        target: icon,
+        placement: { surface: 'frame', edge: 'top', position: 0.3 },
+      },
+    ],
+    view,
+  )
+
+  assert.deepEqual(separated.layout.groups, {})
+  assert.deepEqual(separated.items[0].location, {
+    surface: 'frame',
+    edge: 'top',
+    position: 0.3,
+  })
+  assert.equal(separated.layout.options, initial.layout.options)
+  assert.equal(separated.layout.expanded, initial.layout.expanded)
+})
+
+test('frame overlap merging uses the current scene and retains one location per member', () => {
+  const apps = { kind: 'widget', id: 'apps' } as const
+  const initial = placeSceneObject(
+    createScene(workspace, defaults),
+    icon,
+    { surface: 'frame', edge: 'bottom', position: 1 },
+    view,
+  )
+  const merged = mergeSceneFrameOverlaps(
+    initial,
+    [
+      { target: apps, bounds: { x: 900, y: 642, width: 300, height: 54 } },
+      { target: icon, bounds: { x: 1100, y: 642, width: 54, height: 54 } },
+    ],
+    view,
+  )
+  const group = getTargetGroup(merged.layout, apps)!
+  assert.equal(group.members.length, 2)
+  assert.deepEqual(merged.items[0].location, {
+    surface: 'group',
+    groupId: group.id,
+  })
+  assert.equal(
+    Object.hasOwn(merged.layout.placements, 'item:notes-shortcut'),
+    false,
+  )
+  assert.deepEqual(initial.items[0].location, {
+    surface: 'frame',
+    edge: 'bottom',
+    position: 1,
   })
 })

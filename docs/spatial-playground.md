@@ -107,10 +107,21 @@ windows retain workspace geometry. Scene projection exposes canvas controls to
 shared geometry operations without saving a second copy of their positions.
 
 The renderer and geometry helpers receive derived workspace and layout views.
-`useScene` routes changes to either view through the same scene state queue.
-Those views don't save
-independent copies of an item's position, so moving it between canvas and
-frame cannot leave two competing locations behind.
+`useScene` exposes concrete actions for placing and moving objects, joining or
+releasing frame groups, separating members, and restoring canceled drags. Each
+action uses the latest scene and commits placement and any resulting peeks
+together. `useObjectLayout` owns pointer input and measurements; it asks these
+actions to change the scene instead of coordinating separate layout and
+workspace updates.
+
+Ordinary layout dragging updates the moved object's canonical position directly.
+The workspace adapter still lets shared geometry helpers work with bounds, but
+applies their changed fields and locations back to the scene. It doesn't rebuild
+saved state or recursively compare drawing strokes on every update. Unchanged
+objects, strokes, and metadata keep their references. The layout adapter handles
+item preferences and other layout metadata through the same state queue. Neither
+view saves an independent copy of an item's position, so moving it between
+canvas and frame cannot leave two competing locations behind.
 
 Background objects occupy the lowest canvas layer. Raised icons, drawings,
 and widgets sit above them but below ordinary windows. Frame attachments sit

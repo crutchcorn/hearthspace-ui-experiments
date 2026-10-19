@@ -10,9 +10,9 @@ import {
   type PointerEvent,
 } from 'react'
 import type { Workspace, Bounds } from './desktop'
+import type { SceneActions } from './useScene'
 import {
   getPlacement,
-  setObjectPlacement,
   setAllowHideTools,
   targetKey,
   getFrameDropTarget,
@@ -31,14 +31,12 @@ import {
   setWidgetExpanded,
   type FrameLayout,
 } from './frame-layout'
-import { transformCanvasWorkspace, settleLayoutDrop } from './layout-workspace'
 import { mergeOverlappingFrameItems } from './frame-collisions'
-import { restoreBackgroundItems } from './peek-layout'
 import { snapFramePlacement } from './frame-grid'
 
 export default function useObjectLayout(
   workspace: Workspace,
-  setWorkspace: Dispatch<SetStateAction<Workspace>>,
+  sceneActions: SceneActions,
   layout: FrameLayout,
   setLayout: Dispatch<SetStateAction<FrameLayout>>,
   view: Bounds,
@@ -75,7 +73,6 @@ export default function useObjectLayout(
     moved: boolean
     captureTarget: HTMLElement
     originalLayout: FrameLayout
-    originalPlacement?: ObjectPlacement
     originalObject?:
       | Workspace['windows'][number]
       | Workspace['items'][number]
@@ -117,7 +114,7 @@ export default function useObjectLayout(
       frameSpacing(pending.target),
     )
     if (next.position !== placement.position)
-      setLayout((current) => setObjectPlacement(current, pending.target, next))
+      sceneActions.place(pending.target, next, { settle: false })
   })
   useLayoutEffect(() => {
     if (!pendingSnap.current || motionFrame.current !== null) return
@@ -248,7 +245,7 @@ export default function useObjectLayout(
       })
       const next = mergeOverlappingFrameItems(layout, entries)
       if (next === layout) return
-      setLayout(next)
+      sceneActions.mergeFrameOverlaps(entries)
       setSelected((previous) => {
         // Resizing an edited item may merge its frame neighbors. Keep editing
         // that item; only a selected group needs its merged identity resolved.
@@ -259,9 +256,6 @@ export default function useObjectLayout(
           : undefined
         return group ? { kind: 'group', id: group.id } : previous
       })
-      setWorkspace((previous) =>
-        transformCanvasWorkspace(previous, next, restoreBackgroundItems),
-      )
     })
     return () => cancelAnimationFrame(frame)
   }, [
@@ -270,8 +264,7 @@ export default function useObjectLayout(
     workspace.items,
     workspace.windows,
     workspace.drawings,
-    setWorkspace,
-    setLayout,
+    sceneActions,
   ])
 
   function motionBounds(element: HTMLElement, widget: boolean): Bounds {
@@ -409,23 +402,12 @@ export default function useObjectLayout(
     if (current.captureTarget.hasPointerCapture(current.pointerId))
       current.captureTarget.releasePointerCapture(current.pointerId)
     if (!current.moved) return
-    setLayout(current.originalLayout)
-    if (current.originalObject && !isToolbar(current.target)) {
-      const field =
-        current.target.kind === 'window'
-          ? 'windows'
-          : current.target.kind === 'item'
-            ? 'items'
-            : 'drawings'
-      const original = current.originalObject
-      setWorkspace((previous) => ({
-        ...previous,
-        [field]: previous[field].map((item) =>
-          item.id === current.target.id ? original : item,
-        ),
-      }))
-    }
-  }, [setWorkspace, setLayout, cancelMotion])
+    sceneActions.restoreDrag({
+      target: current.target,
+      layout: current.originalLayout,
+      object: current.originalObject,
+    })
+  }, [sceneActions, cancelMotion])
 
   useEffect(() => {
     if (!editing) return
@@ -505,58 +487,9 @@ export default function useObjectLayout(
       })
       // Groups belong to the frame. Moving one onto the painting releases its
       // members at their visible positions instead of leaving empty frame slots.
-      let nextLayout = ungroupFrameTarget(layout, target)
-      for (const destination of destinations)
-        nextLayout = setObjectPlacement(nextLayout, destination.target, {
-          surface,
-          ...(destination.target.kind === 'widget' ? destination.bounds : {}),
-        })
       beforeSettle(target)
-      setLayout(nextLayout)
+      sceneActions.releaseGroup(target, surface, destinations)
       setSelected(null)
-      setWorkspace((current) => {
-        const positions = new Map(
-          destinations.map(({ target: member, bounds }) => [
-            targetKey(member),
-            bounds,
-          ]),
-        )
-        const position = <T extends Bounds & { id: string }>(
-          item: T,
-          kind: LayoutTarget['kind'],
-        ): T => {
-          const bounds = positions.get(targetKey({ kind, id: item.id }))
-          if (!bounds) return item
-          return {
-            ...item,
-            x: Math.max(0, Math.min(bounds.x, current.width - item.width)),
-            y: Math.max(0, Math.min(bounds.y, current.height - item.height)),
-            peekOrigin: undefined,
-          }
-        }
-        let updated: Workspace = {
-          ...current,
-          windows: current.windows.map((item) => position(item, 'window')),
-          items: current.items.map((item) => position(item, 'item')),
-          drawings: current.drawings.map((item) => {
-            const moved = position(item, 'drawing')
-            return moved === item
-              ? item
-              : {
-                  ...moved,
-                  layer: surface === 'background' ? 'below' : 'above',
-                }
-          }),
-        }
-        for (const destination of destinations)
-          updated = settleLayoutDrop(
-            updated,
-            nextLayout,
-            destination.target,
-            destination.bounds,
-          )
-        return updated
-      })
       return
     }
     if (
@@ -575,54 +508,13 @@ export default function useObjectLayout(
     ) {
       queueMotion(target)
     }
-    const nextLayout = setObjectPlacement(layout, target, next)
-    setLayout(nextLayout)
     if (settle) beforeSettle(target)
-    if (
-      settle ||
-      target.kind === 'drawing' ||
-      previous.surface !== next.surface
-    )
-      setWorkspace((current) => {
-        const updated =
-          target.kind === 'drawing'
-            ? {
-                ...current,
-                drawings: current.drawings.map((item) =>
-                  item.id === target.id
-                    ? {
-                        ...item,
-                        layer:
-                          next.surface === 'background'
-                            ? ('below' as const)
-                            : ('above' as const),
-                        peekOrigin: undefined,
-                      }
-                    : item,
-                ),
-              }
-            : current
-        return settle
-          ? settleLayoutDrop(
-              updated,
-              nextLayout,
-              target,
-              widgetBounds(target, next),
-            )
-          : transformCanvasWorkspace(
-              updated,
-              nextLayout,
-              restoreBackgroundItems,
-            )
-      })
+    sceneActions.place(target, next, {
+      settle,
+      bounds: widgetBounds(target, next),
+    })
   }
   function move(target: LayoutTarget, x: number, y: number) {
-    const field =
-      target.kind === 'window'
-        ? 'windows'
-        : target.kind === 'item'
-          ? 'items'
-          : 'drawings'
     if (isToolbar(target)) {
       const previous = placement(target)
       place(
@@ -636,19 +528,7 @@ export default function useObjectLayout(
       )
       return
     }
-    setWorkspace((current) => ({
-      ...current,
-      [field]: current[field].map((item) =>
-        item.id === target.id
-          ? {
-              ...item,
-              x: Math.max(0, Math.min(x, current.width - item.width)),
-              y: Math.max(0, Math.min(y, current.height - item.height)),
-              peekOrigin: undefined,
-            }
-          : item,
-      ),
-    }))
+    sceneActions.move(target, x, y)
   }
   function onPointerDownCapture(event: PointerEvent<HTMLElement>) {
     if (
@@ -708,7 +588,6 @@ export default function useObjectLayout(
       moved: false,
       captureTarget: event.currentTarget,
       originalLayout: layout,
-      originalPlacement: layout.placements[targetKey(target)],
       originalObject:
         target.kind === 'window'
           ? workspace.windows.find((item) => item.id === target.id)
@@ -808,13 +687,10 @@ export default function useObjectLayout(
           joining.target,
           joining.before,
         )
-        setLayout(next)
         const group = getTargetGroup(next, joining.target)
         if (group) setSelected({ kind: 'group', id: group.id })
         beforeSettle(current.target)
-        setWorkspace((previous) =>
-          transformCanvasWorkspace(previous, next, restoreBackgroundItems),
-        )
+        sceneActions.group(current.target, joining.target, joining.before)
         finishDrag(event)
         return
       }
@@ -839,9 +715,6 @@ export default function useObjectLayout(
             movingBounds.height = width
           }
         }
-        if (placement(current.target).surface === 'frame')
-          place(current.target, { surface: 'canvas' }, false)
-        move(current.target, view.x + movingBounds.x, view.y + movingBounds.y)
         const previous = placement(current.target)
         const surface =
           previous.surface === 'background' ? 'background' : 'canvas'
@@ -853,27 +726,20 @@ export default function useObjectLayout(
               y: view.y + movingBounds.y,
             }
           : { ...previous, surface }
-        const nextLayout = setObjectPlacement(
-          layout,
-          current.target,
-          nextPlacement,
-        )
-        setLayout(nextLayout)
         beforeSettle(current.target)
-        setWorkspace((previous) =>
-          settleLayoutDrop(
-            previous,
-            nextLayout,
-            current.target,
-            isToolbar(current.target)
-              ? {
-                  ...movingBounds,
-                  x: view.x + movingBounds.x,
-                  y: view.y + movingBounds.y,
-                }
-              : undefined,
-          ),
-        )
+        sceneActions.place(current.target, nextPlacement, {
+          position: {
+            x: view.x + movingBounds.x,
+            y: view.y + movingBounds.y,
+          },
+          bounds: isToolbar(current.target)
+            ? {
+                ...movingBounds,
+                x: view.x + movingBounds.x,
+                y: view.y + movingBounds.y,
+              }
+            : undefined,
+        })
       }
     }
     finishDrag(event)
@@ -1074,7 +940,7 @@ export default function useObjectLayout(
       const group = getTargetGroup(layout, selected)
       if (!group) return
       const previous = getPlacement(layout, selected)
-      let next = ungroupFrameTarget(layout, selected)
+      const next = ungroupFrameTarget(layout, selected)
       const groupBounds = targetElement({
         kind: 'group',
         id: group.id,
@@ -1083,6 +949,10 @@ export default function useObjectLayout(
       const detached = group.members.filter(
         (member) => !getTargetGroup(next, member),
       )
+      const placements: {
+        target: LayoutTarget
+        placement: ObjectPlacement
+      }[] = []
       const margin = view.width <= 760 ? 12 : 24
       for (const member of detached) {
         const bounds = targetElement(member)?.getBoundingClientRect()
@@ -1106,24 +976,17 @@ export default function useObjectLayout(
             (start - margin) / Math.max(1, extent - margin * 2 - size),
           ),
         )
-        next = setObjectPlacement(next, member, { ...previous, position })
+        placements.push({
+          target: member,
+          placement: { ...previous, position },
+        })
       }
-      setLayout(next)
+      sceneActions.ungroup(selected, placements)
       if (selected.kind === 'group') setSelected(null)
     },
     setWarning,
     placement,
     place,
-    forget: (target: LayoutTarget) => {
-      setLayout((current) => {
-        const next = ungroupFrameTarget(current, target)
-        const key = targetKey(target)
-        if (!Object.hasOwn(next.placements, key)) return next
-        const placements = { ...next.placements }
-        delete placements[key]
-        return { ...next, placements }
-      })
-    },
     remove,
     restoreTools,
     attachSelected,
