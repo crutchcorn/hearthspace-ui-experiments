@@ -93,3 +93,13 @@ The surface tokens are in `src/index.css`. Toolbar coverage is in
 `ShellControls.module.css`, `LauncherDock.module.css`,
 `NotificationInbox.module.css`, and `PlacedWidget.module.css` under
 `src/components/`; monitor fills are in `DisplaySettings.module.css`.
+
+### Light-mode hover
+
+In light mode, hovering or focusing within a toolbar gently darkens its raised
+fill. Individual hovered controls darken further so their bounds remain clear
+against the pale surface. Monitor previews use the same surface hover tint.
+The darkening uses the existing text color as a neutral tint; it does not add
+another radial glow. Dark mode keeps its existing hover fill and soft edges.
+The shared `--toolbar-material` state also feeds standalone and merged mobile
+bars, while grouped child surfaces remain transparent.

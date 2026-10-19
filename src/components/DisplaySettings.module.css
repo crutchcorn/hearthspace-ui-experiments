@@ -36,6 +36,7 @@
   transition:
     left 160ms ease-out,
     top 160ms ease-out,
+    background-color 180ms ease,
     border-color 180ms ease,
     box-shadow 220ms ease;
 }
@@ -46,6 +47,7 @@
 
 .monitor:hover {
   border-color: var(--accent-border);
+  background: var(--material-raised-hover);
   box-shadow: var(--shadow-glow), var(--glass-edge-active);
 }
 

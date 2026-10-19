@@ -1,21 +1,25 @@
 .surface {
   --shell-padding: 4px;
   --shell-border-width: 1px;
+  --toolbar-material: var(--material-raised);
 
   height: 54px;
   padding: var(--shell-padding);
   border: var(--shell-border-width) solid var(--chrome-border);
   border-radius: var(--radius-panel);
-  background: var(--material-raised);
+  background: var(--toolbar-material);
   box-shadow: var(--shadow-panel), var(--glass-edge);
   backdrop-filter: var(--glass-blur);
   color: var(--chrome-text);
   transition:
+    background-color 180ms ease,
     border-color 180ms ease,
     box-shadow 180ms ease;
 }
 
 .surface:is(:hover, :focus-within) {
+  --toolbar-material: var(--material-raised-hover);
+
   border-color: var(--accent-border);
   box-shadow: var(--shadow-glow), var(--glass-edge-active);
 }
@@ -71,6 +75,7 @@
   .mobileSurface {
     --shell-padding: 4px;
     --shell-border-width: 1px;
+    --toolbar-material: var(--material-raised);
 
     height: 54px;
     isolation: isolate;
@@ -86,14 +91,19 @@
     z-index: -1;
     inset: 0;
     border-radius: inherit;
-    background: var(--material-raised);
+    background: var(--toolbar-material);
     box-shadow: var(--glass-edge);
     backdrop-filter: var(--glass-blur);
     pointer-events: none;
     content: '';
+    transition:
+      background-color 180ms ease,
+      box-shadow 180ms ease;
   }
 
   .mobileSurface:is(:hover, :focus-within) {
+    --toolbar-material: var(--material-raised-hover);
+
     border-color: var(--accent-border);
     box-shadow: var(--shadow-glow);
   }
@@ -105,6 +115,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .surface,
+  .mobileSurface::before,
   .control {
     transition: none;
   }

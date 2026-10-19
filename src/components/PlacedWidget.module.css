@@ -56,6 +56,10 @@
     backdrop-filter: var(--glass-blur);
   }
 
+  .widget[data-layout-widget='tools'] > .content:is(:hover, :focus-within) {
+    background: var(--material-raised-hover);
+  }
+
   .widget[data-merged] {
     position: relative;
     z-index: auto;

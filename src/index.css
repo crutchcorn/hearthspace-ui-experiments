@@ -18,7 +18,12 @@
     var(--surface-raised-tint) 82%,
     transparent
   );
-  --chrome-hover: #ffffff5c;
+  --chrome-raised-hover: color-mix(
+    in srgb,
+    var(--chrome-raised) 95%,
+    var(--chrome-text)
+  );
+  --chrome-hover: color-mix(in srgb, var(--chrome-text) 9%, transparent);
   --chrome-border: #ffffff70;
   --chrome-text: #303a3c;
   --chrome-muted: #667373;
@@ -41,6 +46,7 @@
   );
   --material-surface: var(--edge-light), var(--chrome);
   --material-raised: var(--edge-light), var(--chrome-raised);
+  --material-raised-hover: var(--edge-light), var(--chrome-raised-hover);
   --panel-wash: var(--edge-light);
   --glass-blur: blur(40px) saturate(1.35);
   --glass-edge: inset 0 1px 0 #ffffff85, inset 0 -1px 0 #49635b0a;
@@ -88,6 +94,7 @@
   --surface-tint: color-mix(in srgb, var(--accent-base) 4%, #202c30);
   --surface-raised-tint: color-mix(in srgb, var(--surface-tint) 88%, white);
   --chrome: color-mix(in srgb, var(--surface-tint) 70%, transparent);
+  --chrome-raised-hover: var(--chrome-raised);
   --chrome-hover: #e0f5ee12;
   --chrome-border: #d9f3e82e;
   --chrome-text: #eff4ee;
