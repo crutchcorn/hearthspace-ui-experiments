@@ -122,7 +122,10 @@ on the frame. Its strokes remain one object through those changes.
 
 Ordinary dragging still moves an object within its chosen place. The layout
 tool is the deliberate way to change that place, so a window dragged near an
-edge doesn't unexpectedly become a frame attachment.
+edge doesn't unexpectedly become a frame attachment. The desktop cursor can
+select and move canvas controls alongside icons, including a mixed selection.
+A click still opens a control; dragging changes its position. Controls already
+on the frame remain attachments until Change layout moves them.
 
 Attached objects can adapt to the space. A pinned window leaves a narrow strip
 visible, reveals a little more on hover, and opens fully on click. It slides
@@ -147,13 +150,16 @@ Desktop items begin on the background, and windows begin above it. These are
 starting placements the user can change. A background window is still a
 window; a raised drawing is still a drawing. Raising an icon or drawing above
 the background doesn't put it in front of ordinary windows. Attaching it to
-the frame makes it stay above canvas work.
+the frame makes it stay above canvas work. Opening a canvas control leaves its
+icon on that layer; only its temporary panel appears above windows. For example,
+opening Battery never raises the battery icon through a window covering it.
 
 Existing movement gives that depth a useful purpose. Fully covered work can
-peek into view, and displaced icons and drawings on either canvas layer return
-home when their space clears. Frame attachments stay above and outside those
-arrangements. Search can temporarily
-borrow the visible canvas without rewriting the places the user chose.
+peek into view, and displaced icons, controls, and drawings on either canvas
+layer return home when their space clears. Moving one yourself establishes a
+new home; another window pushing it aside preserves that intended position.
+Frame attachments stay above and outside those arrangements. Search can
+temporarily borrow the visible canvas without rewriting the places the user chose.
 
 Deliberately placing something on the background also establishes a new
 arrangement there. Background objects moved aside by that placement keep their

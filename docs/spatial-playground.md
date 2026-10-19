@@ -12,16 +12,16 @@ The minimap translates pointer positions into world coordinates. Grabbing its vi
 
 Dragging a window’s title bar combines pointer movement with changes in scroll position. This keeps a grabbed window under the pointer while edge scrolling carries it farther across the world. Shell-owned windows join a glass title bar and opaque content in one frame, with a 44-pixel header increasing to 50 pixels for coarse pointers. External app previews use their own Realistic frame styles while retaining the same window interactions. The body scrolls in the remaining space. Eight resize handles constrain windows to the world bounds and a minimum size of 280 × 200 pixels.
 
-Holding Alt while dragging a window header, desktop item, or drawing snaps the
-top-left of its bounds to the nearest wallpaper dot. The hidden grid shares the
+Holding Alt while dragging a window header, desktop item, canvas control, or
+drawing snaps the top-left of its bounds to the nearest wallpaper dot. The hidden grid shares the
 wallpaper's 28-pixel spacing, with dot centers at `14 + 28n` on each world axis,
 so panning doesn't shift the alignment. Pressing or releasing Alt updates the
 placement during the drag; releasing it resumes free movement immediately.
-Selected windows or desktop items preserve their offsets and use the grabbed
-object as the anchor. Placement stays within the world bounds; if a group has
-no valid dot position on an axis, the boundary takes precedence. The grid remains
+Selected windows or a mixed selection of desktop items and canvas controls
+preserve their offsets and use the grabbed object as the anchor. Placement
+stays within the world bounds; if a group has no valid dot position on an axis, the boundary takes precedence. The grid remains
 available with a photo background and applies to drawings on either layer.
-Deliberate moves still clear a canvas icon or drawing's `peekOrigin`.
+Deliberate moves still clear an icon, control, or drawing's `peekOrigin`.
 
 Holding Alt during a window resize snaps only the moving edges to the same dot
 grid. A corner handle snaps both edges; their opposite edges stay fixed, even
@@ -32,20 +32,21 @@ if an edge has no reachable dot. Arrange, launches, and automatic peeking do
 not use this snap behavior.
 
 Windows may cover one another completely during a drag or resize. Releasing a
-moved window, desktop item, or drawing, or opening a new window, checks for fully
-covered work, including coverage shared by several higher windows. A newly
+moved window, desktop item, canvas control, or drawing, or opening a new window,
+checks for fully covered work, including coverage shared by several higher windows. A newly
 opened window stays at its launch position, above the existing windows. Hidden
 windows move to the nearest available opening with a 24-pixel patch exposed.
 Desktop icons on either canvas layer follow the same rule, exposing 32 pixels
-of their artwork. Canvas drawings also peek out when their ink is fully
+of their artwork. Canvas controls use their measured surface bounds and also
+peek when fully covered. Canvas drawings peek out when their ink is fully
 covered; empty space inside a drawing's bounds doesn't count as visible art.
 Frame attachments stay outside these calculations. Partly visible objects stay put; sizes and stacking order stay
 intact. The canvas edges constrain movement, so an object stays in place when
 no opening is possible.
 
-Windows keep these adjusted positions. Canvas desktop items and drawings
-instead retain a `peekOrigin` for the position before their first automatic
-move. Further peeks preserve that origin. Once the original space is clear,
+Windows keep these adjusted positions. Canvas desktop items, controls, and
+drawings instead retain a `peekOrigin` for the position before their first
+automatic move. Further peeks preserve that origin. Once the original space is clear,
 they return there and discard the origin. A partial window overlap keeps them
 away, even when moving home would leave some of the object visible. Dragging
 or editing one of those objects deliberately establishes a new home.
@@ -53,20 +54,20 @@ or editing one of those objects deliberately establishes a new home.
 Returning checks the object's full original bounds against windows. Between
 desktop icons, it checks artwork against artwork; overlapping label space or
 invisible padding doesn't prevent a return. This lets icons placed three grid
-dots apart return after any number of window pushes. Canvas drawings still
-check their full bounds against icons' artwork. Touching edges is allowed.
-Drawings don't act as opaque
-blockers, so empty space around their ink cannot hold another object away.
+dots apart return after any number of window pushes. Canvas controls and
+drawings check their full bounds against icons' artwork. Touching edges is
+allowed. Drawings don't act as opaque blockers, so empty space around their ink cannot hold another object away.
 Displaced icons can return together when they temporarily occupy each other's
 homes. Their intended destinations must be clear; a window or stationary icon
 still blocks the affected returns.
 
 Closing or arranging windows, gathering related windows, and removing a
-canvas drawing also check whether displaced icons and drawings can return.
+canvas drawing also check whether displaced icons, controls, and drawings can
+return.
 Both the peek position and its origin persist with the workspace, so a reload
 doesn't forget the intended placement. A short slide reveals where hidden work
-went and brings icons and drawings home without slowing direct dragging;
-reduced motion makes the change immediate. Canceled gestures, simple clicks,
+went and brings icons, controls, and drawings home without slowing direct
+dragging; reduced motion makes the change immediate. Canceled gestures, simple clicks,
 search previews, and navigation to existing windows do not rearrange the saved
 layout this way. Launching a new app from search does reveal covered work.
 Ordinary header double-click maximization and restore also reveal covered work.
@@ -101,7 +102,9 @@ belongs.
 `widget`, or `group`. The stored frame layout contains group membership and
 window, widget, and group placements; item and drawing locations belong to
 their scene objects. Only catalog widgets can be hidden. Canvas widgets store
-world coordinates in their placement, and windows retain workspace geometry.
+world coordinates, measured size, and an optional `peekOrigin` in their placement;
+windows retain workspace geometry. Scene projection exposes canvas controls to
+shared geometry operations without saving a second copy of their positions.
 
 The renderer and geometry helpers receive derived workspace and layout views.
 `useScene` routes changes to either view through the same scene state queue.
@@ -112,7 +115,9 @@ frame cannot leave two competing locations behind.
 Background objects occupy the lowest canvas layer. Raised icons, drawings,
 and widgets sit above them but below ordinary windows. Frame attachments sit
 above all canvas work. A `canvas` placement for an icon or drawing doesn't
-give it the frame's foreground position.
+give it the frame's foreground position. Selecting or activating a canvas
+control also leaves its surface beneath ordinary windows. Only its open panel
+uses a foreground layer, anchored to the control without raising the icon.
 
 `FRAME_WIDGETS` defines Notifications, Clock, Wi-Fi, Sound, Battery, Canvas
 tools, and Apps, including default corners and search metadata. The four
@@ -230,17 +235,17 @@ attachment. Pinned desktop items instead animate into compact glass tiles.
 
 `transformCanvasWorkspace` applies arrangement, peeking, and gathering to a
 projection of the canvas objects, then merges the changed geometry back by ID.
-Frame attachments remain outside those calculations. Icons and drawings on
-both canvas layers participate in peeking and return-home calculations while
-keeping their chosen layer. Background windows precede ordinary windows in
+Frame attachments remain outside those calculations. Icons, controls, and
+drawings on both canvas layers participate in peeking and return-home
+calculations while keeping their chosen layer. Background windows precede ordinary windows in
 overlap calculations.
 This keeps canvas movement from changing a frame attachment's saved geometry.
 
 Completing a layout move resolves fully covered canvas objects. Background
 placement also relocates blocked background objects and makes their adjusted
 positions permanent, clearing the old return-home position. A raised window
-temporarily displacing canvas icons or drawings continues to preserve `peekOrigin` for
-the eventual return. These are separate consequences of deliberate layout
+temporarily displacing canvas icons, controls, or drawings continues to preserve
+`peekOrigin` for the eventual return. These are separate consequences of deliberate layout
 editing and temporary overlap.
 
 Canvas tools are protected while `allowHideTools` is false. Attempting removal
@@ -258,6 +263,17 @@ searchable when the user wants the editor.
 Projects and Pictures folders, a Notes.txt document, and a shortcut for every app in `APP_CATALOG` start near the home viewport. App shortcuts are permanent and movable; the user can arrange them alongside files and folders, but cannot remove an app's desktop entry. These are simulated entry points into app previews. Items start on the background. Change layout can move an item to the raised canvas or the frame; selecting it alone keeps its chosen layer. Built-in shell controls can share groups with these items, while custom desktop widgets remain outside this experiment.
 
 Pan mode drags the canvas even when the drag starts on an item. The cursor is the default tool and selects desktop items. Dragging the background draws a rectangle in world coordinates and selects intersecting items without selecting windows. Clicking an item selects it; Shift, Ctrl, or ⌘ toggles individual items or adds a rectangle’s matches to the selection. Space selects a focused item. Dragging a selected item moves the selected group together, keeping it within the world bounds. Double-click or Enter on a focused item opens its associated simulated app preview without changing the canvas tool. Window and desktop-item selections have separate IDs. Desktop selection is shown through item highlights and the dragged rectangle, without a text hint or count.
+
+The same cursor selects detached shell controls on either canvas layer. The
+background rectangle includes their measured surfaces alongside desktop icons;
+Shift adds controls or rectangle matches to the current selection. Dragging a
+selected icon or control moves the mixed selection, preserves its spacing, and
+supports Alt alignment. A control's ordinary click still activates it when the
+pointer hasn't moved far enough to start a drag. Completing a drag suppresses
+that click, so repositioning Battery doesn't also open its panel. Panel inputs
+remain interactive, and frame controls stay outside desktop selection. Escape,
+pointer cancellation, or loss of browser focus restores the original positions
+of an unfinished icon/control drag, including any saved return-home positions.
 
 Item locations persist with the scene. Icons on either canvas layer can move aside when a drag ends or a window header is double-clicked, while keeping their chosen layer beneath ordinary windows. They retain their original positions and slide back once those spaces are clear. Dragging a displaced icon yourself replaces that original position. Arrange moves windows and lets displaced icons return if their spaces become clear.
 
@@ -490,74 +506,75 @@ across Settings windows.
 
 ## Source map
 
-| File                                                                                    | Responsibility                                                                                               |
-| --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| [`src/scene.ts`](../src/scene.ts)                                                       | Canonical scene, exclusive item and drawing locations, derived views, and shared state updates.              |
-| [`src/scene-storage.ts`](../src/scene-storage.ts)                                       | Single scene storage key, validation, and fresh scene fallback.                                              |
-| [`src/useScene.ts`](../src/useScene.ts)                                                 | Shared scene state queue, workspace and layout adapters, viewport state, and saving.                         |
-| [`src/desktop.ts`](../src/desktop.ts)                                                   | Workspace geometry types, starter desktop items, window resizing, and arrangement.                           |
-| [`src/frame-layout.ts`](../src/frame-layout.ts)                                         | Frame placements, ordered groups, widget catalog, status detail, frame bounds, offsets, and validation.      |
-| [`src/frame-collisions.ts`](../src/frame-collisions.ts)                                 | Positive-area attachment overlap and transitive group merging.                                               |
-| [`src/useObjectLayout.ts`](../src/useObjectLayout.ts)                                   | Layout editing, grouping, cancellation, placement and detail choices, removal protection, and tool recovery. |
-| [`src/layout-workspace.ts`](../src/layout-workspace.ts)                                 | Apply geometry operations to canvas objects while preserving frame attachments.                              |
-| [`src/components/LayoutEditor.tsx`](../src/components/LayoutEditor.tsx)                 | Selected-object title, placement and detail choices, separation, removal, and Done.                          |
-| [`src/components/FrameShell.tsx`](../src/components/FrameShell.tsx)                     | Shared frame-group surfaces, member rendering, whole-group grips, and default mobile bars.                   |
-| [`src/components/FramePreviewSlot.tsx`](../src/components/FramePreviewSlot.tsx)         | Measured slots and group bounds for existing window and drawing surfaces.                                    |
-| [`src/components/PlacedWidget.tsx`](../src/components/PlacedWidget.tsx)                 | Measured shell-widget positioning, responsive merging, and popover placement.                                |
-| [`src/components/LayoutConfirm.tsx`](../src/components/LayoutConfirm.tsx)               | Tool-removal warning and pinned-window close confirmation.                                                   |
-| [`src/drawings.ts`](../src/drawings.ts)                                                 | Drawing types, stroke bounds, local coordinates, and saved-art validation.                                   |
-| [`src/window-layout.ts`](../src/window-layout.ts)                                       | Responsive shell clearances and ordinary maximized window bounds.                                            |
-| [`src/canvas-grid.ts`](../src/canvas-grid.ts)                                           | Bounded object movement and dot snapping, including moving window edges during resizing.                     |
-| [`src/peek-layout.ts`](../src/peek-layout.ts)                                           | Covered-window placement, temporary canvas icon and drawing peeking, and return-home positions.              |
-| [`src/usePeekMotion.ts`](../src/usePeekMotion.ts)                                       | Short slide animations for peeking objects and canvas icons and drawings returning home.                     |
-| [`src/canvas-search.ts`](../src/canvas-search.ts)                                       | Search matching and shared grid/parking layouts for canvas search and window switching.                      |
-| [`src/canvas-tool-catalog.ts`](../src/canvas-tool-catalog.ts)                           | Shared canvas-tool names, icons, shortcuts, modes, actions, and search terms.                                |
-| [`src/preview-motion.ts`](../src/preview-motion.ts)                                     | Window measurements and continuous transitions from temporary previews to the restored viewport.             |
-| [`src/gather-windows.ts`](../src/gather-windows.ts)                                     | Same-app window matching and placement near the selection within the current viewport.                       |
-| [`src/useShellPeek.ts`](../src/useShellPeek.ts)                                         | Temporary shell reveal near corners, over controls, and during keyboard interaction in focused view.         |
-| [`src/useWindowSwitcher.ts`](../src/useWindowSwitcher.ts)                               | Stable window-order snapshots, keyboard cycling, commit on Ctrl release, and cancellation.                   |
-| [`src/useAI.ts`](../src/useAI.ts)                                                       | Shared AI opt-in preference, simulated model download progress, cancellation, and persistence.               |
-| [`src/selection.ts`](../src/selection.ts)                                               | Freeform polygon intersection with window bounds.                                                            |
-| [`src/theme.ts`](../src/theme.ts)                                                       | Accent and Light/Dark mode preferences, defaults, and storage validation.                                    |
-| [`src/favorites.ts`](../src/favorites.ts)                                               | Favorite app defaults, valid IDs, deduplication, order, and persistence.                                     |
-| [`src/gestures.ts`](../src/gestures.ts)                                                 | Gesture assignment types, examples, pad coordinates, storage validation, and persistence.                    |
-| [`src/display-layout.ts`](../src/display-layout.ts)                                     | Monitor layout coordinates, nearest-edge snapping, and group centering for the two-display preview.          |
-| [`src/useBackground.ts`](../src/useBackground.ts)                                       | Photo decoding, shared background state, object URL lifetime, and IndexedDB persistence.                     |
-| [`src/App.tsx`](../src/App.tsx)                                                         | Workspace rendering, pointer gestures, viewport navigation, focused view, window actions, and saving.        |
-| [`src/components/SystemBar.tsx`](../src/components/SystemBar.tsx)                       | Independent clock, Wi-Fi, sound, and battery items, compact/detail views, popovers, and simulated controls.  |
-| [`src/useSystemStatus.ts`](../src/useSystemStatus.ts)                                   | Shared simulated Wi-Fi, volume, battery, and clock state for placed controls and search.                     |
-| [`src/useNotifications.ts`](../src/useNotifications.ts)                                 | Shared notification records, unread count, and updates for the inbox and search.                             |
-| [`src/components/NotificationInbox.tsx`](../src/components/NotificationInbox.tsx)       | Notification trigger, inbox, read/dismiss actions, and sample toasts.                                        |
-| [`src/components/Minimap.tsx`](../src/components/Minimap.tsx)                           | Map rendering and pointer capture for dragging the visible canvas area.                                      |
-| [`src/components/CanvasTools.tsx`](../src/components/CanvasTools.tsx)                   | Background and window-selection dropdowns, drawing, Change layout, map, and arrangement actions.             |
-| [`src/components/CanvasSearch.tsx`](../src/components/CanvasSearch.tsx)                 | Positioned search field, typed/handwritten query input, result navigation, and close/empty states.           |
-| [`src/components/SearchControlPreview.tsx`](../src/components/SearchControlPreview.tsx) | Status, app-launcher, and tool icons and state within canvas search results.                                 |
-| [`src/components/HandwritingPad.tsx`](../src/components/HandwritingPad.tsx)             | One-line ink input, pause/check submission, progress, clear, and retry controls.                             |
-| [`src/handwriting.ts`](../src/handwriting.ts)                                           | Lazy worker lifetime, recognition requests, cancellation, and recovery.                                      |
-| [`src/handwriting.worker.ts`](../src/handwriting.worker.ts)                             | Quantized local TrOCR loading, serialized inference, and raw recognized text.                                |
-| [`src/handwriting-image.ts`](../src/handwriting-image.ts)                               | Cropped black-on-white rasterization of handwriting strokes.                                                 |
-| [`src/handwriting-protocol.ts`](../src/handwriting-protocol.ts)                         | Narrow worker request, response, progress, and PNG input contract.                                           |
-| [`src/components/GatherWindows.tsx`](../src/components/GatherWindows.tsx)               | Floating selection action, viewport-aware placement, opt-in gating, and cancellable gather shimmer.          |
-| [`src/components/DrawingLayer.tsx`](../src/components/DrawingLayer.tsx)                 | Saved and draft stroke rendering, selection outlines, and ink hit targets.                                   |
-| [`src/components/DrawingActions.tsx`](../src/components/DrawingActions.tsx)             | Side controls for opening Change layout, playing a gesture, deleting, and finishing.                         |
-| [`src/components/DesktopItems.tsx`](../src/components/DesktopItems.tsx)                 | Desktop-item layers, compact frame shortcuts, item artwork, and selection/opening input.                     |
-| [`src/components/WindowContent.tsx`](../src/components/WindowContent.tsx)               | Editable scratchpad, appearance settings, and simulated app interiors.                                       |
-| [`src/components/Settings.tsx`](../src/components/Settings.tsx)                         | Responsive category navigation, shared preferences, and simulated display settings.                          |
-| [`src/components/AISettings.tsx`](../src/components/AISettings.tsx)                     | Gathering explanation, AI opt-in switch, and simulated 3 GB download status.                                 |
-| [`src/components/DisplaySettings.tsx`](../src/components/DisplaySettings.tsx)           | Two draggable monitor previews, monitor selection, and simulated per-monitor controls.                       |
-| [`src/components/GestureSettings.tsx`](../src/components/GestureSettings.tsx)           | Saved gesture previews, assignment management, and the Settings editor.                                      |
-| [`src/components/BackgroundSettings.tsx`](../src/components/BackgroundSettings.tsx)     | Photo preview, upload, fit, reset, and storage feedback in Settings.                                         |
-| [`src/components/AppIcon.tsx`](../src/components/AppIcon.tsx)                           | Consistent icon sizing and app-specific artwork.                                                             |
-| [`src/components/LauncherDock.tsx`](../src/components/LauncherDock.tsx)                 | Saved favorites, running-app groups, window instance picker, launcher drop feedback, and the Apps trigger.   |
-| [`src/components/WindowSwitcher.tsx`](../src/components/WindowSwitcher.tsx)             | Selected window's caption and initial focus for the canvas window-switching view.                            |
-| [`src/components/AppLauncher.tsx`](../src/components/AppLauncher.tsx)                   | App gallery/list, filtering, keyboard navigation, and launcher views.                                        |
-| [`src/components/GesturePad.tsx`](../src/components/GesturePad.tsx)                     | Shared pointer pad and assignment editor, with local gesture matching in launcher mode.                      |
-| [`src/components/AppPicker.tsx`](../src/components/AppPicker.tsx)                       | React Aria app combobox with catalog choices, shared icons, and custom styling.                              |
-| [`src/components/launcher-apps.ts`](../src/components/launcher-apps.ts)                 | Shared app catalog, icons, and descriptions.                                                                 |
-| [`src/App.module.css`](../src/App.module.css)                                           | Canvas, windows, and navigation styling.                                                                     |
-| [`src/components/WindowContent.module.css`](../src/components/WindowContent.module.css) | Document surfaces and simulated app interior styling.                                                        |
-| [`src/components/SystemBar.module.css`](../src/components/SystemBar.module.css)         | Status-item detail, shared glass controls, and popover styling.                                              |
-| [`src/index.css`](../src/index.css)                                                     | Shared visual tokens, Light/Dark and accent palettes, typography, viewport, and element defaults.            |
+| File                                                                                                                                                  | Responsibility                                                                                               |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| [`src/scene.ts`](../src/scene.ts)                                                                                                                     | Canonical scene, exclusive item and drawing locations, derived views, and shared state updates.              |
+| [`src/scene-storage.ts`](../src/scene-storage.ts)                                                                                                     | Single scene storage key, validation, and fresh scene fallback.                                              |
+| [`src/useScene.ts`](../src/useScene.ts)                                                                                                               | Shared scene state queue, workspace and layout adapters, viewport state, and saving.                         |
+| [`src/desktop.ts`](../src/desktop.ts)                                                                                                                 | Workspace geometry types, starter desktop items, window resizing, and arrangement.                           |
+| [`src/frame-layout.ts`](../src/frame-layout.ts)                                                                                                       | Frame placements, ordered groups, widget catalog, status detail, frame bounds, offsets, and validation.      |
+| [`src/frame-collisions.ts`](../src/frame-collisions.ts)                                                                                               | Positive-area attachment overlap and transitive group merging.                                               |
+| [`src/useObjectLayout.ts`](../src/useObjectLayout.ts)                                                                                                 | Layout editing, grouping, cancellation, placement and detail choices, removal protection, and tool recovery. |
+| [`src/layout-workspace.ts`](../src/layout-workspace.ts)                                                                                               | Apply geometry operations to canvas objects while preserving frame attachments.                              |
+| [`src/components/LayoutEditor.tsx`](../src/components/LayoutEditor.tsx)                                                                               | Selected-object title, placement and detail choices, separation, removal, and Done.                          |
+| [`src/components/FrameShell.tsx`](../src/components/FrameShell.tsx)                                                                                   | Shared frame-group surfaces, member rendering, whole-group grips, and default mobile bars.                   |
+| [`src/components/FramePreviewSlot.tsx`](../src/components/FramePreviewSlot.tsx)                                                                       | Measured slots and group bounds for existing window and drawing surfaces.                                    |
+| [`src/components/PlacedWidget.tsx`](../src/components/PlacedWidget.tsx)                                                                               | Measured shell-widget positioning, canvas selection and dragging, responsive merging, and popover placement. |
+| [`src/components/WidgetPopover.tsx`](../src/components/WidgetPopover.tsx), [`widget-popover-context.ts`](../src/components/widget-popover-context.ts) | Detached popup, menu, and toast portals with shared placement; the control stays on the canvas.              |
+| [`src/components/LayoutConfirm.tsx`](../src/components/LayoutConfirm.tsx)                                                                             | Tool-removal warning and pinned-window close confirmation.                                                   |
+| [`src/drawings.ts`](../src/drawings.ts)                                                                                                               | Drawing types, stroke bounds, local coordinates, and saved-art validation.                                   |
+| [`src/window-layout.ts`](../src/window-layout.ts)                                                                                                     | Responsive shell clearances and ordinary maximized window bounds.                                            |
+| [`src/canvas-grid.ts`](../src/canvas-grid.ts)                                                                                                         | Bounded object movement and dot snapping, including moving window edges during resizing.                     |
+| [`src/peek-layout.ts`](../src/peek-layout.ts)                                                                                                         | Covered-window placement, temporary canvas icon, control, and drawing peeking, and return-home positions.    |
+| [`src/usePeekMotion.ts`](../src/usePeekMotion.ts)                                                                                                     | Short slide animations for peeking objects and canvas icons, controls, and drawings returning home.          |
+| [`src/canvas-search.ts`](../src/canvas-search.ts)                                                                                                     | Search matching and shared grid/parking layouts for canvas search and window switching.                      |
+| [`src/canvas-tool-catalog.ts`](../src/canvas-tool-catalog.ts)                                                                                         | Shared canvas-tool names, icons, shortcuts, modes, actions, and search terms.                                |
+| [`src/preview-motion.ts`](../src/preview-motion.ts)                                                                                                   | Window measurements and continuous transitions from temporary previews to the restored viewport.             |
+| [`src/gather-windows.ts`](../src/gather-windows.ts)                                                                                                   | Same-app window matching and placement near the selection within the current viewport.                       |
+| [`src/useShellPeek.ts`](../src/useShellPeek.ts)                                                                                                       | Temporary shell reveal near corners, over controls, and during keyboard interaction in focused view.         |
+| [`src/useWindowSwitcher.ts`](../src/useWindowSwitcher.ts)                                                                                             | Stable window-order snapshots, keyboard cycling, commit on Ctrl release, and cancellation.                   |
+| [`src/useAI.ts`](../src/useAI.ts)                                                                                                                     | Shared AI opt-in preference, simulated model download progress, cancellation, and persistence.               |
+| [`src/selection.ts`](../src/selection.ts)                                                                                                             | Freeform polygon intersection with window bounds.                                                            |
+| [`src/theme.ts`](../src/theme.ts)                                                                                                                     | Accent and Light/Dark mode preferences, defaults, and storage validation.                                    |
+| [`src/favorites.ts`](../src/favorites.ts)                                                                                                             | Favorite app defaults, valid IDs, deduplication, order, and persistence.                                     |
+| [`src/gestures.ts`](../src/gestures.ts)                                                                                                               | Gesture assignment types, examples, pad coordinates, storage validation, and persistence.                    |
+| [`src/display-layout.ts`](../src/display-layout.ts)                                                                                                   | Monitor layout coordinates, nearest-edge snapping, and group centering for the two-display preview.          |
+| [`src/useBackground.ts`](../src/useBackground.ts)                                                                                                     | Photo decoding, shared background state, object URL lifetime, and IndexedDB persistence.                     |
+| [`src/App.tsx`](../src/App.tsx)                                                                                                                       | Workspace rendering, pointer gestures, viewport navigation, focused view, window actions, and saving.        |
+| [`src/components/SystemBar.tsx`](../src/components/SystemBar.tsx)                                                                                     | Independent clock, Wi-Fi, sound, and battery items, compact/detail views, popovers, and simulated controls.  |
+| [`src/useSystemStatus.ts`](../src/useSystemStatus.ts)                                                                                                 | Shared simulated Wi-Fi, volume, battery, and clock state for placed controls and search.                     |
+| [`src/useNotifications.ts`](../src/useNotifications.ts)                                                                                               | Shared notification records, unread count, and updates for the inbox and search.                             |
+| [`src/components/NotificationInbox.tsx`](../src/components/NotificationInbox.tsx)                                                                     | Notification trigger, inbox, read/dismiss actions, and sample toasts.                                        |
+| [`src/components/Minimap.tsx`](../src/components/Minimap.tsx)                                                                                         | Map rendering and pointer capture for dragging the visible canvas area.                                      |
+| [`src/components/CanvasTools.tsx`](../src/components/CanvasTools.tsx)                                                                                 | Background and window-selection dropdowns, drawing, Change layout, map, and arrangement actions.             |
+| [`src/components/CanvasSearch.tsx`](../src/components/CanvasSearch.tsx)                                                                               | Positioned search field, typed/handwritten query input, result navigation, and close/empty states.           |
+| [`src/components/SearchControlPreview.tsx`](../src/components/SearchControlPreview.tsx)                                                               | Status, app-launcher, and tool icons and state within canvas search results.                                 |
+| [`src/components/HandwritingPad.tsx`](../src/components/HandwritingPad.tsx)                                                                           | One-line ink input, pause/check submission, progress, clear, and retry controls.                             |
+| [`src/handwriting.ts`](../src/handwriting.ts)                                                                                                         | Lazy worker lifetime, recognition requests, cancellation, and recovery.                                      |
+| [`src/handwriting.worker.ts`](../src/handwriting.worker.ts)                                                                                           | Quantized local TrOCR loading, serialized inference, and raw recognized text.                                |
+| [`src/handwriting-image.ts`](../src/handwriting-image.ts)                                                                                             | Cropped black-on-white rasterization of handwriting strokes.                                                 |
+| [`src/handwriting-protocol.ts`](../src/handwriting-protocol.ts)                                                                                       | Narrow worker request, response, progress, and PNG input contract.                                           |
+| [`src/components/GatherWindows.tsx`](../src/components/GatherWindows.tsx)                                                                             | Floating selection action, viewport-aware placement, opt-in gating, and cancellable gather shimmer.          |
+| [`src/components/DrawingLayer.tsx`](../src/components/DrawingLayer.tsx)                                                                               | Saved and draft stroke rendering, selection outlines, and ink hit targets.                                   |
+| [`src/components/DrawingActions.tsx`](../src/components/DrawingActions.tsx)                                                                           | Side controls for opening Change layout, playing a gesture, deleting, and finishing.                         |
+| [`src/components/DesktopItems.tsx`](../src/components/DesktopItems.tsx)                                                                               | Desktop-item layers, compact frame shortcuts, item artwork, and selection/opening input.                     |
+| [`src/components/WindowContent.tsx`](../src/components/WindowContent.tsx)                                                                             | Editable scratchpad, appearance settings, and simulated app interiors.                                       |
+| [`src/components/Settings.tsx`](../src/components/Settings.tsx)                                                                                       | Responsive category navigation, shared preferences, and simulated display settings.                          |
+| [`src/components/AISettings.tsx`](../src/components/AISettings.tsx)                                                                                   | Gathering explanation, AI opt-in switch, and simulated 3 GB download status.                                 |
+| [`src/components/DisplaySettings.tsx`](../src/components/DisplaySettings.tsx)                                                                         | Two draggable monitor previews, monitor selection, and simulated per-monitor controls.                       |
+| [`src/components/GestureSettings.tsx`](../src/components/GestureSettings.tsx)                                                                         | Saved gesture previews, assignment management, and the Settings editor.                                      |
+| [`src/components/BackgroundSettings.tsx`](../src/components/BackgroundSettings.tsx)                                                                   | Photo preview, upload, fit, reset, and storage feedback in Settings.                                         |
+| [`src/components/AppIcon.tsx`](../src/components/AppIcon.tsx)                                                                                         | Consistent icon sizing and app-specific artwork.                                                             |
+| [`src/components/LauncherDock.tsx`](../src/components/LauncherDock.tsx)                                                                               | Saved favorites, running-app groups, window instance picker, launcher drop feedback, and the Apps trigger.   |
+| [`src/components/WindowSwitcher.tsx`](../src/components/WindowSwitcher.tsx)                                                                           | Selected window's caption and initial focus for the canvas window-switching view.                            |
+| [`src/components/AppLauncher.tsx`](../src/components/AppLauncher.tsx)                                                                                 | App gallery/list, filtering, keyboard navigation, and launcher views.                                        |
+| [`src/components/GesturePad.tsx`](../src/components/GesturePad.tsx)                                                                                   | Shared pointer pad and assignment editor, with local gesture matching in launcher mode.                      |
+| [`src/components/AppPicker.tsx`](../src/components/AppPicker.tsx)                                                                                     | React Aria app combobox with catalog choices, shared icons, and custom styling.                              |
+| [`src/components/launcher-apps.ts`](../src/components/launcher-apps.ts)                                                                               | Shared app catalog, icons, and descriptions.                                                                 |
+| [`src/App.module.css`](../src/App.module.css)                                                                                                         | Canvas, windows, and navigation styling.                                                                     |
+| [`src/components/WindowContent.module.css`](../src/components/WindowContent.module.css)                                                               | Document surfaces and simulated app interior styling.                                                        |
+| [`src/components/SystemBar.module.css`](../src/components/SystemBar.module.css)                                                                       | Status-item detail, shared glass controls, and popover styling.                                              |
+| [`src/index.css`](../src/index.css)                                                                                                                   | Shared visual tokens, Light/Dark and accent palettes, typography, viewport, and element defaults.            |
 
 ## Saved state
 
@@ -593,8 +610,8 @@ Handwriting model assets use the browser cache when available, separately from w
 
 Photo backgrounds are stored in IndexedDB database `hearthspace-background-v1`, in the `background` store’s `photo` record. The record holds the original image Blob, filename, and allowed fit value, independently of the workspace and other appearance settings. The image is decoded before use and is not sent to a server. Resetting deletes this record. If saving or deleting fails, the current session still shows the selected background and Settings explains that the change could not be saved. An unavailable or unreadable saved photo falls back to the default dots.
 
-Desktop items and drawings on either canvas layer can store a `peekOrigin`. It
-preserves the intended position while an object temporarily peeks out. Loading
+Desktop items, controls, and drawings on either canvas layer can store a
+`peekOrigin`. It preserves the intended position while an object temporarily peeks out. Loading
 validates this optional origin independently, discarding an invalid origin
 without losing the object.
 

@@ -85,7 +85,8 @@ of the screen, keeping the group narrow while its bell stays upright.
 Finishing a layout move reveals work that the placement fully covers. Placing
 an object on the background also moves blocked background objects aside; those
 adjusted positions become their new homes. This differs from a window
-temporarily pushing canvas icons or drawings out of the way, after which they return.
+temporarily pushing canvas icons, drawings, or controls out of the way, after
+which they return.
 
 **Remove from frame** returns a window, desktop item, or drawing to the canvas
 without closing or deleting it. **Remove** hides a shell widget, leaving it
@@ -119,8 +120,8 @@ artwork recognizable while taking less room on the frame.
 - **Place windows.** Drag their headers, resize, and close them. Dragging toward
   the viewport edge carries a window farther across the canvas.
 - **Align with the dots.** Hold **Alt** while dragging a window, desktop item,
-  or drawing to snap the top-left of its bounds to the wallpaper dots. Release
-  Alt to move freely again. Selected groups keep their spacing, using the
+  canvas control, or drawing to snap the top-left of its bounds to the wallpaper
+  dots. Release Alt to move freely again. Selected groups keep their spacing, using the
   grabbed window or item as the anchor. The same hidden grid works with a
   photo background and with drawings on either layer. Hold Alt while resizing
   to align the edges you're moving with the dots, keeping opposite edges fixed.
@@ -128,10 +129,10 @@ artwork recognizable while taking less room on the frame.
   boundaries still apply.
 - **Leave covered work in sight.** Windows can overlap completely while you
   drag. On release or when a new window opens, fully hidden windows, desktop
-  icons, and drawings on either canvas layer slide toward the nearest opening until a
-  small part peeks out. A new window stays where it opened.
-  Canvas icons and drawings slide home once nothing overlaps their original
-  space. Moving or editing one yourself gives it a new home; windows keep their
+  icons, controls, and drawings on either canvas layer slide toward the nearest
+  opening until a small part peeks out. A new window stays where it opened.
+  Canvas icons, controls, and drawings slide home once nothing overlaps their
+  original space. Moving or editing one yourself gives it a new home; windows keep their
   adjusted positions. Partly visible items stay put. Header double-click
   maximization does the same; the maximize button's focused view leaves the
   underlying layout alone.
@@ -140,6 +141,14 @@ artwork recognizable while taking less room on the frame.
   Change layout can raise them or attach them to the frame. The default cursor tool selects them;
   dragging the background draws a selection rectangle. Move selected items
   together; double-click or Enter opens its app preview.
+- **Move canvas controls.** With **Select desktop items** (**V**), select controls
+  such as Wi-Fi or Battery by clicking or drawing a selection rectangle. Hold
+  Shift to add to the selection, then drag a selected control or desktop icon
+  to move them together. A click without dragging still opens the control; a
+  drag moves it without opening its panel. The panel opens above windows while
+  its control stays on its chosen canvas layer. Controls on either canvas layer
+  participate, while controls attached to the frame stay put. Use Change layout
+  to move controls between the canvas and frame.
 - **Select windows separately.** Choose rectangle selection or a freeform
   lasso. With several windows selected, drag any selected header to move the
   group. Start outside the group to select again. Escape clears selection and
