@@ -40,6 +40,20 @@ factory rather than adding another shell icon library.
 still supports background and pinned layers; importing this icon set does
 not change placement behavior.
 
+## Canvas control glyphs
+
+- **Change layout** uses a divided frame with an inset pane, indicating placement
+  within the desktop frame.
+- **Toggle canvas map** uses viewfinder corners around a window, indicating an
+  overview of the canvas.
+- **Arrange windows** uses one tall pane on the left and two smaller panes
+  stacked on the right. The three-pane layout distinguishes arrangement from
+  the plain app grid icon.
+
+These definitions are shared by the toolbar, tool menu, search previews,
+settings, and drawing controls. Changing a glyph does not change its action,
+shortcut, selection state, or placement behavior.
+
 ## Source files
 
 - `src/icons/createIcon.ts`: SVG defaults and optical stroke sizing.

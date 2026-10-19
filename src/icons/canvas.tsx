@@ -27,9 +27,9 @@ export const Lasso = createIcon(
 export const Overview = createIcon(
   'canvas-overview',
   <>
-    <rect x="3.5" y="3.5" width="17" height="17" rx="1" />
-    <path d="M8 3.5v17M3.5 8h17" />
-    <rect x="11" y="11" width="6.5" height="6" rx="0.75" />
+    <path d="M3.5 8V3.5H8m8 0h4.5V8m0 8v4.5H16m-8 0H3.5V16" />
+    <rect x="7" y="7" width="9" height="8" rx="1" />
+    <path d="M10 10h3" />
   </>,
 )
 
@@ -41,9 +41,9 @@ export const Cursor = createIcon(
 export const FrameLayout = createIcon(
   'change-layout',
   <>
-    <path d="M3.5 8V3.5H8m8 0h4.5V8m0 8v4.5H16m-8 0H3.5V16" />
-    <rect x="7" y="7" width="9" height="8" rx="1" />
-    <path d="M10 10h3" />
+    <rect x="3.5" y="3.5" width="17" height="17" rx="1" />
+    <path d="M8 3.5v17M3.5 8h17" />
+    <rect x="11" y="11" width="6.5" height="6" rx="0.75" />
   </>,
 )
 
@@ -109,10 +109,9 @@ export const AppsGrid = createIcon(
 export const ArrangeWindows = createIcon(
   'arrange-windows',
   <>
-    <rect x="3.5" y="3.5" width="17" height="7.5" rx="1" />
-    <path d="M3.5 6.5h17" />
-    <rect x="3.5" y="14" width="7" height="6.5" rx="1" />
-    <rect x="13.5" y="14" width="7" height="6.5" rx="1" />
+    <rect x="3.5" y="3.5" width="7.5" height="17" rx="1" />
+    <rect x="14" y="3.5" width="6.5" height="6.5" rx="1" />
+    <rect x="14" y="14" width="6.5" height="6.5" rx="1" />
   </>,
 )
 
