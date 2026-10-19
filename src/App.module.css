@@ -446,12 +446,6 @@
 }
 
 .desktop[data-presentation='realistic']
-  .window[data-external='true'][data-active='true'] {
-  outline: 2px solid var(--accent-border);
-  outline-offset: 2px;
-}
-
-.desktop[data-presentation='realistic']
   .window[data-external='true'][data-selected='true'] {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
@@ -747,6 +741,13 @@
   button:last-child:hover {
   background: #c54646;
   color: #fff;
+}
+
+/* Hearthspace owns the active rim, after each app's resting border styles. */
+.desktop[data-presentation='realistic']
+  .window[data-external='true']:is([data-active='true'], :focus-within) {
+  border-color: var(--accent-border);
+  box-shadow: var(--glass-edge-active), var(--shadow-glow);
 }
 
 .mapPanel {

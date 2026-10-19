@@ -9,7 +9,7 @@ interaction and points to its implementation.
 
 - [Canvas navigation](canvas-navigation.md): panning, tool pickers, temporary drag navigation, and Overview.
 - [Desktop items](desktop-items.md): permanent app shortcuts, sample files and folders, and movable canvas controls.
-- [Window management](window-management.md): movement, resizing, Arrange, ordinary maximization, and focused view.
+- [Window management](window-management.md): movement, resizing, active-window rims, Arrange, ordinary maximization, and focused view.
 - [Window selection](window-selection.md): rectangle/lasso selection, grouped dragging, and inert app contents.
 - [Window peeking](window-peeking.md): revealing covered work, remembering original homes, and restoring them.
 - [Grid snapping](grid-snapping.md): Alt movement, edge resizing, and frame alignment with corner exceptions.

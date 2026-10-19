@@ -58,6 +58,11 @@ all participate in these layers. The simulated third-party apps keep their
 individual title bars, content materials, and artwork. An opaque app interior
 can coexist with the translucent shell around it.
 
+Active windows share a thin accent rim on their immediate outer border and a
+faint tinted shadow. This applies to third-party apps as well as Settings;
+their title bars and interiors keep their own materials. An active window
+doesn't need a detached outline to identify its place in Hearthspace.
+
 ## Keep light near the surface edges
 
 `--edge-light` adds a faint radial tint from the outer corner, fading to

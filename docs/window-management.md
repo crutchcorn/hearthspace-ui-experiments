@@ -21,6 +21,13 @@ and styling. Settings belongs to Hearthspace: its icon and controls use the
 [local SVG set](icons.md), and its surfaces follow the shared
 [translucent materials](materials-and-light.md).
 
+The active-window highlight belongs to Hearthspace in every app. A thin accent
+rim follows the window's existing outer border, with a faint tinted shadow.
+It sits directly against the app instead of floating across a gap. Third-party
+title bars, corner shapes, and content keep their own styling. This active rim
+is separate from window-selection and search-preview outlines, and remains
+visible when mouse input hides keyboard focus rings.
+
 ## Two ways to make room
 
 Double-clicking a header toggles **ordinary maximization**. The window expands
@@ -64,6 +71,8 @@ bounds rather than resuming maximized or focused presentation.
 ## Where this lives
 
 [App.tsx](../src/App.tsx) coordinates gestures, focus, launching, and Arrange.
+[App styles](../src/App.module.css) draw the shared active rim around each app's
+window chrome.
 [desktop.ts](../src/desktop.ts) supplies resizing and grid arrangement;
 [window-layout.ts](../src/window-layout.ts) defines maximized bounds.
 [useShellPeek](../src/useShellPeek.ts) handles focused-view reveal.
