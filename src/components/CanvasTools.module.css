@@ -46,12 +46,11 @@
 }
 
 .toolMenu {
-  position: absolute;
+  --widget-panel-width: 260px;
+
   z-index: 1;
-  bottom: calc(100% + 12px);
-  left: 0;
-  width: 260px;
-  max-width: calc(100vw - 24px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 5px;
   border: 1px solid var(--chrome-border);
   border-radius: var(--radius-panel);
@@ -153,28 +152,6 @@
     width: 44px;
     height: 44px;
   }
-
-  .mobileMenu {
-    position: fixed;
-    bottom: 78px;
-    left: 12px;
-    max-height: calc(100dvh - 156px);
-    overflow-y: auto;
-    overscroll-behavior: contain;
-  }
-}
-
-:global(:is([data-layout-widget], [data-widget-popover])) .toolMenu {
-  position: absolute;
-  inset: var(--widget-popover-top) auto var(--widget-popover-bottom)
-    clamp(
-      calc(12px - var(--widget-popover-x)),
-      0px,
-      calc(100vw - var(--widget-popover-x) - min(260px, 100vw - 24px) - 12px)
-    );
-  max-height: var(--widget-popover-height);
-  overflow-y: auto;
-  overscroll-behavior: contain;
 }
 
 :global(:is([data-layout-widget], [data-widget-popover])) .tooltip {
@@ -206,27 +183,6 @@
   width: 24px;
   height: 1px;
   justify-self: center;
-}
-
-:global(
-    [data-layout-widget]:is([data-frame-edge='left'], [data-frame-edge='right'])
-  )
-  .toolMenu {
-  inset: var(--widget-side-top) auto var(--widget-side-bottom)
-    clamp(
-      calc(12px - var(--widget-x)),
-      calc(100% + 12px),
-      calc(100vw - var(--widget-x) - min(260px, 100vw - 24px) - 12px)
-    );
-  max-height: var(--widget-side-height);
-}
-
-:global([data-layout-widget][data-frame-edge='right']) .toolMenu {
-  left: clamp(
-    calc(12px - var(--widget-x)),
-    calc(-1 * (min(260px, 100vw - 24px) + 12px)),
-    calc(100vw - var(--widget-x) - min(260px, 100vw - 24px) - 12px)
-  );
 }
 
 :global([data-layout-widget][data-frame-edge='left']) .tooltip {

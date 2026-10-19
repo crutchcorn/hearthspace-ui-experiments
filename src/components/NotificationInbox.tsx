@@ -20,6 +20,7 @@ import {
 } from '../useNotifications'
 import AppIcon from './AppIcon'
 import WidgetPopover from './WidgetPopover'
+import popoverStyles from './WidgetPopover.module.css'
 import shellStyles from './ShellControls.module.css'
 import styles from './NotificationInbox.module.css'
 
@@ -182,7 +183,7 @@ export default function NotificationInbox({
           <section
             ref={panel}
             id="notification-inbox"
-            className={styles.panel}
+            className={`${popoverStyles.panel} ${styles.panel}`}
             aria-labelledby="notification-heading"
           >
             <header className={styles.heading}>
@@ -281,7 +282,7 @@ export default function NotificationInbox({
         <WidgetPopover>
           <aside
             ref={toastElement}
-            className={styles.toast}
+            className={`${popoverStyles.panel} ${styles.toast}`}
             role="status"
             aria-live="polite"
           >

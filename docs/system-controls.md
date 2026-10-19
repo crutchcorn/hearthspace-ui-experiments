@@ -46,6 +46,13 @@ doesn't open the layout editor or alter a visible control's placement.
 [SystemBar](../src/components/SystemBar.tsx) renders each control.
 [PlacedWidget](../src/components/PlacedWidget.tsx) places it, and
 [WidgetPopover](../src/components/WidgetPopover.tsx) separates detached popup
-layering from the control body. [SearchControlPreview](../src/components/SearchControlPreview.tsx)
-reads the same state. Movement and settling are covered by
+layering from the control body. Its [shared panel styles](../src/components/WidgetPopover.module.css)
+also own viewport clamping, opening direction, and available height for system
+controls, notifications, running-app lists, and canvas tool menus. Each popup
+supplies its width through `--widget-panel-width` and keeps its own content
+styles. Moving a control between edges doesn't require separate placement rules
+in each popup.
+
+[SearchControlPreview](../src/components/SearchControlPreview.tsx) reads the
+same state. Movement and settling are covered by
 [layout workspace tests](../tests/layout-workspace.test.ts).

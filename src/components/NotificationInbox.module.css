@@ -1,8 +1,7 @@
 .corner {
-  position: fixed;
+  position: relative;
   z-index: 1000;
-  top: 24px;
-  left: 24px;
+  max-width: 100%;
   color: var(--chrome-text);
 }
 
@@ -68,12 +67,8 @@
 
 .panel,
 .toast {
-  position: absolute;
-  top: calc(100% + 12px);
-  left: 0;
-  width: 390px;
-  max-width: calc(100vw - 24px);
-  max-height: calc(100dvh - 186px);
+  --widget-panel-width: 390px;
+
   overflow: auto;
   border: 1px solid var(--chrome-border);
   border-radius: var(--radius-panel);
@@ -452,7 +447,6 @@
 
 @media (width <= 760px) {
   .corner {
-    position: static;
     flex: none;
   }
 
@@ -463,14 +457,6 @@
     background: transparent;
     box-shadow: none;
     backdrop-filter: none;
-  }
-
-  .panel,
-  .toast {
-    position: fixed;
-    top: 78px;
-    left: 12px;
-    max-height: calc(100dvh - 156px);
   }
 }
 
@@ -496,23 +482,6 @@
   }
 }
 
-:global(:is([data-layout-widget], [data-widget-popover])) .corner {
-  position: relative;
-  inset: auto;
-  max-width: 100%;
-}
-
-:global(:is([data-layout-widget], [data-widget-popover])) :is(.panel, .toast) {
-  position: absolute;
-  inset: var(--widget-popover-top) auto var(--widget-popover-bottom)
-    clamp(
-      calc(12px - var(--widget-popover-x)),
-      0px,
-      calc(100vw - var(--widget-popover-x) - min(390px, 100vw - 24px) - 12px)
-    );
-  max-height: var(--widget-popover-height);
-}
-
 @media (width <= 760px) {
   :global(:is([data-layout-widget], [data-widget-popover])) .corner .bar {
     height: 54px;
@@ -533,27 +502,6 @@
     box-shadow: none;
     backdrop-filter: none;
   }
-}
-
-:global(
-    [data-layout-widget]:is([data-frame-edge='left'], [data-frame-edge='right'])
-  )
-  :is(.panel, .toast) {
-  inset: var(--widget-side-top) auto var(--widget-side-bottom)
-    clamp(
-      calc(12px - var(--widget-x)),
-      calc(100% + 12px),
-      calc(100vw - var(--widget-x) - min(390px, 100vw - 24px) - 12px)
-    );
-  max-height: var(--widget-side-height);
-}
-
-:global([data-layout-widget][data-frame-edge='right']) :is(.panel, .toast) {
-  left: clamp(
-    calc(12px - var(--widget-x)),
-    calc(-1 * (min(390px, 100vw - 24px) + 12px)),
-    calc(100vw - var(--widget-x) - min(390px, 100vw - 24px) - 12px)
-  );
 }
 
 :global(

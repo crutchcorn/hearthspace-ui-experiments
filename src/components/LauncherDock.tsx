@@ -11,6 +11,7 @@ import {
 import type { DesktopWindow } from '../desktop'
 import AppIcon from './AppIcon'
 import WidgetPopover from './WidgetPopover'
+import popoverStyles from './WidgetPopover.module.css'
 import { APP_CATALOG, type LauncherApp } from './launcher-apps'
 import shellStyles from './ShellControls.module.css'
 import styles from './LauncherDock.module.css'
@@ -422,7 +423,7 @@ export default function LauncherDock({
           <section
             ref={panelRef}
             id={panelId}
-            className={styles.windowPopover}
+            className={`${popoverStyles.panel} ${styles.windowPopover}`}
             aria-labelledby={`${panelId}-heading`}
           >
             <header className={styles.popoverHeading}>

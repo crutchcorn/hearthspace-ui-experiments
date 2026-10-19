@@ -3,6 +3,7 @@ import { useEffect, useId, useRef, useState, type KeyboardEvent } from 'react'
 import type { CanvasTool, WindowSelectionShape } from '../desktop'
 import { CANVAS_TOOLS } from '../canvas-tool-catalog.ts'
 import WidgetPopover from './WidgetPopover'
+import popoverStyles from './WidgetPopover.module.css'
 import styles from './CanvasTools.module.css'
 import shellStyles from './ShellControls.module.css'
 
@@ -366,7 +367,7 @@ export default function CanvasTools({
       <div
         ref={mobileMenuRef}
         id={mobileMenuId}
-        className={`${styles.toolMenu} ${styles.mobileMenu}`}
+        className={`${popoverStyles.panel} ${styles.toolMenu}`}
         role="menu"
         aria-label="Canvas tools"
         onKeyDown={(event) =>
@@ -580,7 +581,7 @@ export default function CanvasTools({
                 <div
                   ref={menuRef}
                   id={toolMenuId}
-                  className={styles.toolMenu}
+                  className={`${popoverStyles.panel} ${styles.toolMenu}`}
                   role="menu"
                   aria-label="Canvas interaction tool"
                   onKeyDown={(event) => navigateMenu(event, 'primary')}
@@ -668,7 +669,7 @@ export default function CanvasTools({
                 <div
                   ref={selectionMenuRef}
                   id={selectionMenuId}
-                  className={styles.toolMenu}
+                  className={`${popoverStyles.panel} ${styles.toolMenu}`}
                   role="menu"
                   aria-label="Window selection tool"
                   onKeyDown={(event) => navigateMenu(event, 'selection')}

@@ -11,6 +11,7 @@ import {
 import type { SystemStatus } from '../useSystemStatus'
 import { formatClock, type ClockDateFormat } from '../clock-format'
 import WidgetPopover from './WidgetPopover'
+import popoverStyles from './WidgetPopover.module.css'
 import styles from './SystemBar.module.css'
 import shellStyles from './ShellControls.module.css'
 
@@ -176,7 +177,7 @@ export default function SystemBar({
         <WidgetPopover>
           {id === 'wifi' && openPanel === id && (
             <div
-              className={`${styles.popover} ${styles.systemPopover}`}
+              className={`${popoverStyles.panel} ${styles.popover} ${styles.systemPopover}`}
               ref={panelRef}
               data-system-panel
               tabIndex={-1}
@@ -210,7 +211,7 @@ export default function SystemBar({
 
           {id === 'volume' && openPanel === id && (
             <div
-              className={`${styles.popover} ${styles.systemPopover}`}
+              className={`${popoverStyles.panel} ${styles.popover} ${styles.systemPopover}`}
               ref={panelRef}
               data-system-panel
               tabIndex={-1}
@@ -240,7 +241,7 @@ export default function SystemBar({
 
           {id === 'battery' && openPanel === id && (
             <div
-              className={`${styles.popover} ${styles.systemPopover}`}
+              className={`${popoverStyles.panel} ${styles.popover} ${styles.systemPopover}`}
               ref={panelRef}
               data-system-panel
               tabIndex={-1}
@@ -261,7 +262,7 @@ export default function SystemBar({
 
           {id === 'clock' && openPanel === id && (
             <div
-              className={`${styles.popover} ${styles.calendarPopover}`}
+              className={`${popoverStyles.panel} ${styles.popover} ${styles.calendarPopover}`}
               ref={panelRef}
               data-system-panel
               tabIndex={-1}
