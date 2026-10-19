@@ -77,24 +77,6 @@ export const FileText = createIcon(
   </>,
 )
 
-export const FileCode = createIcon(
-  'FileCode',
-  <>
-    <path d="M6 3.5h8l5 5v11a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-15a1 1 0 0 1 1-1Z" />
-    <path d="M14 3.5v4a1 1 0 0 0 1 1h4m-9.5 3L7 14l2.5 2.5m5-5L17 14l-2.5 2.5" />
-  </>,
-)
-
-export const LockKeyhole = createIcon(
-  'LockKeyhole',
-  <>
-    <rect x="5.5" y="10.5" width="13" height="10" rx="1.5" />
-    <path d="M8 10.5v-3a4 4 0 0 1 8 0v3" />
-    <circle cx="12" cy="14.5" r="1" />
-    <path d="M12 15.5v2" />
-  </>,
-)
-
 export const ImagePlus = createIcon(
   'ImagePlus',
   <>

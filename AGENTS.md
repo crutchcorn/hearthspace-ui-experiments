@@ -11,7 +11,8 @@ full accessibility workflow are not requirements for these experiments.
   authoritative for the package manager and supported Node versions.
 - Use CSS Modules and the local SVG icon set in `src/icons/`. Follow
   [docs/icons.md](docs/icons.md) when adding or changing glyphs; reuse the shared
-  factory and optical stroke sizing instead of importing another icon library.
+  factory and optical stroke sizing for Hearthspace controls. Preserve the
+  existing Lucide artwork and styling for simulated third-party apps.
   Ordinary CSS is sufficient; if SCSS becomes useful, limit its features to
   media-query variables.
 - Add routing, server state, a backend, orchestration, or abstractions only when

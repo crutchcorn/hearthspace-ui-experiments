@@ -1,4 +1,10 @@
-import { ArrowUpRight, FileCode, FileText, Folder, LockKeyhole } from '../icons'
+import {
+  ArrowUpRight,
+  FileCode2,
+  FileText,
+  Folder,
+  LockKeyhole,
+} from 'lucide-react'
 import type { DesktopWindow, Workspace } from '../desktop'
 import type { AccentThemeId, ColorMode } from '../theme'
 import type { BackgroundFit, BackgroundPhoto } from '../useBackground'
@@ -41,7 +47,7 @@ const files = [
   { name: 'Projects', kind: 'Folder', icon: Folder },
   { name: 'References', kind: 'Folder', icon: Folder },
   { name: 'Notes.txt', kind: 'Text document', icon: FileText },
-  { name: 'Sketches.svg', kind: 'SVG image', icon: FileCode },
+  { name: 'Sketches.svg', kind: 'SVG image', icon: FileCode2 },
 ]
 
 const bookmarks = [
@@ -115,7 +121,7 @@ export default function WindowContent({
         <div className={styles.fileGrid}>
           {files.map(({ name, kind, icon: Icon }) => (
             <div key={name} className={styles.fileTile}>
-              <Icon size={23} aria-hidden="true" />
+              <Icon size={23} strokeWidth={1.4} aria-hidden="true" />
               <div>
                 <strong>{name}</strong>
                 <span>{kind}</span>
@@ -171,7 +177,7 @@ export default function WindowContent({
                 <strong>{bookmark.name}</strong>
                 <span>{bookmark.detail}</span>
               </div>
-              <ArrowUpRight size={16} aria-hidden="true" />
+              <ArrowUpRight size={16} strokeWidth={1.5} aria-hidden="true" />
             </div>
           ))}
         </div>
@@ -210,7 +216,12 @@ export default function WindowContent({
   return (
     <div className={styles.appPreview}>
       <div className={styles.previewHeading}>
-        <AppIcon appId={app?.id ?? 'unknown'} icon={Icon} size={22} />
+        <AppIcon
+          appId={app?.id ?? 'unknown'}
+          icon={Icon}
+          size={22}
+          strokeWidth={1.5}
+        />
         <div>
           <h2>{app?.name ?? item.title}</h2>
           <p>{app?.description}</p>

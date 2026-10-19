@@ -75,6 +75,12 @@
   fill: var(--accent-soft);
 }
 
+.icon:has([data-app-artwork='simulated']) {
+  filter: drop-shadow(
+    0 2px 1px color-mix(in srgb, var(--chrome-text) 8%, transparent)
+  );
+}
+
 .item[data-item-kind='file'] .icon > svg {
   fill: var(--chrome-raised);
   color: var(--muted);
