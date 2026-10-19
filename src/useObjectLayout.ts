@@ -1,6 +1,7 @@
 import {
   useCallback,
   useEffect,
+  useEffectEvent,
   useLayoutEffect,
   useRef,
   useState,
@@ -33,6 +34,7 @@ import {
 import { transformCanvasWorkspace, settleLayoutDrop } from './layout-workspace'
 import { mergeOverlappingFrameItems } from './frame-collisions'
 import { restoreBackgroundItems } from './peek-layout'
+import { snapFramePlacement } from './frame-grid'
 
 export default function useObjectLayout(
   workspace: Workspace,
@@ -66,6 +68,9 @@ export default function useObjectLayout(
     target: LayoutTarget
     x: number
     y: number
+    clientX: number
+    clientY: number
+    altKey: boolean
     bounds: Bounds
     moved: boolean
     captureTarget: HTMLElement
@@ -81,6 +86,10 @@ export default function useObjectLayout(
     from: Bounds
     preview: boolean
   } | null>(null)
+  const pendingFrameGrid = useRef<{
+    target: LayoutTarget
+    size: { width: number; height: number }
+  } | null>(null)
   const motionFrame = useRef<number | null>(null)
   const snapAnimation = useRef<Animation | null>(null)
   const turnAnimation = useRef<Animation | null>(null)
@@ -88,10 +97,28 @@ export default function useObjectLayout(
     if (motionFrame.current !== null) cancelAnimationFrame(motionFrame.current)
     motionFrame.current = null
     pendingSnap.current = null
+    pendingFrameGrid.current = null
     snapAnimation.current?.cancel()
     turnAnimation.current?.cancel()
   }, [])
   useEffect(() => cancelMotion, [cancelMotion])
+  useLayoutEffect(() => {
+    const pending = pendingFrameGrid.current
+    if (!pending) return
+    pendingFrameGrid.current = null
+    const placement = getPlacement(layout, pending.target)
+    if (placement.surface !== 'frame') return
+    // Turning or ungrouping a toolbar changes its final size after the drop.
+    const next = snapFramePlacement(
+      placement,
+      frameSize(pending.target, pending.size),
+      view,
+      true,
+      frameSpacing(pending.target),
+    )
+    if (next.position !== placement.position)
+      setLayout((current) => setObjectPlacement(current, pending.target, next))
+  })
   useLayoutEffect(() => {
     if (!pendingSnap.current || motionFrame.current !== null) return
     // Measure after the widget has laid out its new orientation. Keep this frame
@@ -404,15 +431,33 @@ export default function useObjectLayout(
     if (!editing) return
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') cancelDrag()
+      else updateDragModifier(event)
     }
     window.addEventListener('keydown', onKeyDown, true)
+    window.addEventListener('keyup', updateDragModifier, true)
     window.addEventListener('blur', cancelDrag)
     return () => {
       window.removeEventListener('keydown', onKeyDown, true)
+      window.removeEventListener('keyup', updateDragModifier, true)
       window.removeEventListener('blur', cancelDrag)
       cancelDrag()
     }
   }, [editing, cancelDrag])
+
+  const updateDragModifier = useEffectEvent((event: KeyboardEvent) => {
+    const current = drag.current
+    if (!current?.moved || current.altKey === event.altKey) return
+    updateDrag(current.clientX, current.clientY, event.altKey)
+  })
+
+  const refreshDragOrientation = useEffectEvent(() => {
+    const current = drag.current
+    if (current?.moved && current.altKey)
+      updateDrag(current.clientX, current.clientY, true)
+  })
+  useLayoutEffect(() => {
+    refreshDragOrientation()
+  }, [draggingWidget?.edge])
 
   function placement(target: LayoutTarget): ObjectPlacement {
     const saved = getPlacement(layout, target)
@@ -656,6 +701,9 @@ export default function useObjectLayout(
       target,
       x: event.clientX,
       y: event.clientY,
+      clientX: event.clientX,
+      clientY: event.clientY,
+      altKey: event.altKey,
       bounds,
       moved: false,
       captureTarget: event.currentTarget,
@@ -674,28 +722,32 @@ export default function useObjectLayout(
   function onPointerMove(event: PointerEvent<HTMLElement>) {
     const current = drag.current
     if (!current || current.pointerId !== event.pointerId) return
+    updateDrag(event.clientX, event.clientY, event.altKey)
+  }
+  function updateDrag(clientX: number, clientY: number, altKey: boolean) {
+    const current = drag.current
+    if (!current) return
     if (!editing) {
       cancelDrag()
       return
     }
-    const dx = event.clientX - current.x,
-      dy = event.clientY - current.y
+    current.clientX = clientX
+    current.clientY = clientY
+    current.altKey = altKey
+    const dx = clientX - current.x,
+      dy = clientY - current.y
     if (!current.moved && Math.hypot(dx, dy) < 6) return
     current.moved = true
-    const movingBounds = dragBounds(current, dx, dy)
-    const drop = isToolbar(current.target)
-      ? getWidgetFrameDropTarget(movingBounds, view, 72, draggingWidget?.edge)
-      : getFrameDropTarget(movingBounds, view)
+    const { bounds: movingBounds, drop } = frameDrag(current, dx, dy, altKey)
     const favorite = favorites?.hover(
       current.target.kind === 'item' ? current.target.id : null,
-      event.clientX,
-      event.clientY,
+      clientX,
+      clientY,
     )
     setGroupDropTarget(
       favorite
         ? null
-        : (findGroupDrop(current.target, event.clientX, event.clientY)
-            ?.target ?? null),
+        : (findGroupDrop(current.target, clientX, clientY)?.target ?? null),
     )
     setDropTarget(drop)
     if (isToolbar(current.target)) {
@@ -710,8 +762,8 @@ export default function useObjectLayout(
         id: current.target.id,
         edge: nextEdge,
         center: {
-          x: current.bounds.x + current.bounds.width / 2 + dx,
-          y: current.bounds.y + current.bounds.height / 2 + dy,
+          x: movingBounds.x + movingBounds.width / 2,
+          y: movingBounds.y + movingBounds.height / 2,
         },
       })
     }
@@ -729,7 +781,12 @@ export default function useObjectLayout(
     }
     const dx = event.clientX - current.x
     const dy = event.clientY - current.y
-    const movingBounds = dragBounds(current, dx, dy)
+    const { bounds: movingBounds, drop } = frameDrag(
+      current,
+      dx,
+      dy,
+      event.altKey,
+    )
     if (current.moved || Math.hypot(dx, dy) >= 6) {
       if (
         current.target.kind === 'item' &&
@@ -761,11 +818,14 @@ export default function useObjectLayout(
         finishDrag(event)
         return
       }
-      const drop = isToolbar(current.target)
-        ? getWidgetFrameDropTarget(movingBounds, view, 72, draggingWidget?.edge)
-        : getFrameDropTarget(movingBounds, view)
-      if (drop) place(current.target, drop)
-      else if (current.target.kind === 'group') {
+      if (drop) {
+        if (event.altKey && drop.position > 0 && drop.position < 1)
+          pendingFrameGrid.current = {
+            target: current.target,
+            size: movingBounds,
+          }
+        place(current.target, drop)
+      } else if (current.target.kind === 'group') {
         place(current.target, { surface: 'canvas' })
       } else {
         if (isToolbar(current.target)) {
@@ -846,6 +906,54 @@ export default function useObjectLayout(
       width,
       height,
     }
+  }
+  function frameSpacing(target: LayoutTarget) {
+    return target.kind === 'window' || target.kind === 'drawing'
+      ? ('flush' as const)
+      : ('padded' as const)
+  }
+  function frameSize(
+    target: LayoutTarget,
+    fallback: { width: number; height: number },
+  ) {
+    if (target.kind === 'item') return { width: 54, height: 54 }
+    if (target.kind === 'window')
+      return workspace.windows.find((item) => item.id === target.id) ?? fallback
+    if (target.kind === 'drawing')
+      return (
+        workspace.drawings.find((item) => item.id === target.id) ?? fallback
+      )
+    const element = targetElement(target)
+    return {
+      width: element?.offsetWidth || fallback.width,
+      height: element?.offsetHeight || fallback.height,
+    }
+  }
+  function frameDrag(
+    current: NonNullable<typeof drag.current>,
+    dx: number,
+    dy: number,
+    snap: boolean,
+  ) {
+    const bounds = dragBounds(current, dx, dy)
+    const drop = isToolbar(current.target)
+      ? getWidgetFrameDropTarget(bounds, view, 72, draggingWidget?.edge)
+      : getFrameDropTarget(bounds, view)
+    if (!drop || !snap || drop.position === 0 || drop.position === 1)
+      return { bounds, drop }
+    const size = frameSize(current.target, bounds)
+    const spacing = frameSpacing(current.target)
+    const snapped = snapFramePlacement(drop, size, view, true, spacing)
+    const aligned = getFrameBounds(
+      snapped,
+      size.width,
+      size.height,
+      view,
+      spacing,
+    )
+    if (drop.edge === 'top' || drop.edge === 'bottom') bounds.x = aligned.x
+    else bounds.y = aligned.y
+    return { bounds, drop: snapped }
   }
   function widgetBounds(
     target: LayoutTarget,
