@@ -18,11 +18,13 @@ through browser-driven clicks and keyboard input. React hooks, child
 components, geometry, and browser APIs remain real. This catches failures
 where individually correct pieces don't work together.
 
-The initial flows protect shell panel exclusivity, search cancellation, and
-window-switcher cancellation. They check that edited note text, window
-positions, and keyboard focus survive temporary arrangements. Assertions
-wait for the observable result instead of sleeping for an animation's
-current duration.
+The flows protect shell panel exclusivity, search and window-switcher
+cancellation, interrupted desktop dragging, and app state across canvas/frame
+placement. They check that edited note text, window positions, keyboard
+focus, and the selected Settings category survive temporary arrangements.
+An interrupted drag must restore the icon's position and leave the next
+drag usable. Assertions wait for the observable result instead of sleeping
+for an animation's current duration.
 
 ## Isolation and limits
 
@@ -47,8 +49,10 @@ is the outcome; don't save screenshots as assertions.
 
 Keep helpers small. The shared desktop helper supplies the real mount and
 finds a window through its close control; it doesn't replace application
-behavior. Add external substitutes only when the boundary requires one,
-and document what the test consequently cannot demonstrate.
+behavior. A small Playwright command holds the native mouse button during a
+drag so the test can interrupt it with Escape or search before releasing it.
+Add external substitutes only when the boundary requires one, and document
+what the test consequently cannot demonstrate.
 
 The [contributor guide](../CONTRIBUTING.md#verify-interactions) has install,
 run, and debugging commands. Configuration lives in

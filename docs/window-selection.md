@@ -47,6 +47,16 @@ unfinished selection outline aren't.
 
 ## Where this lives
 
+Pointer interactions use distinct session types in
+[`pointer-session.ts`](../src/pointer-session.ts), so a resize always has an
+edge and a drawing always has its stroke data. App owns one finish/cancel path
+for capture release, drafts, selection outlines, and favorite-drop feedback.
+Escape, lost capture, browser blur, and opening search use that same cleanup.
+Canceled desktop drags restore their starting positions; committed drags keep
+the normal overlap and peek behavior. The
+[browser interruption tests](../tests/browser/drag-interruption.test.tsx)
+also perform a second drag to check that input remains usable after cancellation.
+
 [CanvasTools](../src/components/CanvasTools.tsx) presents the two shapes.
 [App.tsx](../src/App.tsx) owns selection state, rectangular intersection, group
 dragging, and app-content suppression. [selection.ts](../src/selection.ts)
