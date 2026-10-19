@@ -204,7 +204,6 @@ export default function SystemBar({
                   <Check size={18} className={styles.networkCheck} />
                 )}
               </div>
-              <p className={styles.previewNote}>Simulated connection</p>
             </div>
           )}
 
@@ -235,9 +234,6 @@ export default function SystemBar({
                 />
                 <Volume2 size={17} />
               </div>
-              <p className={styles.previewNote}>
-                Built-in speakers · Simulated
-              </p>
             </div>
           )}
 
@@ -259,7 +255,6 @@ export default function SystemBar({
                 <span />
               </div>
               <p className={styles.batteryDescription}>On battery power</p>
-              <p className={styles.previewNote}>Simulated battery status</p>
             </div>
           )}
 
@@ -307,7 +302,6 @@ export default function SystemBar({
                   </span>
                 ))}
               </div>
-              <p className={styles.calendarFooter}>Local date and time</p>
             </div>
           )}
         </WidgetPopover>

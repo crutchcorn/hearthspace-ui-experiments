@@ -157,7 +157,7 @@
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 24px 0;
+  padding-top: 24px;
 }
 
 .networkRow > div {
@@ -188,19 +188,11 @@
   color: var(--accent);
 }
 
-.previewNote {
-  margin: 0;
-  padding-top: 14px;
-  border-top: 1px solid var(--line);
-  color: var(--chrome-muted);
-  font-size: 11px;
-}
-
 .volumeRow {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin: 24px 0;
+  margin-top: 24px;
 }
 
 .volumeSlider {
@@ -230,7 +222,7 @@
 }
 
 .batteryDescription {
-  margin: 0 0 18px;
+  margin: 0;
   font-size: 13px;
 }
 
@@ -285,14 +277,6 @@
   background: linear-gradient(135deg, var(--accent-bright), var(--accent));
   box-shadow: 0 3px 10px color-mix(in srgb, var(--accent) 20%, transparent);
   color: var(--accent-ink);
-}
-
-.calendarFooter {
-  margin: 18px 0 0;
-  padding-top: 14px;
-  border-top: 1px solid var(--line);
-  color: var(--chrome-muted);
-  font-size: 11px;
 }
 
 @keyframes panel-in {
