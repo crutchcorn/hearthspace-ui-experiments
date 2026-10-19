@@ -6,7 +6,7 @@ A private browser playground for trying desktop ideas for [Hearthspace](https://
 
 Think of it as a [painting canvas inside a frame](docs/canvas-and-frame.md). Work can move with the painting or stay attached to its edges. The default arrangement puts compact controls in four corners, with warm glass around opaque app content. We've repeatedly removed labels, counts, and instructions that only describe what's already visible. The selected window's name in the switcher helps you choose; a permanent “Drag to explore” caption doesn't need to occupy your desktop.
 
-The [feature guide](docs/features.md) covers what you can try and what is simulated. The [visual language](docs/visual-language.md) explains the decisions behind the current design.
+The [feature guide](docs/features.md) links to individual pages explaining what you can try, how each feature behaves, and what is simulated. The [visual language](docs/visual-language.md) explains the decisions behind the current design.
 
 ## Run it
 

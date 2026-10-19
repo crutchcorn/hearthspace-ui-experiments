@@ -209,6 +209,12 @@ The monitor arrangement preview also has a bounded size. Two numbered monitors f
 
 ## Let interaction provide feedback
 
+The shell behaves like OS controls when you drag across its words: it doesn't
+select text. App content and editable fields can still select text, including
+terminal output, Notes, and search. Settings labels and app menus retain the
+control behavior. Keep this [text-selection boundary](text-selection.md) when
+adding a surface, so a desktop gesture doesn't become an accidental highlight.
+
 Selected tools stay selected, including Search after its field closes. Escape dismisses a panel or clears selection without changing the canvas tool; Change layout is an editing session that ends with Done or Escape. On desktop, pressing an inactive expandable tool selects it; pressing it again opens its choices. The primary cursor dropdown remembers desktop selection, Pan, or Search. The pencil selects drawing directly, also available with D. Each expansion indicator sits at the top right. Short-lived tooltips explain unfamiliar controls without remaining over the canvas after the user has moved on.
 
 Use distinct icons for distinct actions. Apps and Arrange have different silhouettes; Arrange's uneven grid suggests separate, non-overlapping windows. A divider separates background, selection, drawing, and layout tools from Overview and Arrange. **Gather similar windows** uses overlapping rectangles beside the selected windows, tying the action to its context.
