@@ -14,6 +14,8 @@ import { restoreBackgroundItems } from './peek-layout'
 import {
   createScene,
   projectScene,
+  removeSceneObject,
+  type RemovableSceneTarget,
   updateSceneLayout,
   updateSceneWorkspace,
 } from './scene'
@@ -53,9 +55,12 @@ export default function useScene() {
   const setLayout = useCallback((action: SetStateAction<FrameLayout>) => {
     setScene((current) => updateSceneLayout(current, action, viewRef.current))
   }, [])
+  const removeObject = useCallback((target: RemovableSceneTarget) => {
+    setScene((current) => removeSceneObject(current, target, viewRef.current))
+  }, [])
   useEffect(() => {
     const timer = window.setTimeout(() => saveScene(scene), 200)
     return () => window.clearTimeout(timer)
   }, [scene])
-  return { ...projection, setWorkspace, setLayout, view, setView }
+  return { ...projection, setWorkspace, setLayout, removeObject, view, setView }
 }

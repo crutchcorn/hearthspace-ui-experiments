@@ -18,6 +18,13 @@ import {
   type LayoutTarget,
   type ObjectPlacement,
 } from './frame-layout.ts'
+import { transformCanvasWorkspace } from './layout-workspace.ts'
+import { restoreBackgroundItems } from './peek-layout.ts'
+
+export type RemovableSceneTarget = {
+  kind: 'window' | 'item' | 'drawing'
+  id: string
+}
 
 type SceneLocation =
   | {
@@ -43,12 +50,14 @@ export type Scene = {
 }
 
 function removeMissingMembers(workspace: Workspace, layout: FrameLayout) {
+  const windows = new Set(workspace.windows.map((item) => item.id))
   const items = new Set(workspace.items.map((item) => item.id))
   const drawings = new Set(workspace.drawings.map((drawing) => drawing.id))
   let next = layout
   for (const group of Object.values(layout.groups ?? {})) {
     for (const member of group.members) {
       if (
+        (member.kind === 'window' && !windows.has(member.id)) ||
         (member.kind === 'item' && !items.has(member.id)) ||
         (member.kind === 'drawing' && !drawings.has(member.id))
       )
@@ -354,5 +363,34 @@ export function updateSceneLayout(
   return reconcileScene(
     scene,
     createScene({ ...projection.workspace, controls: undefined }, layout),
+  )
+}
+
+/** Deleting work also releases its frame slot and any background work it covered. */
+export function removeSceneObject(
+  scene: Scene,
+  target: RemovableSceneTarget,
+  view: Bounds,
+): Scene {
+  const projection = projectScene(scene, view)
+  const field =
+    target.kind === 'window'
+      ? 'windows'
+      : target.kind === 'item'
+        ? 'items'
+        : 'drawings'
+  const layout = ungroupFrameTarget(projection.layout, target)
+  const placements = { ...layout.placements }
+  delete placements[targetKey(target)]
+  const nextLayout = { ...layout, placements }
+  const workspace = {
+    ...projection.workspace,
+    [field]: projection.workspace[field].filter(
+      (item) => item.id !== target.id,
+    ),
+  }
+  return createScene(
+    transformCanvasWorkspace(workspace, nextLayout, restoreBackgroundItems),
+    nextLayout,
   )
 }

@@ -193,8 +193,15 @@ function App() {
   const favoriteTimer = useRef<number | undefined>(undefined)
   useEffect(() => saveFavoriteApps(favoriteAppIds), [favoriteAppIds])
   useEffect(() => () => window.clearTimeout(favoriteTimer.current), [])
-  const { workspace, setWorkspace, layout, setLayout, view, setView } =
-    useScene()
+  const {
+    workspace,
+    setWorkspace,
+    layout,
+    setLayout,
+    view,
+    setView,
+    removeObject,
+  } = useScene()
   const [activeId, setActiveId] = useState<string | null>(
     workspace.windows.at(-1)?.id ?? null,
   )
@@ -1816,18 +1823,11 @@ function App() {
       setClosingPinnedId(id)
       return
     }
-    if (confirmed)
-      objectLayout.place({ kind: 'window', id }, { surface: 'canvas' })
     setClosingPinnedId(null)
     setRevealRequest(null)
     if (focusView?.id === id) setFocusView(null)
     preparePeekMotion({ backgroundOnly: true })
-    setWorkspace((current) =>
-      restoreBackgroundItems({
-        ...current,
-        windows: current.windows.filter((entry) => entry.id !== id),
-      }),
-    )
+    removeObject({ kind: 'window', id })
   }
 
   function addWindow(

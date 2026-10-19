@@ -47,3 +47,8 @@ preview state aren't saved.
 strip, with [tests](../tests/frame-layout.test.ts) for resting, hover, fully open,
 and small-window cases. [FramePreviewSlot](../src/components/FramePreviewSlot.tsx)
 measures grouped previews without substituting a second window visual.
+
+Closing uses the scene's `removeObject` operation to remove the window and its
+placement together, release group members, and return displaced background work
+home. This leaves no saved frame entry for a window that no longer exists.
+The [scene tests](../tests/scene.test.ts) cover grouped closing and that return.

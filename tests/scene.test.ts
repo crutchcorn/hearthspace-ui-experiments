@@ -14,6 +14,7 @@ import {
 import {
   createScene,
   projectScene,
+  removeSceneObject,
   updateSceneLayout,
   updateSceneWorkspace,
 } from '../src/scene.ts'
@@ -126,6 +127,43 @@ test('pinning personal work discards its canvas coordinates and peek home', () =
     false,
   )
   assert.equal(Object.hasOwn(scene.layout.placements, 'drawing:sketch'), false)
+})
+
+test('closing a pinned window removes its placement and releases its group neighbor', () => {
+  const target = { kind: 'window', id: 'notes' } as const
+  const initial = createScene(
+    workspace,
+    mergeFrameTargets(defaults, target, { kind: 'widget', id: 'apps' }),
+  )
+  const closed = removeSceneObject(initial, target, view)
+
+  assert.equal(closed.workspace.windows.length, 0)
+  assert.equal(Object.hasOwn(closed.layout.placements, 'window:notes'), false)
+  assert.deepEqual(closed.layout.groups, {})
+  assert.deepEqual(closed.layout.placements['widget:apps'], {
+    surface: 'frame',
+    edge: 'bottom',
+    position: 1,
+  })
+})
+
+test('closing a canvas window restores the first home of the icons it displaced', () => {
+  const initial = updateSceneWorkspace(
+    createScene({ ...workspace, drawings: [] }, defaults),
+    settleCoveredItems,
+    view,
+  )
+  assert.ok('peekOrigin' in initial.items[0].location)
+  const closed = removeSceneObject(
+    initial,
+    { kind: 'window', id: 'notes' },
+    view,
+  )
+  assert.deepEqual(closed.items[0].location, {
+    surface: 'background',
+    x: 140,
+    y: 140,
+  })
 })
 
 test('detaching starts at the visible frame location then accepts the actual drop position', () => {
