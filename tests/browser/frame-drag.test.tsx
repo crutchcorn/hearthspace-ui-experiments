@@ -1,4 +1,4 @@
-import { afterEach, expect, test } from 'vitest'
+import { afterEach, expect, test, vi } from 'vitest'
 import { commands, page } from 'vitest/browser'
 import type { Scene } from '../../src/scene'
 import { SCENE_STORAGE_KEY } from '../../src/scene-storage'
@@ -59,6 +59,50 @@ function visualGrip(along: number) {
   }
 }
 
+function pauseToolsMotion() {
+  const animations: Animation[] = []
+  const animate = Element.prototype.animate
+  const spy = vi
+    .spyOn(Element.prototype, 'animate')
+    .mockImplementation(function (this: Element, keyframes, options) {
+      const animation = animate.call(this, keyframes, options)
+      if (this.matches('[data-layout-widget="tools"]')) {
+        // Keep the real keyframes and easing, but take control of playback
+        // before a remote pointer command can outlast the whole animation.
+        animation.pause()
+        animations.push(animation)
+      }
+      return animation
+    })
+  return {
+    async sample<T>(read: () => T) {
+      await expect.poll(() => animations.length).toBeGreaterThan(0)
+      await Promise.all(animations.map((animation) => animation.ready))
+      const frames: T[] = []
+      for (const progress of [0, 0.25, 0.5, 0.75, 1]) {
+        for (const animation of animations) {
+          animation.currentTime =
+            Number(animation.effect!.getComputedTiming().endTime) * progress
+        }
+        await new Promise<void>((resolve) =>
+          requestAnimationFrame(() => resolve()),
+        )
+        frames.push(read())
+      }
+      return frames
+    },
+    async resume() {
+      spy.mockRestore()
+      const active = animations.filter(
+        (animation) => animation.playState !== 'idle',
+      )
+      for (const animation of active) animation.play()
+      await Promise.all(active.map((animation) => animation.finished))
+      await expect.poll(() => canvasTools().getAnimations().length).toBe(0)
+    },
+  }
+}
+
 afterEach(async () => {
   await commands.releasePointer()
 })
@@ -71,27 +115,21 @@ test.each([
   await page.getByRole('button', { name: 'Change layout', exact: true }).click()
   const along = gripX / canvasTools().offsetWidth
   await commands.startFrameWidgetDrag('tools', { x: gripX, y: 27 })
-  await commands.movePointerTo({ x: 45, y: 450 })
-  await expect.poll(() => toolsState().edge).toBe('left')
-  const frames: ReturnType<typeof visualGrip>[] = []
-  let frame = 0
-  function sample() {
-    frames.push(visualGrip(along))
-    frame = requestAnimationFrame(sample)
-  }
-  sample()
+  const motion = pauseToolsMotion()
   try {
-    await expect
-      .poll(() => canvasTools().getAnimations().length)
-      .toBeGreaterThan(0)
-    await expect.poll(() => canvasTools().getAnimations().length).toBe(0)
+    await commands.movePointerTo({ x: 45, y: 450 })
+    await expect.poll(() => toolsState().edge).toBe('left')
+    const frames = await motion.sample(() => ({
+      grip: visualGrip(along),
+      angle: Math.abs(Number.parseFloat(toolsState().rotate) || 0),
+    }))
+    expect(frames.some(({ angle }) => angle > 0 && angle < 90)).toBe(true)
+    for (const { grip } of frames) {
+      expect(grip.x).toBeCloseTo(45, 0)
+      expect(grip.y).toBeCloseTo(450, 0)
+    }
   } finally {
-    cancelAnimationFrame(frame)
-  }
-  expect(frames.length).toBeGreaterThan(1)
-  for (const grip of frames) {
-    expect(grip.x).toBeCloseTo(45, 0)
-    expect(grip.y).toBeCloseTo(450, 0)
+    await motion.resume()
   }
   expect(canvasTools().getBoundingClientRect().left).toBeCloseTo(18, 0)
 })
@@ -166,28 +204,23 @@ test('canvas tools keep their center when a vertical preview returns to a canvas
   expect(toolsState().centerX).toBeCloseTo(1050)
   expect(toolsState().centerY).toBeCloseTo(650)
 
-  const frames: ReturnType<typeof toolsState>[] = []
-  let frame = 0
-  function sample() {
-    frames.push(toolsState())
-    frame = requestAnimationFrame(sample)
-  }
-  sample()
+  const motion = pauseToolsMotion()
   try {
     await commands.releasePointer()
-    // Wait for the actual turn and snap animations rather than sleeping for
-    // their configured duration; sample every presented frame along the way.
-    await expect
-      .poll(() => canvasTools().getAnimations().length)
-      .toBeGreaterThan(0)
-    await expect.poll(() => canvasTools().getAnimations().length).toBe(0)
+    const frames = await motion.sample(toolsState)
+    expect(
+      frames.some(({ rotate }) => {
+        const angle = Math.abs(Number.parseFloat(rotate) || 0)
+        return angle > 0 && angle < 90
+      }),
+    ).toBe(true)
+    for (const sampled of frames) {
+      expect(sampled.centerX).toBeCloseTo(1050, 0)
+      expect(sampled.centerY).toBeCloseTo(650, 0)
+    }
   } finally {
-    cancelAnimationFrame(frame)
+    await motion.resume()
   }
   expect(toolsState().offsetWidth).toBeGreaterThan(toolsState().offsetHeight)
   expect(toolsState().surface).toBe('canvas')
-  for (const sampled of frames) {
-    expect(sampled.centerX).toBeCloseTo(1050, 0)
-    expect(sampled.centerY).toBeCloseTo(650, 0)
-  }
 })

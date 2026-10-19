@@ -46,7 +46,11 @@ The [frame drag flows](../tests/browser/frame-drag.test.tsx) grab canvas tools
 near either end, move to an edge or corner, and check the resulting placement.
 They also sample the gripped point throughout a turn and the center of a
 centrally grabbed toolbar as it returns to a canvas row. These checks catch
-animation jumps that a final-position assertion misses. Release checks keep the
+animation jumps that a final-position assertion misses. Before the native move
+or release, the tests arrange to capture and pause the toolbar's real Web
+Animations, then check their geometry at several points through the turn. Their keyframes
+and easing remain unchanged; controlling playback keeps a slow CI command
+response from missing the animation. Release checks keep the
 highlighted target and final position tied to the pointer rather than the
 toolbar's length.
 
