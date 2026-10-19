@@ -11,8 +11,13 @@
   --accent-soft: color-mix(in srgb, var(--accent) 10%, #ffffff24);
   --accent-wash: color-mix(in srgb, var(--accent) 7%, #ffffff14);
   --surface-tint: color-mix(in srgb, var(--accent) 3%, #f6f8f5);
+  --surface-raised-tint: color-mix(in srgb, var(--surface-tint) 55%, white);
   --chrome: color-mix(in srgb, var(--surface-tint) 54%, transparent);
-  --chrome-raised: color-mix(in srgb, var(--surface-tint) 70%, transparent);
+  --chrome-raised: color-mix(
+    in srgb,
+    var(--surface-raised-tint) 82%,
+    transparent
+  );
   --chrome-hover: #ffffff5c;
   --chrome-border: #ffffff70;
   --chrome-text: #303a3c;
@@ -81,8 +86,8 @@
 
 [data-color-mode='dark'] {
   --surface-tint: color-mix(in srgb, var(--accent-base) 4%, #202c30);
+  --surface-raised-tint: color-mix(in srgb, var(--surface-tint) 88%, white);
   --chrome: color-mix(in srgb, var(--surface-tint) 70%, transparent);
-  --chrome-raised: color-mix(in srgb, var(--surface-tint) 78%, transparent);
   --chrome-hover: #e0f5ee12;
   --chrome-border: #d9f3e82e;
   --chrome-text: #eff4ee;

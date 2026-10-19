@@ -557,7 +557,7 @@
     padding: var(--shell-padding);
     border: var(--shell-border-width) solid var(--chrome-border);
     border-radius: var(--radius-panel);
-    background: var(--material-surface);
+    background: var(--material-raised);
     box-shadow: var(--shadow-panel), var(--glass-edge);
     backdrop-filter: var(--glass-blur);
   }

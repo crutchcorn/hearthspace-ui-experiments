@@ -68,3 +68,28 @@ implement physical lighting, reflections, or refraction.
 - The launcher, system bar, notifications, search, layout controls, gesture pad,
   and other component CSS Modules apply the shared material roles.
 - `src/theme.ts` and `src/useBackground.ts`: existing preference and image storage.
+
+## Raised surface separation
+
+Toolbars and the monitor previews in Settings use `--material-raised` so they
+remain lighter than the canvas or display-layout board beneath them. This
+material combines the existing faint edge tint with an 82% alpha base. The
+base mixes the surface tint with white: 45% white in light mode and 12% in dark
+mode. Regular window surfaces keep their existing translucency.
+
+Selected monitors retain this raised base with an accent outline and an
+accent-colored number. Selecting a monitor therefore keeps
+its surface visible instead of replacing it with a faint transparent tint.
+Display selection, dragging, arrow-key placement, and saved preferences are
+unchanged; monitor configuration remains simulated.
+
+The shared desktop toolbar, merged mobile bars, and the standalone mobile
+canvas tools, dock, and notification bar use this same raised material.
+Merged child controls remain transparent so grouped surfaces do not compound
+the fill. The existing soft highlights, blur, and interaction shadows remain
+in use.
+
+The surface tokens are in `src/index.css`. Toolbar coverage is in
+`ShellControls.module.css`, `LauncherDock.module.css`,
+`NotificationInbox.module.css`, and `PlacedWidget.module.css` under
+`src/components/`; monitor fills are in `DisplaySettings.module.css`.
