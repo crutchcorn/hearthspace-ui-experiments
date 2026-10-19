@@ -18,6 +18,8 @@ interface DesktopItemsProps {
   frameLayout?: FrameLayout
   view?: Bounds
   frameHost?: HTMLElement | null
+  dragHost?: HTMLElement | null
+  draggingId?: string
   inline?: boolean
   previewSelectedId?: string
   onPointerDown: (
@@ -36,6 +38,8 @@ export default function DesktopItems({
   frameLayout,
   view,
   frameHost,
+  dragHost,
+  draggingId,
   previewSelectedId,
   inline = false,
   onPointerDown,
@@ -151,6 +155,8 @@ export default function DesktopItems({
             <span className={styles.title}>{item.title}</span>
           </button>
         )
+        if (!inline && draggingId === item.id && dragHost)
+          return createPortal(element, dragHost, item.id)
         return framed && !inline && frameHost
           ? createPortal(element, frameHost, item.id)
           : element

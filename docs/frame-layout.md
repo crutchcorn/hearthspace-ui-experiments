@@ -35,6 +35,13 @@ animates the toolbar into the indicated placement. Its surface, outline, and
 contents move together. Icons and toolbars share the same screen inset;
 standalone windows and drawings sit flush with the edge.
 
+Placement outlines stay above windows, including pinned windows, so a window
+can't hide your drop target. Their tinted backgrounds stay below frame items so
+icons and grouped window previews remain visible. The object you're dragging
+sits above the guides and other frame items, with the layout editor still within
+reach. Releasing or canceling the drag returns it to its usual layer. This
+temporary lift doesn't change its saved Canvas, Background, or Frame placement.
+
 Hold **Alt** to align a frame attachment with the visible canvas dots. This snaps
 horizontal movement along the top and bottom, or vertical movement along the
 sides, while preserving the edge inset. Corners retain their exact placement.
@@ -67,6 +74,13 @@ Layout motion uses that grip as the turn's pivot and owns the toolbar's snap
 animation. [Peek motion](../src/usePeekMotion.ts) animates displaced neighbors
 and excludes that toolbar, keeping the two animations from moving it in
 different directions on release.
+
+The editing overlays in [App](../src/App.tsx) separate the guides and active drag
+from the ordinary canvas stack. [FrameGuides](../src/components/FrameGuides.tsx)
+keeps the fill in the canvas background and the outline above windows. Dragged
+objects use canvas coordinates in an overlay that follows the current viewport.
+[WindowHost](../src/components/WindowHost.tsx) moves a window between these hosts
+without restarting the app inside it.
 
 [frame-grid](../src/frame-grid.ts) and its [tests](../tests/frame-grid.test.ts)
 cover Alt alignment. [Layout workspace tests](../tests/layout-workspace.test.ts)

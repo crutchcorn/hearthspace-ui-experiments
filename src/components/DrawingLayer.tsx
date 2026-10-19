@@ -25,6 +25,8 @@ interface DrawingLayerProps {
   frameLayout?: FrameLayout
   view?: Bounds
   frameHost?: HTMLElement | null
+  dragHost?: HTMLElement | null
+  draggingId?: string
   groupBounds?: Map<string, FramePreviewBounds>
   draggingWidget?: { id: string; edge?: FrameEdge } | null
   frameDropTarget?: Extract<ObjectPlacement, { surface: 'frame' }> | null
@@ -70,6 +72,8 @@ export default function DrawingLayer({
   frameLayout,
   view,
   frameHost,
+  dragHost,
+  draggingId,
   groupBounds,
   draggingWidget,
   frameDropTarget,
@@ -230,6 +234,8 @@ export default function DrawingLayer({
               ))}
           </svg>
         )
+        if (dragHost && (draggingId === drawing.id || movingGroup))
+          return createPortal(element, dragHost, drawing.id)
         return framed ? createPortal(element, frameHost, drawing.id) : element
       })}
       {draftPoints.length > 0 && (

@@ -20,6 +20,7 @@ import styles from './PlacedWidget.module.css'
 
 interface PlacedWidgetProps {
   canvasHost: HTMLElement | null
+  dragHost: HTMLElement | null
   popoverHost: HTMLElement | null
   id: string
   kind?: 'widget' | 'group'
@@ -51,6 +52,7 @@ interface PlacedWidgetProps {
 
 export default function PlacedWidget({
   canvasHost,
+  dragHost,
   popoverHost,
   id,
   kind = 'widget',
@@ -271,6 +273,7 @@ export default function PlacedWidget({
       </div>
     </div>
   )
+  if (!inline && dragged && dragHost) return createPortal(element, dragHost)
   if (inline || onFrame || placement.surface === 'hidden') return element
   return canvasHost ? createPortal(element, canvasHost) : null
 }

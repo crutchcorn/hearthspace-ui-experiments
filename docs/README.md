@@ -17,7 +17,7 @@ interaction and points to its implementation.
 
 ## Frame and shell
 
-- [Change layout](frame-layout.md): canvas/background/frame placement, pointer-driven toolbar targets, orientation, removal, and recovery.
+- [Change layout](frame-layout.md): canvas/background/frame placement, visible drop guides, pointer-driven toolbar targets, orientation, removal, and recovery.
 - [Frame groups](frame-groups.md): merging overlapping attachments, moving a group, and separating members.
 - [Pinned windows](pinned-windows.md): resting strips, hover peeks, focused opening, and close confirmation.
 - [System controls](system-controls.md): independent status items, detail choices, canvas placement, and anchored popups.

@@ -196,6 +196,9 @@ function App() {
   const [tool, setTool] = useState(loadCanvasTool)
   const drawingLayer: DrawingLayerName = 'above'
   const [frameHost, setFrameHost] = useState<HTMLDivElement | null>(null)
+  const [layoutDragHost, setLayoutDragHost] = useState<HTMLDivElement | null>(
+    null,
+  )
   const [canvasHost, setCanvasHost] = useState<HTMLDivElement | null>(null)
   const [framePreviewBounds, setFramePreviewBounds] = useState(
     new Map<string, FramePreviewBounds>(),
@@ -375,6 +378,9 @@ function App() {
     { hover: hoverFavoriteDrop, drop: dropFavorite },
   )
   const setLayoutSelection = objectLayout.setSelected
+  const activeLayoutDragHost = objectLayout.draggingTarget
+    ? layoutDragHost
+    : null
   const measureControl = useCallback(
     (id: string, size: { width: number; height: number }) => {
       setLayout((current) => {
@@ -2206,8 +2212,21 @@ function App() {
         className={styles.frameHost}
         data-shell-controls
       />
+      <div className={styles.layoutDragOverlay}>
+        <div
+          ref={setLayoutDragHost}
+          className={styles.layoutDragWorld}
+          style={{
+            left: -view.x,
+            top: -view.y,
+            width: workspace.width,
+            height: workspace.height,
+          }}
+        />
+      </div>
       {tool === 'layout' && (
         <>
+          <FrameGuides target={objectLayout.dropTarget} layer="outline" />
           <LayoutEditor
             target={objectLayout.selected}
             title={objectLayout.title}
@@ -2387,7 +2406,7 @@ function App() {
           }
         >
           {tool === 'layout' && (
-            <FrameGuides target={objectLayout.dropTarget} />
+            <FrameGuides target={objectLayout.dropTarget} layer="fill" />
           )}
           <div inert={focusView !== null || windowSwitcher.open}>
             <DesktopItems
@@ -2404,6 +2423,12 @@ function App() {
               }
               frameLayout={objectLayout.layout}
               frameHost={frameHost}
+              dragHost={activeLayoutDragHost}
+              draggingId={
+                objectLayout.draggingTarget?.kind === 'item'
+                  ? objectLayout.draggingTarget.id
+                  : undefined
+              }
               view={view}
               selectedIds={selectedItemIds}
               returningIds={returningFavoriteIds}
@@ -2422,6 +2447,12 @@ function App() {
                 drawings={workspace.drawings}
                 frameLayout={objectLayout.layout}
                 frameHost={frameHost}
+                dragHost={activeLayoutDragHost}
+                draggingId={
+                  objectLayout.draggingTarget?.kind === 'drawing'
+                    ? objectLayout.draggingTarget.id
+                    : undefined
+                }
                 groupBounds={framePreviewBounds}
                 draggingWidget={objectLayout.draggingWidget}
                 frameDropTarget={objectLayout.dropTarget}
@@ -2790,7 +2821,16 @@ function App() {
             return (
               <WindowHost
                 key={item.id}
-                container={attached ? frameHost : canvasHost}
+                container={
+                  activeLayoutDragHost &&
+                  (movingGroup ||
+                    (objectLayout.draggingTarget?.kind === 'window' &&
+                      objectLayout.draggingTarget.id === item.id))
+                    ? activeLayoutDragHost
+                    : attached
+                      ? frameHost
+                      : canvasHost
+                }
               >
                 {content}
               </WindowHost>
@@ -2805,6 +2845,12 @@ function App() {
                 drawings={workspace.drawings}
                 frameLayout={objectLayout.layout}
                 frameHost={frameHost}
+                dragHost={activeLayoutDragHost}
+                draggingId={
+                  objectLayout.draggingTarget?.kind === 'drawing'
+                    ? objectLayout.draggingTarget.id
+                    : undefined
+                }
                 groupBounds={framePreviewBounds}
                 draggingWidget={objectLayout.draggingWidget}
                 frameDropTarget={objectLayout.dropTarget}
@@ -3023,6 +3069,7 @@ function App() {
         )}
       <FrameShell
         canvasHost={canvasHost}
+        dragHost={activeLayoutDragHost}
         popoverHost={frameHost}
         selectedControlIds={selectedControlIds}
         onControlPointerDown={startControlGesture}

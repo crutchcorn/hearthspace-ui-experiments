@@ -36,6 +36,11 @@ animation jumps that a final-position assertion misses. Release checks keep the
 highlighted target and final position tied to the pointer rather than the
 toolbar's length.
 
+[Layout layer tests](../tests/browser/layout-layers.test.tsx) check the browser's
+paint order where outlines, windows, and dragged items overlap. They also check
+that releasing or canceling a layout drag restores ordinary layering, including
+returning a frame shortcut to the canvas beneath windows.
+
 ## Isolation and limits
 
 Each test mounts a fresh desktop into a full-height root and clears local

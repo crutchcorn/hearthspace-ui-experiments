@@ -3,6 +3,7 @@ import styles from './FrameGuides.module.css'
 
 interface FrameGuidesProps {
   target: { edge: FrameEdge; position: number } | null
+  layer: 'fill' | 'outline'
 }
 
 const edges = ['top', 'right', 'bottom', 'left'] as const
@@ -19,28 +20,24 @@ const edgeCorners = {
   left: ['top-left', 'bottom-left'],
 } as const
 
-export default function FrameGuides({ target }: FrameGuidesProps) {
+export default function FrameGuides({ target, layer }: FrameGuidesProps) {
   const activeCorner =
     target && (target.position === 0 || target.position === 1)
       ? edgeCorners[target.edge][target.position === 0 ? 0 : 1]
       : null
 
   return (
-    <div className={styles.guides} aria-hidden="true">
-      {edges.map((edge) => (
+    <div className={styles.guides} data-guide-layer={layer} aria-hidden="true">
+      {[...edges, ...corners].map((zone) => (
         <div
-          key={edge}
+          key={zone}
           className={styles.zone}
-          data-frame-guide={edge}
-          data-active={target?.edge === edge && activeCorner === null}
-        />
-      ))}
-      {corners.map((corner) => (
-        <div
-          key={corner}
-          className={styles.zone}
-          data-frame-guide={corner}
-          data-active={activeCorner === corner}
+          data-frame-guide={layer === 'outline' ? zone : undefined}
+          data-guide-zone={zone}
+          data-active={
+            activeCorner === zone ||
+            (activeCorner === null && target?.edge === zone)
+          }
         />
       ))}
     </div>

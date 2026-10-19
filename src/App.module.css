@@ -884,6 +884,29 @@
   pointer-events: auto;
 }
 
+/* Editing overlays sit above windows without changing the canvas stack. */
+.layoutDragOverlay {
+  position: fixed;
+  z-index: 1150;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.layoutDragWorld {
+  position: absolute;
+  pointer-events: none;
+}
+
+.layoutDragWorld > * {
+  pointer-events: auto;
+}
+
+/* Group previews stay above the strip's glass while the whole group moves. */
+.layoutDragWorld > [data-drawing-id] {
+  z-index: 1101;
+}
+
 .desktop[data-layout-editing='true']
   :is([data-window-id], [data-desktop-item-id], [data-drawing-id]) {
   cursor: move;

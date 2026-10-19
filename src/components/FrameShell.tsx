@@ -18,6 +18,7 @@ import styles from './FrameShell.module.css'
 
 interface FrameShellProps {
   canvasHost: HTMLElement | null
+  dragHost: HTMLElement | null
   popoverHost: HTMLElement | null
   layout: FrameLayout
   view: Bounds
@@ -46,6 +47,7 @@ interface FrameShellProps {
 
 export default function FrameShell({
   canvasHost,
+  dragHost,
   popoverHost,
   layout,
   view,
@@ -98,6 +100,7 @@ export default function FrameShell({
     return (
       <PlacedWidget
         canvasHost={canvasHost}
+        dragHost={dragHost}
         popoverHost={popoverHost}
         key={targetKey(target)}
         id={id}
@@ -132,6 +135,7 @@ export default function FrameShell({
     return (
       <PlacedWidget
         canvasHost={canvasHost}
+        dragHost={dragHost}
         popoverHost={popoverHost}
         key={targetKey(target)}
         kind="group"

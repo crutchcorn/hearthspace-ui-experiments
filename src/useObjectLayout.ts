@@ -67,6 +67,9 @@ export default function useObjectLayout(
   },
 ) {
   const [selected, setSelected] = useState<LayoutTarget | null>(null)
+  const [draggingTarget, setDraggingTarget] = useState<LayoutTarget | null>(
+    null,
+  )
   const [groupDropTarget, setGroupDropTarget] = useState<LayoutTarget | null>(
     null,
   )
@@ -439,6 +442,7 @@ export default function useObjectLayout(
     if (!current) return
     drag.current = null
     cancelMotion()
+    setDraggingTarget(null)
     setDraggingWidget(null)
     setDropTarget(null)
     setGroupDropTarget(null)
@@ -679,6 +683,7 @@ export default function useObjectLayout(
     const dx = clientX - current.x,
       dy = clientY - current.y
     if (!current.moved && Math.hypot(dx, dy) < 6) return
+    if (!current.moved) setDraggingTarget(current.target)
     current.moved = true
     const { bounds: movingBounds, drop } = frameDrag(current, dx, dy, altKey)
     const favorite = favorites?.hover(
@@ -800,6 +805,7 @@ export default function useObjectLayout(
   }
   function finishDrag(event: PointerEvent<HTMLElement>) {
     drag.current = null
+    setDraggingTarget(null)
     setDraggingWidget(null)
     setDropTarget(null)
     setGroupDropTarget(null)
@@ -989,6 +995,7 @@ export default function useObjectLayout(
     dropTarget,
     groupDropTarget,
     draggingWidget,
+    draggingTarget,
     group: selected ? getTargetGroup(layout, selected) : undefined,
     expanded:
       selected?.kind === 'widget' &&
