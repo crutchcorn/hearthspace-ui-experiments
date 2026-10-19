@@ -6,9 +6,11 @@ without changing where windows or icons live.
 
 ## Dots or a local photo
 
-The default wallpaper repeats dots across the canvas, with the environment's
-accent tint. They move as you pan and expose the same grid used by
-[Alt snapping](grid-snapping.md).
+The default wallpaper repeats quiet dots over one solid field. The field and
+dots change with Light or Dark mode, independently of the accent. They move as
+you pan and expose the same grid used by [Alt snapping](grid-snapping.md).
+There's no stationary radial wash beneath them: a brighter patch that stayed
+still would make the dots and their background feel like separate surfaces.
 
 Choose **Upload photo** to use an image your browser can decode. The first
 photo uses Cover; replacing a photo keeps the current fit choice. Settings
@@ -26,8 +28,10 @@ replace canvas coordinates or disable snapping; the hidden dot grid still
 exists underneath the photo.
 
 **Use default background** restores the dots and removes the saved photo.
-Changing the [accent or color mode](appearance.md) changes the default field,
-not the pixels in an uploaded image.
+Changing the [color mode](appearance.md) changes the default field, while the
+accent changes surrounding controls and materials. Neither recolors the pixels
+in an uploaded image. The Background and Appearance previews use the same
+uniform dotted treatment as the desktop.
 
 ## Keep the image local
 

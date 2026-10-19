@@ -8,7 +8,9 @@ The starting canvas is ten screens wide and tall, using a minimum base size of
 960 × 720 pixels. It opens near the middle so you can explore in any direction.
 This is a finite browser scroll area with hidden scrollbars; Arrange can enlarge
 it when the windows need more room. The repeating dots travel with the canvas,
-giving movement a visible reference.
+giving movement a visible reference. Their background is one uniform color per
+theme, without a screen-centered glow. This keeps the whole dotted surface
+moving together instead of revealing a stationary tint above it.
 
 ## Moving around
 
@@ -50,6 +52,11 @@ Open **Overview** from Canvas tools or press **M**. Its map shows window rectang
 and the current viewport. Drag inside the viewport rectangle to keep the grabbed
 point under your pointer. Clicking elsewhere centers the viewport there; keep
 dragging to continue navigating. Canvas boundaries limit the destination.
+
+The Overview glyph has four open corners surrounding a small window. **Change
+layout** uses the divided frame with a window inside it. Keeping these
+[local icons](icons.md) distinct helps separate navigating the canvas from
+editing where its controls live.
 
 The plus and minus controls are visual placeholders. They don't change canvas
 scale. On narrow screens, Overview lives in the same flat tool picker as the

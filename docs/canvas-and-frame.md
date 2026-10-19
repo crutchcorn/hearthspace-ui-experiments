@@ -40,8 +40,11 @@ edge. It stays pinned when dragged into the middle of the screen.
 
 The frame doesn't need a decorative border around the whole screen. Its meaning
 comes from attached objects remaining stationary and appearing above the
-moving canvas. Keep the restrained glass surfaces, recognizable app artwork,
-and opaque app content described in [Visual language](visual-language.md).
+moving canvas. Thin translucent surfaces let that relationship remain visible:
+strong blur softens the work underneath, while faint edge light and tinted
+shadows separate each layer. The dotted canvas itself keeps one uniform field
+color for each color mode, so panning never leaves a lighting effect behind.
+See [Materials and light](materials-and-light.md) for the shared treatment.
 
 ## The four corners are a starting arrangement
 
@@ -58,6 +61,17 @@ Changing the layout shouldn't erase the consistency within the controls.
 Shared padding, hover states, icon sizes, and surface treatment still help
 unrelated objects feel comfortable beside one another. A user can change where
 something belongs without having to redesign it.
+
+The brighter raised material distinguishes toolbars from the canvas. In Light
+mode, a faint accent wash acknowledges the whole bar while a stronger
+accent-and-white highlight identifies the hovered tool. Other surfaces retain
+white highlights, and Dark mode uses subdued pale light. Hover changes lighting,
+not geometry; moving or resizing a surface doesn't bend it or distort what's
+underneath.
+
+Hearthspace controls share the [local icon set](icons.md), including Settings.
+Simulated third-party apps keep their own artwork and interior styling. That
+lets shell actions stay consistent without making every app look like the shell.
 
 Frame groups let attachments share one surface. A folder can sit beside a
 reference window, or the app dock, canvas tools, and device controls can join

@@ -23,6 +23,14 @@ Wi-Fi and volume are in-memory prototype state; they reset on reload and don't
 control the host computer. The battery is a fixed preview, not a device reading.
 Layout and detail choices do persist.
 
+The clock and status glyphs belong to Hearthspace's [local icon set](icons.md).
+Their toolbar uses the lighter raised material, while an open popover adds a
+separate translucent layer with strong blur. In light mode, toolbar buttons
+have a subtle accent hover and ordinary popover controls keep a white
+highlight. Opening a panel shouldn't spread the toolbar's tint through every
+control inside it. See [materials and light](materials-and-light.md) for the
+shared treatment.
+
 ## Canvas placement and search
 
 Move a control to Canvas or Background to make it travel with the painting.

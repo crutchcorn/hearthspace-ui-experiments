@@ -30,6 +30,13 @@ opened. Their resting strip reaches the group's outer surface instead of
 receding behind its padding, and hover extends it a little further. The preview
 uses the actual window, including its content and chrome.
 
+Pinning preserves the app's visual identity too. Settings keeps Hearthspace's
+layered translucent material and custom icon; simulated third-party apps keep
+their own artwork and chrome. The surrounding group uses one lighter raised
+surface to separate the attachment from the canvas. Revealing a window slides
+that existing surface into view without bending it or refracting content
+underneath. See [Materials and light](materials-and-light.md) and [Icons](icons.md).
+
 Drag the exposed part during layout editing to move the attachment. Moving into
 the interior detaches it onto the canvas; the drag follows the visible strip
 rather than the hidden off-screen body. **Remove from frame** also returns the

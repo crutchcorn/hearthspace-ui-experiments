@@ -1,27 +1,51 @@
 # Hearthspace icons
 
-Hearthspace controls use the local geometric SVG icon set in `src/icons/`.
-The shell, canvas tools, settings, notifications, and layout controls share
-simple shapes, square line caps, and restrained strokes. Icons inherit the
-current control color, including theme, selection, hover, and focus states.
+Hearthspace controls share a local SVG icon set in [`src/icons/`](../src/icons/).
+Simple geometry and restrained strokes keep a small tool recognizable over a
+translucent surface. Square line caps and miter joins give the set a consistent
+shape, while the surrounding control supplies its color and interaction light.
+The icon itself doesn't need a glow or a separate background.
 
 ## App identities
 
-Simulated third-party apps keep their previous artwork. `AppIcon.tsx` maps
-Browser, Files, Terminal, Notes, Music, Photos, and Calendar to their existing
-Lucide glyphs, while
-`AppIcon.module.css` retains their colored artwork. This applies to desktop
-shortcuts, the launcher, dock, window titles, notifications, and app previews.
-The simulated app content in `WindowContent.tsx` also retains its icons.
-Lucide remains a dependency for these app identities; Hearthspace controls
-use the local set. Settings and its gesture shortcut are part of Hearthspace
-and use the custom icon without simulated app artwork.
+The shell can share a visual language without making every app look as though
+Hearthspace built it. Browser, Files, Terminal, Notes, Music, Photos, and Calendar
+keep their existing Lucide glyphs and colored artwork. This applies wherever
+[`AppIcon`](../src/components/AppIcon.tsx) represents them: desktop shortcuts,
+the launcher, dock, window titles, notifications, and previews. The simulated
+app contents also keep their Lucide icons.
+
+Settings belongs to Hearthspace. Its app icon is the local `AppSettings` glyph,
+with two vertical sliders. The shortcut from the gesture pad uses the local
+`Settings` cog. Neither gets simulated third-party artwork. Likewise, a desktop
+folder or file is a Hearthspace object and uses the local `Folder` or `FileText`
+glyph; the **Files app** keeps its own artwork.
+
+The current desktop uses the `realistic` presentation, which makes `AppIcon`
+show the third-party artwork in place of the catalog's local fallback glyph.
+Those fallback glyphs still exist in `src/icons/apps.tsx`; their presence isn't
+a reason to replace an app's displayed identity. Lucide remains a dependency
+for this boundary, rather than a second source for new shell controls.
 
 ## Using and adding icons
 
 Import glyphs from `src/icons`. Use the `size` prop for the rendered dimensions
 and inherit `currentColor` from the surrounding control. Give interactive
 controls their accessible name; icons are decorative by default.
+
+For example, a component under `src/components/` can render a search control as:
+
+```tsx
+import { Search } from '../icons'
+
+function SearchButton({ onOpen }: { onOpen: () => void }) {
+  return (
+    <button type="button" aria-label="Search canvas" onClick={onOpen}>
+      <Search size={20} />
+    </button>
+  )
+}
+```
 
 The shared `createIcon` factory draws on a 24 by 24 grid. It supplies square
 line caps, miter joins, a miter limit of 2, and optical stroke widths:
@@ -32,13 +56,16 @@ line caps, miter joins, a miter limit of 2, and optical stroke widths:
 | Between 16 and 32 | 1.5          |
 | 32 or larger      | 1.25         |
 
-String sizes use a stroke width of 1.5. Explicit stroke widths are supported
-when needed. Keep new glyph geometry within the same grid and use the shared
-factory rather than adding another shell icon library.
+String sizes use a stroke width of 1.5. Explicit stroke widths are supported,
+but the optical defaults keep small icons legible and large ones from feeling
+heavy. Keep new glyph geometry within the same grid and use the shared factory.
+Check it at the sizes where the control actually appears, in both color modes.
 
-`Pin` represents the drawing layout action “Pin to top.” Drawing placement
-still supports background and pinned layers; importing this icon set does
-not change placement behavior.
+The shared [materials](materials-and-light.md) provide hover and focus feedback.
+In light mode, controls on raised toolbars use the subtle accent hover, while
+ordinary surfaces keep their white hover treatment. Selected controls can use
+the stronger accent state. Don't bake those states into SVG geometry or force
+the simulated app artwork to inherit the shell's accent.
 
 ## Canvas control glyphs
 
@@ -49,20 +76,27 @@ not change placement behavior.
 - **Arrange windows** uses one tall pane on the left and two smaller panes
   stacked on the right. The three-pane layout distinguishes arrangement from
   the plain app grid icon.
+- **Apps** uses four equal panes in a two-by-two grid.
+- **Pin to top** uses `Pin` for a drawing's screen-fixed placement. It is separate
+  from attaching a window or control to the frame.
 
-These definitions are shared by the toolbar, tool menu, search previews,
-settings, and drawing controls. Changing a glyph does not change its action,
-shortcut, selection state, or placement behavior.
+Reuse each definition wherever its action appears, including toolbars, tool
+menus, search previews, Settings, and drawing controls. The glyph identifies
+the action; it doesn't change its shortcut, selection state, or placement rules.
 
 ## Source files
 
-- `src/icons/createIcon.ts`: SVG defaults and optical stroke sizing.
-- `src/icons/actions.tsx`: common actions and window controls.
-- `src/icons/apps.tsx`: geometric app and document glyphs.
-- `src/icons/canvas.tsx`: canvas, drawing, selection, and layout glyphs.
-- `src/icons/system.tsx`: status, settings, and notification glyphs.
-- `src/icons/index.ts`: public exports.
-- `src/components/AppIcon.tsx`: app identity and presentation mapping.
-- `src/components/AppIcon.module.css`: simulated app artwork.
-- `src/components/WindowContent.tsx`: simulated app content.
-- `assets/icon-set.svg`: overview of the imported icon set.
+- [`createIcon.ts`](../src/icons/createIcon.ts): SVG defaults and optical stroke sizing.
+- [`actions.tsx`](../src/icons/actions.tsx): common actions and window controls.
+- [`apps.tsx`](../src/icons/apps.tsx): geometric app and document glyphs.
+- [`canvas.tsx`](../src/icons/canvas.tsx): canvas, drawing, selection, and layout glyphs.
+- [`system.tsx`](../src/icons/system.tsx): status, settings, and notification glyphs.
+- [`index.ts`](../src/icons/index.ts): public exports.
+- [`AppIcon.tsx`](../src/components/AppIcon.tsx) and
+  [`AppIcon.module.css`](../src/components/AppIcon.module.css): app identity
+  mapping and simulated artwork.
+- [`WindowContent.tsx`](../src/components/WindowContent.tsx): simulated app content.
+- [`icon-set.svg`](../assets/icon-set.svg): a visual reference sheet. It includes
+  fallback app glyphs and isn't a complete inventory of the running UI; for
+  example, `Pin` is defined in source but isn't pictured. The source definitions
+  are authoritative when adding or changing a glyph.

@@ -17,6 +17,11 @@ contains the actual app surface, scaled to fit, with its contents temporarily
 inert. Desktop shortcuts move out of the result area, and drawings and frame
 controls stay out of the switching presentation.
 
+The caption uses a small raised translucent surface with the shared blur,
+highlight, and shadow. App previews retain their own appearance, including
+third-party artwork; switching doesn't restyle their contents. See
+[materials and light](materials-and-light.md) for the shell treatment.
+
 Release Control to commit. Enter or clicking a preview also selects it. The
 canvas then moves to center that window, subject to the outer canvas bounds,
 and focuses it. A pinned window opens from its existing frame edge instead of

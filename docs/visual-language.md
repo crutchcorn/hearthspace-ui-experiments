@@ -1,10 +1,10 @@
 # Visual language
 
-Hearthspace puts your work at the center of the desktop. Windows, desktop items, and drawings occupy a continuous canvas; small controls stay at its edges. Warm orange, glass, and clear boundaries give the environment its character without needing a logo, a welcome message, or a label on every control.
+Hearthspace puts your work at the center of the desktop. Windows, desktop items, and drawings occupy a continuous canvas; small controls stay within reach. The interface is a thin translucent layer that picks up color from the work beneath it. Strong blur, faint highlights, and soft tinted shadows give those layers depth without making them compete with the canvas.
 
 The repeated direction across these experiments has been to remove visual explanation once the interaction can carry it. We still need to know which window is selected, where a tool lives, and what a setting changes. We can communicate much of that through placement, shape, and state, leaving text for the parts that need words.
 
-This document explains how to extend that direction. The [feature list](features.md) describes what you can try today, including the simulated parts. [Spatial playground](spatial-playground.md) covers the implementation and saved state.
+This document explains how to extend that direction. [Materials and light](materials-and-light.md) covers the surface roles and interaction treatments; [Hearthspace icons](icons.md) covers the shared glyphs and app-artwork boundary. The [feature list](features.md) describes what you can try today, including the simulated parts. [Spatial playground](spatial-playground.md) covers the implementation and saved state.
 
 The guiding analogy is [a painting canvas inside a frame](canvas-and-frame.md).
 The canvas holds your work; the frame keeps chosen things within reach while
@@ -15,7 +15,7 @@ explains the shared placement and recovery rules behind these controls.
 
 ## Keep the canvas available for work
 
-The default background is a flat field of subtly tinted dots, spaced 28 pixels apart in both axes. Because those dots move with the canvas, even an empty area gives you a reference while panning. Desktop shortcuts, files, and folders start on this background layer. Users can raise them or attach them to the frame through Change layout. Every catalog app has a shortcut: you can decide where it belongs, while its continued presence makes the desktop a complete place to find apps.
+The default background is one solid color with quiet dots, spaced 28 pixels apart in both axes. The field and dots change with Light or Dark mode, independently of the accent. Because the dots move with the canvas, even an empty area gives you a reference while panning. A stationary radial wash would break that continuity. Desktop shortcuts, files, and folders start on this background layer. Users can raise them or attach them to the frame through Change layout. Every catalog app has a shortcut: you can decide where it belongs, while its continued presence makes the desktop a complete place to find apps.
 
 Leave decorative taglines and branding off the canvas. Apps can have headings, status lines, or descriptions. Those belong to the work inside a window; they don't need to become permanent desktop furniture.
 
@@ -23,10 +23,10 @@ A photo can replace the dots. **Repeat with canvas** attaches native-size tiles 
 
 ## Give drawings a place
 
-Drawing adds content to the workspace. A sketch can sit on the canvas background,
-on the raised canvas beneath ordinary windows, or on the frame. Several strokes
-make one object until the user finishes it, so moving a drawing keeps its parts
-together.
+Drawing adds content to the workspace. New ink uses **Pin to top**, keeping a
+free screen position above windows and below frame controls. **Background**
+puts it on the moving canvas beneath other work. Several strokes make one
+object until the user finishes it, so moving a drawing keeps its parts together.
 
 Use the shared accent for ink and a simple outline for selection. Put the small
 Change layout, delete, and finish controls beside the selected drawing, within reach and
@@ -35,8 +35,9 @@ instruction. The cursor selects and moves drawings as it does other work on the
 canvas.
 
 Keep creation and placement separate. The pencil creates ink; Change layout
-handles its layer and frame attachment using the same interaction as other
-objects. A drawing doesn't need a separate set of pinning modes.
+offers the drawing's two placements. Drawings don't attach to frame edges or
+join frame groups, and dragging pinned ink into the middle doesn't unpin it.
+The custom Pin glyph identifies this foreground placement.
 
 Play belongs beside selected ink when saved app gestures make it useful. Keep
 launching deliberate: drawing a mark alone does not run it. On a match, let the
@@ -75,7 +76,7 @@ The default four corners provide stable places to look:
 
 Keep each default corner to one row on desktop. Icons and toolbars share the same screen inset on every edge, so moving a control from a corner to a side preserves its spacing. Standalone windows remain flush with the edge; grouped work follows its shared surface. Drawings use free screen placement when pinned above windows, beneath the frame controls. Side attachments stack their controls vertically while leaving the icons upright. The tray and clock have the same glass backing as the other corners, so their text and controls remain distinct from whatever passes underneath. Notifications stay left-aligned and take only the width their icon, status, and padding need. Apps share one continuous bar; each icon doesn't need another resting bubble.
 
-The common surface is 54 pixels tall, with 4 pixels of padding, a 1-pixel border, and 44-pixel control targets. Buttons are transparent at rest. Hover adds a shared fill, active or expanded controls use the soft accent, and keyboard focus adds an inset outline. This treatment comes from [ShellControls.module.css](../src/components/ShellControls.module.css), including the tray's background.
+The common surface is 54 pixels tall, with 4 pixels of padding, a 1-pixel border, and 44-pixel control targets. Its raised material uses a lighter base than ordinary surfaces in either theme. Buttons are transparent at rest. In light mode, a faint accent wash distinguishes hovered tools from their brighter container; ordinary surfaces keep a white highlight. Active or expanded controls use the stronger soft accent, and keyboard focus adds an inset outline. This treatment comes from [ShellControls.module.css](../src/components/ShellControls.module.css), including the tray's background.
 
 On screens 760 pixels wide or narrower, the default top corners merge into one top bar and the default bottom corners into one bottom bar. Expanded notifications retain their full status text; a user can deliberately reduce them to an icon in Change layout. Device icons and app icons can scroll horizontally within their own strips. Apps remain right-aligned; the canvas tool stays on the left. That tool becomes one selector with a flat menu containing the available tools and actions. Custom attachments keep their chosen edge and position.
 
@@ -86,11 +87,12 @@ shared surfaces and control states should keep that arrangement coherent even
 when the original corners are empty.
 
 Grouping extends the continuous dock surface to other combinations. A folder,
-window, drawing, the canvas tools, and the app dock can sit alongside one another inside one
+window, the canvas tools, and the app dock can sit alongside one another inside one
 shared frame surface. Avoid nesting a complete glass tile around every member;
 padding, upright icons, and hover states provide separation without a row of
 bubbles. The group uses one orientation when it moves to another edge.
-Windows preserve their actual content and chrome; drawings preserve their art.
+Windows preserve their actual content and chrome. Drawings keep their separate
+background or pinned placement.
 A grouped window's resting peek meets the group's outer glass edge, keeping
 the shared surface and the visible window aligned.
 Overlapping frame attachments join automatically when placed or when their
@@ -111,16 +113,18 @@ to an edge attaches the object, with distinct animated corner targets providing
 alignment points. Keep
 edge placement direct; a list of edge buttons and a position slider would
 repeat what the drag already expresses. The editor offers Canvas,
-Background, and Frame, the selected object's name, removal when relevant, and
-Done. Frame chooses the nearest edge; dragging gives direct control over the
-attachment's position.
+Background, and Frame for windows, desktop items, and widgets, along with the
+selected object's name, removal when relevant, and Done. Drawings instead offer
+Pin to top and Background. Frame chooses the nearest edge; dragging gives
+direct control over the attachment's position.
 
 The frame is the screen boundary. Dragging an attachment away from an edge
 returns it to the canvas; reaching another edge attaches it again. Releasing
 in the interior keeps it on the canvas. The layer choices remain available
-when the user wants to place an object directly. Canvas icons, drawings, and
-widgets stay beneath ordinary windows, even when raised above background work.
-Only frame attachments stay above all canvas layers. Keep the outline,
+when the user wants to place an object directly. Canvas icons and widgets stay
+beneath ordinary windows, even when raised above background work. Background
+ink stays beneath that work; pinned ink sits above windows and below frame
+attachments. Keep the outline,
 surface, and controls moving as one object, including when a toolbar changes
 between a horizontal row and a vertical stack. Change orientation during the
 drag when the toolbar enters a new edge area, retain it across the interior,
@@ -163,25 +167,29 @@ Put longer explanations where someone has asked for detail. AI settings uses a p
 
 This is a direction for the shell, not a claim that every app interior has been stripped of labels. The editable Scratchpad still has a word count; sample apps have their own content hierarchy. When adding shell copy, use the same restraint we've applied to the surrounding controls.
 
-## Use glass around work and solid surfaces behind it
+## Build depth by layering thin surfaces
 
-Glass provides depth for the shell, window headers, and navigation. Bright edges and restrained shadows separate those layers from the canvas. Light mode uses pale glass and warm paper; Dark mode uses smoked glass and dark paper. The content area of an app is opaque so wallpaper and neighboring windows don't compete with reading or editing.
+The shell uses strong backdrop blur and medium-alpha fills. A little color from beneath a surface remains visible, while the blur keeps that content from competing with controls. A nested card adds another thin layer. It doesn't need its own spotlight or an opaque sheet to make its boundary clear.
+
+Light reaches a surface from its edges, with a restrained accent tint near the outer corner. Highlights get stronger and shadows grow during interaction. The whole toolbar's hover should stay quieter than the tool under the pointer. [Materials and light](materials-and-light.md) records those distinctions, including the raised fills for toolbars and monitor previews.
 
 Join a window's title bar and contents into one frame. Its border, shadow, and active or selected outline belong to the whole window. The header needs its own surface behind the drag controls and title, with a fine divider between header and body. A gap between them makes one window look like two unrelated pieces.
 
-Settings follows this shell treatment, with an opaque content pane beside its translucent sidebar. App-specific frames can use different materials while retaining the same movement, resizing, and window-state cues.
+Settings follows this treatment throughout: its window, sidebar, content pane, cards, and controls build up translucent layers. The simulated third-party apps keep their own content and title-bar materials, including opaque surfaces. Their identity is useful context when judging how Hearthspace sits around unfamiliar apps.
+
+Materials don't reflect light, refract the background, bend, or wobble. They can resize to fit their contents, and spatial previews can scale actual windows. Those operations explain the workspace; a decorative scale or travelling shine on a toolbar doesn't.
 
 ## Expect apps to look different
 
-The playground now always uses the varied Linux-style app presentation. There is no Ideal/Realistic appearance switch. This lets us judge the shell with icons that have their own backgrounds, colors, and silhouettes, and with windows whose chrome we don't control.
+The playground always uses the varied Linux-style app presentation. There is no Ideal/Realistic appearance switch. Browser, Files, Terminal, Notes, Music, Photos, and Calendar retain their existing Lucide-based artwork, colors, and silhouettes. Settings belongs to Hearthspace and uses the local icon set and shared materials.
 
 Give that artwork a consistent amount of space. The shared dock surface and target sizes provide order around it. Carry the same app identity through desktop shortcuts, canvas search, the launcher, window picker, switcher, and notification actions. Running dots and active-window highlights belong to the shell, so app artwork doesn't have to encode desktop state.
 
-The previews include a tabbed browser, a file manager with rounded controls, classic Notes menus, and an angular terminal. These illustrate different app conventions without claiming to reproduce a particular toolkit. App-specific light and dark palettes preserve those structures; Terminal, Music, and Photos retain their dark interiors in either mode. Settings continues to use the shared shell palette.
+The previews include a tabbed browser, a file manager with rounded controls, classic Notes menus, and an angular terminal. These illustrate different app conventions without claiming to reproduce a particular toolkit. App-specific light and dark palettes preserve those structures; Terminal, Music, and Photos retain their dark interiors in either mode. Hearthspace controls around them use the [local geometric SVG set](icons.md), with shared stroke sizing and inherited control color.
 
 ## Give color a consistent job
 
-Orange is the default accent, carrying the warmth associated with Hearthspace. Settings offers Orange, Rose, Violet, Blue, Teal, and Olive as coordinated palettes. One selection applies to the environment: controls, selections, window outlines, canvas ink, gesture strokes, and canvas tints. There are no per-component color choices or arbitrary color inputs.
+Orange is the default accent, carrying the warmth associated with Hearthspace. Settings offers Orange, Rose, Violet, Blue, Teal, and Olive as coordinated palettes. One selection applies to controls, selections, window outlines, canvas ink, gesture strokes, and surface tints. The dotted field stays uniform and independent of that accent. There are no per-component color choices or arbitrary color inputs.
 
 Light and Dark are separate choices. Without a saved choice, the initial mode follows the operating system's preference. A chosen mode applies immediately and persists independently of the accent. App artwork and photos keep their colors.
 
@@ -191,16 +199,16 @@ Use the accent to make focus, selection, activity, and action visible. Strong ac
 
 Compact controls leave more room for windows, but recognizable content and touch targets still need enough space to be useful. Search and the keyboard switcher scale actual windows to fit the available viewport. Keep their proportions and leave space between them, so window content and app-specific chrome help identify a choice. Only the selected switcher window needs an extra title beneath it. Shared panels elsewhere should follow their contents instead of growing to fill unused width.
 
-Corner hover shapes should follow the curve of their parent. Their radius is the outer radius minus padding and border width: currently 16 − 4 − 1 = 11 pixels. Use that relationship when changing the container so the inset highlight continues to fit.
+Corner hover shapes should follow the curve of their parent. Their radius is the outer radius minus padding and border width: currently 20 − 4 − 1 = 15 pixels. Use that relationship when changing the container so the inset highlight continues to fit.
 
 Elsewhere, reuse the shared radius scale:
 
 | Token              | Radius | Use                                    |
 | ------------------ | ------ | -------------------------------------- |
-| `--radius-detail`  | 4px    | Small details and miniature previews.  |
-| `--radius-control` | 8px    | Buttons and compact controls.          |
-| `--radius-tile`    | 12px   | Tiles and small modules.               |
-| `--radius-panel`   | 16px   | Shell panels and joined window frames. |
+| `--radius-detail`  | 5px    | Small details and miniature previews.  |
+| `--radius-control` | 10px   | Buttons and compact controls.          |
+| `--radius-tile`    | 14px   | Tiles and small modules.               |
+| `--radius-panel`   | 20px   | Shell panels and joined window frames. |
 | `--radius-round`   | 999px  | Circular targets and rounded markers.  |
 
 Use readable sans-serif labels and restrained headings in the shared shell, with monospace for shortcuts and coordinates. App content can follow its own conventions, including the Scratchpad's monospace editor and terminal text. Expanded panels fit between the shell bars and scroll internally when height is limited. Settings collapses its sidebar according to the window's available width. Its gesture editor replaces the list and header with a separate screen and a back button, keeping the task clear without another explanatory paragraph.
@@ -217,7 +225,7 @@ adding a surface, so a desktop gesture doesn't become an accidental highlight.
 
 Selected tools stay selected, including Search after its field closes. Escape dismisses a panel or clears selection without changing the canvas tool; Change layout is an editing session that ends with Done or Escape. On desktop, pressing an inactive expandable tool selects it; pressing it again opens its choices. The primary cursor dropdown remembers desktop selection, Pan, or Search. The pencil selects drawing directly, also available with D. Each expansion indicator sits at the top right. Short-lived tooltips explain unfamiliar controls without remaining over the canvas after the user has moved on.
 
-Use distinct icons for distinct actions. Apps and Arrange have different silhouettes; Arrange's uneven grid suggests separate, non-overlapping windows. A divider separates background, selection, drawing, and layout tools from Overview and Arrange. **Gather similar windows** uses overlapping rectangles beside the selected windows, tying the action to its context.
+Use distinct icons for distinct actions. **Change layout** uses a divided frame; **Toggle canvas map** uses viewfinder corners around a window. **Arrange** uses one tall pane on the left and two stacked panes on the right, keeping it distinct from the app grid. A divider separates background, selection, drawing, and layout tools from Overview and Arrange. **Gather similar windows** uses overlapping rectangles beside the selected windows, tying the action to its context. [The icon guide](icons.md) defines the glyphs and their shared drawing rules.
 
 Pointer, trackpad, touch, and keyboard should reach the same work. Controls retain usable targets and accessible names when visible labels are removed. Hover can explain an action, while direct activation and keyboard commands make it available without hover.
 
@@ -251,7 +259,7 @@ The maximize button enters focused view, keeping window chrome while the corners
 
 ## Keep the prototype boundary clear
 
-The UI is a playground for OS interactions. Launcher strokes and explicitly played canvas drawings are compared locally with saved gesture assignments; unknown or ambiguous shapes remain visible with a brief no-match message. Handwriting search runs a real local OCR model after downloading its assets and can misread text. AI gathering’s opt-in separately simulates a 3 GB download and a delete confirmation. Gathering shows a brief shimmer, then moves other windows from the selected applications into view using app identity alone; no model runs or inspects their contents. Display and device controls also stay inside the prototype.
+The UI is a playground for OS interactions. Launcher strokes and explicitly played canvas drawings are compared locally with saved gesture assignments; unknown or ambiguous shapes remain visible with a brief no-match message. Handwriting search runs a real local OCR model after downloading its assets and can misread text. AI gathering’s opt-in separately simulates a 3 GB download and a delete confirmation. Gathering shows a brief glow, then moves other windows from the selected applications into view using app identity alone; no model runs or inspects their contents. Display and device controls also stay inside the prototype.
 
 Keep those limits explicit in the [feature list](features.md) and usage documentation. Inside the interface, explanations should help with the interaction being tried. The quiet **Preview notification** footer button is a useful example: it makes sample activity available without adding a permanent “simulated notifications” banner to the inbox.
 

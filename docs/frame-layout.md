@@ -9,6 +9,12 @@ toolbar implementation.
 ## Put an item where it belongs
 
 Open **Change layout** from canvas tools, **Settings → System**, or canvas search.
+Its local glyph shows a divided frame with an inset window. **Overview** uses
+open corner marks around a window, and **Arrange windows** uses a tall tile
+beside two stacked tiles, keeping the three actions distinct. The editor shares
+the toolbar's raised translucent surface and restrained hover lighting; see
+[Icons](icons.md) and [Materials and light](materials-and-light.md).
+
 Select an object, then drag it or use the editor's placement buttons:
 
 - **Canvas** puts it on the raised canvas layer. Icons and controls
@@ -16,7 +22,8 @@ Select an object, then drag it or use the editor's placement buttons:
 - **Background** affixes it to the lower layer of the painting.
 - **Frame** attaches it to the nearest screen edge.
 
-Drawings offer only **Background** and **Pin to top**. They start pinned above
+Drawings offer only **Background** and **Pin to top**, with a dedicated pin glyph.
+They start pinned above
 canvas windows at a free screen position, beneath frame attachments. Background
 puts the ink beneath the other canvas work.
 

@@ -2,8 +2,8 @@
 
 Suppose you've found one Browser window, but its siblings are scattered
 elsewhere on the canvas. Select that window and choose **Gather similar
-windows**, the overlapping-rectangles button beside the selection. After a
-one-second shimmer, other Browser windows move into view near it.
+windows**, the overlapping-window button beside the selection. After a
+one-second glow, other Browser windows move into view near it.
 
 The movement is implemented. The “AI” is a deterministic same-application
 rule, so we can evaluate the interaction before involving a model.
@@ -24,11 +24,19 @@ Below the toggle, **Features** is a subheading. Its expandable entries are
 **On-device AI**, followed by **Gather similar windows**. They describe the
 intended product behavior without adding permanent explanation to the canvas.
 
+The enabled switch uses a restrained accent fill and one faint top highlight.
+Dark mode mutes that fill so the switch stays readable without lighting up the
+whole row. The surrounding Settings controls keep their white hover highlight;
+the raised confirmation dialog uses the subtle accent hover described in
+[materials and light](materials-and-light.md).
+
 ## What gathering changes
 
 Use rectangle or lasso [window selection](window-selection.md) to choose one
 or more anchors. The action appears while at least one selected window is
-visible. While disabled or downloading, its tooltip explains availability.
+visible. It uses the local **Gather windows** glyph on a raised shell surface,
+matching Canvas tools. While disabled or downloading, its tooltip explains
+availability.
 
 After opt-in, gathering finds other canvas windows with the selected apps'
 identities. Selecting windows from two apps gathers candidates from both.
@@ -50,5 +58,6 @@ disabling this preview doesn't install or delete that model.
 
 - [`useAI.ts`](../src/useAI.ts) owns opt-in persistence and simulated progress.
 - [`AISettings.tsx`](../src/components/AISettings.tsx) presents the feature details and confirmation.
-- [`GatherWindows.tsx`](../src/components/GatherWindows.tsx) owns the contextual action, delay, and shimmer state.
+- [`Settings.module.css`](../src/components/Settings.module.css) owns the switch's restrained highlight and dark-mode fill.
+- [`GatherWindows.tsx`](../src/components/GatherWindows.tsx) owns the contextual action, delay, and glow state; [`canvas.tsx`](../src/icons/canvas.tsx) supplies its glyph.
 - [`gather-windows.ts`](../src/gather-windows.ts) matches app identities and places candidates; [`App.tsx`](../src/App.tsx) limits the operation to canvas work and cancels incompatible contexts.

@@ -60,16 +60,27 @@ and [gathering](ai-gathering.md) instead change window positions for later use.
 
 ## Change the environment
 
-| Feature                                     | Start here                                                                                 |
-| ------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| [Appearance](appearance.md)                 | Choose Light/Dark and one of six accents, with varied Linux-style app identities.          |
-| [Backgrounds](background.md)                | Upload a local photo, choose its fit and movement, or restore the dotted wallpaper.        |
-| [Display layout preview](display-layout.md) | Drag two monitors, snap and recenter them, and try per-display settings.                   |
-| [Gather similar windows](ai-gathering.md)   | Opt into the simulated download flow, then bring same-app canvas windows near a selection. |
+| Feature                                     | Start here                                                                                                   |
+| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| [Appearance](appearance.md)                 | Choose Light/Dark and one of six accents, with translucent Hearthspace surfaces and distinct app identities. |
+| [Backgrounds](background.md)                | Upload a local photo, choose its fit and movement, or restore the dotted wallpaper.                          |
+| [Display layout preview](display-layout.md) | Drag two monitors, snap and recenter them, and try per-display settings.                                     |
+| [Gather similar windows](ai-gathering.md)   | Opt into the simulated download flow, then bring same-app canvas windows near a selection.                   |
 
 Settings has categories in a sidebar that collapses when the app window is
 small. Gestures opens its own editor screen with a back button; System links
 to Change layout rather than duplicating placement and battery-detail options.
+
+The [materials](materials-and-light.md) use strong blur and thin translucent
+layers. Toolbars and monitor previews use a lighter base than ordinary surfaces;
+light-mode hover adds a quiet accent wash on raised surfaces and keeps white
+highlights elsewhere. The dotted field is one solid color per mode, independent
+of the accent, so its grid moves with the canvas without a stationary wash.
+
+[Custom SVG icons](icons.md) identify Hearthspace controls and Settings. The
+seven simulated third-party apps keep their existing artwork. Change layout's
+divided frame, the map's viewfinder, and Arrange's tall-left/two-right panes
+give the neighboring toolbar actions distinct shapes.
 
 ## Know what is real
 
@@ -81,7 +92,7 @@ to Change layout rather than duplicating placement and battery-detail options.
 | Monitor settings and Overview zoom                | Monitor arrangement and selected values update the preview; real display configuration and canvas zoom aren't implemented. |
 | App gesture matching                              | Real deterministic geometric matching, with no model download.                                                             |
 | Handwritten search                                | Real local inference, with model/runtime downloads on first recognition and fallible results.                              |
-| AI gathering                                      | A real same-app rearrangement after a one-second shimmer. The four-second 3 GB download and deletion flow are simulated.   |
+| AI gathering                                      | A real same-app rearrangement after a one-second glow. The four-second 3 GB download and deletion flow are simulated.      |
 | Extensibility                                     | Built-in widgets exist; arbitrary third-party widgets, app uninstalling, and a favorites-management screen don't.          |
 
 The removed explanatory captions don't turn a preview into a system
@@ -90,22 +101,27 @@ extending the experiment, while the shell itself stays concise.
 
 ## Understand revisions in older discussions
 
-| Earlier experiment                                                   | Current behavior                                                                                                               |
-| -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| Alt+Tab, then Ctrl+Tab                                               | Ctrl+1 and Ctrl+Shift+1 avoid the original shortcut choices.                                                                   |
-| A dock-attached keyboard switcher with app/instance arrow navigation | A later request moved switching onto the canvas. The current switcher cycles windows in a temporary grid.                      |
-| Any launcher stroke starts a hardcoded app                           | Saved assignments now drive actual gesture recognition. Unmatched strokes don't launch.                                        |
-| Above/below drawing modes                                            | New drawings use Pin to top. Change layout chooses between that foreground placement and Background; raised Canvas is removed. |
-| Drawings attached to frame edges or groups                           | Pin to top gives drawings a free screen position above windows and below frame controls; dragging never changes that layer.    |
-| Ideal/Realistic appearance toggle                                    | Varied app presentation is always active; no appearance-mode selector remains.                                                 |
-| Battery-percentage setting                                           | Show details/Icon only in Change layout controls battery detail like other status items.                                       |
-| A Workspace app and new-workspace action                             | Removed. One saved spatial scene remains; there is no workspace-switching feature.                                             |
-| Fixed, inseparable corner toolbars                                   | Four-corner defaults can be split, moved, hidden, and grouped.                                                                 |
-| Separate canvas coordinates and frame placement for the same item    | One scene location determines where each item belongs. Old split layout saves are deliberately ignored.                        |
+| Earlier experiment                                                         | Current behavior                                                                                                                |
+| -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| Alt+Tab, then Ctrl+Tab                                                     | Ctrl+1 and Ctrl+Shift+1 avoid the original shortcut choices.                                                                    |
+| A dock-attached keyboard switcher with app/instance arrow navigation       | A later request moved switching onto the canvas. The current switcher cycles windows in a temporary grid.                       |
+| Any launcher stroke starts a hardcoded app                                 | Saved assignments now drive actual gesture recognition. Unmatched strokes don't launch.                                         |
+| Above/below drawing modes                                                  | New drawings use Pin to top. Change layout chooses between that foreground placement and Background; raised Canvas is removed.  |
+| Drawings attached to frame edges or groups                                 | Pin to top gives drawings a free screen position above windows and below frame controls; dragging never changes that layer.     |
+| Ideal/Realistic appearance toggle                                          | Varied app presentation is always active; no appearance-mode selector remains.                                                  |
+| Battery-percentage setting                                                 | Show details/Icon only in Change layout controls battery detail like other status items.                                        |
+| A Workspace app and new-workspace action                                   | Removed. One saved spatial scene remains; there is no workspace-switching feature.                                              |
+| Fixed, inseparable corner toolbars                                         | Four-corner defaults can be split, moved, hidden, and grouped.                                                                  |
+| Separate canvas coordinates and frame placement for the same item          | One scene location determines where each item belongs. Old split layout saves are deliberately ignored.                         |
+| Opaque Settings content with glass only around it                          | Settings now builds up translucent layers throughout; third-party previews retain their own materials.                          |
+| Accent-colored washes across the dotted canvas and nested panels           | The canvas uses a uniform field per mode; faint edge tint belongs to outer materials, with uniform nested layers.               |
+| White or darkened hover on every light-mode surface                        | Raised controls use a subtle accent wash; ordinary surfaces retain white highlights.                                            |
+| Lucide glyphs for every shell action, or custom replacements for every app | Hearthspace uses local SVG glyphs; the seven simulated third-party apps retain their original artwork. Settings is first-party. |
 
-Styling refinements such as shorter captions, joined window chrome, padded
-frame icons, the uneven Arrange icon, and consistent hover radii belong to
-[the visual language](visual-language.md) and the affected feature pages.
+Styling decisions belong to [the visual language](visual-language.md),
+[materials and light](materials-and-light.md), and [the icon guide](icons.md).
+Those pages describe the current design; earlier experiments in
+[notes](../notes/README.md) remain historical context.
 
 ## What survives a reload
 
@@ -125,9 +141,3 @@ including the version where drawings could attach to frame edges and groups. Sep
 storage is unavailable, the current session remains usable; background save
 failures also display an explanation. See [saved state](spatial-playground.md#saved-state)
 for storage ownership and validation.
-
-## Materials and light
-
-- [Materials and light](materials-and-light.md): Current translucent shell, restrained interaction lighting, and solid dotted canvas.
-
-- [Custom icons](icons.md): Local geometric SVG glyphs for Hearthspace controls and applications.

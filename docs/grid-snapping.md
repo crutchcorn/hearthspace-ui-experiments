@@ -8,6 +8,12 @@ The grid has 28-pixel cells, with each dot at the cell's center. Coordinates
 therefore fall at 14, 42, 70, and so on. The geometry and wallpaper share the
 same spacing, and the grid still works when a photo replaces the dots.
 
+The default wallpaper keeps one uniform field color and dot color for each
+Light/Dark mode. Both move with the canvas, without a viewport gradient that
+would suggest a different fixed background. Changing the accent tints the
+controls, not the dot grid. This gives snapping the same visible reference
+wherever you pan.
+
 ## Canvas movement and resizing
 
 Alt-dragging a window, desktop item, canvas control, or drawing aligns the

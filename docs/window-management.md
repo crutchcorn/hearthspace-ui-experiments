@@ -15,7 +15,11 @@ edges being resized to the [dot grid](grid-snapping.md).
 Focusing a canvas window brings it above its peers. The close button removes
 that instance. The original Scratchpad is editable and saves its text; other app
 content is primarily a preview. App icons and chrome intentionally vary, matching
-the mix of applications we'd expect on Linux.
+the mix of applications we'd expect on Linux. Browser, Files, Terminal, Notes,
+Music, Photos, and Calendar retain their existing simulated third-party artwork
+and styling. Settings belongs to Hearthspace: its icon and controls use the
+[local SVG set](icons.md), and its surfaces follow the shared
+[translucent materials](materials-and-light.md).
 
 ## Two ways to make room
 
@@ -42,6 +46,11 @@ Choose **Arrange windows**, or press **A**, to place canvas windows side by side
 near the current viewport. It includes windows on the background and raised
 canvas, and excludes frame attachments. Maximized windows first regain their
 ordinary sizes.
+
+The Arrange glyph is one tall rectangle on the left and two smaller rectangles
+stacked on the right. It suggests a collection of windows without duplicating
+the four-square app launcher icon. The glyph describes the action; it doesn't
+prescribe the resulting grid's proportions.
 
 Arrange orders windows by their existing vertical and horizontal positions,
 then uses a square-ish grid with enough space for the largest window and gaps

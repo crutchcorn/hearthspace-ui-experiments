@@ -17,6 +17,11 @@ inbox. **Mark all read** clears unread status without removing the entries;
 individual dismiss buttons remove entries. Clicking outside or pressing Escape
 closes the inbox. There are no separate event or unread totals in its header.
 
+The bell, read, open, and dismiss controls use Hearthspace's
+[local glyphs](icons.md). App identities keep their existing artwork for the
+simulated Notes, Files, and Browser apps. Gesture settings belongs to Settings,
+so it uses the custom Settings icon.
+
 These are browser previews: the initial entries describe a saved Notes document,
 a Files download, and a Browser bookmark. They don't come from real applications
 or the operating system. Notification state resets when the page reloads.
@@ -42,6 +47,11 @@ overflowing device controls scroll alongside them. Searching for Notifications
 shows its current unread state and opens the actual inbox at the control's
 location. Placement and detail preference persist even though notification
 contents don't.
+
+The trigger sits on a lighter raised toolbar. The inbox and toast use ordinary
+translucent panels, so their light-mode action highlights stay white even when
+the toolbar uses a subtle accent hover. Their blur, faint edges, and soft
+shadows follow [materials and light](materials-and-light.md).
 
 ## Implementation
 

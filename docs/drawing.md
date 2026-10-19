@@ -14,6 +14,13 @@ the next stroke starts a separate drawing. A drawing holds up to 64 strokes; rea
 starts another one. Escape cancels an unfinished stroke without removing
 completed ink.
 
+The floating actions use the same raised material and subtle light-mode accent
+hover as the canvas toolbar. Their [local glyphs](icons.md) identify Change
+layout with a divided frame, launch with a Play triangle, delete with a bin,
+and finish with a check. Hover or focus reveals the action's label. The ink
+keeps round stroke ends; the icon set's square caps apply to controls, not to
+what you draw.
+
 Switch to **Select desktop items** (**V**) to select or drag a drawing by its ink. Its wider
 invisible stroke target makes thin lines easier to grab. Select an existing
 drawing, then choose Draw again to add more strokes to it. Adding ink to a
@@ -29,7 +36,8 @@ eraser, brush palette, or undo stack.
 ## Choose where it belongs
 
 The floating **Change layout** action selects the drawing in the layout editor.
-It offers two placements:
+The editor uses a pin glyph for **Pin to top** and a hatched square for
+**Background**. It offers two placements:
 
 - **Pin to top** keeps it at a freely chosen screen position above canvas
   windows and below frame attachments, including pinned windows. New drawings

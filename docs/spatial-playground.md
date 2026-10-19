@@ -2,15 +2,37 @@
 
 This experiment explores a desktop as a place to arrange icons, folders, drawings, and windows. It runs entirely in the browser, using React local state and CSS Modules. The current interaction has no server state or routing requirement.
 
+## Surfaces and icons
+
+Hearthspace's shell is a thin translucent layer over that work. Strong blur,
+partly transparent fills, faint edge light, and broad tinted shadows give each
+surface depth. Settings and shell-owned windows use the same layers through
+their headers and content. Toolbars and display-preview monitors use a lighter
+raised material so they remain distinct from the surface beneath them.
+
+Hover adds light and shadow without changing a control's size. In Light mode,
+the raised toolbar surface receives a very faint accent wash; the hovered tool
+gets a stronger accent-and-white highlight so you can tell which control is
+under the pointer. Ordinary surfaces keep white hover highlights. Dark mode
+keeps subdued pale highlights and restrained top edges. Materials don't bend,
+refract, or distort the content behind them. Spatial moves, window previews,
+and layout resizing still have their own animations.
+
+Shell controls use the local geometric SVG set, including Settings and gesture
+controls. Browser, Files, Terminal, Notes, Music, Photos, and Calendar retain
+their simulated third-party artwork and app styling. The shared icon factory
+keeps strokes readable at different sizes. [Materials and light](materials-and-light.md)
+and [Icons](icons.md) describe the tokens, glyphs, and boundaries in detail.
+
 ## Canvas and coordinates
 
 A native scroll container fills the viewport and hides its scrollbars. Its world starts ten screens wide and ten screens tall. At creation, one screen is the browser’s initial viewport size, with a minimum of 960 × 720 pixels. Arranging windows can expand the world to fit the result. The saved world keeps its dimensions across reloads.
 
-The home viewport starts at 4.5 screen widths and heights into that world. Desktop items, background drawings, and windows use absolute world coordinates, so ordinary scroll movement also moves the dotted wallpaper. At desktop widths, the default frame controls sit above the scrolling viewport in four corners: notifications at top left, device status at top right, canvas tools at bottom left, and the app launcher at bottom right. Device status combines the clock and three icon buttons in one compact glass row. At 760 pixels or less, pairs still in their default positions join into top and bottom bars, preserving their left-to-right roles. Custom placements remain independent attachments.
+The home viewport starts at 4.5 screen widths and heights into that world. Desktop items, background drawings, and windows use absolute world coordinates, so ordinary scroll movement also moves the dotted wallpaper. The dots sit on one uniform field color for each color mode; changing the accent doesn't recolor the field or add a stationary glow. This keeps the background attached to the canvas as you pan. At desktop widths, the default frame controls sit above the scrolling viewport in four corners: notifications at top left, device status at top right, canvas tools at bottom left, and the app launcher at bottom right. Device status combines the clock and three icon buttons in one compact translucent row. At 760 pixels or less, pairs still in their default positions join into top and bottom bars, preserving their left-to-right roles. Custom placements remain independent attachments.
 
 The minimap translates pointer positions into world coordinates. Grabbing its visible-area rectangle preserves the pointer’s offset within the viewport; pressing elsewhere centers the viewport there. Pointer capture keeps navigation continuous outside the map until release, and the native scroll container clamps travel at the world edges. The Overview panel contains the map without a window count, dragging hint, or Home button; the Home key still returns to the starting viewport. Icon-only zoom-out and zoom-in buttons sit beside its heading. They are presentational placeholders and do not change the map scale or canvas viewport.
 
-Dragging a window’s title bar combines pointer movement with changes in scroll position. This keeps a grabbed window under the pointer while edge scrolling carries it farther across the world. Shell-owned windows join a glass title bar and opaque content in one frame, with a 44-pixel header increasing to 50 pixels for coarse pointers. External app previews use their own Realistic frame styles while retaining the same window interactions. The body scrolls in the remaining space. Eight resize handles constrain windows to the world bounds and a minimum size of 280 × 200 pixels.
+Dragging a window’s title bar combines pointer movement with changes in scroll position. This keeps a grabbed window under the pointer while edge scrolling carries it farther across the world. Shell-owned windows join a translucent title bar and layered content in one frame, with a 44-pixel header increasing to 50 pixels for coarse pointers. External app previews use their own Realistic frame styles while retaining the same window interactions. The body scrolls in the remaining space. Eight resize handles constrain windows to the world bounds and a minimum size of 280 × 200 pixels.
 
 Holding Alt while dragging a window header, desktop item, canvas control, or
 drawing snaps the top-left of its bounds to the nearest wallpaper dot. The hidden grid shares the
@@ -85,9 +107,9 @@ Window selection supports a rectangle or freeform lasso in world coordinates. Th
 
 Selecting one or more windows exposes a floating **Gather similar windows** button beside their combined bounds. Its two overlapping rectangles and tooltip identify the action without adding a selection count. The control follows window movement and viewport travel, stays within the visible work area, and hides when every selected window is offscreen or during focused view, canvas search, or window switching. When neither side has room, it moves inward below the title bar to keep window controls reachable. It sits outside the scroll container so using it does not start another selection or pan gesture.
 
-Gathering is an AI feature preview. Until AI is enabled in Settings, the button remains visible but unavailable, with a tooltip pointing to **Settings → AI**. After opt-in, pressing it starts a one-second shimmer, then brings other windows from the selected application or applications into the current viewport near the selection. Selected and unrelated windows keep their geometry. Oversized matches fit within the available area, and crowded matches cascade. The result updates ordinary workspace geometry and is saved with the layout.
+Gathering is an AI feature preview. Until AI is enabled in Settings, the button remains visible but unavailable, with a tooltip pointing to **Settings → AI**. After opt-in, pressing it starts a one-second glow, then brings other windows from the selected application or applications into the current viewport near the selection. Selected and unrelated windows keep their geometry. Oversized matches fit within the available area, and crowded matches cascade. The result updates ordinary workspace geometry and is saved with the layout.
 
-`GatherWindows` owns the delay and shimmer; `gather-windows.ts` chooses and places the matching windows. A selection change, disabling AI, or unmounting the control for search, window switching, or focused view cancels pending work. Reduced motion uses a static busy highlight during the same delay. Matching uses app identity only. No model is downloaded, no window contents are analyzed, and no AI service is called.
+`GatherWindows` owns the delay and glow; `gather-windows.ts` chooses and places the matching windows. A selection change, disabling AI, or unmounting the control for search, window switching, or focused view cancels pending work. Reduced motion uses a static busy highlight during the same delay. Matching uses app identity only. No model is downloaded, no window contents are analyzed, and no AI service is called.
 
 ## Object placement and the frame
 
@@ -166,12 +188,13 @@ Pressing or releasing Alt updates an active drag even while the pointer stays
 still; release uses the current modifier state and the final measured size.
 An interior Change layout drag remains freely positioned.
 
-Widget edge detection uses a centered square based on the shorter toolbar
-dimension. That probe stays stable when the toolbar turns, preventing the new
-bounding box from selecting another edge and immediately turning it back.
+Toolbar edge detection follows the pointer, so a long toolbar doesn't reach a
+corner before the point you're holding does. The turn uses that grabbed point
+as its pivot, including grabs near either end, and keeps it under the pointer.
 Corner targets preserve the current drag orientation, choosing the vertical
 or horizontal edge of that corner accordingly. Preview and release use the
 same rule; only entering a non-corner edge changes orientation.
+Releasing in the interior returns the toolbar to a row around its grabbed point.
 Windows and desktop items use their object bounds for edge targets. Drawings
 have no edge targets; dragging preserves their selected placement.
 
@@ -438,6 +461,12 @@ Running Arrange leaves focused view, closes open panels, and clears selection wh
 
 At desktop widths, canvas tools start at the bottom left, with dropdowns for background tools and window selection, direct Draw and Change layout buttons, then a divider and Map and Arrange. The first dropdown’s top-right indicator exposes **Select desktop items** (V), **Pan canvas** (H), and **Search canvas** (/); its icon reflects the remembered background tool. The second dropdown chooses **Rectangle select** (R) or **Freeform lasso** (L), with a square or lasso icon and its own top-right indicator. The pencil (D) selects drawing; Change layout handles placement across object types. Pressing an inactive dropdown tool activates its remembered choice without opening the menu; pressing it again opens its choices. Up or Down on a focused tool opens its menu directly. Desktop-item selection always uses a rectangle, independent of the chosen window-selection shape. Canvas-tool hints appear on hover or focus and dismiss after 2.5 seconds, on pointer exit or blur, or when the control is activated. Arrange runs immediately; its hint identifies the action and A shortcut. Apps creates preview windows, and the Home key returns to the starting viewport.
 
+The three layout-related glyphs have distinct shapes: **Change layout** shows a
+divided frame with an inset window, **Overview** shows a window within open
+corner marks, and **Arrange windows** shows one tall tile beside two stacked
+tiles. The same glyphs appear in the compact picker and search results. Arrange's
+icon suggests tiling; it doesn't prescribe a three-window result.
+
 Default horizontal corner surfaces are 54 pixels high and sit 24 pixels inside the viewport edges. At 760 pixels or less, unchanged default attachments form two shared 54-pixel bars with a 12-pixel screen inset. Customized attachments keep their chosen edge and position with the same inset. The bottom bar contains one canvas-tool selector, the horizontally scrollable app strip, and the Apps launcher. The selector opens a single flat menu containing desktop-item selection, pan, search, rectangle select, freeform lasso, Draw, Change layout, Overview, and Arrange windows, without submenus. Choosing a tool or action closes the menu.
 
 The notification trigger defaults to a bell with a single-line unread status. Its expanded contents remain left-aligned at their natural width, preserving the full label on narrow screens; compact mode shows only the bell and its unread treatment. Clock, network, sound, and battery begin in one group on the right but can move independently. Their compact forms show icons; expanded forms show the chosen date/time format, network name, volume, or battery percentage. The full date and simulated device values remain available in hover titles and panels in either form.
@@ -530,15 +559,15 @@ The normal pad uses the local $P geometric template matcher to compare a complet
 
 The Settings app has sidebar navigation for **Appearance**, **Displays**, **Background**, **Gestures**, **AI**, and **System**, ordinarily opening on Appearance. The gesture pad’s cog opens directly to Gestures. Its 160-pixel sidebar collapses behind a category toggle when the Settings content container is narrower than 560 pixels. Choosing a category closes the compact navigation and returns the content pane to its top. Navigation belongs to each Settings window; saved preferences and gesture assignments are shared across them. New Settings windows open up to 680 pixels wide, constrained by the viewport and ordinary minimum window size; existing saved window sizes remain intact.
 
-**Background** accepts a local photo and applies it beneath desktop items and windows. **Repeat with canvas** tiles the image at its native size on the scrolling world. **Stretch**, **Contain**, and **Cover** instead use a centered, viewport-sized background layer that stays still while the canvas moves. Stretch scales both axes independently, Contain preserves the whole image with the current theme’s field color around it, and Cover preserves proportions while cropping to fill the viewport. Cover is the initial fit; replacing a photo retains the existing fit. **Use default background** restores the accent-colored dot pattern without changing the other appearance preferences.
+**Background** accepts a local photo and applies it beneath desktop items and windows. **Repeat with canvas** tiles the image at its native size on the scrolling world. **Stretch**, **Contain**, and **Cover** instead use a centered, viewport-sized background layer that stays still while the canvas moves. Stretch scales both axes independently, Contain preserves the whole image with the current theme’s field color around it, and Cover preserves proportions while cropping to fill the viewport. Cover is the initial fit; replacing a photo retains the existing fit. **Use default background** restores the uniform dotted field for the current color mode without changing the other appearance preferences.
 
 **Appearance** offers a global **Light** or **Dark** mode. Without a saved choice, the initial mode follows the operating system's `prefers-color-scheme` preference. Selecting a mode immediately updates the canvas, shell, expanded panels, and window surfaces and text. Realistic windows use their own dark palettes and keep their app-specific chrome designs; the already-dark Terminal, Music, and Photos previews remain dark. The shared choice belongs to `App`, so all open Settings windows stay in sync. The root `data-color-mode` attribute selects the matching CSS palette and native `color-scheme`.
 
-The same view offers six allowed accent choices: Orange, Rose, Violet, Blue, Teal, and Olive. Orange is the default. The selection belongs to `App`, so every Settings window reflects the same current choice. Changing it updates the root app’s `--accent-base` property and `data-accent` attribute. Shared CSS properties derive the displayed accent and environment’s palette from that base color and the selected Light or Dark mode. Orange retains its original values in Light mode, while each accent has a lighter Dark-mode color for contrast. Canvas tints, controls, window states, notifications, and gesture strokes use that shared palette. There are no per-component overrides or custom color inputs.
+The same view offers six allowed accent choices: Orange, Rose, Violet, Blue, Teal, and Olive. Orange is the default. The selection belongs to `App`, so every Settings window reflects the same current choice. Changing it updates the root app’s `--accent-base` property and `data-accent` attribute. Shared CSS properties derive the displayed accent and material tints from that base color and the selected Light or Dark mode. Each accent has a lighter Dark-mode color for readable state cues. Surface edges, controls, window states, notifications, and gesture strokes use that shared palette, while the dotted field depends only on color mode. Components can soften that palette for their role: the enabled Settings toggle uses a muted base-accent fill in Dark mode. There are no custom color inputs or per-app accent preferences.
 
-App previews always use Realistic styling; **Appearance** contains only color mode and accent controls. The root uses `data-presentation="realistic"`, giving external app previews independent identities with varied icon silhouettes and backgrounds, frame shapes, title bars, and interior colors. The shell starts with its four-corner layout and keeps shared accent cues across customized placements; Settings retains glass chrome and opaque content. This is a visual approximation of a mixed Linux desktop, not an integration with host applications or a reproduction of particular toolkits.
+App previews always use Realistic styling; **Appearance** contains only color mode and accent controls. The root uses `data-presentation="realistic"`, giving simulated third-party app previews independent identities with varied icon silhouettes and backgrounds, frame shapes, title bars, and interior colors. The shell starts with its four-corner layout and keeps shared accent cues across customized placements. Settings is part of Hearthspace: it uses the local icon set and layered translucent content. This is a visual approximation of a mixed Linux desktop, not an integration with host applications or a reproduction of particular toolkits.
 
-Accent and Light/Dark changes apply immediately to existing windows and their entries in the dock, launcher, and notifications. They do not replace the workspace or alter window geometry, stacking, dock ordering, or scratchpad content. The accent and Light/Dark mode remain separate global settings: shared controls and state cues use the accent, while each Realistic app keeps its own light/dark surface palette and chrome design. App icon artwork and photo backgrounds keep their original colors in either mode. There are no individual app theme controls.
+Accent and Light/Dark changes apply immediately to existing windows and their entries in the dock, launcher, and notifications. They do not replace the workspace or alter window geometry, stacking, dock ordering, or scratchpad content. The accent and Light/Dark mode remain separate global settings: shared controls and state cues use the accent, while each simulated third-party app keeps its own light/dark surface palette and chrome design. Third-party app artwork and photo backgrounds keep their original colors in either mode; Hearthspace's line icons inherit their control's color. There are no individual app theme controls.
 
 **Gestures** presents the saved app assignments and the add, edit, and remove flow described above. These controls edit the local templates used by the gesture launcher.
 
@@ -547,6 +576,10 @@ Accent and Light/Dark changes apply immediately to existing windows and their en
 Turning off enabled AI first requests confirmation, explaining that the 3 GB local model will be deleted and must be downloaded again to re-enable AI. Canceling retains the enabled state; confirming disables it. This remains a presentation of the intended model lifecycle: the playground stores no model file, sends no device information, and performs no download or AI processing. Closing Settings or changing categories leaves a simulated download running for the session, while reloading before completion leaves AI disabled.
 
 **Displays** previews a two-monitor setup. Drag either numbered monitor to arrange it around the other; releasing snaps it to the nearest shared edge so the pair stays connected without overlap. Selecting a monitor reveals its own mock resolution, scale, and refresh-rate controls. These controls change only the preview’s state, with no connection to the host’s monitor configuration or the desktop canvas.
+
+The monitor tiles use the lighter raised material, keeping them visible against
+the dotted preview board. Hover strengthens the edge and shadow; selection adds
+accent text and a border while retaining the lighter fill.
 
 The arrangement uses an 800 × 450 coordinate space in a responsive preview capped at 400 × 225 CSS pixels. During a drag, the other monitor stays fixed and the dragged tile stays within the board. On release, snapping considers all four sides and preserves at least 24 logical pixels of shared edge. Nearby starts, centers, and ends align within a 12-pixel threshold. The pair then recenters as a group, keeping its relative arrangement while leaving equal margins around its combined bounds. Pointer capture supports mouse, pen, and touch dragging beyond a tile; cancellation restores the original layout. Arrow keys place the focused monitor on another side and recenter the pair in the same way.
 
@@ -618,7 +651,7 @@ across Settings windows.
 | [`src/handwriting.worker.ts`](../src/handwriting.worker.ts)                                                                                           | Quantized local TrOCR loading, serialized inference, and raw recognized text.                                |
 | [`src/handwriting-image.ts`](../src/handwriting-image.ts)                                                                                             | Cropped black-on-white rasterization of handwriting strokes.                                                 |
 | [`src/handwriting-protocol.ts`](../src/handwriting-protocol.ts)                                                                                       | Narrow worker request, response, progress, and PNG input contract.                                           |
-| [`src/components/GatherWindows.tsx`](../src/components/GatherWindows.tsx)                                                                             | Floating selection action, viewport-aware placement, opt-in gating, and cancellable gather shimmer.          |
+| [`src/components/GatherWindows.tsx`](../src/components/GatherWindows.tsx)                                                                             | Floating selection action, viewport-aware placement, opt-in gating, and cancellable gather glow.             |
 | [`src/components/DrawingLayer.tsx`](../src/components/DrawingLayer.tsx)                                                                               | Saved and draft stroke rendering, selection outlines, and ink hit targets.                                   |
 | [`src/components/DrawingActions.tsx`](../src/components/DrawingActions.tsx)                                                                           | Side controls for opening Change layout, playing a gesture, deleting, and finishing.                         |
 | [`src/components/DesktopItems.tsx`](../src/components/DesktopItems.tsx)                                                                               | Desktop-item layers, compact frame shortcuts, item artwork, and selection/opening input.                     |
@@ -628,7 +661,8 @@ across Settings windows.
 | [`src/components/DisplaySettings.tsx`](../src/components/DisplaySettings.tsx)                                                                         | Two draggable monitor previews, monitor selection, and simulated per-monitor controls.                       |
 | [`src/components/GestureSettings.tsx`](../src/components/GestureSettings.tsx)                                                                         | Saved gesture previews, assignment management, and the Settings editor.                                      |
 | [`src/components/BackgroundSettings.tsx`](../src/components/BackgroundSettings.tsx)                                                                   | Photo preview, upload, fit, reset, and storage feedback in Settings.                                         |
-| [`src/components/AppIcon.tsx`](../src/components/AppIcon.tsx)                                                                                         | Consistent icon sizing and app-specific artwork.                                                             |
+| [`src/icons/`](../src/icons/)                                                                                                                         | Local Hearthspace glyphs, shared SVG factory, and optical stroke sizing.                                     |
+| [`src/components/AppIcon.tsx`](../src/components/AppIcon.tsx)                                                                                         | Custom Settings artwork and the preserved Lucide artwork for simulated third-party apps.                     |
 | [`src/components/LauncherDock.tsx`](../src/components/LauncherDock.tsx)                                                                               | Saved favorites, running-app groups, window instance picker, launcher drop feedback, and the Apps trigger.   |
 | [`src/components/WindowSwitcher.tsx`](../src/components/WindowSwitcher.tsx)                                                                           | Selected window's caption and initial focus for the canvas window-switching view.                            |
 | [`src/components/AppLauncher.tsx`](../src/components/AppLauncher.tsx)                                                                                 | App gallery/list, filtering, keyboard navigation, and launcher views.                                        |

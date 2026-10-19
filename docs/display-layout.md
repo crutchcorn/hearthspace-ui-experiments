@@ -33,6 +33,12 @@ selected display and its example connector. Changing a select control updates
 its displayed value; it doesn't resize the preview rectangle, scale app
 content, or change a real display mode.
 
+Each rectangle uses the same lighter, raised material as the shell toolbars.
+That keeps both displays visible against the dotted board in light and dark
+mode. Hover strengthens its edge and shadow; selection adds an accent border
+and number without replacing the raised fill. The laptop and monitor glyphs
+in the detail area come from Hearthspace's [local icon set](icons.md).
+
 The layout and preferences belong to each Settings window's React state.
 Closing that window or reloading resets them. They aren't shared monitor
 configuration or saved scene data.
@@ -41,5 +47,5 @@ configuration or saved scene data.
 
 - [`DisplaySettings.tsx`](../src/components/DisplaySettings.tsx) handles pointer capture, selection, arrow-key placement, and settings controls.
 - [`display-layout.ts`](../src/display-layout.ts) bounds, connects, and recenters the two rectangles.
-- [`DisplaySettings.module.css`](../src/components/DisplaySettings.module.css) caps the preview and animates settled moves.
+- [`DisplaySettings.module.css`](../src/components/DisplaySettings.module.css) caps the preview, applies the [raised material](materials-and-light.md), and animates settled moves.
 - [`Settings.tsx`](../src/components/Settings.tsx) owns the temporary layout and per-display values.

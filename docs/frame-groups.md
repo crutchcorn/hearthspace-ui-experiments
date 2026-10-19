@@ -22,6 +22,13 @@ at either side. Corners preserve the direction you arrived with. Long groups
 scroll along their length. Status controls can still switch between icon-only
 and detailed views independently.
 
+A group shares one raised translucent surface. Nested toolbars lose their own
+resting fill, blur, and shadow, so joining controls doesn't pile several bright
+panels on top of each other. Individual buttons retain their hover and selected
+states. In Light mode, the group's accent hover stays fainter than the hovered
+tool; Dark mode keeps restrained pale highlights. These are the same
+[materials](materials-and-light.md) used by the default corner bars.
+
 ## Keep every attachment reachable
 
 Attachments that overlap on the frame merge automatically. This includes overlap

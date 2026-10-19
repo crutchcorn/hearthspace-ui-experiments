@@ -8,8 +8,14 @@ window's size, content, and relative position intact.
 
 Canvas tools offers two shapes with distinct icons:
 
-- **Rectangle select** (**R**): drag to draw a rectangular selection area.
-- **Freeform lasso** (**L**): draw an outline around the windows you want.
+- **Rectangle select** (**R**): the broken rectangle with a pointer; drag to draw
+  a rectangular selection area.
+- **Freeform lasso** (**L**): the loop with a pointer; draw an outline around the
+  windows you want.
+
+Both glyphs come from the shared [local icon set](icons.md). The toolbar's light
+accent hover stays quieter than the selected tool's accent state, so passing
+over a shape doesn't make it look selected.
 
 On the larger toolbar, pressing the selection button while another tool is
 active selects the remembered shape first. Press it again to open the shape

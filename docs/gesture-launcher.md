@@ -19,6 +19,13 @@ with its own heading and back button. Choose an app through the searchable
 React Aria combobox, draw a continuous stroke, then save. Existing assignments
 can be edited or removed from the list.
 
+The cog, pencil, retry, and save controls use [Hearthspace's local icons](icons.md).
+The app picker preserves third-party artwork and uses the custom slider icon
+for Settings. Its menu is a raised translucent surface, with a subtle accent
+hover in light mode. The drawing pad remains an ordinary surface, with light
+along its edge while you interact; its ink uses the environment's accent and
+keeps rounded strokes.
+
 Saving an assignment for an app replaces that app's existing assignment.
 Changing the app while editing moves the assignment to the newly chosen app.
 Returning with the back button leaves the saved assignment unchanged. The

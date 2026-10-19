@@ -17,6 +17,11 @@ Errors and empty results keep the ink for retry, and the retry button submits
 that same line again. Clear removes the handwriting without changing text
 already added to search.
 
+The [local icons](icons.md) distinguish those actions: a check submits, an
+eraser clears, and a reset arrow retries after an error. The pad sits inside
+search's translucent panel, with a faint baseline and accent-colored ink.
+Its controls keep the ordinary white hover treatment in light mode.
+
 Starting more ink, editing the query, clearing the pad, or closing search
 cancels the pending result. A late response can't overwrite a newer query.
 An inference already running inside the worker may still finish, but its
@@ -29,6 +34,10 @@ worker. The first recognition request downloads its assets and displays loading
 progress. The selected model weights are about 64 MB, plus tokenizer and runtime
 assets; browser caching can avoid downloading them again. Ink stays on the
 device during recognition.
+
+The image sent to the local model contains only black ink on white. The UI's
+accent, baseline, blur, and highlights aren't included, so changing the desktop
+theme doesn't change that input treatment.
 
 This download is independent of the simulated 3 GB opt-in for
 [AI window gathering](ai-gathering.md). That toggle doesn't enable, disable, or

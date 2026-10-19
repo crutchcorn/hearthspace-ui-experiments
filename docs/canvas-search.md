@@ -37,6 +37,17 @@ notifications, and the clock's configured format. Drawings are searchable by
 their displayed number and the terms “drawing,” “ink,” or “sketch”; their contents
 aren't indexed. The pencil adds [handwritten search](handwritten-search.md).
 
+Tool results reuse the [same glyphs](icons.md) as their controls: the divided
+frame means Change layout, viewfinder corners mean the canvas map, and three
+unequal panes mean Arrange. App results retain their own artwork, with Settings
+using Hearthspace's custom icon. We keep that identity while changing the
+result's position, so the preview still looks like the object you'll open.
+
+The search field and handwriting pad share an ordinary translucent panel.
+Their controls use white hover highlights in light mode, with accent treatment
+for the active handwriting button. This keeps search distinct from the lighter
+raised canvas toolbar that can open it.
+
 ## A temporary arrangement
 
 Escape, the close button, or an empty-canvas click dismisses search. The temporary

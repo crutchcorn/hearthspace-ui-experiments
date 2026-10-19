@@ -9,6 +9,12 @@ These are browser previews. Opening a folder launches the Files preview;
 Notes.txt opens Notes. They don't browse the host filesystem, and the playground
 doesn't implement file creation, deletion, or app uninstallation.
 
+App shortcuts keep the same artwork as the launcher and dock. Settings uses
+the local slider icon; the seven simulated third-party apps retain their
+colored Lucide artwork. Folder and file objects use Hearthspace's local glyphs.
+This is why **Projects** and the **Files app** can look different even though
+both open the Files preview. See [icons](icons.md) for that boundary.
+
 ## Selecting and moving
 
 Choose **Select desktop items**, or press **V**. Click an item to select it, then
@@ -36,9 +42,11 @@ beneath ordinary windows and participate in [peeking](window-peeking.md).
 An item pushed aside remembers its original home until that space is clear.
 Moving it yourself establishes a new home.
 
-Frame attachments become compact glass tiles and open with one click, including
-inside a group. Removing an item from the frame returns it to the canvas; it
-doesn't delete the item. Dragging an app shortcut onto Apps adds a favorite and
+Frame attachments become compact translucent tiles and open with one click,
+including inside a group. Their surface, blur, and thin highlights separate
+them from the work underneath. A grouped item shares the group's surface
+instead of stacking a complete tile inside it. Removing an item from the frame
+returns it to the canvas; it doesn't delete the item. Dragging an app shortcut onto Apps adds a favorite and
 returns the original shortcut to its starting placement, including a frame
 attachment when the drag began there.
 

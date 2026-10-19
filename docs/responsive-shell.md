@@ -19,10 +19,18 @@ submenus to navigate with a finger. Selecting a mode closes the list; Overview
 and Arrange perform their respective actions. Arrange is disabled when there
 are no open windows.
 
-The shell uses the same shared surface and hover styling across both bars.
+The shell uses one raised translucent surface per bar, with the child toolbar
+fills, shadows, and blur removed. This keeps a merged bar from becoming brighter
+simply because it contains more controls. Light-mode hover adds a very faint
+accent wash to the bar and a more visible accent-and-white highlight to the
+tool. Dark mode retains subdued pale highlights. The compact picker uses the
+same [local glyphs](icons.md) as the desktop toolbar and search; simulated
+third-party app artwork stays unchanged.
+
 Frame insets reduce from 24 pixels on larger screens to 12 pixels here. Popovers
 limit their width and available height to the viewport, and long contents scroll
-inside them.
+inside them. [Materials and light](materials-and-light.md) explains which raised
+menus use accent hover and which ordinary panels keep white highlights.
 
 ## Respect a customized frame
 

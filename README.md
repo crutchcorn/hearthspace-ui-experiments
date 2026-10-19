@@ -2,11 +2,11 @@
 
 A private browser playground for trying desktop ideas for [Hearthspace](https://github.com/crutchcorn/hearthspace), a Linux distribution exploring how computing could work. Spread windows, files, and drawings across a large canvas, attach things you want nearby to its frame, and use search to bring work into view without losing its place.
 
-![Hearthspace in dark mode, with overlapping windows on a warm dotted canvas and controls in all four corners.](assets/hearthspace-desktop.jpg)
+![Hearthspace in dark mode, with translucent Settings over app windows, a uniform dotted canvas, and custom controls in all four corners.](assets/hearthspace-desktop.jpg)
 
-Think of it as a [painting canvas inside a frame](docs/canvas-and-frame.md). Work can move with the painting or stay attached to its edges. The default arrangement puts compact controls in four corners, with warm glass around opaque app content. We've repeatedly removed labels, counts, and instructions that only describe what's already visible. The selected window's name in the switcher helps you choose; a permanent “Drag to explore” caption doesn't need to occupy your desktop.
+Think of it as a [painting canvas inside a frame](docs/canvas-and-frame.md). Work can move with the painting or stay attached to its edges. The default arrangement puts compact controls in four corners, with thin translucent surfaces that pick up color from the work beneath them. We've repeatedly removed labels, counts, and instructions that only describe what's already visible. The selected window's name in the switcher helps you choose; a permanent “Drag to explore” caption doesn't need to occupy your desktop.
 
-The [feature guide](docs/features.md) links to individual pages explaining what you can try, how each feature behaves, and what is simulated. The [visual language](docs/visual-language.md) explains the decisions behind the current design.
+The [feature guide](docs/features.md) links to individual pages explaining what you can try, how each feature behaves, and what is simulated. The [visual language](docs/visual-language.md), [materials](docs/materials-and-light.md), and [icons](docs/icons.md) explain the decisions behind the current design.
 
 ## Run it
 
@@ -48,7 +48,7 @@ A few things to try:
 
 ## Make it yours
 
-Open Settings from Apps. Appearance offers Light/Dark mode and six accents, with Orange as the default. Background accepts a photo that either repeats with the canvas or stays fixed using Stretch, Contain, or Cover. System opens **Change layout** for frame placement, grouping, and status detail, including the battery percentage. App icons and frames always retain the visual variety we expect from Linux applications; the shared shell keeps them feeling at home together.
+Open Settings from Apps. Appearance offers Light/Dark mode and six accents, with Orange as the default. Background accepts a photo that either repeats with the canvas or stays fixed using Stretch, Contain, or Cover. System opens **Change layout** for frame placement, grouping, and status detail, including the battery percentage. Simulated third-party apps keep their varied artwork and frames. Settings uses Hearthspace's custom icons and translucent layers, matching the shell around those apps.
 
 Gestures lets you add, edit, and remove app assignments using a searchable app picker and drawing pad. Displays lets you drag two monitor previews, snap their edges together, and try per-monitor settings. AI presents opt-in controls for gathering related windows, including a simulated model download and a confirmation before turning it off.
 
@@ -58,7 +58,7 @@ Window and desktop-item positions, canvas drawings, frame attachments and groups
 
 The current scene format starts a fresh desktop instead of importing layouts saved by earlier versions of this playground. Appearance, backgrounds, favorites, gestures, and other preferences keep their separate saved values.
 
-This remains an interaction experiment. App windows are previews, device controls don't change your computer, and drawn launch gestures match the shortcuts saved in Settings. AI gathering starts off and performs no model download or analysis. After opt-in, Gather similar windows uses a same-app rule: following a brief shimmer, other windows from the selected applications move into view.
+This remains an interaction experiment. App windows are previews, device controls don't change your computer, and drawn launch gestures match the shortcuts saved in Settings. AI gathering starts off and performs no model download or analysis. After opt-in, Gather similar windows uses a same-app rule: following a brief glow, other windows from the selected applications move into view.
 
 Handwriting search separately downloads about 64 MB of model weights plus its runtime on first use, then reads ink locally; recognition can make mistakes. The [feature guide](docs/features.md) keeps these boundaries alongside the relevant controls.
 

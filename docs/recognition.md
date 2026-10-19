@@ -3,6 +3,11 @@
 Two different paths use ink: app gestures compare saved shapes, while handwritten
 search reads text. Neither sends the drawing to a recognition service.
 
+The [icon set](icons.md) and [materials](materials-and-light.md) describe their
+controls and surfaces. Recognition works from the user's strokes, so the
+control glyphs' square line caps don't change the round-ended ink or its
+matching rules. The visible accent color isn't an input to either matcher.
+
 ## App gestures
 
 App gestures use a TypeScript adaptation of the [$P point-cloud recognizer](https://depts.washington.edu/acelab/proj/dollar/pdollar.html). It compares geometric templates locally. Saved assignments supply the templates; changing a shortcut changes what can launch.

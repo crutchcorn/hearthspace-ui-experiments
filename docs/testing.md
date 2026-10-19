@@ -75,6 +75,28 @@ drag so the test can interrupt it with Escape or search before releasing it.
 Add external substitutes only when the boundary requires one, and document
 what the test consequently cannot demonstrate.
 
+## Checking materials and icons
+
+Small visual refinements need a browser check, but don't need a new test that
+only repeats CSS values. Compare light and dark mode, then try another accent.
+Hover the toolbar and one of its tools separately: the parent should stay
+quieter than the individual tool, and the selected tool should remain distinct.
+Open an ordinary system popover to check that its light-mode highlights stay
+white. Raised menus can use the subtle accent treatment.
+
+Check Settings' display rectangles against their dotted board and the enabled
+AI switch against its row. The monitors should remain visibly raised; the
+switch should have a faint top edge without a bright halo. On the main canvas,
+pan across the dots to check that their uniform background travels with them.
+
+For icons, inspect the actual toolbar sizes as well as the larger app icons.
+Change layout, Overview, and Arrange should each read as a different action.
+Settings uses the custom glyphs; simulated third-party apps keep their existing
+artwork. Check a narrow viewport when a toolbar or menu changes, since several
+controls share one material there. Use [materials and light](materials-and-light.md)
+and [icons](icons.md) as the design references, rather than adding screenshot
+regression assertions for these experiments.
+
 The [contributor guide](../CONTRIBUTING.md#verify-interactions) has install,
 run, and debugging commands. Configuration lives in
 [vitest.config.ts](../vitest.config.ts), and the
