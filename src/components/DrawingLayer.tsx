@@ -5,16 +5,12 @@ import type { SearchPlacement } from '../canvas-search'
 import type { CanvasDrawing, DrawingLayerName } from '../drawings'
 import type { GesturePoint } from '../gestures'
 import {
-  getFrameBounds,
   getPlacement,
-  getTargetGroup,
   targetKey,
-  type FrameEdge,
   type FrameLayout,
   type ObjectPlacement,
 } from '../frame-layout'
 import styles from './DrawingLayer.module.css'
-import type { FramePreviewBounds } from './FramePreviewSlot'
 
 interface DrawingLayerProps {
   drawings: CanvasDrawing[]
@@ -24,13 +20,10 @@ interface DrawingLayerProps {
   placements?: Map<string, SearchPlacement>
   frameLayout?: FrameLayout
   view?: Bounds
-  frameHost?: HTMLElement | null
+  pinnedHost?: HTMLElement | null
   dragHost?: HTMLElement | null
   draggingId?: string
-  groupBounds?: Map<string, FramePreviewBounds>
-  draggingWidget?: { id: string; edge?: FrameEdge } | null
-  frameDropTarget?: Extract<ObjectPlacement, { surface: 'frame' }> | null
-  draft?: { points: GesturePoint[]; layer: DrawingLayerName }
+  draft?: { points: GesturePoint[]; layer: DrawingLayerName; pinned?: boolean }
   interactive: boolean
   onPointerDown: (event: PointerEvent<SVGSVGElement>, id: string) => void
   onSelect?: (id: string) => void
@@ -71,12 +64,9 @@ export default function DrawingLayer({
   placements,
   frameLayout,
   view,
-  frameHost,
+  pinnedHost,
   dragHost,
   draggingId,
-  groupBounds,
-  draggingWidget,
-  frameDropTarget,
   draft,
   interactive,
   onPointerDown,
@@ -96,53 +86,50 @@ export default function DrawingLayer({
   const draftHeight = draftPoints.length
     ? Math.max(1, Math.max(...draftPoints.map(({ y }) => y)) - draftY)
     : 1
+  const draftStroke = draftPoints.length > 0 && (
+    <svg
+      className={styles.drawing}
+      aria-hidden="true"
+      data-drawing-draft
+      viewBox={`0 0 ${draftWidth} ${draftHeight}`}
+      style={{
+        position: draft?.pinned ? 'fixed' : undefined,
+        left: draftX - (draft?.pinned ? (view?.x ?? 0) : 0),
+        top: draftY - (draft?.pinned ? (view?.y ?? 0) : 0),
+        width: draftWidth,
+        height: draftHeight,
+      }}
+    >
+      <Stroke
+        points={draftPoints.map(({ x, y }) => ({
+          x: x - draftX,
+          y: y - draftY,
+        }))}
+      />
+    </svg>
+  )
 
   return (
     <div className={styles.layer} data-drawing-layer={layer}>
       {drawings.map((drawing, index) => {
         const placement = placements?.get(drawing.id)
-        const group =
-          frameLayout &&
-          getTargetGroup(frameLayout, { kind: 'drawing', id: drawing.id })
-        const movingGroup =
-          group && draggingWidget?.id === group.id ? draggingWidget : null
-        const savedLayout =
-          group && frameLayout
-            ? getPlacement(frameLayout, { kind: 'drawing', id: drawing.id })
-            : (frameLayout?.placements[
-                targetKey({ kind: 'drawing', id: drawing.id })
-              ] ?? {
-                surface: drawing.layer === 'below' ? 'background' : 'canvas',
-              })
-        const layout =
-          movingGroup && savedLayout.surface !== 'frame'
-            ? (frameDropTarget ?? { surface: 'canvas' as const })
-            : savedLayout
+        const layout: ObjectPlacement = frameLayout?.placements[
+          targetKey({ kind: 'drawing', id: drawing.id })
+        ]
+          ? getPlacement(frameLayout, { kind: 'drawing', id: drawing.id })
+          : {
+              surface: drawing.layer === 'below' ? 'background' : 'canvas',
+            }
         const effectiveLayer = placements
           ? 'above'
           : layout.surface === 'background'
             ? 'below'
             : 'above'
         if (effectiveLayer !== layer || (placements && !placement)) return null
-        const framed =
-          !placements && layout.surface === 'frame' && view && frameHost
-        const slot = groupBounds?.get(`drawing:${drawing.id}`)
-        const bounds = framed
-          ? getFrameBounds(layout, drawing.width, drawing.height, view)
-          : movingGroup && !placements && slot && view
-            ? {
-                x: slot.x + view.x,
-                y: slot.y + view.y,
-                width: slot.width,
-                height: slot.height,
-              }
-            : drawing
-        if (framed && group && slot) {
-          bounds.x = slot.x
-          bounds.y = slot.y
-          bounds.width = slot.width
-          bounds.height = slot.height
-        }
+        const pinned = !placements && layout.surface === 'pinned'
+        const bounds = pinned
+          ? { ...drawing, x: layout.x, y: layout.y }
+          : drawing
         const drawingInteractive =
           !consumingIds.includes(drawing.id) &&
           (placements ? placement?.matches === true : interactive)
@@ -167,16 +154,11 @@ export default function DrawingLayer({
             tabIndex={drawingInteractive ? 0 : undefined}
             viewBox={`0 0 ${drawing.width} ${drawing.height}`}
             style={{
-              clipPath:
-                framed && group && slot
-                  ? `inset(${Math.max(0, slot.frame.y - bounds.y)}px ${Math.max(0, bounds.x + bounds.width - slot.frame.x - slot.frame.width)}px ${Math.max(0, bounds.y + bounds.height - slot.frame.y - slot.frame.height)}px ${Math.max(0, slot.frame.x - bounds.x)}px)`
-                  : undefined,
-              position: framed ? 'fixed' : undefined,
+              position: pinned ? 'fixed' : undefined,
               left: bounds.x,
               top: bounds.y,
               width: bounds.width,
               height: bounds.height,
-              pointerEvents: framed && drawingInteractive ? 'auto' : undefined,
               transform: placement
                 ? `translate(${placement.x - drawing.x}px, ${placement.y - drawing.y}px) scale(${placement.scale})`
                 : 'translate(0px, 0px) scale(1)',
@@ -234,31 +216,17 @@ export default function DrawingLayer({
               ))}
           </svg>
         )
-        if (dragHost && (draggingId === drawing.id || movingGroup))
+        if (pinned)
+          return pinnedHost
+            ? createPortal(element, pinnedHost, drawing.id)
+            : null
+        if (dragHost && draggingId === drawing.id)
           return createPortal(element, dragHost, drawing.id)
-        return framed ? createPortal(element, frameHost, drawing.id) : element
+        return element
       })}
-      {draftPoints.length > 0 && (
-        <svg
-          className={styles.drawing}
-          aria-hidden="true"
-          data-drawing-draft
-          viewBox={`0 0 ${draftWidth} ${draftHeight}`}
-          style={{
-            left: draftX,
-            top: draftY,
-            width: draftWidth,
-            height: draftHeight,
-          }}
-        >
-          <Stroke
-            points={draftPoints.map(({ x, y }) => ({
-              x: x - draftX,
-              y: y - draftY,
-            }))}
-          />
-        </svg>
-      )}
+      {draft?.pinned && pinnedHost
+        ? createPortal(draftStroke, pinnedHost)
+        : draftStroke}
     </div>
   )
 }

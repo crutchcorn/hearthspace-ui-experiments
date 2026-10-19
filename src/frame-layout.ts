@@ -19,6 +19,7 @@ export type ObjectPlacement =
       peekOrigin?: Pick<Bounds, 'x' | 'y'>
     }
   | { surface: 'frame'; edge: FrameEdge; position: number }
+  | { surface: 'pinned'; x: number; y: number }
   | { surface: 'hidden' }
 export type FrameGroup = {
   id: string
@@ -99,11 +100,19 @@ function defaultPlacement(target: LayoutTarget): ObjectPlacement {
   )
 }
 
+function allowsPlacement(target: LayoutTarget, placement: ObjectPlacement) {
+  return (
+    (placement.surface !== 'pinned' || target.kind === 'drawing') &&
+    (placement.surface !== 'frame' || target.kind !== 'drawing')
+  )
+}
+
 function protectPlacement(
   layout: FrameLayout,
   target: LayoutTarget,
   placement: ObjectPlacement,
 ): ObjectPlacement {
+  if (!allowsPlacement(target, placement)) return defaultPlacement(target)
   if (placement.surface !== 'hidden') return placement
   if (target.kind !== 'widget') return defaultPlacement(target)
   if (target.id === 'tools' && !layout.allowHideTools)
@@ -178,6 +187,7 @@ export function setObjectPlacement(
   target: LayoutTarget,
   placement: ObjectPlacement,
 ): FrameLayout {
+  if (!allowsPlacement(target, placement)) return layout
   const previous = getPlacement(layout, target)
   if (
     target.kind === 'widget' &&
@@ -218,7 +228,13 @@ export function mergeFrameTargets(
   before = false,
 ): FrameLayout {
   const canGroup = (candidate: LayoutTarget) =>
-    candidate.kind !== 'group' || Boolean(getTargetGroup(layout, candidate))
+    candidate.kind !== 'drawing' &&
+    (candidate.kind !== 'group' ||
+      Boolean(
+        getTargetGroup(layout, candidate)?.members.every(
+          (member) => member.kind !== 'drawing',
+        ),
+      ))
   if (
     !canGroup(source) ||
     !canGroup(target) ||
@@ -327,6 +343,15 @@ function readPlacement(value: unknown): ObjectPlacement | null {
   if (!value || typeof value !== 'object') return null
   if (!('surface' in value)) return null
   if (value.surface === 'hidden') return { surface: 'hidden' }
+  if (value.surface === 'pinned')
+    return 'x' in value &&
+      typeof value.x === 'number' &&
+      Number.isFinite(value.x) &&
+      'y' in value &&
+      typeof value.y === 'number' &&
+      Number.isFinite(value.y)
+      ? { surface: 'pinned', x: value.x, y: value.y }
+      : null
   if (value.surface === 'canvas' || value.surface === 'background') {
     const placement: ObjectPlacement = { surface: value.surface }
     if ('x' in value) {
@@ -404,7 +429,7 @@ export function readFrameLayout(value: unknown): FrameLayout {
   for (const [key, savedPlacement] of Object.entries(savedPlacements)) {
     const target = readTarget(key)
     const placement = readPlacement(savedPlacement)
-    if (target && placement)
+    if (target && placement && allowsPlacement(target, placement))
       layout.placements[key] = protectPlacement(layout, target, placement)
   }
 
@@ -429,8 +454,7 @@ export function readFrameLayout(value: unknown): FrameLayout {
           typeof candidate.id !== 'string' ||
           (candidate.kind !== 'widget' &&
             candidate.kind !== 'item' &&
-            candidate.kind !== 'window' &&
-            candidate.kind !== 'drawing')
+            candidate.kind !== 'window')
         )
           continue
         const member = readTarget(`${candidate.kind}:${candidate.id}`)

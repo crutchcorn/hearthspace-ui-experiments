@@ -23,14 +23,20 @@ you see without changing where those objects belong.
 
 The frame follows the viewport. An attached item stays along the chosen
 screen edge while the canvas moves. Icons and toolbars share the corner controls'
-screen inset; standalone windows and drawings sit flush with the edge. A system tray is an obvious candidate, but the same placement
-should work for a file you keep referring to, a drawing, a widget, or a window.
+screen inset; standalone windows sit flush with the edge. A system tray is an
+obvious candidate, but the same placement works for a file you keep referring
+to, a widget, or a window.
 The object keeps its identity and purpose when its placement changes.
 
 For example, you might attach a reference window to the right edge, keep a
 folder along the bottom, and leave the running-app list on the left. These are
 choices about what stays nearby. They don't create a different kind of window
 or a second copy of the folder.
+
+Drawings have a related exception: **Pin to top** keeps ink at any screen
+position above canvas windows and below frame attachments. A reference sketch
+can stay beside your work without becoming part of a toolbar or snapping to an
+edge. It stays pinned when dragged into the middle of the screen.
 
 The frame doesn't need a decorative border around the whole screen. Its meaning
 comes from attached objects remaining stationary and appearing above the
@@ -53,12 +59,12 @@ Shared padding, hover states, icon sizes, and surface treatment still help
 unrelated objects feel comfortable beside one another. A user can change where
 something belongs without having to redesign it.
 
-Frame groups let any attachments share one surface. A folder can sit beside a
-reference window and drawing, or the app dock, canvas tools, and device controls
-can join into a single taskbar. Grouping changes how objects sit together;
-each member keeps its own action and can be moved out again. Windows retain
-their contents and chrome, and drawings retain their art, so the frame still
-shows the work you're keeping nearby.
+Frame groups let attachments share one surface. A folder can sit beside a
+reference window, or the app dock, canvas tools, and device controls can join
+into a single taskbar. Grouping changes how objects sit together; each member
+keeps its own action and can be moved out again. Windows retain their contents
+and chrome, so the frame still shows the work you're keeping nearby. Drawings
+stay independent and never become group members.
 
 Device status is a useful example. Clock, Wi-Fi, sound, and battery begin
 together at the top right, but each is an independent item. Notifications are
@@ -78,9 +84,10 @@ grouping, and status detail belong together there, including the choice to
 show a battery percentage.
 
 Use this tool to attach an item to a frame edge, return it to the canvas, or
-affix it to the canvas background. The same operation applies to drawings,
-windows, desktop items, and widgets. Placement belongs to the object, rather
-than to a separate drawing mode or a special version of an app.
+affix it to the canvas background. Drawings use **Pin to top** in place of
+Frame; Canvas and Background return them to the painting. Placement belongs
+to the object, rather than to a separate drawing mode or a special version of
+an app.
 
 Drag an object to an edge to attach it there. Distinct animated corner targets
 help align the placement. Dragging an attachment away from an edge returns it
@@ -118,7 +125,9 @@ information fits alongside the work.
 Drawing therefore has one job: create ink. **Change layout** replaces the
 above/below drawing modes and the separate drawing pinning controls. A drawing
 can later become a background annotation, move with other raised work, or stay
-on the frame. Its strokes remain one object through those changes.
+pinned above canvas windows. Its strokes remain one object through those
+changes. Dragging a drawing never changes that placement: you choose Canvas,
+Background, or Pin to top deliberately in the editor.
 
 Ordinary dragging still moves an object within its chosen place. The layout
 tool is the deliberate way to change that place, so a window dragged near an
@@ -140,17 +149,19 @@ The painting has depth. Background work sits lowest. Raised canvas icons,
 drawings, and widgets sit above it, with ordinary windows above those objects.
 All of that work remains beneath the frame.
 
-| Place             | What moving the canvas does | Why something belongs there                   |
-| ----------------- | --------------------------- | --------------------------------------------- |
-| Canvas background | Moves it with the canvas.   | It should stay beneath other canvas work.     |
-| Raised canvas     | Moves it with the canvas.   | It needs room to overlap and be worked on.    |
-| Frame edge        | Leaves it within reach.     | It should remain visible as the canvas moves. |
+| Place             | What moving the canvas does       | Why something belongs there                                              |
+| ----------------- | --------------------------------- | ------------------------------------------------------------------------ |
+| Canvas background | Moves it with the canvas.         | It should stay beneath other canvas work.                                |
+| Raised canvas     | Moves it with the canvas.         | It needs room to overlap and be worked on.                               |
+| Pinned drawing    | Leaves it at its screen position. | Ink should stay visible above canvas windows, beneath frame attachments. |
+| Frame edge        | Leaves it within reach.           | It should remain visible as the canvas moves.                            |
 
 Desktop items begin on the background, and windows begin above it. These are
 starting placements the user can change. A background window is still a
 window; a raised drawing is still a drawing. Raising an icon or drawing above
-the background doesn't put it in front of ordinary windows. Attaching it to
-the frame makes it stay above canvas work. Opening a canvas control leaves its
+the background doesn't put it in front of ordinary windows. **Pin to top**
+places a drawing above those windows; attaching an icon to the frame keeps
+that icon above the canvas too. Opening a canvas control leaves its
 icon on that layer; only its temporary panel appears above windows. For example,
 opening Battery never raises the battery icon through a window covering it.
 
@@ -170,7 +181,7 @@ uses the return-home behavior.
 ## Removal changes the layout
 
 Removing a frame attachment means taking it off the frame. It doesn't close an
-open window, delete a file or drawing, or uninstall an app. Personal objects
+open window, delete a file, or uninstall an app. Personal objects
 return to the canvas and remain searchable. Default controls, such as the
 system tray or running-app list, remain available in a searchable catalog even
 when they aren't placed anywhere.

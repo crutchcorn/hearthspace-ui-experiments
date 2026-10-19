@@ -40,6 +40,7 @@ type SceneLocation =
       peekOrigin?: Pick<Bounds, 'x' | 'y'>
     }
   | { surface: 'frame'; edge: FrameEdge; position: number }
+  | { surface: 'pinned'; x: number; y: number }
   | { surface: 'group'; groupId: string }
 
 type SceneItem = Omit<DesktopItem, 'x' | 'y' | 'peekOrigin'> & {
@@ -58,14 +59,13 @@ export type Scene = {
 function removeMissingMembers(workspace: Workspace, layout: FrameLayout) {
   const windows = new Set(workspace.windows.map((item) => item.id))
   const items = new Set(workspace.items.map((item) => item.id))
-  const drawings = new Set(workspace.drawings.map((drawing) => drawing.id))
   let next = layout
   for (const group of Object.values(layout.groups ?? {})) {
     for (const member of group.members) {
       if (
         (member.kind === 'window' && !windows.has(member.id)) ||
         (member.kind === 'item' && !items.has(member.id)) ||
-        (member.kind === 'drawing' && !drawings.has(member.id))
+        member.kind === 'drawing'
       )
         next = ungroupFrameTarget(next, member)
     }
@@ -82,7 +82,9 @@ function canonicalLocation(
   const group = getTargetGroup(layout, target)
   if (group) return { surface: 'group', groupId: group.id }
   const placement = layout.placements[targetKey(target)]
-  if (placement?.surface === 'frame')
+  if (placement?.surface === 'pinned' && target.kind === 'drawing')
+    return { surface: 'pinned', x: placement.x, y: placement.y }
+  if (placement?.surface === 'frame' && target.kind !== 'drawing')
     return {
       surface: 'frame',
       edge: placement.edge,
@@ -174,6 +176,8 @@ function projectPlacement(location: SceneLocation): ObjectPlacement | null {
       edge: location.edge,
       position: location.position,
     }
+  if (location.surface === 'pinned')
+    return { surface: 'pinned', x: location.x, y: location.y }
   // Canvas coordinates belong to the object, never to a second layout entry.
   return { surface: location.surface }
 }
@@ -184,7 +188,7 @@ function projectLocation(
   view: Bounds,
   compact: boolean,
 ): Bounds & {
-  surface: 'canvas' | 'background' | 'frame' | 'hidden'
+  surface: 'canvas' | 'background' | 'frame' | 'pinned' | 'hidden'
   peekOrigin?: Pick<Bounds, 'x' | 'y'>
 } {
   const location = object.location
@@ -192,6 +196,14 @@ function projectLocation(
     location.surface === 'group'
       ? getPlacement(layout, { kind: 'group', id: location.groupId })
       : location
+  if (placement.surface === 'pinned')
+    return {
+      surface: 'pinned',
+      x: view.x + placement.x,
+      y: view.y + placement.y,
+      width: object.width,
+      height: object.height,
+    }
   if (placement.surface === 'frame') {
     const frame = getFrameBounds(
       placement,
@@ -319,9 +331,11 @@ function sameLocation(a: SceneLocation, b: SceneLocation): boolean {
     return a.edge === b.edge && a.position === b.position
   if (a.surface === 'group' && b.surface === 'group')
     return a.groupId === b.groupId
+  if (a.surface === 'pinned' && b.surface === 'pinned')
+    return a.x === b.x && a.y === b.y
   return (
-    'x' in a &&
-    'x' in b &&
+    (a.surface === 'canvas' || a.surface === 'background') &&
+    (b.surface === 'canvas' || b.surface === 'background') &&
     a.x === b.x &&
     a.y === b.y &&
     sameOrigin(a.peekOrigin, b.peekOrigin)
@@ -332,6 +346,8 @@ function samePlacement(a: ObjectPlacement, b: ObjectPlacement): boolean {
   if (a === b) return true
   if (a.surface !== b.surface) return false
   if (a.surface === 'hidden') return true
+  if (a.surface === 'pinned' && b.surface === 'pinned')
+    return a.x === b.x && a.y === b.y
   if (a.surface === 'frame' && b.surface === 'frame')
     return a.edge === b.edge && a.position === b.position
   return (
@@ -419,6 +435,9 @@ function applyWorkspaceChanges(
   const oldDrawings = new Map(
     scene.drawings.map((drawing) => [drawing.id, drawing]),
   )
+  const projectedDrawings = new Map(
+    before.drawings.map((drawing) => [drawing.id, drawing]),
+  )
   const items =
     workspace.items === before.items && layout === projection.layout
       ? scene.items
@@ -460,12 +479,20 @@ function applyWorkspaceChanges(
           scene.drawings,
           workspace.drawings.map((drawing) => {
             const previous = oldDrawings.get(drawing.id)
-            const location = canonicalLocation(
-              layout,
-              { kind: 'drawing', id: drawing.id },
-              drawing,
-              drawing.layer === 'below' ? 'background' : 'canvas',
-            )
+            const projected = projectedDrawings.get(drawing.id)
+            const location =
+              previous?.location.surface === 'pinned' && projected
+                ? {
+                    surface: 'pinned' as const,
+                    x: previous.location.x + drawing.x - projected.x,
+                    y: previous.location.y + drawing.y - projected.y,
+                  }
+                : canonicalLocation(
+                    layout,
+                    { kind: 'drawing', id: drawing.id },
+                    drawing,
+                    drawing.layer === 'below' ? 'background' : 'canvas',
+                  )
             if (
               previous &&
               previous.width === drawing.width &&
@@ -736,6 +763,17 @@ export function moveSceneObject(
     object && object.location.surface !== 'group'
       ? object.location
       : getPlacement(scene.layout, target)
+  if (target.kind === 'drawing' && placement.surface === 'pinned')
+    return updateSceneLayout(
+      scene,
+      (layout) =>
+        setObjectPlacement(layout, target, {
+          surface: 'pinned',
+          x: x - view.x,
+          y: y - view.y,
+        }),
+      view,
+    )
   const surface = placement.surface === 'background' ? 'background' : 'canvas'
   if (target.kind === 'widget' || target.kind === 'group')
     return placeSceneObject(scene, target, { surface, x, y }, view, {

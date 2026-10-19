@@ -902,9 +902,12 @@
   pointer-events: auto;
 }
 
-/* Group previews stay above the strip's glass while the whole group moves. */
-.layoutDragWorld > [data-drawing-id] {
-  z-index: 1101;
+.pinnedDrawingHost {
+  position: fixed;
+  z-index: 1090;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
 }
 
 .desktop[data-layout-editing='true']

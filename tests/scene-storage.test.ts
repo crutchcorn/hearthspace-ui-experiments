@@ -55,7 +55,7 @@ const drawing: Scene['drawings'][number] = {
 test('the previous scene format resets without changing separate preferences', () => {
   const previous = freshScene()
   previous.workspace.note = 'Previous scene format'
-  storage.set('hearthspace-scene-v1', JSON.stringify(previous))
+  storage.set('hearthspace-scene-v2', JSON.stringify(previous))
   storage.set('hearthspace-accent-v1', 'teal')
   assert.notEqual(loadScene().workspace.note, previous.workspace.note)
   assert.equal(storage.get('hearthspace-accent-v1'), 'teal')
@@ -242,7 +242,7 @@ test('clock date format survives grouping, detaching, and saved-scene reloads', 
   })
 })
 
-test('direct scene loading preserves frame artwork without projecting it into the canvas', () => {
+test('direct scene loading preserves freeform pinned artwork without projecting it into the canvas', () => {
   const scene = freshScene()
   scene.workspace.home = {
     x: scene.workspace.width - 100,
@@ -253,7 +253,7 @@ test('direct scene loading preserves frame artwork without projecting it into th
       ...drawing,
       width: 1200,
       height: 900,
-      location: { surface: 'frame', edge: 'right', position: 1 },
+      location: { surface: 'pinned', x: 320, y: 240 },
     },
   ]
   const original = structuredClone(scene)
@@ -268,7 +268,7 @@ test('reading the same scene is independent of the current browser viewport', ()
   const scene = freshScene()
   scene.items = scene.items.slice(0, 1)
   scene.drawings = [
-    { ...drawing, location: { surface: 'frame', edge: 'bottom', position: 1 } },
+    { ...drawing, location: { surface: 'pinned', x: 840, y: 50 } },
   ]
   const originalWindow = Object.getOwnPropertyDescriptor(globalThis, 'window')
   try {
@@ -520,7 +520,6 @@ test('invalid drawing records and stroke data leave valid neighboring artwork in
 
 test('groups retain valid members and release a lone survivor onto the same frame edge', () => {
   const workspace = createWorkspace()
-  workspace.drawings = [{ ...drawing, x: 100, y: 200, layer: 'above' }]
   let layout = setObjectPlacement(
     readFrameLayout(undefined),
     { kind: 'item', id: workspace.items[0].id },
@@ -528,7 +527,7 @@ test('groups retain valid members and release a lone survivor onto the same fram
   )
   layout = mergeFrameTargets(
     layout,
-    { kind: 'drawing', id: drawing.id },
+    { kind: 'window', id: workspace.windows[0].id },
     { kind: 'item', id: workspace.items[0].id },
   )
   const scene = createScene(workspace, layout)
@@ -536,12 +535,11 @@ test('groups retain valid members and release a lone survivor onto the same fram
     kind: 'item',
     id: workspace.items[0].id,
   })!
-  assert.deepEqual(readScene(scene).drawings, scene.drawings)
   assert.deepEqual(readScene(scene).layout.groups?.[group.id], group)
 
   const loaded = readScene({
     ...scene,
-    drawings: [{ ...scene.drawings[0], strokes: [] }],
+    workspace: { ...scene.workspace, windows: [] },
   })
   assert.equal(loaded.layout.groups?.[group.id], undefined)
   assert.deepEqual(loaded.items[0].location, {
@@ -556,11 +554,12 @@ test('groups retain valid members and release a lone survivor onto the same fram
   assert.equal(`group:${group.id}` in loaded.layout.placements, false)
 })
 
-test('a drawing survives a saved frame group with only one member', () => {
+test('saved drawing frame attachments and groups are rejected', () => {
   const scene = freshScene()
   const placement = { surface: 'frame', edge: 'left', position: 0.4 } as const
   scene.drawings = [
     { ...drawing, location: { surface: 'group', groupId: 'art' } },
+    { ...drawing, id: 'edge', location: placement },
   ]
   scene.layout = {
     ...scene.layout,
@@ -572,7 +571,7 @@ test('a drawing survives a saved frame group with only one member', () => {
 
   const loaded = readScene(scene)
 
-  assert.deepEqual(loaded.drawings, [{ ...drawing, location: placement }])
+  assert.deepEqual(loaded.drawings, [])
   assert.deepEqual(loaded.layout.groups, {})
   assert.equal('drawing:ink' in loaded.layout.placements, false)
   assert.equal('group:art' in loaded.layout.placements, false)
@@ -609,4 +608,34 @@ test('a file survives when its other frame group member is invalid', () => {
   assert.deepEqual(loaded.layout.groups, {})
   assert.equal(`item:${file.id}` in loaded.layout.placements, false)
   assert.equal('group:files' in loaded.layout.placements, false)
+})
+
+test('pinned drawing coordinates round-trip without a canvas home or frame membership', () => {
+  const scene = freshScene()
+  scene.drawings = [
+    { ...drawing, location: { surface: 'pinned', x: -20, y: 180 } },
+  ]
+  saveScene(scene)
+  const saved = JSON.parse(storage.get(SCENE_STORAGE_KEY)!)
+  assert.deepEqual(saved.drawings, scene.drawings)
+  const loaded = loadScene()
+  assert.deepEqual(loaded.drawings, scene.drawings)
+  assert.deepEqual(loaded.layout, scene.layout)
+  assert.equal('drawing:ink' in loaded.layout.placements, false)
+})
+
+test('pinned locations are invalid for files and invalid drawing anchors are discarded', () => {
+  const scene = freshScene()
+  const file = scene.items.find((item) => item.kind === 'file')!
+  file.location = { surface: 'pinned', x: 10, y: 20 }
+  scene.drawings = [
+    { ...drawing, location: { surface: 'pinned', x: NaN, y: 20 } },
+    { ...drawing, id: 'valid', location: { surface: 'pinned', x: 10, y: 20 } },
+  ]
+  const loaded = readScene(scene)
+  assert.equal(
+    loaded.items.some((item) => item.id === file.id),
+    false,
+  )
+  assert.deepEqual(loaded.drawings, [scene.drawings[1]])
 })

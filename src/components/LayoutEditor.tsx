@@ -8,6 +8,7 @@ import {
   Ungroup,
   List,
   Square,
+  Pin,
 } from 'lucide-react'
 import type { LayoutTarget, ObjectPlacement } from '../frame-layout'
 import styles from './LayoutEditor.module.css'
@@ -28,10 +29,9 @@ interface LayoutEditorProps {
   children?: ReactNode
 }
 
-const choices = [
+const canvasChoices = [
   { label: 'Canvas', Icon: Layers2, surface: 'canvas' },
   { label: 'Background', Icon: Wallpaper, surface: 'background' },
-  { label: 'Frame', Icon: PanelsTopLeft, surface: 'frame' },
 ] as const
 
 export default function LayoutEditor({
@@ -48,6 +48,12 @@ export default function LayoutEditor({
   onDone,
   children,
 }: LayoutEditorProps) {
+  const choices = [
+    ...canvasChoices,
+    target?.kind === 'drawing'
+      ? ({ label: 'Pin to top', Icon: Pin, surface: 'pinned' } as const)
+      : ({ label: 'Frame', Icon: PanelsTopLeft, surface: 'frame' } as const),
+  ]
   const [hint, setHint] = useState<string | null>(null)
   const hintId = useId()
   const hintTimeout = useRef<number | undefined>(undefined)
@@ -67,7 +73,7 @@ export default function LayoutEditor({
 
   function choosePlacement(choice: (typeof choices)[number]) {
     hideHint()
-    if (choice.surface === 'frame') {
+    if (choice.surface === 'frame' || choice.surface === 'pinned') {
       onFrame()
       return
     }

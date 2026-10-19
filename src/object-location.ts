@@ -12,6 +12,7 @@ import {
 export type ObjectLocation =
   | { surface: 'canvas' | 'background'; bounds: Bounds }
   | { surface: 'frame'; edge: FrameEdge; position: number }
+  | { surface: 'pinned'; x: number; y: number }
   | { surface: 'hidden' }
 
 const emptyLayout: FrameLayout = { placements: {}, allowHideTools: false }
@@ -39,6 +40,7 @@ export function resolveObjectLocation(
       position: placement.position,
     }
   if (placement.surface === 'hidden') return { surface: 'hidden' }
+  if (placement.surface === 'pinned') return placement
   return {
     surface: placement.surface,
     bounds: {

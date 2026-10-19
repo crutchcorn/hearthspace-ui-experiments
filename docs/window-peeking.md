@@ -46,8 +46,8 @@ Change layout makes room permanently. Background objects displaced by that
 placement adopt the adjusted positions as their new homes. Unrelated peeks
 elsewhere keep their original homes.
 
-Only canvas objects participate. Frame attachments never use leftover canvas
-coordinates as blockers. Raised objects respect background-versus-canvas
+Only canvas objects participate. Frame attachments and drawings set to
+**Pin to top** never use leftover canvas coordinates as blockers. Raised objects respect background-versus-canvas
 ordering while staying beneath ordinary windows. Saved scene locations retain
 temporary homes across reloads.
 
@@ -55,7 +55,7 @@ temporary homes across reloads.
 
 [peek-layout.ts](../src/peek-layout.ts) calculates coverage and restoration.
 [layout-workspace.ts](../src/layout-workspace.ts) applies layer rules and excludes
-frame work. It passes each drawing's resolved surface separately from the drawing
+frame work and pinned drawings. It passes each drawing's resolved surface separately from the drawing
 content, so both canvas layers participate without temporarily rewriting the
 drawing's layer or strokes.
 

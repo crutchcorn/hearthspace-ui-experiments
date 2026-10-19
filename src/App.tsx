@@ -196,6 +196,8 @@ function App() {
   const [tool, setTool] = useState(loadCanvasTool)
   const drawingLayer: DrawingLayerName = 'above'
   const [frameHost, setFrameHost] = useState<HTMLDivElement | null>(null)
+  const [pinnedDrawingHost, setPinnedDrawingHost] =
+    useState<HTMLDivElement | null>(null)
   const [layoutDragHost, setLayoutDragHost] = useState<HTMLDivElement | null>(
     null,
   )
@@ -239,6 +241,7 @@ function App() {
   const [drawingDraft, setDrawingDraft] = useState<{
     points: GesturePoint[]
     layer: DrawingLayerName
+    pinned?: boolean
   } | null>(null)
   const [consumingDrawingIds, setConsumingDrawingIds] = useState<string[]>([])
   const [drawingLaunchId, setDrawingLaunchId] = useState<string | null>(null)
@@ -928,10 +931,11 @@ function App() {
       current.points.push(point)
       if (current.points.length > 4096)
         current.points = current.points.filter((_, index) => index % 2 === 0)
-      setDrawingDraft({
+      setDrawingDraft((previous) => ({
+        pinned: previous?.pinned,
         points: [...current.points],
         layer: current.drawingLayer,
-      })
+      }))
       return
     }
     if (current.type === 'drawing-move') {
@@ -1189,6 +1193,9 @@ function App() {
   const panAtEdge = useEffectEvent(() => {
     if (
       focusView ||
+      (gesture.current?.type === 'drawing-move' &&
+        objectLayout.placement({ kind: 'drawing', id: gesture.current.id })
+          .surface === 'pinned') ||
       (gesture.current?.type === 'item-move' &&
         isFavoriteDrop(
           gesture.current.id ?? null,
@@ -1368,7 +1375,14 @@ function App() {
     setSelectedIds([])
     setSelectedItemIds([])
     setSelectedControlIds([])
-    setDrawingDraft({ points, layer })
+    setDrawingDraft({
+      points,
+      layer,
+      pinned: existing
+        ? objectLayout.placement({ kind: 'drawing', id: existing.id })
+            .surface === 'pinned'
+        : false,
+    })
     closePopovers()
   }
 
@@ -1385,11 +1399,6 @@ function App() {
     id: string,
   ) {
     const drawing = workspace.drawings.find((item) => item.id === id)
-    if (objectLayout.placement({ kind: 'drawing', id }).surface === 'frame') {
-      event.stopPropagation()
-      selectDrawing(id)
-      return
-    }
     if (
       !drawing ||
       tool !== 'cursor' ||
@@ -1837,27 +1846,11 @@ function App() {
     const app = APP_CATALOG.find((item) => item.id === match?.appId)
     if (!app) return false
     const drawingId = selectedDrawing.id
-    const drawingPlacement = objectLayout.placement({
-      kind: 'drawing',
-      id: drawingId,
-    })
-    const drawingBounds =
-      drawingPlacement.surface === 'frame'
-        ? (framePreviewBounds.get(`drawing:${drawingId}`) ??
-          getFrameBounds(
-            drawingPlacement,
-            selectedDrawing.width,
-            selectedDrawing.height,
-            view,
-          ))
-        : selectedDrawing
-    const drawingOffset =
-      drawingPlacement.surface === 'frame' ? view : { x: 0, y: 0 }
     const windowId = addWindow(
       app,
       {
-        x: drawingBounds.x + drawingBounds.width / 2 + drawingOffset.x,
-        y: drawingBounds.y + drawingBounds.height / 2 + drawingOffset.y,
+        x: selectedDrawing.x + selectedDrawing.width / 2,
+        y: selectedDrawing.y + selectedDrawing.height / 2,
       },
       drawingId,
     )
@@ -1970,7 +1963,7 @@ function App() {
       if (
         drawing &&
         objectLayout.placement({ kind: 'drawing', id: result.id }).surface !==
-          'frame'
+          'pinned'
       )
         viewport.current?.scrollTo({
           left: drawing.x - (view.width - drawing.width) / 2,
@@ -2224,6 +2217,7 @@ function App() {
           }}
         />
       </div>
+      <div ref={setPinnedDrawingHost} className={styles.pinnedDrawingHost} />
       {tool === 'layout' && (
         <>
           <FrameGuides target={objectLayout.dropTarget} layer="outline" />
@@ -2446,16 +2440,13 @@ function App() {
               <DrawingLayer
                 drawings={workspace.drawings}
                 frameLayout={objectLayout.layout}
-                frameHost={frameHost}
+                pinnedHost={pinnedDrawingHost}
                 dragHost={activeLayoutDragHost}
                 draggingId={
                   objectLayout.draggingTarget?.kind === 'drawing'
                     ? objectLayout.draggingTarget.id
                     : undefined
                 }
-                groupBounds={framePreviewBounds}
-                draggingWidget={objectLayout.draggingWidget}
-                frameDropTarget={objectLayout.dropTarget}
                 view={view}
                 placements={searchLayout?.drawings}
                 onOpen={(id) => activateSearchResult({ kind: 'drawing', id })}
@@ -2844,16 +2835,13 @@ function App() {
               <DrawingLayer
                 drawings={workspace.drawings}
                 frameLayout={objectLayout.layout}
-                frameHost={frameHost}
+                pinnedHost={pinnedDrawingHost}
                 dragHost={activeLayoutDragHost}
                 draggingId={
                   objectLayout.draggingTarget?.kind === 'drawing'
                     ? objectLayout.draggingTarget.id
                     : undefined
                 }
-                groupBounds={framePreviewBounds}
-                draggingWidget={objectLayout.draggingWidget}
-                frameDropTarget={objectLayout.dropTarget}
                 view={view}
                 placements={searchLayout?.drawings}
                 onOpen={(id) => activateSearchResult({ kind: 'drawing', id })}
@@ -2973,35 +2961,7 @@ function App() {
         !drawingDraft && (
           <DrawingActions
             key={selectedDrawing.id}
-            drawing={
-              objectLayout.placement({
-                kind: 'drawing',
-                id: selectedDrawing.id,
-              }).surface === 'frame'
-                ? {
-                    ...selectedDrawing,
-                    ...(() => {
-                      const placement = objectLayout.placement({
-                        kind: 'drawing',
-                        id: selectedDrawing.id,
-                      })
-                      const b =
-                        placement.surface === 'frame'
-                          ? (framePreviewBounds.get(
-                              `drawing:${selectedDrawing.id}`,
-                            ) ??
-                            getFrameBounds(
-                              placement,
-                              selectedDrawing.width,
-                              selectedDrawing.height,
-                              view,
-                            ))
-                          : selectedDrawing
-                      return { ...b, x: b.x + view.x, y: b.y + view.y }
-                    })(),
-                  }
-                : selectedDrawing
-            }
+            drawing={selectedDrawing}
             view={view}
             editing={tool === 'draw'}
             onPlay={gestureShortcuts.length > 0 ? playDrawing : undefined}
@@ -3100,7 +3060,7 @@ function App() {
           const item =
             target.kind === 'window'
               ? workspace.windows.find((item) => item.id === target.id)
-              : workspace.drawings.find((item) => item.id === target.id)
+              : undefined
           if (!item) return null
           const vertical = edge === 'left' || edge === 'right'
           const width = Math.min(item.width, view.width - 48)
@@ -3108,8 +3068,8 @@ function App() {
           return (
             <FramePreviewSlot
               target={target}
-              width={target.kind === 'window' && vertical ? 44 : width}
-              height={target.kind === 'window' && !vertical ? 44 : height}
+              width={vertical ? 44 : width}
+              height={!vertical ? 44 : height}
               onBounds={updateFramePreviewBounds}
             />
           )

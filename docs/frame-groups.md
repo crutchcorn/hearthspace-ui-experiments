@@ -29,10 +29,13 @@ after dropping, changing detail size, resizing the viewport, or restoring a save
 layout. Even attachments approaching the same corner from different edges join
 when their measured bounds intersect. Simply touching edges doesn't merge them.
 
-[Pinned windows](pinned-windows.md) keep their actual chrome and content, and
-drawings keep their art. They aren't replaced with generic compact tiles. A
+[Pinned windows](pinned-windows.md) keep their actual chrome and content. A
 grouped window's resting strip reaches the outer edge of the group's surface;
 hovering reveals more without opening it fully.
+
+Drawings don't join frame groups. Their [Pin to top](drawing.md#choose-where-it-belongs)
+placement keeps ink above windows and below the controls at a free screen
+position, so overlapping a group doesn't rearrange either object.
 
 Groups belong to the frame. Moving a whole group onto Canvas or Background
 releases its members at their visible positions on that layer. Removing a group

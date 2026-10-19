@@ -108,9 +108,9 @@ test('pinning personal work discards its canvas coordinates and peek home', () =
     scene,
     (layout) =>
       setObjectPlacement(layout, drawing, {
-        surface: 'frame',
-        edge: 'top',
-        position: 0.2,
+        surface: 'pinned',
+        x: 320,
+        y: 240,
       }),
     view,
   )
@@ -129,7 +129,7 @@ test('pinning personal work discards its canvas coordinates and peek home', () =
     width: 100,
     height: 80,
     strokes: workspace.drawings[0].strokes,
-    location: { surface: 'frame', edge: 'top', position: 0.2 },
+    location: { surface: 'pinned', x: 320, y: 240 },
   })
   assert.equal(
     Object.hasOwn(scene.layout.placements, 'item:notes-shortcut'),
@@ -403,26 +403,21 @@ test('sequential updates use the latest scene and frame content edits cannot per
   })
 })
 
-test('removing grouped artwork removes its membership and preserves the remaining attachment', () => {
+test('removing pinned artwork leaves frame attachments alone', () => {
   const initial = createScene(workspace, defaults)
-  const grouped = updateSceneLayout(
+  const pinned = placeSceneObject(
     initial,
-    (layout) =>
-      mergeFrameTargets(layout, drawing, { kind: 'widget', id: 'apps' }),
+    drawing,
+    {
+      surface: 'pinned',
+      x: 320,
+      y: 240,
+    },
     view,
   )
-  const removed = updateSceneWorkspace(
-    grouped,
-    (current) => ({ ...current, drawings: [] }),
-    view,
-  )
+  const removed = removeSceneObject(pinned, drawing, view)
   assert.equal(removed.drawings.length, 0)
-  assert.deepEqual(removed.layout.groups, {})
-  assert.deepEqual(removed.layout.placements['widget:apps'], {
-    surface: 'frame',
-    edge: 'bottom',
-    position: 1,
-  })
+  assert.deepEqual(removed.layout, initial.layout)
 })
 
 test('equivalent workspace and layout updates retain scene identity', () => {
@@ -675,7 +670,6 @@ test('releasing a mixed frame group stores each member at its visible drop posit
     false,
     view,
   )
-  grouped = groupSceneObjects(grouped, drawing, battery, false, view)
   grouped = groupSceneObjects(grouped, window, battery, false, view)
   const group = getTargetGroup(grouped.layout, battery)!
   const released = releaseSceneGroup(
@@ -684,7 +678,6 @@ test('releasing a mixed frame group stores each member at its visible drop posit
     'background',
     [
       { target: icon, bounds: { x: 1800, y: 1800, width: 54, height: 54 } },
-      { target: drawing, bounds: { x: 2100, y: 1800, width: 100, height: 80 } },
       { target: window, bounds: { x: 2400, y: 1800, width: 280, height: 200 } },
       { target: battery, bounds: { x: 2800, y: 1800, width: 54, height: 54 } },
     ],
@@ -697,11 +690,7 @@ test('releasing a mixed frame group stores each member at its visible drop posit
     x: 1800,
     y: 1800,
   })
-  assert.deepEqual(released.drawings[0].location, {
-    surface: 'background',
-    x: 2100,
-    y: 1800,
-  })
+  assert.deepEqual(released.drawings[0].location, grouped.drawings[0].location)
   assert.equal(released.drawings[0].strokes, grouped.drawings[0].strokes)
   assert.equal(released.workspace.windows[0].x, 2400)
   assert.equal(released.workspace.windows[0].y, 1800)
@@ -840,5 +829,123 @@ test('frame overlap merging uses the current scene and retains one location per 
     surface: 'frame',
     edge: 'bottom',
     position: 1,
+  })
+})
+
+test('pinned drawings follow the viewport with one stored screen position', () => {
+  const pinned = { surface: 'pinned', x: 320, y: 240 } as const
+  const scene = createScene(
+    workspace,
+    setObjectPlacement(defaults, drawing, pinned),
+  )
+  const original = structuredClone(scene)
+  const first = projectScene(scene, view)
+  const movedView = { ...view, x: 2200, y: 1700, width: 900 }
+  const next = projectScene(scene, movedView)
+  assert.deepEqual(scene.drawings[0].location, pinned)
+  assert.equal(first.workspace.drawings[0].x, view.x + pinned.x)
+  assert.equal(first.workspace.drawings[0].y, view.y + pinned.y)
+  assert.equal(next.workspace.drawings[0].x, movedView.x + pinned.x)
+  assert.equal(next.workspace.drawings[0].y, movedView.y + pinned.y)
+  assert.deepEqual(getPlacement(next.layout, drawing), pinned)
+  assert.deepEqual(scene, original)
+})
+
+test('moving pinned drawings changes their viewport anchor without detaching or grouping', () => {
+  const initial = placeSceneObject(
+    createScene(workspace, defaults),
+    drawing,
+    {
+      surface: 'pinned',
+      x: 30,
+      y: 40,
+    },
+    view,
+  )
+  const moved = moveSceneObject(
+    initial,
+    drawing,
+    view.x + 400,
+    view.y + 280,
+    view,
+  )
+  assert.deepEqual(moved.drawings[0].location, {
+    surface: 'pinned',
+    x: 400,
+    y: 280,
+  })
+  assert.equal(moved.workspace, initial.workspace)
+  assert.equal(moved.items, initial.items)
+  const grouped = groupSceneObjects(
+    moved,
+    drawing,
+    { kind: 'widget', id: 'apps' },
+    false,
+    view,
+  )
+  assert.deepEqual(grouped.drawings[0].location, moved.drawings[0].location)
+  assert.equal(getTargetGroup(grouped.layout, drawing), undefined)
+  const restored = restoreSceneDrag(
+    moved,
+    {
+      target: drawing,
+      layout: projectScene(initial, view).layout,
+      object: projectScene(initial, view).workspace.drawings[0],
+    },
+    view,
+  )
+  assert.deepEqual(restored.drawings[0].location, initial.drawings[0].location)
+})
+
+test('workspace edits retain and move pinned drawing anchors using projected coordinate deltas', () => {
+  const initial = placeSceneObject(
+    createScene(workspace, defaults),
+    drawing,
+    {
+      surface: 'pinned',
+      x: 30,
+      y: 40,
+    },
+    view,
+  )
+  const scrolled = { ...view, x: 3000, y: 2200 }
+  const edited = updateSceneWorkspace(
+    initial,
+    (current) => ({
+      ...current,
+      note: 'Still pinned',
+      drawings: current.drawings.map((item) => ({
+        ...item,
+        x: item.x + 90,
+        y: item.y + 30,
+        strokes: [
+          ...item.strokes,
+          [
+            { x: 10, y: 10 },
+            { x: 20, y: 20 },
+          ],
+        ],
+      })),
+    }),
+    scrolled,
+  )
+  assert.deepEqual(edited.drawings[0].location, {
+    surface: 'pinned',
+    x: 120,
+    y: 70,
+  })
+  assert.equal(edited.drawings[0].strokes.length, 2)
+  assert.equal(edited.workspace.note, 'Still pinned')
+  const lowered = placeSceneObject(
+    edited,
+    drawing,
+    { surface: 'canvas' },
+    scrolled,
+    { settle: false },
+  )
+  assert.deepEqual(lowered.drawings[0].location, {
+    surface: 'canvas',
+    x: scrolled.x + 120,
+    y: scrolled.y + 70,
   })
 })

@@ -25,7 +25,8 @@ Use Up/Down to cycle results and Enter to activate one, or click it:
   preview app; this isn't a filesystem search.
 - A window becomes focused and the canvas centers it, within the canvas bounds.
   A frame window opens at its pinned edge instead.
-- A drawing becomes selected at its actual location.
+- A drawing becomes selected at its actual location. Pin to top keeps it at
+  its screen position; a canvas drawing scrolls into view.
 - A system control opens where it lives. Canvas controls scroll into view;
   hidden controls return to the canvas before opening.
 - A tool selects its mode or runs its action. Finding Arrange, for example,

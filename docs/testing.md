@@ -39,7 +39,11 @@ toolbar's length.
 [Layout layer tests](../tests/browser/layout-layers.test.tsx) check the browser's
 paint order where outlines, windows, and dragged items overlap. They also check
 that releasing or canceling a layout drag restores ordinary layering, including
-returning a frame shortcut to the canvas beneath windows.
+returning a frame shortcut to the canvas beneath windows. Drawing cases check
+that Pin to top keeps ink above canvas windows and below frame tools, permits
+free placement without grouping, and preserves screen coordinates through
+panning and reload. Returning that drawing to Canvas makes it move with the
+painting again.
 
 ## Isolation and limits
 

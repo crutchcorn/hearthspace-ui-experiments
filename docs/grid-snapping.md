@@ -24,17 +24,24 @@ You can press or release Alt during the gesture, even while the pointer is
 still. The new result is calculated from the original drag position rather
 than accumulating offsets from the previous snap.
 
+## Pinned drawings
+
+**Pin to top** keeps a drawing in screen coordinates, above canvas windows.
+Alt-dragging aligns it with the dots visible at the current canvas position.
+Both axes can snap anywhere on the screen; frame-edge and corner rules don't
+apply. Panning afterward moves the dots underneath the pinned ink.
+
 ## Frame attachments
 
 In **Change layout**, Alt also aligns an attachment with the dots currently
 visible behind the frame. Top and bottom attachments snap horizontally;
 left and right attachments snap vertically. The distance from the screen edge
 stays intact: shortcuts and toolbars retain their padding, while standalone
-windows and drawings stay flush.
+windows stay flush.
 
 Corners are the exception. An item placed in a corner keeps its exact corner
 position and incoming toolbar orientation. Elsewhere, snapping applies to
-shortcuts, drawings, windows, controls, and whole groups. A toolbar's final
+shortcuts, windows, controls, and whole groups. A toolbar's final
 orientation and dimensions determine its alignment. Panning later moves the
 dots beneath the fixed attachment; it doesn't continually re-snap the frame.
 

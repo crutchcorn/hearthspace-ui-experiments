@@ -30,7 +30,7 @@ Overview can navigate that space, but its zoom buttons are placeholders.
 | Feature                                 | Start here                                                                                                      |
 | --------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
 | [Change layout](frame-layout.md)        | Drag between canvas, background, and frame. Toolbars turn around your grip and use pointer-driven drop targets. |
-| [Frame groups](frame-groups.md)         | Combine icons, controls, drawings, and window previews on a shared surface. Overlaps join groups.               |
+| [Frame groups](frame-groups.md)         | Combine icons, controls, and window previews on a shared surface. Overlaps join groups.                         |
 | [Pinned windows](pinned-windows.md)     | Keep an edge strip, reveal more on hover, open on click, and tuck away when focus leaves.                       |
 | [System controls](system-controls.md)   | Move Clock, Wi-Fi, Sound, and Battery independently, change their detail, and recover hidden controls.          |
 | [Clock formats](clock-formats.md)       | Choose a date/time presentation through item-specific layout controls.                                          |
@@ -50,7 +50,7 @@ setting before removal; keyboard search remains available to find them again.
 | [Keyboard window switching](window-switching.md)     | Hold Ctrl and press 1, or Shift+1 for reverse, then release Ctrl to choose a window.               |
 | [App launcher](app-launcher.md)                      | Browse gallery/list views, filter apps, or open the dedicated gesture pad.                         |
 | [Favorites and running windows](dock-favorites.md)   | Drag shortcuts onto Apps to favorite them; use window dots, instance pickers, and reorder handles. |
-| [Canvas drawing](drawing.md)                         | Keep artwork on the canvas or frame, move it, and explicitly play it as an app gesture.            |
+| [Canvas drawing](drawing.md)                         | Keep artwork on the canvas or pin it above windows, move it, and play it as an app gesture.        |
 | [Gesture launching and editing](gesture-launcher.md) | Record custom shapes, assign apps with the searchable picker, and match rough strokes locally.     |
 | [Handwritten search](handwritten-search.md)          | Read a line of ink locally and append the recognized text to the editable search query.            |
 
@@ -96,6 +96,7 @@ extending the experiment, while the shell itself stays concise.
 | A dock-attached keyboard switcher with app/instance arrow navigation | A later request moved switching onto the canvas. The current switcher cycles windows in a temporary grid.                   |
 | Any launcher stroke starts a hardcoded app                           | Saved assignments now drive actual gesture recognition. Unmatched strokes don't launch.                                     |
 | Above/below drawing modes                                            | Change layout chooses placement for drawings and other objects. Both canvas drawing layers remain beneath ordinary windows. |
+| Drawings attached to frame edges or groups                           | Pin to top gives drawings a free screen position above windows and below frame controls; dragging never changes that layer. |
 | Ideal/Realistic appearance toggle                                    | Varied app presentation is always active; no appearance-mode selector remains.                                              |
 | Battery-percentage setting                                           | Show details/Icon only in Change layout controls battery detail like other status items.                                    |
 | A Workspace app and new-workspace action                             | Removed. One saved spatial scene remains; there is no workspace-switching feature.                                          |
@@ -119,8 +120,8 @@ switcher arrangements, notifications, mock device values, and display settings
 are temporary. Handwriting assets may remain in the browser cache; its query
 and ink aren't saved.
 
-The current scene format starts fresh instead of importing the older split
-workspace/frame saves. Separately saved preferences remain independent. If
+The current scene format starts fresh instead of importing older scenes,
+including the version where drawings could attach to frame edges and groups. Separately saved preferences remain independent. If
 storage is unavailable, the current session remains usable; background save
 failures also display an explanation. See [saved state](spatial-playground.md#saved-state)
 for storage ownership and validation.

@@ -22,15 +22,28 @@ the whole object; there isn't a per-stroke eraser, brush palette, or undo stack.
 ## Choose where it belongs
 
 The floating **Change layout** action selects the drawing in the layout editor.
-From there, put it on the raised canvas, affix it to the background, or attach it
-to the frame. Placement belongs to the shared
-[frame and canvas model](frame-layout.md), rather than separate Draw modes.
+It offers three placements:
 
-New drawings sit on the raised canvas beneath ordinary windows. Drawings on
-both canvas layers participate in covered-item peeking and return to their
-original position when the obstruction clears. Frame drawings follow the screen edge and
-can join groups while retaining their full drawing presentation. A drawing
-can't simultaneously own a canvas position and a frame attachment.
+- **Canvas** keeps the drawing on the raised painting, beneath ordinary windows.
+  New drawings start here.
+- **Background** affixes it beneath the other canvas work.
+- **Pin to top** keeps it at a freely chosen screen position above canvas
+  windows and below frame attachments, including pinned windows.
+
+For example, pinning a small reference sketch keeps it visible while you pan
+between apps. Drag the pinned ink wherever it helps, including the middle of
+the screen. Moving it away from an edge doesn't unpin it, and placing it over
+a toolbar doesn't join that toolbar's group. Drawings never attach to frame
+edges or join frame groups. Choose **Canvas** or **Background** in Change layout
+to put the drawing back on the painting at its current visible position.
+
+Drawings on both canvas layers participate in covered-item peeking and return
+to their original position when the obstruction clears. Pinned drawings stay
+where you put them. Alt-dragging aligns the pinned drawing with the dots
+currently visible behind it, without snapping it to an edge or corner. Panning
+later moves those dots without moving the drawing. Each drawing owns one
+location: canvas coordinates or a pinned screen position. Placement changes
+preserve the same strokes.
 
 ## Turn ink into an action
 
@@ -52,3 +65,8 @@ owned location, covered by [scene storage tests](../tests/scene-storage.test.ts)
 [`DrawingLayer.tsx`](../src/components/DrawingLayer.tsx) renders and targets ink;
 [`DrawingActions.tsx`](../src/components/DrawingActions.tsx) provides the actions.
 [`App.tsx`](../src/App.tsx) owns recording, movement, and launch/consume behavior.
+[`useObjectLayout`](../src/useObjectLayout.ts) changes placement and moves pinned
+ink; [`scene.ts`](../src/scene.ts) owns its exclusive canvas or screen location.
+[Browser layer tests](../tests/browser/layout-layers.test.tsx) cover free pinned
+placement, overlap with windows and controls, panning, reload, and returning
+to the canvas.

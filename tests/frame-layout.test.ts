@@ -169,7 +169,6 @@ test('invalid entries do not discard valid placements or hide protected tools', 
     placements: {
       'widget:tools': { surface: 'frame', edge: 'bottom', position: 0 },
       'widget:wifi': { surface: 'frame', edge: 'right', position: 1 },
-      'drawing:sketch': { surface: 'frame', edge: 'top', position: 0 },
       'item:hidden': { surface: 'background' },
     },
     groups: {},
@@ -356,33 +355,26 @@ test('removing a group respects the canvas tools safeguard and preserves persona
   assert.deepEqual(getPlacement(allowed, tools), { surface: 'hidden' })
 })
 
-test('windows and drawings join a frame group and retain membership after reload', () => {
+test('drawings cannot join or receive frame groups, while windows still can', () => {
   const window = { kind: 'window', id: 'notes' } as const
   const drawing = { kind: 'drawing', id: 'sketch' } as const
-  let layout = mergeFrameTargets(defaults, window, apps)
-  layout = mergeFrameTargets(layout, drawing, {
-    kind: 'group',
-    id: getTargetGroup(layout, apps)!.id,
+  const grouped = mergeFrameTargets(defaults, window, apps)
+  const pinned = setObjectPlacement(grouped, drawing, {
+    surface: 'pinned',
+    x: 240,
+    y: 180,
   })
-  assert.deepEqual(getTargetGroup(layout, apps)?.members, [
-    apps,
-    window,
-    drawing,
-  ])
-  assert.deepEqual(getPlacement(layout, window), {
-    surface: 'frame',
-    edge: 'bottom',
-    position: 1,
-  })
-  assert.deepEqual(getPlacement(layout, drawing), getPlacement(layout, apps))
-  assert.deepEqual(readFrameLayout(JSON.parse(JSON.stringify(layout))), layout)
+  assert.equal(mergeFrameTargets(pinned, drawing, apps), pinned)
+  assert.equal(mergeFrameTargets(pinned, apps, drawing), pinned)
+  assert.deepEqual(getTargetGroup(pinned, apps)?.members, [apps, window])
+  assert.equal(getTargetGroup(pinned, drawing), undefined)
+  assert.deepEqual(readFrameLayout(JSON.parse(JSON.stringify(pinned))), pinned)
 })
 
-test('removing a mixed group returns personal windows and drawings to the canvas', () => {
+test('removing a mixed group returns windows to the canvas without affecting drawings', () => {
   const window = { kind: 'window', id: 'notes' } as const
   const drawing = { kind: 'drawing', id: 'sketch' } as const
-  let layout = mergeFrameTargets(defaults, window, apps)
-  layout = mergeFrameTargets(layout, drawing, apps)
+  const layout = mergeFrameTargets(defaults, window, apps)
   const removed = setObjectPlacement(
     layout,
     { kind: 'group', id: getTargetGroup(layout, apps)!.id },
@@ -398,38 +390,42 @@ test('removing a mixed group returns personal windows and drawings to the canvas
   )
 })
 
-test('detaching a grouped drawing preserves the other window attachment and its frame edge', () => {
-  const window = { kind: 'window', id: 'notes' } as const
+test('only drawings accept freeform pinned positions and drawings cannot attach to an edge', () => {
   const drawing = { kind: 'drawing', id: 'sketch' } as const
-  let layout = setObjectPlacement(defaults, window, {
-    surface: 'frame',
-    edge: 'left',
-    position: 0.4,
-  })
-  layout = mergeFrameTargets(layout, drawing, window)
-  const detached = setObjectPlacement(layout, drawing, {
-    surface: 'background',
-    x: 420,
-    y: 360,
-  })
-  assert.deepEqual(getFrameGroups(detached), [])
-  assert.deepEqual(getPlacement(detached, drawing), {
-    surface: 'background',
-    x: 420,
-    y: 360,
-  })
-  assert.deepEqual(getPlacement(detached, window), {
-    surface: 'frame',
-    edge: 'left',
-    position: 0.4,
-  })
-  const ungrouped = ungroupFrameTarget(layout, {
-    kind: 'group',
-    id: getTargetGroup(layout, window)!.id,
-  })
+  const pinned = { surface: 'pinned', x: 420, y: 360 } as const
+  const layout = setObjectPlacement(defaults, drawing, pinned)
+  assert.deepEqual(getPlacement(layout, drawing), pinned)
+  assert.equal(
+    setObjectPlacement(layout, drawing, {
+      surface: 'frame',
+      edge: 'left',
+      position: 0.4,
+    }),
+    layout,
+  )
+  assert.equal(setObjectPlacement(layout, apps, pinned), layout)
+  assert.equal(
+    setObjectPlacement(layout, { kind: 'item', id: 'file' }, pinned),
+    layout,
+  )
+  assert.equal(
+    setObjectPlacement(layout, { kind: 'window', id: 'notes' }, pinned),
+    layout,
+  )
   assert.deepEqual(
-    getPlacement(ungrouped, drawing),
-    getPlacement(ungrouped, window),
+    readFrameLayout({
+      groups: {},
+      placements: {
+        'drawing:sketch': pinned,
+        'drawing:old': { surface: 'frame', edge: 'left', position: 0.4 },
+        'widget:apps': pinned,
+        'item:file': pinned,
+        'window:notes': pinned,
+        'drawing:invalid': { surface: 'pinned', x: Infinity, y: 1 },
+        'drawing:missing': { surface: 'pinned', x: 10 },
+      },
+    }).placements,
+    { 'drawing:sketch': pinned },
   )
 })
 
@@ -872,4 +868,22 @@ test('collapsed windows detach using their exposed strip instead of their offscr
       'left',
     )
   }
+})
+
+test('loading an old group removes its drawing and retains the neighboring frame attachment', () => {
+  const placement = { surface: 'frame', edge: 'left', position: 0.4 } as const
+  const layout = readFrameLayout({
+    placements: { 'group:art': placement },
+    groups: {
+      art: { id: 'art', members: [apps, { kind: 'drawing', id: 'sketch' }] },
+    },
+  })
+  assert.deepEqual(getFrameGroups(layout), [])
+  assert.deepEqual(getPlacement(layout, apps), placement)
+  assert.equal(
+    getTargetGroup(layout, { kind: 'drawing', id: 'sketch' }),
+    undefined,
+  )
+  assert.equal('drawing:sketch' in layout.placements, false)
+  assert.equal('group:art' in layout.placements, false)
 })

@@ -16,7 +16,7 @@ import {
 } from './frame-layout.ts'
 import { createScene, type Scene } from './scene.ts'
 
-export const SCENE_STORAGE_KEY = 'hearthspace-scene-v2'
+export const SCENE_STORAGE_KEY = 'hearthspace-scene-v3'
 
 type World = Pick<Bounds, 'width' | 'height'>
 type Location = Scene['items'][number]['location']
@@ -61,6 +61,10 @@ function readLocation(
   target: LayoutTarget,
 ): Location | null {
   if (!record(value)) return null
+  if (value.surface === 'pinned')
+    return target.kind === 'drawing' && point(value)
+      ? { surface: 'pinned', x: value.x, y: value.y }
+      : null
   if (value.surface === 'canvas' || value.surface === 'background') {
     if (!point(value)) return null
     const peekOrigin = readPeekOrigin(value.peekOrigin, size, world)
@@ -72,6 +76,7 @@ function readLocation(
     }
   }
   if (
+    target.kind !== 'drawing' &&
     value.surface === 'frame' &&
     (value.edge === 'left' ||
       value.edge === 'right' ||
@@ -82,7 +87,11 @@ function readLocation(
     value.position <= 1
   )
     return { surface: 'frame', edge: value.edge, position: value.position }
-  if (value.surface === 'group' && typeof value.groupId === 'string') {
+  if (
+    target.kind !== 'drawing' &&
+    value.surface === 'group' &&
+    typeof value.groupId === 'string'
+  ) {
     const group =
       layout.groups && Object.hasOwn(layout.groups, value.groupId)
         ? layout.groups[value.groupId]

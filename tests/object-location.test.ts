@@ -28,14 +28,19 @@ test('a frame icon has no active canvas position or peek origin', () => {
   })
 })
 
-test('group frame placement overrides old child canvas coordinates and drawing layer', () => {
+test('group frame placement overrides old child canvas coordinates while pinned drawings have no canvas geometry', () => {
   const layout: FrameLayout = {
     ...emptyLayout,
-    groups: { attached: { id: 'attached', members: [icon, drawing] } },
+    groups: {
+      attached: {
+        id: 'attached',
+        members: [icon, { kind: 'widget', id: 'apps' }],
+      },
+    },
     placements: {
       'group:attached': { surface: 'frame', edge: 'bottom', position: 0.8 },
       'item:browser-shortcut': { surface: 'canvas', x: 100, y: 200 },
-      'drawing:sketch': { surface: 'background', x: 300, y: 400 },
+      'drawing:sketch': { surface: 'pinned', x: 300, y: 400 },
     },
   }
 
@@ -46,7 +51,7 @@ test('group frame placement overrides old child canvas coordinates and drawing l
   })
   assert.deepEqual(
     resolveObjectLocation(layout, drawing, savedBounds, 'background'),
-    { surface: 'frame', edge: 'bottom', position: 0.8 },
+    { surface: 'pinned', x: 300, y: 400 },
   )
 })
 

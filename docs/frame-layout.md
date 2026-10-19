@@ -1,8 +1,8 @@
 # Change layout
 
 You might want a folder beside the app launcher, a clock on the left edge, or a
-drawing that stays put while you pan. **Change layout** gives these objects the
-same placement controls. The [canvas and frame](canvas-and-frame.md) model is the
+drawing that stays put while you pan. **Change layout** lets you choose where
+each object belongs. The [canvas and frame](canvas-and-frame.md) model is the
 reason: an object's location belongs to the scene, rather than to a special
 toolbar implementation.
 
@@ -14,9 +14,16 @@ Select an object, then drag it or use the editor's three placement buttons:
 - **Canvas** puts it on the raised canvas layer. Icons, drawings, and controls
   still sit below ordinary windows.
 - **Background** affixes it to the lower layer of the painting.
-- **Frame** attaches it to the nearest screen edge.
+- **Frame** attaches it to the nearest screen edge. Drawings instead offer
+  **Pin to top**, keeping their ink above windows at any screen position.
 
-Dragging near an edge attaches the object there; each corner has its own target.
+Dragging a drawing keeps its selected placement. Drawings don't snap to edges
+or join frame groups. A pinned drawing stays pinned when moved into the middle
+of the screen; choose Canvas or Background to unpin it. See
+[drawing placement](drawing.md#choose-where-it-belongs).
+
+For other objects, dragging near an edge attaches the object there; each corner
+has its own target.
 Dragging back into the interior returns it to the canvas. Releasing there keeps
 that position, while continuing to another edge attaches it again. Edge dragging
 doesn't pan the canvas during layout editing, so reaching the frame has one
@@ -33,14 +40,15 @@ along the edge. A corner becomes the target when your pointer reaches its target
 area; the length of the toolbar doesn't pull it into a corner early. Releasing
 animates the toolbar into the indicated placement. Its surface, outline, and
 contents move together. Icons and toolbars share the same screen inset;
-standalone windows and drawings sit flush with the edge.
+standalone windows sit flush with the edge.
 
 Placement outlines stay above windows, including pinned windows, so a window
 can't hide your drop target. Their tinted backgrounds stay below frame items so
 icons and grouped window previews remain visible. The object you're dragging
 sits above the guides and other frame items, with the layout editor still within
 reach. Releasing or canceling the drag returns it to its usual layer. This
-temporary lift doesn't change its saved Canvas, Background, or Frame placement.
+temporary lift doesn't change its saved placement. Pinned drawings are the
+exception: their ink stays below frame attachments even while dragging.
 
 Hold **Alt** to align a frame attachment with the visible canvas dots. This snaps
 horizontal movement along the top and bottom, or vertical movement along the

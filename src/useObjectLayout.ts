@@ -33,6 +33,7 @@ import {
 } from './frame-layout'
 import { mergeOverlappingFrameItems } from './frame-collisions'
 import { snapFramePlacement } from './frame-grid'
+import { snapCanvasCoordinate } from './canvas-grid'
 
 type ToolbarGrip = { along: number; across: number }
 
@@ -232,10 +233,6 @@ export default function useObjectLayout(
           kind: 'window' as const,
           id: item.id,
         })),
-        ...workspace.drawings.map((item) => ({
-          kind: 'drawing' as const,
-          id: item.id,
-        })),
       ]
       const entries = targets.flatMap((target) => {
         if (target.kind !== 'group' && getTargetGroup(layout, target)) return []
@@ -258,9 +255,7 @@ export default function useObjectLayout(
               element.offsetWidth || rect.width,
               element.offsetHeight || rect.height,
               view,
-              target.kind === 'window' || target.kind === 'drawing'
-                ? 'flush'
-                : 'padded',
+              target.kind === 'window' ? 'flush' : 'padded',
             )
         if (target.kind === 'window') {
           if (placement.edge === 'left' || placement.edge === 'right') {
@@ -289,14 +284,7 @@ export default function useObjectLayout(
       })
     })
     return () => cancelAnimationFrame(frame)
-  }, [
-    layout,
-    view,
-    workspace.items,
-    workspace.windows,
-    workspace.drawings,
-    sceneActions,
-  ])
+  }, [layout, view, workspace.items, workspace.windows, sceneActions])
 
   function motionBounds(element: HTMLElement, widget: boolean): Bounds {
     const rect = element.getBoundingClientRect()
@@ -345,13 +333,14 @@ export default function useObjectLayout(
   }
 
   function findGroupDrop(source: LayoutTarget, x: number, y: number) {
+    if (source.kind === 'drawing') return null
     const members =
       source.kind === 'group'
         ? (getFrameGroups(layout).find((group) => group.id === source.id)
             ?.members ?? [])
         : [source]
     const elements = document.querySelectorAll<HTMLElement>(
-      '[data-layout-widget], [data-desktop-item-id], [data-layout-group], [data-window-id], [data-drawing-id]',
+      '[data-layout-widget], [data-desktop-item-id], [data-layout-group], [data-window-id]',
     )
     const candidates = [...elements].flatMap((element) => {
       if (!element.getBoundingClientRect().width || element.closest('[hidden]'))
@@ -362,9 +351,7 @@ export default function useObjectLayout(
           ? { kind: 'item', id: element.dataset.desktopItemId }
           : element.dataset.windowId
             ? { kind: 'window', id: element.dataset.windowId }
-            : element.dataset.drawingId
-              ? { kind: 'drawing', id: element.dataset.drawingId }
-              : { kind: 'group', id: element.dataset.layoutGroup! }
+            : { kind: 'group', id: element.dataset.layoutGroup! }
       if (
         targetKey(target) === targetKey(source) ||
         members.some((member) => targetKey(member) === targetKey(target))
@@ -516,7 +503,7 @@ export default function useObjectLayout(
       const groupBounds = targetElement(target)?.getBoundingClientRect()
       const destinations = group.members.map((member) => {
         const slot =
-          member.kind === 'window' || member.kind === 'drawing'
+          member.kind === 'window'
             ? document.querySelector<HTMLElement>(
                 `[data-frame-preview-slot="${CSS.escape(targetKey(member))}"]`,
               )
@@ -716,6 +703,14 @@ export default function useObjectLayout(
       })
     }
     const previous = placement(current.target)
+    if (previous.surface === 'pinned') {
+      place(
+        current.target,
+        { surface: 'pinned', x: movingBounds.x, y: movingBounds.y },
+        false,
+      )
+      return
+    }
     if (previous.surface === 'frame')
       place(current.target, { surface: 'canvas' }, false)
     move(current.target, view.x + movingBounds.x, view.y + movingBounds.y)
@@ -732,6 +727,11 @@ export default function useObjectLayout(
     const { bounds, drop } = frameDrag(current, dx, dy, event.altKey)
     let movingBounds = bounds
     if (current.moved || Math.hypot(dx, dy) >= 6) {
+      if (placement(current.target).surface === 'pinned') {
+        place(current.target, { surface: 'pinned', x: bounds.x, y: bounds.y })
+        finishDrag(event)
+        return
+      }
       if (
         current.target.kind === 'item' &&
         favorites?.drop(current.target.id, event.clientX, event.clientY)
@@ -846,9 +846,7 @@ export default function useObjectLayout(
     }
   }
   function frameSpacing(target: LayoutTarget) {
-    return target.kind === 'window' || target.kind === 'drawing'
-      ? ('flush' as const)
-      : ('padded' as const)
+    return target.kind === 'window' ? ('flush' as const) : ('padded' as const)
   }
   function frameSize(
     target: LayoutTarget,
@@ -874,6 +872,25 @@ export default function useObjectLayout(
     snap: boolean,
   ) {
     let bounds = dragBounds(current, dx, dy)
+    if (current.target.kind === 'drawing') {
+      if (snap)
+        bounds = {
+          ...bounds,
+          x:
+            snapCanvasCoordinate(
+              view.x + bounds.x,
+              0,
+              workspace.width - bounds.width,
+            ) - view.x,
+          y:
+            snapCanvasCoordinate(
+              view.y + bounds.y,
+              0,
+              workspace.height - bounds.height,
+            ) - view.y,
+        }
+      return { bounds, drop: null }
+    }
     const drop = isToolbar(current.target)
       ? getWidgetFrameDropTarget(bounds, view, 72, current.edge, {
           x: current.x + dx,
@@ -922,7 +939,12 @@ export default function useObjectLayout(
     }
   }
   function attachSelected() {
-    if (!selected || placement(selected).surface === 'frame') return
+    if (
+      !selected ||
+      placement(selected).surface === 'frame' ||
+      placement(selected).surface === 'pinned'
+    )
+      return
     const attribute =
       selected.kind === 'group'
         ? 'data-layout-group'
@@ -937,6 +959,11 @@ export default function useObjectLayout(
       `[${attribute}="${CSS.escape(selected.id)}"]`,
     )
     if (!element) return
+    if (selected.kind === 'drawing') {
+      const { x, y } = element.getBoundingClientRect()
+      place(selected, { surface: 'pinned', x, y })
+      return
+    }
     const nearest = getFrameDropTarget(
       element.getBoundingClientRect(),
       view,

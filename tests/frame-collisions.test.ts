@@ -106,7 +106,7 @@ test('colliding groups flatten without duplicating separately measured child ent
   assert.deepEqual(getPlacement(merged, battery), frame)
 })
 
-test('frame shortcuts, windows, and drawings group while canvas and hidden controls are ignored', () => {
+test('frame shortcuts and windows group while pinned drawings and canvas controls are ignored', () => {
   const item = { kind: 'item', id: 'projects' } as const
   let mixed = setObjectPlacement(layout, item, frame)
   mixed = setObjectPlacement(mixed, wifi, { surface: 'canvas', x: 200, y: 640 })
@@ -114,7 +114,8 @@ test('frame shortcuts, windows, and drawings group while canvas and hidden contr
   const window = { kind: 'window', id: 'notes' } as const
   const drawing = { kind: 'drawing', id: 'sketch' } as const
   mixed = setObjectPlacement(mixed, window, frame)
-  mixed = setObjectPlacement(mixed, drawing, frame)
+  const pinned = { surface: 'pinned', x: 200, y: 640 } as const
+  mixed = setObjectPlacement(mixed, drawing, pinned)
   const merged = mergeOverlappingFrameItems(mixed, [
     measured(apps, 200),
     measured(item, 220),
@@ -123,15 +124,11 @@ test('frame shortcuts, windows, and drawings group while canvas and hidden contr
     measured(window, 200),
     measured(drawing, 200),
   ])
-  assert.deepEqual(getTargetGroup(merged, apps)?.members, [
-    apps,
-    item,
-    window,
-    drawing,
-  ])
+  assert.deepEqual(getTargetGroup(merged, apps)?.members, [apps, item, window])
   assert.equal(getTargetGroup(merged, wifi), undefined)
   assert.deepEqual(getPlacement(merged, window), frame)
-  assert.deepEqual(getPlacement(merged, drawing), frame)
+  assert.deepEqual(getPlacement(merged, drawing), pinned)
+  assert.equal(getTargetGroup(merged, drawing), undefined)
 })
 
 test('items on different frame edges still group if they intersect at the corner', () => {

@@ -84,7 +84,7 @@ test('items return home even when a frame window has overlapping saved canvas bo
   assert.equal(result.windows[0], workspace.windows[0])
 })
 
-test('frame drawings and shortcuts retain their geometry when canvas windows settle', () => {
+test('pinned drawings and frame shortcuts retain their geometry when canvas windows settle', () => {
   const stacked: Workspace = {
     ...workspace,
     windows: [...workspace.windows, { ...workspace.windows[0], id: 'front' }],
@@ -93,7 +93,10 @@ test('frame drawings and shortcuts retain their geometry when canvas windows set
     stacked,
     {
       ...defaults,
-      placements: { 'item:notes-shortcut': frame, 'drawing:sketch': frame },
+      placements: {
+        'item:notes-shortcut': frame,
+        'drawing:sketch': { surface: 'pinned', x: 240, y: 140 },
+      },
     },
     settleCoveredItems,
   )
@@ -388,7 +391,7 @@ test('background widget drops use supplied bounds without moving frame attachmen
       placements: {
         'widget:notifications': { surface: 'background', x: 100, y: 100 },
         'item:attached-shortcut': frame,
-        'drawing:sketch': frame,
+        'drawing:sketch': { surface: 'pinned', x: 240, y: 140 },
       },
     },
     { kind: 'widget', id: 'notifications' },
@@ -501,7 +504,10 @@ test('a detached canvas drawing peeks repeatedly and returns without rewriting i
     drawings: [{ ...workspace.drawings[0], layer: 'above' }],
   }
   const layout = setObjectPlacement(
-    { ...defaults, placements: { 'drawing:sketch': frame } },
+    {
+      ...defaults,
+      placements: { 'drawing:sketch': { surface: 'pinned', x: 240, y: 140 } },
+    },
     { kind: 'drawing', id: 'sketch' },
     { surface: 'canvas' },
   )
@@ -666,14 +672,17 @@ test('a shortcut dropped from the frame under a window peeks immediately', () =>
   assert.equal(result.windows[0], before.windows[0])
 })
 
-test('a drawing dropped from the frame under a window peeks immediately', () => {
+test('unpinning a drawing to the canvas under a window makes it peek immediately', () => {
   const before: Workspace = {
     ...workspace,
     items: [],
     drawings: [{ ...workspace.drawings[0], layer: 'above' }],
   }
   const layout = setObjectPlacement(
-    { ...defaults, placements: { 'drawing:sketch': frame } },
+    {
+      ...defaults,
+      placements: { 'drawing:sketch': { surface: 'pinned', x: 240, y: 140 } },
+    },
     { kind: 'drawing', id: 'sketch' },
     { surface: 'canvas' },
   )

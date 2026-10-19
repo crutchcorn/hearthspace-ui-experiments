@@ -91,12 +91,13 @@ Gathering is an AI feature preview. Until AI is enabled in Settings, the button 
 
 The [canvas-and-frame model](canvas-and-frame.md) separates an object's identity
 from its placement. `scene.ts` owns one source of state for the workspace,
-frame layout, desktop items, and drawings. An item or drawing has exactly one
-location: canvas or background coordinates with an optional return-home
-position, a frame edge and position, or a reference to its frame group. A
-frame or group location has no leftover canvas coordinates. Drawing bounds
-and strokes describe its content; its location determines where that content
-belongs.
+frame layout, desktop items, and drawings. Each object has one location.
+Desktop items use canvas or background coordinates with an optional return-home
+position, a frame edge and position, or a reference to a frame group. Drawings
+use canvas/background coordinates or a pinned screen position; they never
+attach to edges or join groups. A frame, group, or pinned location has no
+leftover canvas coordinates. Drawing bounds and strokes describe its content;
+its location determines where that content belongs.
 
 `frame-layout.ts` addresses targets by kind and ID: `window`, `item`, `drawing`,
 `widget`, or `group`. The stored frame layout contains group membership and
@@ -143,8 +144,8 @@ outside that world. On mobile, Notifications and the unchanged
 default device group share the top bar; Canvas tools and Apps share the bottom
 bar while both retain their default placements.
 Frame bounds inset widgets and desktop items by 24 pixels on desktop and
-12 pixels on mobile, matching corner and side spacing. Standalone windows and
-drawings remain flush with the screen boundary; grouped work uses the shared
+12 pixels on mobile, matching corner and side spacing. Standalone windows
+remain flush with the screen boundary; grouped work uses the shared
 group surface. Side toolbars
 stack controls vertically, with upright icons; top and bottom toolbars remain
 horizontal. During a drag, entering a new edge area changes the orientation;
@@ -158,7 +159,7 @@ Alt also aligns attachments during Change layout. `snapFramePlacement` in
 coordinates, snaps it to the shared dot grid, then converts back. It adjusts
 only x along the top or bottom edge, or y along a side, preserving the normal
 screen inset or flush placement. Corner targets bypass grid snapping. The
-same rule applies to shortcuts, windows, drawings, widgets, and whole groups.
+same rule applies to shortcuts, windows, widgets, and whole groups.
 Pressing or releasing Alt updates an active drag even while the pointer stays
 still; release uses the current modifier state and the final measured size.
 An interior Change layout drag remains freely positioned.
@@ -169,7 +170,8 @@ bounding box from selecting another edge and immediately turning it back.
 Corner targets preserve the current drag orientation, choosing the vertical
 or horizontal edge of that corner accordingly. Preview and release use the
 same rule; only entering a non-corner edge changes orientation.
-Windows, desktop items, and drawings use their object bounds for edge targets.
+Windows and desktop items use their object bounds for edge targets. Drawings
+have no edge targets; dragging preserves their selected placement.
 
 Groups store ordered member targets and have their own placement. Members
 retain their identity and use the group's placement while joined. Groups can
@@ -242,25 +244,23 @@ Dropping a whole group onto the canvas or choosing Canvas or Background
 dissolves it. Each member
 receives the chosen layer and its current screen position plus the canvas
 view offset, constrained to the world bounds. Widgets store those coordinates
-in their placement; windows, desktop items, and drawings update workspace
-geometry. A drawing's layer follows the chosen surface. Moving a group during
-a drag can temporarily use canvas coordinates without dissolving membership;
+in their placement; windows and desktop items update workspace geometry.
+Moving a group during a drag can temporarily use canvas coordinates without dissolving membership;
 an interior release or explicit layer choice releases its members.
 
-Frame windows, items, and drawings render through the shared frame host,
-outside the scrolling canvas. Each object appears once. Personal attachments
-retain their workspace identity and content; taking one off the frame returns
-it to the canvas. Desktop items return to Background, while windows and
-drawings return to Canvas. A removed widget becomes hidden and stays in the
-searchable catalog. There is no delete-shortcut action or uninstall flow.
+Frame windows and items render through the shared frame host, outside the
+scrolling canvas. Each object appears once. Personal attachments retain their
+workspace identity and content; taking one off the frame returns it to the
+canvas. Desktop items return to Background, while windows return to Canvas.
+A removed widget becomes hidden and stays in the searchable catalog. There
+is no delete-shortcut action or uninstall flow.
 
-Grouped windows and drawings retain their actual content and artwork.
-`FramePreviewSlot` reserves their place in the group's row or column and
-reports both slot bounds and outer group bounds. The existing window or drawing
-renders through the frame portal at that measured position, so it isn't cloned
-or replaced with an app icon. A grouped window reserves a 44-pixel strip in
-the direction perpendicular to its edge and retains its extent along the
-edge; a drawing reserves its artwork bounds. Slots fit within the viewport.
+Grouped windows retain their actual content. `FramePreviewSlot` reserves their
+place in the group's row or column and reports both slot bounds and outer
+group bounds. The existing window renders through the frame portal at that
+measured position, so it isn't cloned or replaced with an app icon. A grouped
+window reserves a 44-pixel strip in the direction perpendicular to its edge
+and retains its extent along the edge. Slots fit within the viewport.
 
 Pinned windows use a sliding presentation rather than changing their saved
 size. A standalone window leaves 42 pixels visible and exposes 100 pixels on
@@ -326,8 +326,13 @@ Item locations persist with the scene. Icons on either canvas layer can move asi
 ## Canvas drawings
 
 The pencil tool (D) draws directly on the raised canvas, above background work
-and beneath ordinary windows. Change layout chooses the background, raised canvas, or frame
-placement; the pencil has no separate placement modes.
+and beneath ordinary windows. Change layout offers Background, Canvas, and
+Pin to top; the pencil has no separate placement modes. Pin to top preserves
+the drawing's visible position in screen coordinates, above canvas windows
+and below frame attachments, including pinned windows. Dragging pinned ink
+keeps it pinned anywhere on the screen; only choosing Canvas or Background
+returns it to the painting. Drawings never snap to frame edges or join frame
+groups.
 Primary pointer input draws even over a window; Space-drag and middle-button
 drag retain temporary panning. Each completed stroke joins the selected drawing
 until the floating check finishes it. A later stroke then starts another drawing.
@@ -357,10 +362,13 @@ strokes in separate background and raised canvas layers, both beneath ordinary
 windows, with pointer targets following the ink rather than filling each
 drawing's bounding box. The scene location supplies the derived drawing's
 placement and layer: `below` means Background and `above` means raised Canvas.
-Frame drawings portal into the
-shared frame host; each drawing has only one rendered SVG. Search temporarily
-renders matching drawings with the result grid, while window switching and
-focused view hide them.
+Pinned drawings portal into a dedicated screen layer beneath the frame;
+each drawing has only one rendered SVG. The pinned layer stays in that order
+even while dragging. Panning doesn't move pinned ink, and covered-item peeking
+doesn't reposition it. Alt movement aligns it with the visible canvas dots on
+both axes without using frame-edge rules. Search temporarily renders matching
+drawings with the result grid, while window switching and focused view hide
+them.
 Covered drawings on either canvas layer can peek out and return home when their
 original space is clear. Arrange preserves the chosen placement of drawings,
 while allowing displaced canvas drawings to return home.
@@ -385,7 +393,7 @@ The field stays near the clicked point, clamped to leave the shell controls avai
 
 `getCanvasSearchLayout` computes presentation coordinates and scales from the current workspace, viewport, anchor, and query. Matching items, actual window surfaces, drawing SVGs, and widget cards share a result grid; nonmatching objects move beyond a viewport edge. Attached objects temporarily use the result placement instead of their frame placement. Windows keep their content and chrome, with inner controls inactive while they act as search results. The original workspace coordinates, sizes, and stacking remain unchanged. Closing search removes these temporary placements, so panning, arrangement, and persistence continue to use the workspace's ordinary geometry.
 
-Results place desktop items first, then matching windows in front-to-back order, drawings, catalog widgets, and canvas tools. Up and Down change the selected result, wrapping at either end; Left and Right retain normal text-cursor behavior. Enter or clicking a result closes search, then opens the item's associated preview or focuses and centers the existing window. A pinned window opens at its frame edge. A drawing is selected and centered unless it is attached to the frame. Escape, the field's close button, empty-canvas input, or another shell or tool action also closes search. Dismissing it preserves the Search tool, ready for another background click. The field has no result count or instruction footer; a query without matches displays **No matches**.
+Results place desktop items first, then matching windows in front-to-back order, drawings, catalog widgets, and canvas tools. Up and Down change the selected result, wrapping at either end; Left and Right retain normal text-cursor behavior. Enter or clicking a result closes search, then opens the item's associated preview or focuses and centers the existing window. A pinned window opens at its frame edge. A canvas drawing is selected and centered; a pinned drawing stays at its screen position. Escape, the field's close button, empty-canvas input, or another shell or tool action also closes search. Dismissing it preserves the Search tool, ready for another background click. The field has no result count or instruction footer; a query without matches displays **No matches**.
 
 `SearchControlPreview` gives widgets and tools recognizable icons. Status previews read the same `useSystemStatus` and `useNotifications` state as the placed controls, so their network, sound level, battery percentage, time, and unread state stay in sync. The Apps result previews favorite app icons. Individual app shortcuts retain their existing `AppIcon` rendering and launch their app.
 
@@ -568,7 +576,7 @@ across Settings windows.
 | [`src/components/LayoutItemControls.tsx`](../src/components/LayoutItemControls.tsx)                                                                   | Target-key registry for item-specific layout editors.                                                        |
 | [`src/components/ClockLayoutControls.tsx`](../src/components/ClockLayoutControls.tsx)                                                                 | Clock date-format choices with live radio-card previews.                                                     |
 | [`src/components/FrameShell.tsx`](../src/components/FrameShell.tsx)                                                                                   | Shared frame-group surfaces, member rendering, whole-group grips, and default mobile bars.                   |
-| [`src/components/FramePreviewSlot.tsx`](../src/components/FramePreviewSlot.tsx)                                                                       | Measured slots and group bounds for existing window and drawing surfaces.                                    |
+| [`src/components/FramePreviewSlot.tsx`](../src/components/FramePreviewSlot.tsx)                                                                       | Measured slots and group bounds for existing window surfaces.                                                |
 | [`src/components/PlacedWidget.tsx`](../src/components/PlacedWidget.tsx)                                                                               | Measured shell-widget positioning, canvas selection and dragging, responsive merging, and popover placement. |
 | [`src/components/WidgetPopover.tsx`](../src/components/WidgetPopover.tsx), [`widget-popover-context.ts`](../src/components/widget-popover-context.ts) | Detached popup, menu, and toast portals with shared placement; the control stays on the canvas.              |
 | [`src/components/LayoutConfirm.tsx`](../src/components/LayoutConfirm.tsx)                                                                             | Tool-removal warning and pinned-window close confirmation.                                                   |
@@ -629,13 +637,15 @@ across Settings windows.
 
 ## Saved state
 
-The whole scene is saved under `hearthspace-scene-v2`. It contains world
+The whole scene is saved under `hearthspace-scene-v3`. It contains world
 dimensions and home coordinates, windows and their stacking, desktop items,
 drawings, frame groups and placements, status detail, item-specific options,
 the tools-hiding preference, window list order, and the scratchpad. Items and drawings each
 save one location. Canvas and background locations can retain a `peekOrigin`;
 frame locations store an edge and position, and group members refer to their
-group. The frame layout does not also save item or drawing positions.
+group. Drawings instead support a `pinned` location with screen-space `x` and
+`y`; drawing frame/group locations are invalid. The frame layout does not also
+save item or drawing positions.
 `useScene` debounces the single save by 200 milliseconds.
 
 `FrameLayout.options` stores item preferences by target key, independently of
@@ -647,16 +657,16 @@ its date format, and reloading restores it from the existing scene save.
 
 `readScene` validates the canonical records directly. It doesn't project a
 frame attachment into a viewport, parse that presentation as canvas geometry,
-and convert it back. A drawing attached to an edge therefore loads the same
-way on a smaller or larger screen, including when the canvas home is close
-to the world's boundary.
+and convert it back. Pinned drawings retain their saved screen position
+independently of the canvas view; their rendering coordinates are derived
+from that position and the current view.
 
 Validation checks supported object identities and locations, finite geometry,
 frame bounds, group membership, and local drawing strokes. Invalid individual
 records are discarded while valid neighboring work remains. Duplicate app
 shortcuts are removed and missing catalog shortcuts are restored without
 reusing existing IDs. Groups lose missing or invalid members; a lone surviving
-member retains the group's frame edge, including its file or drawing content.
+member retains the group's frame edge, including its file content.
 Valid canvas peek homes remain attached to
 their objects. Only widgets may be hidden, and Canvas tools cannot load hidden
 while their hide-able preference is off. Missing, unreadable, or structurally
@@ -664,10 +674,11 @@ invalid scene storage starts with the default desktop and frame arrangement.
 Pinned-window hover and expanded states, layout selection, and unfinished
 placement drags are temporary.
 
-This format deliberately ignores `hearthspace-scene-v1`,
+This format deliberately ignores `hearthspace-scene-v2`, `hearthspace-scene-v1`,
 `hearthspace-playground-v1`, and `hearthspace-frame-layout-v1`. There is no
-migration or fallback to those saves: the first load with v2 creates a fresh desktop. Theme,
-background, favorites, gestures, and other preferences use their existing
+migration or fallback to those saves: the first load with v3 creates a fresh
+desktop, including resetting drawings that previously used frame attachments.
+Theme, background, favorites, gestures, and other preferences use their existing
 separate storage and are unaffected by this reset.
 
 Favorites are stored under `hearthspace-favorite-apps-v1` as catalog app IDs.
