@@ -14,7 +14,8 @@ starts another one. Escape cancels an unfinished stroke without removing
 completed ink.
 
 Switch to **Select desktop items** (**V**) to select or drag a drawing by its ink. Its wider
-invisible stroke target makes thin lines easier to grab. Holding Alt while
+invisible stroke target makes thin lines easier to grab. Select an existing
+drawing, then choose Draw again to add more strokes to it. Holding Alt while
 moving aligns it with the [dot grid](grid-snapping.md). Delete drawing removes
 the whole object; there isn't a per-stroke eraser, brush palette, or undo stack.
 

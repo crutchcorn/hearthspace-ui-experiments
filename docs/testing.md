@@ -18,9 +18,11 @@ through browser-driven clicks and keyboard input. React hooks, child
 components, geometry, and browser APIs remain real. This catches failures
 where individually correct pieces don't work together.
 
-The flows protect shell panel exclusivity, search and window-switcher
+The flows protect shell panel exclusivity, tool choices across entry points,
+search and window-switcher
 cancellation, interrupted desktop dragging, and app state across canvas/frame
-placement. They check that edited note text, window positions, keyboard
+placement. A drawing flow also checks that returning to Draw appends strokes
+to the selected piece. The tests check that edited note text, window positions, keyboard
 focus, and the selected Settings category survive temporary arrangements.
 An interrupted drag must restore the icon's position and leave the next
 drag usable. Assertions wait for the observable result instead of sleeping

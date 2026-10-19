@@ -22,9 +22,29 @@ export const releasePointer: BrowserCommand = async ({ page }) => {
   await page.mouse.up()
 }
 
+export const drawCanvasStroke: BrowserCommand<[points: Point[]]> = async (
+  { iframe, page },
+  points,
+) => {
+  const viewport = await iframe.locator('#root').boundingBox()
+  if (!viewport || !points.length)
+    throw new Error('A visible canvas and stroke points are required')
+  await page.mouse.move(viewport.x + points[0].x, viewport.y + points[0].y)
+  await page.mouse.down()
+  try {
+    for (const point of points.slice(1))
+      await page.mouse.move(viewport.x + point.x, viewport.y + point.y, {
+        steps: 8,
+      })
+  } finally {
+    await page.mouse.up()
+  }
+}
+
 declare module 'vitest/browser' {
   interface BrowserCommands {
     startDesktopDrag: (title: string, delta: Point) => Promise<void>
     releasePointer: () => Promise<void>
+    drawCanvasStroke: (points: Point[]) => Promise<void>
   }
 }

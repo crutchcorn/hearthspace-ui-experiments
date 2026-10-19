@@ -74,3 +74,47 @@ test('canceling the window switcher restores the layout and focused note', async
   await expect.element(note).toHaveValue('Keep this note through switching.')
   await expect.element(note).toHaveFocus()
 })
+
+test('tool choices share the same behavior through shortcuts, toolbar, and search', async () => {
+  await renderDesktop()
+  const overview = page.getByRole('heading', { name: 'Overview', exact: true })
+  const pan = page.getByRole('button', {
+    name: 'Pan canvas, choose canvas tool',
+    exact: true,
+  })
+  const draw = page.getByRole('button', { name: 'Draw', exact: true })
+
+  await userEvent.keyboard('m')
+  await expect.element(overview).toBeVisible()
+  await userEvent.keyboard('h')
+  await expect.element(pan).toHaveAttribute('aria-pressed', 'true')
+  await expect.element(overview).not.toBeInTheDocument()
+
+  await draw.click()
+  await expect.element(draw).toHaveAttribute('aria-pressed', 'true')
+  // The first press selects the remembered primary tool; the second opens its picker.
+  await pan.click()
+  await expect.element(pan).toHaveAttribute('aria-pressed', 'true')
+  await expect.element(pan).toHaveAttribute('aria-expanded', 'false')
+  await pan.click()
+  await page
+    .getByRole('menuitemradio', { name: 'Select desktop items V' })
+    .click()
+
+  await userEvent.keyboard('{Control>}k{/Control}')
+  await page
+    .getByRole('searchbox', {
+      name: 'Search apps, windows, files, folders, drawings, tools, and widgets',
+    })
+    .fill('Pan canvas')
+  await userEvent.keyboard('{Enter}')
+  await expect.element(pan).toHaveAttribute('aria-pressed', 'true')
+  await expect
+    .element(page.getByRole('search', { name: 'Canvas search' }))
+    .not.toBeInTheDocument()
+
+  await userEvent.keyboard('m')
+  await expect.element(overview).toBeVisible()
+  await userEvent.keyboard('m')
+  await expect.element(overview).not.toBeInTheDocument()
+})

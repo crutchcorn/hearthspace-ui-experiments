@@ -30,7 +30,6 @@ interface AppLauncherProps {
   onCustomizeGestures: () => void
   onSaveGestureShortcut: (shortcut: GestureShortcut) => void
   gestureShortcuts: GestureShortcut[]
-  editingGestures?: boolean
 }
 
 export default function AppLauncher({
@@ -42,7 +41,6 @@ export default function AppLauncher({
   onCustomizeGestures,
   onSaveGestureShortcut,
   gestureShortcuts,
-  editingGestures = false,
 }: AppLauncherProps) {
   const launcherRef = useRef<HTMLElement>(null)
   const [query, setQuery] = useState('')
@@ -330,7 +328,6 @@ export default function AppLauncher({
             onSaveShortcut={onSaveGestureShortcut}
             onLaunch={onLaunch}
             onCustomizeGestures={onCustomizeGestures}
-            initialEditing={editingGestures}
           />
         </div>
       )}

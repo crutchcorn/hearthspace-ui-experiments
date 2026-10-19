@@ -132,6 +132,14 @@ import {
   type ColorMode,
 } from './theme'
 
+type ShellPanel =
+  | { kind: 'notifications' }
+  | { kind: 'system'; panel: Exclude<SystemPanel, null> }
+  | { kind: 'overview' }
+  | { kind: 'launcher'; mode: 'apps' | 'gestures' }
+  | { kind: 'dock'; appId: string }
+  | null
+
 const edges = ['n', 'e', 's', 'w', 'ne', 'se', 'sw', 'nw']
 
 function App() {
@@ -171,9 +179,12 @@ function App() {
   } | null>(null)
   const [dragging, setDragging] = useState(false)
   const [spaceHeld, setSpaceHeld] = useState(false)
-  const [showMap, setShowMap] = useState(false)
-  const [notificationsOpen, setNotificationsOpen] = useState(false)
-  const [systemPanel, setSystemPanel] = useState<SystemPanel>(null)
+  const [shellPanel, setShellPanel] = useState<ShellPanel>(null)
+  const showMap = shellPanel?.kind === 'overview'
+  const notificationsOpen = shellPanel?.kind === 'notifications'
+  const systemPanel = shellPanel?.kind === 'system' ? shellPanel.panel : null
+  const launcher = shellPanel?.kind === 'launcher' ? shellPanel.mode : null
+  const dockAppId = shellPanel?.kind === 'dock' ? shellPanel.appId : null
   const status = useSystemStatus()
   const clockOptions = getLayoutItemOptions(layout, 'widget:clock')
   const notificationState = useNotifications()
@@ -265,13 +276,10 @@ function App() {
   const [selection, setSelection] = useState<
     (Bounds & { target: 'windows' | 'items'; points?: SelectionPoint[] }) | null
   >(null)
-  const [launcher, setLauncher] = useState<'apps' | 'gestures' | null>(null)
-  const [editingGestures, setEditingGestures] = useState(false)
   const [settingsNavigation, setSettingsNavigation] = useState<{
     windowId: string
     request: SettingsNavigationRequest
   } | null>(null)
-  const [dockAppId, setDockAppId] = useState<string | null>(null)
   const [revealRequest, setRevealRequest] = useState<{
     id: string
     left: number
@@ -321,14 +329,7 @@ function App() {
   )
   const home = workspace.home
   const windowClearance = getWindowClearance(view.width)
-  const shellPeek = useShellPeek(
-    focusView !== null,
-    notificationsOpen ||
-      systemPanel !== null ||
-      showMap ||
-      launcher !== null ||
-      dockAppId !== null,
-  )
+  const shellPeek = useShellPeek(focusView !== null, shellPanel !== null)
   const focusedWindowId = workspace.windows.some((item) => item.id === activeId)
     ? activeId
     : (workspace.windows.at(-1)?.id ?? null)
@@ -339,11 +340,7 @@ function App() {
     onOpen: () => {
       setWidgetReveal(null)
       setCanvasSearch(null)
-      setNotificationsOpen(false)
-      setSystemPanel(null)
-      setDockAppId(null)
-      setShowMap(false)
-      setLauncher(null)
+      setShellPanel(null)
       setRevealRequest(null)
       const canvas = viewport.current
       if (canvas)
@@ -376,6 +373,7 @@ function App() {
       }),
     { hover: hoverFavoriteDrop, drop: dropFavorite },
   )
+  const setLayoutSelection = objectLayout.setSelected
   const measureControl = useCallback(
     (id: string, size: { width: number; height: number }) => {
       setLayout((current) => {
@@ -439,10 +437,30 @@ function App() {
   const closePopovers = useCallback(() => {
     setWidgetReveal(null)
     setCanvasSearch(null)
-    setNotificationsOpen(false)
-    setSystemPanel(null)
-    setDockAppId(null)
-  }, [setDockAppId])
+    setShellPanel(null)
+  }, [])
+
+  const openShellPanel = useCallback((panel: ShellPanel) => {
+    setWidgetReveal(null)
+    setCanvasSearch(null)
+    setSpaceHeld(false)
+    setShellPanel(panel)
+  }, [])
+
+  const toggleShellPanel = useCallback((kind: 'overview' | 'notifications') => {
+    setWidgetReveal(null)
+    setCanvasSearch(null)
+    setSpaceHeld(false)
+    setShellPanel((current) => (current?.kind === kind ? null : { kind }))
+  }, [])
+
+  // An outside-click listener may finish after another panel has opened.
+  const dismissShellPanel = useCallback(
+    (kind: NonNullable<ShellPanel>['kind']) => {
+      setShellPanel((current) => (current?.kind === kind ? null : current))
+    },
+    [],
+  )
 
   const leaveFocusView = useCallback(() => {
     if (!focusView) return
@@ -475,8 +493,6 @@ function App() {
       cancelPeekMotion()
       leaveFocusView()
       closePopovers()
-      setLauncher(null)
-      setShowMap(false)
       setSpaceHeld(false)
       setSelection(null)
       setSelectedIds([])
@@ -503,7 +519,6 @@ function App() {
       finishPointerSession,
       cancelPeekMotion,
       leaveFocusView,
-      setLauncher,
       setSelectedIds,
       setSelectedItemIds,
     ],
@@ -522,8 +537,6 @@ function App() {
     setSelectedIds([])
     setSelectedItemIds([])
     setSelectedControlIds([])
-    setShowMap(false)
-    setLauncher(null)
     closePopovers()
     preparePeekMotion({ backgroundOnly: true })
     setWorkspace((current) =>
@@ -542,10 +555,44 @@ function App() {
     restoreBackgroundItems,
     leaveFocusView,
     setWorkspace,
-    setLauncher,
     setSelectedIds,
     setSelectedItemIds,
   ])
+
+  const activateCanvasTool = useCallback(
+    (id: string, toggle = false) => {
+      const entry = CANVAS_TOOL_CATALOG.find((item) => item.id === id)
+      if (!entry) return
+      if ('action' in entry) {
+        if (entry.action === 'map') {
+          if (toggle) toggleShellPanel('overview')
+          else openShellPanel({ kind: 'overview' })
+        } else arrangeAllWindows()
+        return
+      }
+      closePopovers()
+      finishPointerSession(true)
+      if (entry.mode !== 'draw') setSelectedDrawingId(null)
+      setSelectedIds([])
+      setSelectedItemIds([])
+      setSelectedControlIds([])
+      if (entry.mode === 'layout') {
+        leaveFocusView()
+        setLayoutSelection(null)
+      }
+      setTool(entry.mode)
+      if ('shape' in entry) setSelectionShape(entry.shape)
+    },
+    [
+      arrangeAllWindows,
+      closePopovers,
+      finishPointerSession,
+      leaveFocusView,
+      setLayoutSelection,
+      openShellPanel,
+      toggleShellPanel,
+    ],
+  )
 
   useLayoutEffect(() => {
     viewport.current?.scrollTo(home.x, home.y)
@@ -553,10 +600,9 @@ function App() {
 
   const finishWidgetReveal = useEffectEvent((id: string) => {
     setWidgetReveal(null)
-    if (id === 'notifications') setNotificationsOpen(true)
+    if (id === 'notifications') openShellPanel({ kind: 'notifications' })
     else if (id === 'apps') {
-      setEditingGestures(false)
-      setLauncher('apps')
+      openShellPanel({ kind: 'launcher', mode: 'apps' })
     } else if (id === 'tools') setToolMenuRequest((current) => current + 1)
     else if (
       id === 'wifi' ||
@@ -564,7 +610,7 @@ function App() {
       id === 'battery' ||
       id === 'clock'
     )
-      setSystemPanel(id)
+      openShellPanel({ kind: 'system', panel: id })
   })
 
   useLayoutEffect(() => {
@@ -743,8 +789,6 @@ function App() {
           setCanvasSearch(null)
           viewport.current?.focus({ preventScroll: true })
         }
-        setShowMap(false)
-        setLauncher(null)
         closePopovers()
         setSelectedIds([])
         setSelectedItemIds([])
@@ -771,59 +815,17 @@ function App() {
         })
         return
       }
-      if (event.key.toLowerCase() === 'a') {
+      const shortcut = CANVAS_TOOL_CATALOG.find(
+        (entry) => entry.shortcut.toLowerCase() === event.key.toLowerCase(),
+      )
+      if (shortcut) {
         event.preventDefault()
-        if (!event.repeat) arrangeAllWindows()
+        if (!event.repeat) activateCanvasTool(shortcut.id, true)
         return
       }
-      if (event.key.toLowerCase() === 'h') {
-        closePopovers()
-        setTool('pan')
-        setSelectedIds([])
-        setSelectedItemIds([])
-        setSelectedControlIds([])
-      }
-      if (event.key.toLowerCase() === 'v') {
-        closePopovers()
-        setTool('cursor')
-        setSelectedIds([])
-        setShowMap(false)
-      }
-      if (event.key.toLowerCase() === 'l' || event.key.toLowerCase() === 'r') {
-        closePopovers()
-        setTool('select')
-        setSelectionShape(
-          event.key.toLowerCase() === 'l' ? 'freeform' : 'rectangle',
-        )
-        setSelectedItemIds([])
-        setSelectedControlIds([])
-        setShowMap(false)
-      }
-      if (event.key.toLowerCase() === 'd') {
-        closePopovers()
-        setTool('draw')
-        setSelectedIds([])
-        setSelectedItemIds([])
-        setSelectedControlIds([])
-        setShowMap(false)
-      }
-      if (event.key.toLowerCase() === 'm') {
-        closePopovers()
-        setShowMap((current) => !current)
-      }
-      if (event.key.toLowerCase() === 'g') {
-        closePopovers()
-        setEditingGestures(false)
-        setLauncher('gestures')
-        setShowMap(false)
-      }
-      if (event.key.toLowerCase() === 'n') {
-        setDockAppId(null)
-        setNotificationsOpen((current) => !current)
-        setSystemPanel(null)
-        setShowMap(false)
-        setSpaceHeld(false)
-      }
+      if (event.key.toLowerCase() === 'g')
+        openShellPanel({ kind: 'launcher', mode: 'gestures' })
+      if (event.key.toLowerCase() === 'n') toggleShellPanel('notifications')
       if (event.code === 'Space') {
         if (focusView) return
         if (event.target instanceof Element && event.target.closest('button'))
@@ -858,7 +860,9 @@ function App() {
     tool,
     launcher,
     closePopovers,
-    arrangeAllWindows,
+    activateCanvasTool,
+    openShellPanel,
+    toggleShellPanel,
     focusView,
     canvasSearch,
     openCanvasSearch,
@@ -872,11 +876,11 @@ function App() {
         event.target instanceof Element &&
         !event.target.closest('[data-launcher-root], [data-launcher-trigger]')
       )
-        setLauncher(null)
+        dismissShellPanel('launcher')
     }
     document.addEventListener('pointerdown', dismiss, true)
     return () => document.removeEventListener('pointerdown', dismiss, true)
-  }, [launcher])
+  }, [launcher, dismissShellPanel])
 
   function focusWindow(id: string) {
     if (focusView && focusView.id !== id) leaveFocusView()
@@ -1041,8 +1045,6 @@ function App() {
         suppressedControlClick.current = current.controlId
         captureTarget.current?.setPointerCapture(current.pointerId)
         closePopovers()
-        setLauncher(null)
-        setShowMap(false)
         setDragging(true)
       }
       current.moved = true
@@ -1704,8 +1706,6 @@ function App() {
     setSelectedItemIds([])
     setSelectedControlIds([])
     setRevealRequest(null)
-    setShowMap(false)
-    setLauncher(null)
     closePopovers()
     focusWindow(item.id)
     setWorkspace((current) => ({
@@ -1872,16 +1872,11 @@ function App() {
   }
 
   function toggleLauncher() {
-    closePopovers()
-    setEditingGestures(false)
-    setLauncher((current) => (current ? null : 'apps'))
-    setShowMap(false)
-    setSpaceHeld(false)
+    openShellPanel(launcher ? null : { kind: 'launcher', mode: 'apps' })
   }
 
   function closeLauncher() {
-    setEditingGestures(false)
-    setLauncher(null)
+    dismissShellPanel('launcher')
     launcherTrigger.current?.focus({ preventScroll: true })
   }
 
@@ -1890,7 +1885,6 @@ function App() {
     addWindow(app)
     closeLauncher()
     closePopovers()
-    setShowMap(false)
     setSpaceHeld(false)
     setSelectedIds([])
     setSelectedItemIds([])
@@ -1904,7 +1898,6 @@ function App() {
       closePopovers()
       focusWindow(id)
       setCanvasSearch(null)
-      setLauncher(null)
       return
     }
     const preview =
@@ -1923,8 +1916,6 @@ function App() {
         ? windowClearance.side
         : Math.max(windowClearance.side, (view.width - item.width) / 2)
     closePopovers()
-    setLauncher(null)
-    setShowMap(false)
     setSelectedIds([])
     setSelectedItemIds([])
     setSelectedControlIds([])
@@ -1953,8 +1944,6 @@ function App() {
       if (!FRAME_WIDGETS.some((widget) => widget.id === id)) return
       closePopovers()
       setTool('cursor')
-      setLauncher(null)
-      setShowMap(false)
       const target = { kind: 'widget' as const, id }
       const placement = objectLayout.placement(target)
       if (placement.surface === 'hidden')
@@ -1966,6 +1955,7 @@ function App() {
       setWidgetReveal({ id, onFrame: placement.surface === 'frame' })
     } else if (result.kind === 'tool') {
       activateCanvasTool(result.id)
+      viewport.current?.focus({ preventScroll: true })
     } else if (result.kind === 'drawing') {
       const drawing = workspace.drawings.find((entry) => entry.id === result.id)
       setTool('cursor')
@@ -1987,33 +1977,6 @@ function App() {
     }
   }
 
-  function activateCanvasTool(id: string) {
-    const entry = CANVAS_TOOL_CATALOG.find((item) => item.id === id)
-    if (!entry) return
-    closePopovers()
-    setLauncher(null)
-    setShowMap(false)
-    setSpaceHeld(false)
-    setSelection(null)
-    setDrawingDraft(null)
-    setSelectedDrawingId(null)
-    setSelectedIds([])
-    setSelectedItemIds([])
-    setSelectedControlIds([])
-    if ('mode' in entry) {
-      if (entry.mode === 'layout') changeLayout()
-      else {
-        setTool(entry.mode)
-        if ('shape' in entry) setSelectionShape(entry.shape)
-      }
-    } else {
-      setTool('cursor')
-      if (entry.action === 'map') setShowMap(true)
-      else arrangeAllWindows()
-    }
-    viewport.current?.focus({ preventScroll: true })
-  }
-
   function openGestureSettings(
     category: SettingsNavigationRequest['category'] = 'gestures',
   ) {
@@ -2029,9 +1992,6 @@ function App() {
     })
     if (settings) revealWindow(id, { center: true })
     closePopovers()
-    setLauncher(null)
-    setEditingGestures(false)
-    setShowMap(false)
     setSpaceHeld(false)
   }
 
@@ -2083,10 +2043,7 @@ function App() {
   }
 
   function changeLayout() {
-    leaveFocusView()
-    closePopovers()
-    objectLayout.setSelected(null)
-    setTool('layout')
+    activateCanvasTool('layout')
   }
 
   const frameWidgets = {
@@ -2095,20 +2052,9 @@ function App() {
         state={notificationState}
         expanded={getWidgetExpanded(objectLayout.layout, 'notifications')}
         open={notificationsOpen}
-        previewVisible={
-          !previewLayout && !systemPanel && !launcher && !showMap && !dockAppId
-        }
-        onToggle={() => {
-          setWidgetReveal(null)
-          setCanvasSearch(null)
-          setNotificationsOpen(!notificationsOpen)
-          setDockAppId(null)
-          setSystemPanel(null)
-          setLauncher(null)
-          setShowMap(false)
-          setSpaceHeld(false)
-        }}
-        onClose={() => setNotificationsOpen(false)}
+        previewVisible={!previewLayout && (!shellPanel || notificationsOpen)}
+        onToggle={() => toggleShellPanel('notifications')}
+        onClose={() => dismissShellPanel('notifications')}
         onNavigate={openNotificationTarget}
       />
     ),
@@ -2117,50 +2063,15 @@ function App() {
         openRequest={toolMenuRequest}
         mode={tool}
         selectionShape={selectionShape}
-        onSelectionShapeChange={(shape) => {
-          closePopovers()
-          setSelectionShape(shape)
-          setTool('select')
-          setSelectedIds([])
-          setSelectedItemIds([])
-          setSelectedControlIds([])
-          setShowMap(false)
-          setLauncher(null)
-        }}
-        menusAllowed={
-          !dragging &&
-          !previewLayout &&
-          !showMap &&
-          !launcher &&
-          !notificationsOpen &&
-          !systemPanel &&
-          !dockAppId
+        onSelectionShapeChange={activateCanvasTool}
+        menusAllowed={!dragging && !previewLayout && !shellPanel}
+        onModeChange={(mode) =>
+          activateCanvasTool(mode === 'select' ? selectionShape : mode)
         }
-        onModeChange={(mode) => {
-          if (mode === 'layout') {
-            leaveFocusView()
-            objectLayout.setSelected(null)
-          }
-          closePopovers()
-          setTool(mode)
-          if (mode !== 'select') setSelectedIds([])
-          if (mode !== 'cursor') setSelectedItemIds([])
-          setSelectedControlIds([])
-          setShowMap(false)
-          setLauncher(null)
-        }}
-        onOpenToolMenu={() => {
-          closePopovers()
-          setShowMap(false)
-          setLauncher(null)
-        }}
+        onOpenToolMenu={closePopovers}
         mapOpen={showMap}
-        onToggleMap={() => {
-          closePopovers()
-          setShowMap(!showMap)
-          setLauncher(null)
-        }}
-        onArrange={arrangeAllWindows}
+        onToggleMap={() => activateCanvasTool('map', true)}
+        onArrange={() => activateCanvasTool('arrange')}
         windowCount={workspace.windows.length}
       />
     ),
@@ -2177,11 +2088,8 @@ function App() {
         activeWindowId={focusedWindowId}
         selectedAppId={dockAppId}
         onSelectApp={(id) => {
-          closePopovers()
-          setDockAppId(id)
-          setLauncher(null)
-          setShowMap(false)
-          setSpaceHeld(false)
+          if (id) openShellPanel({ kind: 'dock', appId: id })
+          else dismissShellPanel('dock')
         }}
         onFocusWindow={revealWindow}
         onReorderWindows={(orderedIds) => {
@@ -2207,15 +2115,8 @@ function App() {
           expanded={getWidgetExpanded(objectLayout.layout, id)}
           openPanel={systemPanel}
           onPanelChange={(panel) => {
-            setWidgetReveal(null)
-            setCanvasSearch(null)
-            setSystemPanel(panel)
-            if (panel) {
-              setDockAppId(null)
-              setNotificationsOpen(false)
-              setLauncher(null)
-              setShowMap(false)
-            }
+            if (panel) openShellPanel({ kind: 'system', panel })
+            else dismissShellPanel('system')
           }}
         />,
       ]),
@@ -2326,7 +2227,7 @@ function App() {
             onUngroup={objectLayout.ungroup}
             onFrame={objectLayout.attachSelected}
             onRemove={objectLayout.remove}
-            onDone={() => setTool('cursor')}
+            onDone={() => activateCanvasTool('cursor')}
           >
             <LayoutItemControls
               target={objectLayout.selected}
@@ -3058,11 +2959,11 @@ function App() {
             editing={tool === 'draw'}
             onPlay={gestureShortcuts.length > 0 ? playDrawing : undefined}
             onChangeLayout={() => {
+              changeLayout()
               objectLayout.setSelected({
                 kind: 'drawing',
                 id: selectedDrawing.id,
               })
-              setTool('layout')
             }}
             onDelete={() => {
               preparePeekMotion({ backgroundOnly: true })
@@ -3171,12 +3072,8 @@ function App() {
           anchorRef={launcherTrigger}
           gestureShortcuts={gestureShortcuts}
           mode={launcher}
-          editingGestures={editingGestures}
           onSaveGestureShortcut={saveGestureShortcut}
-          onModeChange={(mode) => {
-            setEditingGestures(false)
-            setLauncher(mode)
-          }}
+          onModeChange={(mode) => openShellPanel({ kind: 'launcher', mode })}
           onCustomizeGestures={() => openGestureSettings()}
           onClose={closeLauncher}
           onLaunch={launchApp}

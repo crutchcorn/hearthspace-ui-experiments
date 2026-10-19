@@ -25,6 +25,14 @@ Escape clears selections and closes panels
 without changing ordinary tools; leaving Change layout returns to the cursor.
 Single-letter shortcuts don't intercept typing inside inputs or app editors.
 
+Keyboard shortcuts, toolbar choices, and search results use the same tool
+commands. Choosing a drawing or selection tool closes shell panels, ends any
+unfinished pointer interaction, and clears unrelated selections. Draw retains
+a selected drawing so another stroke joins the same piece. Overview
+and Arrange are actions: they leave the chosen tool in place. Opening another
+shell panel replaces the current one, so the map, launcher, notifications,
+window list, and system controls don't compete for space.
+
 The primary toolbar button remembers desktop selection, Pan, or Search. If
 another tool is active, its first press selects that remembered tool; the
 second opens its dropdown. On narrow screens, one flat picker exposes every
