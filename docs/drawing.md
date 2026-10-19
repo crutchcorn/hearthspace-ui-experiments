@@ -7,9 +7,9 @@ ink on the canvas. The stroke uses the environment's accent color.
 ## Build and move a drawing
 
 After releasing the pointer, the drawing remains selected with floating actions
-beside it. Further strokes join that drawing until you use **Finish drawing**
-or otherwise clear its selection. Finish keeps Draw active, so the next stroke
-starts a separate drawing. A drawing holds up to 64 strokes; reaching that limit
+beside it. Further strokes join that drawing until you use **Finish drawing**,
+press **Enter**, or otherwise clear its selection. Finish keeps Draw active, so
+the next stroke starts a separate drawing. A drawing holds up to 64 strokes; reaching that limit
 starts another one. Escape cancels an unfinished stroke without removing
 completed ink.
 
@@ -17,7 +17,12 @@ Switch to **Select desktop items** (**V**) to select or drag a drawing by its in
 invisible stroke target makes thin lines easier to grab. Select an existing
 drawing, then choose Draw again to add more strokes to it. Holding Alt while
 moving aligns it with the [dot grid](grid-snapping.md). Delete drawing removes
-the whole object; there isn't a per-stroke eraser, brush palette, or undo stack.
+the whole object; **Delete** does the same when a drawing is selected, including
+pinned drawings and drawings selected in Change layout. Enter clears the
+selection without removing the ink or changing the current tool. These shortcuts
+leave typing inside apps and fields alone, and Enter still activates a focused
+button. They wait until you finish a pointer gesture. There isn't a per-stroke
+eraser, brush palette, or undo stack.
 
 ## Choose where it belongs
 

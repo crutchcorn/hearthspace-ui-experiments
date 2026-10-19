@@ -776,6 +776,22 @@ function App() {
     }
   }, [selectionShape])
 
+  const layoutDrawingId =
+    tool === 'layout' && objectLayout.selected?.kind === 'drawing'
+      ? objectLayout.selected.id
+      : null
+  const activeDrawingId = layoutDrawingId ?? selectedDrawingId
+  const finishDrawing = useCallback(() => {
+    setSelectedDrawingId(null)
+    if (layoutDrawingId) setLayoutSelection(null)
+  }, [layoutDrawingId, setLayoutSelection])
+  const deleteDrawing = useCallback(() => {
+    if (!activeDrawingId) return
+    preparePeekMotion({ backgroundOnly: true })
+    removeObject({ kind: 'drawing', id: activeDrawingId })
+    finishDrawing()
+  }, [activeDrawingId, preparePeekMotion, removeObject, finishDrawing])
+
   useEffect(() => {
     const resize = () =>
       setView((current) => ({
@@ -817,6 +833,31 @@ function App() {
       )
         return
       if (launcher || event.metaKey || event.ctrlKey || event.altKey) return
+      if (
+        activeDrawingId &&
+        (event.key === 'Delete' || event.key === 'Enter') &&
+        !event.shiftKey &&
+        !event.isComposing &&
+        !event.defaultPrevented &&
+        !previewLayout &&
+        !previewExiting &&
+        !focusView &&
+        !gesture.current &&
+        !document.querySelector(':modal')
+      ) {
+        const target = event.target instanceof Element ? event.target : null
+        if (
+          target?.closest('[data-window-id]') ||
+          (event.key === 'Enter' && target?.closest('button, a[href]'))
+        )
+          return
+        event.preventDefault()
+        if (!event.repeat) {
+          if (event.key === 'Delete') deleteDrawing()
+          else finishDrawing()
+        }
+        return
+      }
       if (event.key === '/') {
         event.preventDefault()
         openCanvasSearch({
@@ -877,6 +918,11 @@ function App() {
     canvasSearch,
     openCanvasSearch,
     finishPointerSession,
+    activeDrawingId,
+    deleteDrawing,
+    finishDrawing,
+    previewLayout,
+    previewExiting,
   ])
 
   useEffect(() => {
@@ -1392,6 +1438,7 @@ function App() {
     setSelectedItemIds([])
     setSelectedControlIds([])
     closePopovers()
+    viewport.current?.focus({ preventScroll: true })
   }
 
   function startDrawingMove(
@@ -2972,12 +3019,8 @@ function App() {
                 id: selectedDrawing.id,
               })
             }}
-            onDelete={() => {
-              preparePeekMotion({ backgroundOnly: true })
-              removeObject({ kind: 'drawing', id: selectedDrawing.id })
-              setSelectedDrawingId(null)
-            }}
-            onFinish={() => setSelectedDrawingId(null)}
+            onDelete={deleteDrawing}
+            onFinish={finishDrawing}
           />
         )}
       {!focusView &&

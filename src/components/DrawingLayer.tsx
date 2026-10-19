@@ -183,9 +183,16 @@ export default function DrawingLayer({
               const activate = placements ? onOpen : onSelect
               if (!drawingInteractive || !activate) return
               if (event.key !== 'Enter' && event.key !== ' ') return
+              // A second Enter finishes selected ink through the desktop shortcut.
+              if (
+                !placements &&
+                selectedId === drawing.id &&
+                event.key === 'Enter'
+              )
+                return
               event.preventDefault()
               event.stopPropagation()
-              activate(drawing.id)
+              if (!event.repeat) activate(drawing.id)
             }}
           >
             {placement?.matches && (
