@@ -36,8 +36,14 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Test recognition
+      - name: Test geometry, recognition, and saved state
         run: pnpm test
+
+      - name: Install browser test runtime
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Test browser interactions
+        run: pnpm test:browser
 
       - name: Check types
         run: pnpm typecheck
