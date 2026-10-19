@@ -169,7 +169,7 @@
   box-shadow: var(--control-glow), var(--glass-edge-active);
 }
 
-.option input:focus-visible + .card {
+:global([data-input-modality='keyboard']) .option input:focus-visible + .card {
   outline: 2px solid var(--accent);
   outline-offset: 3px;
 }

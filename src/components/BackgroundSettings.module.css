@@ -89,7 +89,7 @@
   box-shadow: var(--control-glow), var(--glass-edge-active);
 }
 
-.upload:has(input:focus-visible),
+:global([data-input-modality='keyboard']) .upload:has(input:focus-visible),
 .reset:focus-visible,
 .fitRow select:focus-visible {
   outline: 2px solid var(--accent);
