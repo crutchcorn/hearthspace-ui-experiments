@@ -1553,12 +1553,13 @@ function App() {
     })
     const drawingBounds =
       drawingPlacement.surface === 'frame'
-        ? getFrameBounds(
+        ? (framePreviewBounds.get(`drawing:${drawingId}`) ??
+          getFrameBounds(
             drawingPlacement,
             selectedDrawing.width,
             selectedDrawing.height,
             view,
-          )
+          ))
         : selectedDrawing
     const drawingOffset =
       drawingPlacement.surface === 'frame' ? view : { x: 0, y: 0 }
@@ -1575,6 +1576,7 @@ function App() {
     setSelectedDrawingId(null)
     setTool('cursor')
     const timer = window.setTimeout(() => {
+      objectLayout.forget({ kind: 'drawing', id: drawingId })
       preparePeekMotion({ backgroundOnly: true })
       setWorkspace((current) =>
         restoreBackgroundItems({
@@ -2159,6 +2161,7 @@ function App() {
                 frameLayout={objectLayout.layout}
                 frameHost={frameHost}
                 groupBounds={framePreviewBounds}
+                draggingWidget={objectLayout.draggingWidget}
                 view={view}
                 placements={searchLayout?.drawings}
                 onOpen={(id) => activateSearchResult({ kind: 'drawing', id })}
@@ -2529,6 +2532,7 @@ function App() {
                 frameLayout={objectLayout.layout}
                 frameHost={frameHost}
                 groupBounds={framePreviewBounds}
+                draggingWidget={objectLayout.draggingWidget}
                 view={view}
                 placements={searchLayout?.drawings}
                 onOpen={(id) => activateSearchResult({ kind: 'drawing', id })}
@@ -2646,12 +2650,15 @@ function App() {
                       })
                       const b =
                         placement.surface === 'frame'
-                          ? getFrameBounds(
+                          ? (framePreviewBounds.get(
+                              `drawing:${selectedDrawing.id}`,
+                            ) ??
+                            getFrameBounds(
                               placement,
                               selectedDrawing.width,
                               selectedDrawing.height,
                               view,
-                            )
+                            ))
                           : selectedDrawing
                       return { ...b, x: b.x + view.x, y: b.y + view.y }
                     })(),
@@ -2669,6 +2676,7 @@ function App() {
               setTool('layout')
             }}
             onDelete={() => {
+              objectLayout.forget({ kind: 'drawing', id: selectedDrawing.id })
               preparePeekMotion({ backgroundOnly: true })
               setWorkspace((current) =>
                 restoreBackgroundItems({

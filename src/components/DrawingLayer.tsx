@@ -9,6 +9,7 @@ import {
   getPlacement,
   getTargetGroup,
   targetKey,
+  type FrameEdge,
   type FrameLayout,
 } from '../frame-layout'
 import styles from './DrawingLayer.module.css'
@@ -24,6 +25,7 @@ interface DrawingLayerProps {
   view?: Bounds
   frameHost?: HTMLElement | null
   groupBounds?: Map<string, FramePreviewBounds>
+  draggingWidget?: { id: string; edge?: FrameEdge } | null
   draft?: { points: GesturePoint[]; layer: DrawingLayerName }
   interactive: boolean
   onPointerDown: (event: PointerEvent<SVGSVGElement>, id: string) => void
@@ -67,6 +69,7 @@ export default function DrawingLayer({
   view,
   frameHost,
   groupBounds,
+  draggingWidget,
   draft,
   interactive,
   onPointerDown,
@@ -94,7 +97,9 @@ export default function DrawingLayer({
         const group =
           frameLayout &&
           getTargetGroup(frameLayout, { kind: 'drawing', id: drawing.id })
-        const layout =
+        const movingGroup =
+          group && draggingWidget?.id === group.id ? draggingWidget : null
+        const savedLayout =
           group && frameLayout
             ? getPlacement(frameLayout, { kind: 'drawing', id: drawing.id })
             : (frameLayout?.placements[
@@ -102,6 +107,13 @@ export default function DrawingLayer({
               ] ?? {
                 surface: drawing.layer === 'below' ? 'background' : 'canvas',
               })
+        const layout = movingGroup?.edge
+          ? {
+              surface: 'frame' as const,
+              edge: movingGroup.edge,
+              position: 0.5,
+            }
+          : savedLayout
         const effectiveLayer = placements
           ? 'above'
           : layout.surface === 'background'

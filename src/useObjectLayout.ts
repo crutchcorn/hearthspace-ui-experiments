@@ -212,15 +212,19 @@ export default function useObjectLayout(
         )
           return []
         const rect = element.getBoundingClientRect()
-        const bounds = getFrameBounds(
-          placement,
-          element.offsetWidth || rect.width,
-          element.offsetHeight || rect.height,
-          view,
-          target.kind === 'window' || target.kind === 'drawing'
-            ? 'flush'
-            : 'padded',
-        )
+        const mergedMobile =
+          view.width <= 760 && element.closest('[data-mobile-bar]')
+        const bounds = mergedMobile
+          ? { x: rect.x, y: rect.y, width: rect.width, height: rect.height }
+          : getFrameBounds(
+              placement,
+              element.offsetWidth || rect.width,
+              element.offsetHeight || rect.height,
+              view,
+              target.kind === 'window' || target.kind === 'drawing'
+                ? 'flush'
+                : 'padded',
+            )
         if (target.kind === 'window') {
           if (placement.edge === 'left' || placement.edge === 'right') {
             bounds.width = Math.min(42, bounds.width)
@@ -380,7 +384,12 @@ export default function useObjectLayout(
     )
   }
 
+  const favoriteHover = useRef(favorites?.hover)
+  useLayoutEffect(() => {
+    favoriteHover.current = favorites?.hover
+  }, [favorites?.hover])
   const cancelDrag = useCallback(() => {
+    favoriteHover.current?.(null, 0, 0)
     const current = drag.current
     if (!current) return
     drag.current = null
@@ -425,7 +434,11 @@ export default function useObjectLayout(
 
   function placement(target: LayoutTarget): ObjectPlacement {
     const saved = getPlacement(layout, target)
-    if (target.kind === 'drawing' && !layout.placements[targetKey(target)])
+    if (
+      target.kind === 'drawing' &&
+      !layout.placements[targetKey(target)] &&
+      !getTargetGroup(layout, target)
+    )
       return {
         surface:
           workspace.drawings.find((item) => item.id === target.id)?.layer ===
@@ -436,6 +449,91 @@ export default function useObjectLayout(
     return saved
   }
   function place(target: LayoutTarget, next: ObjectPlacement, settle = true) {
+    if (
+      target.kind === 'group' &&
+      settle &&
+      (next.surface === 'canvas' || next.surface === 'background')
+    ) {
+      const group = getTargetGroup(layout, target)
+      if (!group) return
+      const surface = next.surface
+      const groupBounds = targetElement(target)?.getBoundingClientRect()
+      const destinations = group.members.map((member) => {
+        const slot =
+          member.kind === 'window' || member.kind === 'drawing'
+            ? document.querySelector<HTMLElement>(
+                `[data-frame-preview-slot="${CSS.escape(targetKey(member))}"]`,
+              )
+            : null
+        const bounds = (slot ?? targetElement(member))?.getBoundingClientRect()
+        return {
+          target: member,
+          bounds: {
+            x: view.x + (bounds?.x ?? groupBounds?.x ?? 100),
+            y: view.y + (bounds?.y ?? groupBounds?.y ?? 120),
+            width: bounds?.width ?? 240,
+            height: bounds?.height ?? 54,
+          },
+        }
+      })
+      // Groups belong to the frame. Moving one onto the painting releases its
+      // members at their visible positions instead of leaving empty frame slots.
+      let nextLayout = ungroupFrameTarget(layout, target)
+      for (const destination of destinations)
+        nextLayout = setObjectPlacement(nextLayout, destination.target, {
+          surface,
+          ...(destination.target.kind === 'widget'
+            ? { x: destination.bounds.x, y: destination.bounds.y }
+            : {}),
+        })
+      beforeSettle(target)
+      setLayout(nextLayout)
+      setSelected(null)
+      setWorkspace((current) => {
+        const positions = new Map(
+          destinations.map(({ target: member, bounds }) => [
+            targetKey(member),
+            bounds,
+          ]),
+        )
+        const position = <T extends Bounds & { id: string }>(
+          item: T,
+          kind: LayoutTarget['kind'],
+        ): T => {
+          const bounds = positions.get(targetKey({ kind, id: item.id }))
+          if (!bounds) return item
+          return {
+            ...item,
+            x: Math.max(0, Math.min(bounds.x, current.width - item.width)),
+            y: Math.max(0, Math.min(bounds.y, current.height - item.height)),
+            peekOrigin: undefined,
+          }
+        }
+        let updated: Workspace = {
+          ...current,
+          windows: current.windows.map((item) => position(item, 'window')),
+          items: current.items.map((item) => position(item, 'item')),
+          drawings: current.drawings.map((item) => {
+            const moved = position(item, 'drawing')
+            return moved === item
+              ? item
+              : {
+                  ...moved,
+                  layer: surface === 'background' ? 'below' : 'above',
+                }
+          }),
+        }
+        for (const destination of destinations)
+          updated = settleLayoutDrop(
+            updated,
+            nextLayout,
+            destination.target,
+            destination.bounds,
+          )
+        return updated
+      })
+      return
+    }
     if (
       (next.surface === 'canvas' || next.surface === 'background') &&
       isToolbar(target) &&
@@ -934,6 +1032,16 @@ export default function useObjectLayout(
     setWarning,
     placement,
     place,
+    forget: (target: LayoutTarget) => {
+      setLayout((current) => {
+        const next = ungroupFrameTarget(current, target)
+        const key = targetKey(target)
+        if (!Object.hasOwn(next.placements, key)) return next
+        const placements = { ...next.placements }
+        delete placements[key]
+        return { ...next, placements }
+      })
+    },
     remove,
     restoreTools,
     attachSelected,
