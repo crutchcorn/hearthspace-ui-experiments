@@ -22,6 +22,31 @@ export const releasePointer: BrowserCommand = async ({ page }) => {
   await page.mouse.up()
 }
 
+export const startFrameWidgetDrag: BrowserCommand<
+  [id: string, offset?: Point]
+> = async ({ iframe, page }, id, offset) => {
+  const bounds = await iframe
+    .locator(`[data-layout-widget="${id}"]`)
+    .boundingBox()
+  if (!bounds) throw new Error(`Frame widget ${id} has no visible bounds`)
+  await page.mouse.move(
+    bounds.x + (offset?.x ?? bounds.width / 2),
+    bounds.y + (offset?.y ?? bounds.height / 2),
+  )
+  await page.mouse.down()
+}
+
+export const movePointerTo: BrowserCommand<[point: Point]> = async (
+  { iframe, page },
+  point,
+) => {
+  const viewport = await iframe.locator('#root').boundingBox()
+  if (!viewport) throw new Error('A visible canvas is required')
+  await page.mouse.move(viewport.x + point.x, viewport.y + point.y, {
+    steps: 8,
+  })
+}
+
 export const drawCanvasStroke: BrowserCommand<[points: Point[]]> = async (
   { iframe, page },
   points,
@@ -45,6 +70,8 @@ declare module 'vitest/browser' {
   interface BrowserCommands {
     startDesktopDrag: (title: string, delta: Point) => Promise<void>
     releasePointer: () => Promise<void>
+    startFrameWidgetDrag: (id: string, offset?: Point) => Promise<void>
+    movePointerTo: (point: Point) => Promise<void>
     drawCanvasStroke: (points: Point[]) => Promise<void>
   }
 }

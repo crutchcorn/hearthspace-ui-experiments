@@ -609,21 +609,23 @@ export function getWidgetFrameDropTarget(
   viewport: { width: number; height: number },
   maximumDistance = 72,
   currentEdge?: FrameEdge,
+  pointer?: { x: number; y: number },
 ): Extract<ObjectPlacement, { surface: 'frame' }> | null {
-  // Turning a toolbar must not change its edge target and turn it back again.
+  // Use the pointer for hit testing, regardless of where the bar was grabbed.
+  // A square probe also keeps turning from changing the target and turning back.
   const size = Math.min(bounds.width, bounds.height)
   const target = getFrameDropTarget(
     {
-      x: bounds.x + (bounds.width - size) / 2,
-      y: bounds.y + (bounds.height - size) / 2,
+      x: (pointer?.x ?? bounds.x + bounds.width / 2) - size / 2,
+      y: (pointer?.y ?? bounds.y + bounds.height / 2) - size / 2,
       width: size,
       height: size,
     },
     viewport,
     maximumDistance,
   )
-  if (!target || (target.position !== 0 && target.position !== 1)) return target
-
+  if (!target) return null
+  if (target.position !== 0 && target.position !== 1) return target
   const targetIsVertical = target.edge === 'left' || target.edge === 'right'
   const atLeft =
     target.edge === 'left' || (!targetIsVertical && target.position === 0)

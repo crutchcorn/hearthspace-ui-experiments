@@ -23,9 +23,17 @@ doesn't pan the canvas during layout editing, so reaching the frame has one
 meaning. **Done** or Escape leaves the editor.
 
 Toolbars turn vertically at side edges and horizontally at the top or bottom.
-They keep their incoming orientation at corners and while crossing the interior.
-Their surface, outline, and contents animate together. Icons and toolbars share
-the same screen inset; standalone windows and drawings sit flush with the edge.
+They turn around the point you grabbed, keeping it under your pointer even when
+you grab near either end. They keep their incoming orientation at corners and
+while crossing the interior. Releasing in the interior returns the toolbar to a
+row around that same grabbed point.
+
+For toolbars, your pointer chooses the highlighted target and the final position
+along the edge. A corner becomes the target when your pointer reaches its target
+area; the length of the toolbar doesn't pull it into a corner early. Releasing
+animates the toolbar into the indicated placement. Its surface, outline, and
+contents move together. Icons and toolbars share the same screen inset;
+standalone windows and drawings sit flush with the edge.
 
 Hold **Alt** to align a frame attachment with the visible canvas dots. This snaps
 horizontal movement along the top and bottom, or vertical movement along the
@@ -54,6 +62,14 @@ window coverage remains temporary.
 
 [useObjectLayout](../src/useObjectLayout.ts) owns editing and drag transitions;
 [frame-layout](../src/frame-layout.ts) defines placement and recovery rules.
+The active drag remembers its orientation and grip between pointer events.
+Layout motion uses that grip as the turn's pivot and owns the toolbar's snap
+animation. [Peek motion](../src/usePeekMotion.ts) animates displaced neighbors
+and excludes that toolbar, keeping the two animations from moving it in
+different directions on release.
+
 [frame-grid](../src/frame-grid.ts) and its [tests](../tests/frame-grid.test.ts)
 cover Alt alignment. [Layout workspace tests](../tests/layout-workspace.test.ts)
 cover settling, and [scene storage](../src/scene-storage.ts) saves the result.
+[Browser drag tests](../tests/browser/frame-drag.test.tsx) cover grabs near both
+ends, the gripped point throughout a turn, and release placement.

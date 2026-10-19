@@ -28,6 +28,14 @@ An interrupted drag must restore the icon's position and leave the next
 drag usable. Assertions wait for the observable result instead of sleeping
 for an animation's current duration.
 
+The [frame drag flows](../tests/browser/frame-drag.test.tsx) grab canvas tools
+near either end, move to an edge or corner, and check the resulting placement.
+They also sample the gripped point throughout a turn and the center of a
+centrally grabbed toolbar as it returns to a canvas row. These checks catch
+animation jumps that a final-position assertion misses. Release checks keep the
+highlighted target and final position tied to the pointer rather than the
+toolbar's length.
+
 ## Isolation and limits
 
 Each test mounts a fresh desktop into a full-height root and clears local

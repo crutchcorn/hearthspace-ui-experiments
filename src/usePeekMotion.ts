@@ -26,10 +26,12 @@ export default function usePeekMotion(
   const prepare = useCallback(
     ({
       excludedWindowId,
+      excludedControlId,
       backgroundOnly = false,
       drawingOrigin,
     }: {
       excludedWindowId?: string
+      excludedControlId?: string
       backgroundOnly?: boolean
       drawingOrigin?: Position & { id: string }
     } = {}) => {
@@ -46,6 +48,13 @@ export default function usePeekMotion(
         )
           continue
         if (element.dataset.windowId === excludedWindowId && excludedWindowId)
+          continue
+        // Layout motion already animates the dragged control, including the
+        // top-left change needed to turn it around the grabbed point.
+        if (
+          excludedControlId &&
+          element.dataset.canvasControlId === excludedControlId
+        )
           continue
         // Extending ink can rebase its SVG bounds without moving the artwork.
         if (drawingOrigin && element.dataset.drawingId === drawingOrigin.id) {

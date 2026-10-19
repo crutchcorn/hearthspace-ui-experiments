@@ -370,6 +370,7 @@ function App() {
     (target) =>
       preparePeekMotion({
         excludedWindowId: target.kind === 'window' ? target.id : undefined,
+        excludedControlId: target.kind === 'widget' ? target.id : undefined,
       }),
     { hover: hoverFavoriteDrop, drop: dropFavorite },
   )

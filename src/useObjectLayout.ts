@@ -34,6 +34,25 @@ import {
 import { mergeOverlappingFrameItems } from './frame-collisions'
 import { snapFramePlacement } from './frame-grid'
 
+type ToolbarGrip = { along: number; across: number }
+
+function gripPoint(
+  bounds: Pick<Bounds, 'width' | 'height'>,
+  grip?: ToolbarGrip,
+) {
+  if (!grip) return { x: bounds.width / 2, y: bounds.height / 2 }
+  return bounds.height > bounds.width
+    ? { x: (1 - grip.across) * bounds.width, y: grip.along * bounds.height }
+    : { x: grip.along * bounds.width, y: grip.across * bounds.height }
+}
+
+function rotation(element: HTMLElement) {
+  const style = getComputedStyle(element)
+  const [x, y] = style.transformOrigin.split(' ').map(Number.parseFloat)
+  const angle = ((Number.parseFloat(style.rotate) || 0) * Math.PI) / 180
+  return { x, y, cos: Math.cos(angle), sin: Math.sin(angle) }
+}
+
 export default function useObjectLayout(
   workspace: Workspace,
   sceneActions: SceneActions,
@@ -69,6 +88,8 @@ export default function useObjectLayout(
     clientX: number
     clientY: number
     altKey: boolean
+    edge?: FrameEdge
+    grip?: ToolbarGrip
     bounds: Bounds
     moved: boolean
     captureTarget: HTMLElement
@@ -81,6 +102,8 @@ export default function useObjectLayout(
   const pendingSnap = useRef<{
     target: LayoutTarget
     from: Bounds
+    anchor: { x: number; y: number }
+    grip?: ToolbarGrip
     preview: boolean
   } | null>(null)
   const pendingFrameGrid = useRef<{
@@ -137,8 +160,9 @@ export default function useObjectLayout(
       if (!to.width || !to.height) return
       const from = snap.from
       const duration = { duration: 280, easing: 'cubic-bezier(0.2,0.7,0.1,1)' }
-      const dx = from.x + from.width / 2 - (to.x + to.width / 2)
-      const dy = from.y + from.height / 2 - (to.y + to.height / 2)
+      const pivot = gripPoint(to, snap.grip)
+      const dx = snap.anchor.x - (to.x + pivot.x)
+      const dy = snap.anchor.y - (to.y + pivot.y)
       if (widget) {
         const wasVertical = from.height > from.width
         const nowVertical = to.height > to.width
@@ -150,8 +174,12 @@ export default function useObjectLayout(
             -90,
             Math.min(90, currentAngle + (nowVertical ? -90 : 90)),
           )
+          const transformOrigin = `${pivot.x}px ${pivot.y}px`
           turnAnimation.current = element.animate(
-            [{ rotate: `${startAngle}deg` }, { rotate: '0deg' }],
+            [
+              { transformOrigin, rotate: `${startAngle}deg` },
+              { transformOrigin, rotate: '0deg' },
+            ],
             duration,
           )
         }
@@ -270,10 +298,14 @@ export default function useObjectLayout(
   function motionBounds(element: HTMLElement, widget: boolean): Bounds {
     const rect = element.getBoundingClientRect()
     if (!widget) return rect
-    // Rotation changes the bounding box, but not its center or layout dimensions.
+    // Recover layout bounds from the rotated box, including any translation.
+    // A turn around the grip moves the visual center even when the grip stays put.
+    const turn = rotation(element)
+    const cx = element.offsetWidth / 2 - turn.x
+    const cy = element.offsetHeight / 2 - turn.y
     return {
-      x: rect.x + (rect.width - element.offsetWidth) / 2,
-      y: rect.y + (rect.height - element.offsetHeight) / 2,
+      x: rect.x + rect.width / 2 - turn.x - (turn.cos * cx - turn.sin * cy),
+      y: rect.y + rect.height / 2 - turn.y - (turn.sin * cx + turn.cos * cy),
       width: element.offsetWidth,
       height: element.offsetHeight,
     }
@@ -282,14 +314,25 @@ export default function useObjectLayout(
   function queueMotion(target: LayoutTarget, preview = false) {
     const element = targetElement(target)
     if (!element) return
+    const from = motionBounds(element, isToolbar(target))
+    const current = drag.current
+    const grip =
+      current && targetKey(current.target) === targetKey(target)
+        ? current.grip
+        : undefined
+    const pivot = gripPoint(from, grip)
+    const anchor = { x: from.x + pivot.x, y: from.y + pivot.y }
     const pending = pendingSnap.current
     if (pending && targetKey(pending.target) === targetKey(target)) {
       pending.preview &&= preview
+      if (!preview) pending.anchor = anchor
       return
     }
     pendingSnap.current = {
       target,
-      from: motionBounds(element, isToolbar(target)),
+      from,
+      anchor,
+      grip,
       preview,
     }
   }
@@ -558,6 +601,21 @@ export default function useObjectLayout(
       movingElement.dataset.pinnedCollapsed === 'true'
         ? getFrameDragBounds(measured, view)
         : measured
+    let grip: ToolbarGrip | undefined
+    if (isToolbar(target)) {
+      // Undo any in-flight turn before finding the grabbed point in the bar.
+      const turn = rotation(movingElement)
+      const px = event.clientX - bounds.x - turn.x
+      const py = event.clientY - bounds.y - turn.y
+      const x = turn.x + turn.cos * px + turn.sin * py
+      const y = turn.y - turn.sin * px + turn.cos * py
+      grip =
+        bounds.height > bounds.width
+          ? { along: y / bounds.height, across: 1 - x / bounds.width }
+          : { along: x / bounds.width, across: y / bounds.height }
+      bounds.x = event.clientX - x
+      bounds.y = event.clientY - y
+    }
     cancelMotion()
     event.preventDefault()
     event.stopPropagation()
@@ -584,6 +642,11 @@ export default function useObjectLayout(
       clientX: event.clientX,
       clientY: event.clientY,
       altKey: event.altKey,
+      edge:
+        currentPlacement.surface === 'frame'
+          ? currentPlacement.edge
+          : undefined,
+      grip,
       bounds,
       moved: false,
       captureTarget: event.currentTarget,
@@ -630,13 +693,14 @@ export default function useObjectLayout(
     )
     setDropTarget(drop)
     if (isToolbar(current.target)) {
-      const previousEdge = draggingWidget?.edge
+      const previousEdge = current.edge
       const nextEdge = drop?.edge ?? previousEdge
       const isVertical = (edge?: FrameEdge) =>
         edge === 'left' || edge === 'right'
       if (isVertical(previousEdge) !== isVertical(nextEdge)) {
         queueMotion(current.target, true)
       }
+      current.edge = nextEdge
       setDraggingWidget({
         id: current.target.id,
         edge: nextEdge,
@@ -660,12 +724,8 @@ export default function useObjectLayout(
     }
     const dx = event.clientX - current.x
     const dy = event.clientY - current.y
-    const { bounds: movingBounds, drop } = frameDrag(
-      current,
-      dx,
-      dy,
-      event.altKey,
-    )
+    const { bounds, drop } = frameDrag(current, dx, dy, event.altKey)
+    let movingBounds = bounds
     if (current.moved || Math.hypot(dx, dy) >= 6) {
       if (
         current.target.kind === 'item' &&
@@ -706,14 +766,8 @@ export default function useObjectLayout(
       } else {
         if (isToolbar(current.target)) {
           queueMotion(current.target)
-          // Canvas widgets return to a row without shifting their drag center.
-          if (movingBounds.height > movingBounds.width) {
-            const { width, height } = movingBounds
-            movingBounds.x += (width - height) / 2
-            movingBounds.y += (height - width) / 2
-            movingBounds.width = height
-            movingBounds.height = width
-          }
+          // Return to a row around the same grabbed point.
+          movingBounds = dragBounds(current, dx, dy, 'top')
         }
         const previous = placement(current.target)
         const surface =
@@ -760,12 +814,24 @@ export default function useObjectLayout(
     current: NonNullable<typeof drag.current>,
     dx: number,
     dy: number,
+    edge = current.edge,
   ): Bounds {
     const element = isToolbar(current.target)
       ? targetElement(current.target)
       : null
-    const width = element?.offsetWidth ?? current.bounds.width
-    const height = element?.offsetHeight ?? current.bounds.height
+    let width = element?.offsetWidth ?? current.bounds.width
+    let height = element?.offsetHeight ?? current.bounds.height
+    if (current.grip) {
+      const vertical = edge === 'left' || edge === 'right'
+      if (vertical !== height > width) [width, height] = [height, width]
+      const pivot = gripPoint({ width, height }, current.grip)
+      return {
+        x: current.x + dx - pivot.x,
+        y: current.y + dy - pivot.y,
+        width,
+        height,
+      }
+    }
     return {
       x: current.bounds.x + dx + (current.bounds.width - width) / 2,
       y: current.bounds.y + dy + (current.bounds.height - height) / 2,
@@ -801,10 +867,16 @@ export default function useObjectLayout(
     dy: number,
     snap: boolean,
   ) {
-    const bounds = dragBounds(current, dx, dy)
+    let bounds = dragBounds(current, dx, dy)
     const drop = isToolbar(current.target)
-      ? getWidgetFrameDropTarget(bounds, view, 72, draggingWidget?.edge)
+      ? getWidgetFrameDropTarget(bounds, view, 72, current.edge, {
+          x: current.x + dx,
+          y: current.y + dy,
+        })
       : getFrameDropTarget(bounds, view)
+    if (drop && isToolbar(current.target)) {
+      bounds = dragBounds(current, dx, dy, drop.edge)
+    }
     if (!drop || !snap || drop.position === 0 || drop.position === 1)
       return { bounds, drop }
     const size = frameSize(current.target, bounds)

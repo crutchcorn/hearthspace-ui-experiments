@@ -27,15 +27,15 @@ Overview can navigate that space, but its zoom buttons are placeholders.
 
 ## Make the frame yours
 
-| Feature                                 | Start here                                                                                             |
-| --------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| [Change layout](frame-layout.md)        | Drag between canvas, background, and frame, with animated edge and corner targets.                     |
-| [Frame groups](frame-groups.md)         | Combine icons, controls, drawings, and window previews on a shared surface. Overlaps join groups.      |
-| [Pinned windows](pinned-windows.md)     | Keep an edge strip, reveal more on hover, open on click, and tuck away when focus leaves.              |
-| [System controls](system-controls.md)   | Move Clock, Wi-Fi, Sound, and Battery independently, change their detail, and recover hidden controls. |
-| [Clock formats](clock-formats.md)       | Choose a date/time presentation through item-specific layout controls.                                 |
-| [Notifications](notifications.md)       | Read, dismiss, and open sample events from the trigger, inbox, or preview toast.                       |
-| [Responsive shell](responsive-shell.md) | Merge the default corners into narrow-screen bars and use the flat tool picker.                        |
+| Feature                                 | Start here                                                                                                      |
+| --------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| [Change layout](frame-layout.md)        | Drag between canvas, background, and frame. Toolbars turn around your grip and use pointer-driven drop targets. |
+| [Frame groups](frame-groups.md)         | Combine icons, controls, drawings, and window previews on a shared surface. Overlaps join groups.               |
+| [Pinned windows](pinned-windows.md)     | Keep an edge strip, reveal more on hover, open on click, and tuck away when focus leaves.                       |
+| [System controls](system-controls.md)   | Move Clock, Wi-Fi, Sound, and Battery independently, change their detail, and recover hidden controls.          |
+| [Clock formats](clock-formats.md)       | Choose a date/time presentation through item-specific layout controls.                                          |
+| [Notifications](notifications.md)       | Read, dismiss, and open sample events from the trigger, inbox, or preview toast.                                |
+| [Responsive shell](responsive-shell.md) | Merge the default corners into narrow-screen bars and use the flat tool picker.                                 |
 
 Four corners are the starting arrangement: notifications at top left, system
 status at top right, canvas tools at bottom left, and apps at bottom right.
