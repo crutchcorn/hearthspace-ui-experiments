@@ -23,8 +23,8 @@ They aren't a promise that the browser controls a Linux desktop.
 | [Text selection](text-selection.md)                                | Keep shell text non-selectable while preserving app content and editable fields.                  |
 
 The canvas is large but finite. Arrange can extend beyond the viewport;
-Overview can navigate that space. Its zoom readout stays at 100%, with a
-disabled 100% reset shortcut and placeholder plus/minus buttons.
+Overview can navigate that space. Its heading contains a combined 100% zoom
+readout/reset button between minus and plus; all three are placeholders.
 
 ## Make the frame yours
 

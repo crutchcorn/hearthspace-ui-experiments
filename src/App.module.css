@@ -772,9 +772,10 @@
 
 .panelHeading {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 15px;
+  gap: 8px;
   margin-bottom: 18px;
 }
 
@@ -788,17 +789,10 @@
   letter-spacing: -0.7px;
 }
 
-.zoomPercentage {
-  color: var(--chrome-muted);
-  font-size: 14px;
-  font-variant-numeric: tabular-nums;
-}
-
 .zoomControls {
   display: flex;
-  justify-content: flex-end;
+  flex-shrink: 0;
   gap: 2px;
-  margin-top: 12px;
 }
 
 .zoomControls :is(.zoomButton, .zoomReset) {
@@ -812,7 +806,7 @@
 }
 
 .zoomReset {
-  padding-inline: 12px;
+  padding-inline: 6px;
   font-size: 14px;
   font-variant-numeric: tabular-nums;
 }
