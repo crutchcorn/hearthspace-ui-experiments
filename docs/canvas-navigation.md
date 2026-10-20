@@ -63,10 +63,15 @@ layout** uses the divided frame with a window inside it. Keeping these
 [local icons](icons.md) distinct helps separate navigating the canvas from
 editing where its controls live.
 
-The plus and minus controls are visual placeholders. They don't change canvas
-scale. On narrow screens, Overview lives in the same flat tool picker as the
-other canvas actions. Tool hints disappear after a short pause rather than
-remaining over the canvas.
+The zoom readout beside the heading shows **100%**, the canvas's fixed scale.
+Below the map, a **100%** reset shortcut sits between the plus and minus
+controls. The reset is disabled because the canvas is already at 100%. These
+controls preview the zoom interface; canvas scaling isn't implemented, and
+the plus and minus buttons remain visual placeholders.
+
+On narrow screens, Overview lives in the same flat tool picker as the other
+canvas actions. Tool hints disappear after a short pause rather than remaining
+over the canvas.
 
 Window and object locations are saved locally. Viewport travel and whether the
 map is open aren't saved, so reloading returns to the starting view.

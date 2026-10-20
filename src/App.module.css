@@ -788,17 +788,33 @@
   letter-spacing: -0.7px;
 }
 
-.zoomControls {
-  display: flex;
-  flex-shrink: 0;
-  gap: 2px;
+.zoomPercentage {
+  color: var(--chrome-muted);
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
 }
 
-.zoomControls .zoomButton {
+.zoomControls {
+  display: flex;
+  justify-content: flex-end;
+  gap: 2px;
+  margin-top: 12px;
+}
+
+.zoomControls :is(.zoomButton, .zoomReset) {
   display: grid;
-  width: 44px;
   place-items: center;
   border-radius: var(--radius-control);
+}
+
+.zoomButton {
+  width: 44px;
+}
+
+.zoomReset {
+  padding-inline: 12px;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
 }
 
 @keyframes panel-in {

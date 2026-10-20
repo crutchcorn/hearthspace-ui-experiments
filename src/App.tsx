@@ -3146,26 +3146,12 @@ function App() {
         <aside className={styles.mapPanel} data-shell-controls>
           <div className={styles.panelHeading}>
             <h2>Overview</h2>
-            <div
-              className={styles.zoomControls}
-              role="group"
-              aria-label="Canvas zoom"
+            <output
+              className={styles.zoomPercentage}
+              aria-label="Current canvas zoom"
             >
-              <button
-                type="button"
-                className={`${styles.zoomButton} ${shellStyles.control}`}
-                aria-label="Zoom out"
-              >
-                <ZoomOut size={18} aria-hidden="true" />
-              </button>
-              <button
-                type="button"
-                className={`${styles.zoomButton} ${shellStyles.control}`}
-                aria-label="Zoom in"
-              >
-                <ZoomIn size={18} aria-hidden="true" />
-              </button>
-            </div>
+              100%
+            </output>
           </div>
           <Minimap
             workspace={workspace}
@@ -3174,6 +3160,35 @@ function App() {
               if (!focusView) viewport.current?.scrollTo(x, y)
             }}
           />
+          <div
+            className={styles.zoomControls}
+            role="group"
+            aria-label="Canvas zoom"
+          >
+            <button
+              type="button"
+              className={`${styles.zoomButton} ${shellStyles.control}`}
+              aria-label="Zoom out"
+            >
+              <ZoomOut size={18} aria-hidden="true" />
+            </button>
+            <button
+              type="button"
+              className={`${styles.zoomReset} ${shellStyles.control}`}
+              aria-label="Reset canvas zoom to 100%"
+              title="Reset canvas zoom to 100%"
+              disabled
+            >
+              100%
+            </button>
+            <button
+              type="button"
+              className={`${styles.zoomButton} ${shellStyles.control}`}
+              aria-label="Zoom in"
+            >
+              <ZoomIn size={18} aria-hidden="true" />
+            </button>
+          </div>
         </aside>
       )}
       {switcherWindow && switcherPlacement && (
