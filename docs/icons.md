@@ -104,6 +104,8 @@ the simulated app artwork to inherit the shell's accent.
   within the desktop frame.
 - **Toggle canvas map** uses viewfinder corners around a window, indicating an
   overview of the canvas.
+- **Reset canvas zoom to 100%** reuses the local `RotateCcw` counterclockwise
+  arrow at 18 pixels, with the shared factory's optical stroke sizing.
 - **Arrange windows** uses one tall pane on the left and two smaller panes
   stacked on the right. The three-pane layout distinguishes arrangement from
   the plain app grid icon.

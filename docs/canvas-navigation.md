@@ -63,14 +63,14 @@ layout** uses the divided frame with a window inside it. Keeping these
 [local icons](icons.md) distinct helps separate navigating the canvas from
 editing where its controls live.
 
-The heading has one compact zoom control: minus, **100%**, and plus. The middle
-button combines the current zoom readout with the intended reset shortcut,
-keeping the percentage in one place. Its hover treatment previews the action,
-and its tooltip identifies the reset to 100%.
+The zoom readout beside the heading shows **100%**, the canvas's fixed scale.
+Below the map, the reset icon sits to the left of minus and plus. It uses the
+local counterclockwise arrow glyph and has the label **Reset canvas zoom to
+100%**. Reset is disabled because the canvas is already at 100%.
 
-All three buttons are presentational placeholders. The percentage stays at
-**100%**, the canvas's fixed scale, and pressing these controls doesn't change
-it. Canvas scaling isn't implemented.
+All three buttons are presentational placeholders. The readout stays at
+**100%**, and pressing the plus or minus button doesn't change it. Canvas
+scaling isn't implemented.
 
 On narrow screens, Overview lives in the same flat tool picker as the other
 canvas actions. Tool hints disappear after a short pause rather than remaining
