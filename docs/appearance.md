@@ -11,9 +11,13 @@ the default. A choice updates shell controls, focus and selection outlines,
 drawing ink, gesture strokes, and translucent surface tints together. There are no
 custom color inputs or per-component overrides.
 
-Light and Dark are separate choices. On first load, the mode follows the
-operating system's color preference. Once you choose a mode, that choice wins
-on later loads. This is an initial fallback, not a live “follow system” toggle.
+Light and Dark are separate choices, shown side by side in equally sized
+preview cards. The pair stays within 480px with an 8px gap, so the previews
+remain compact in wide Settings windows and shrink together in narrow ones.
+
+On first load, the mode follows the operating system's color preference. Once
+you choose a mode, that choice wins on later loads. This is an initial fallback,
+not a live “follow system” toggle.
 Both preferences apply immediately and save independently in local storage;
 if storage fails, the current session still uses the chosen colors.
 
@@ -61,4 +65,5 @@ between controls and content.
 - [`theme.ts`](../src/theme.ts) owns allowed accents, initial mode, and saved preferences.
 - [`index.css`](../src/index.css) defines shared light/dark color tokens and canvas tints.
 - [`Settings.tsx`](../src/components/Settings.tsx) presents the choices.
+- [`Settings.module.css`](../src/components/Settings.module.css) sizes the mode previews and styles their selection states.
 - [`App.module.css`](../src/App.module.css) and [`WindowContent.module.css`](../src/components/WindowContent.module.css) give app previews their individual chrome and surfaces.

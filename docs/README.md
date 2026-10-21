@@ -37,7 +37,7 @@ interaction and points to its implementation.
 
 ## Settings
 
-- [Appearance](appearance.md): coordinated accents, light/dark modes, translucent Settings, and preserved app identities.
+- [Appearance](appearance.md): coordinated accents, compact light/dark previews, translucent Settings, and preserved app identities.
 - [Backgrounds](background.md): local photos, fit modes, canvas movement, photo-specific contrast, and storage failures.
 - [Display layout](display-layout.md): two-monitor placement, recentering, and temporary settings.
 - [AI gathering](ai-gathering.md): simulated opt-in/download/deletion and implemented same-app window gathering.
