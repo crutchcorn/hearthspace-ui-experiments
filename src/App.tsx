@@ -10,7 +10,7 @@ import {
 } from 'react'
 import { transformCanvasWorkspace } from './layout-workspace'
 import { CANVAS_LAYERS } from './canvas-layers'
-import useObjectLayout from './useObjectLayout'
+import useObjectLayout, { LAYOUT_MOTION_ID } from './useObjectLayout'
 import useScene from './useScene'
 import { useSystemStatus } from './useSystemStatus'
 import { useNotifications } from './useNotifications'
@@ -2571,6 +2571,7 @@ function App() {
               ? framePreviewBounds.get(`window:${item.id}`)
               : undefined
             const expanded = expandedPinnedId === item.id
+            const hovered = tool !== 'layout' && hoveredPinnedId === item.id
             const frameBounds = attached
               ? getFrameBounds(objectPlacement, item.width, item.height, view)
               : null
@@ -2610,9 +2611,9 @@ function App() {
                             : objectPlacement.edge === 'top'
                               ? slot.frame.y + slot.frame.height
                               : view.height - slot.frame.y) +
-                          (hoveredPinnedId === item.id ? 58 : 0),
+                          (hovered ? 58 : 0),
                       )
-                    : hoveredPinnedId === item.id
+                    : hovered
                       ? 100
                       : 42,
                 )
@@ -2637,7 +2638,14 @@ function App() {
                 data-frame-edge={attached ? objectPlacement.edge : undefined}
                 data-pinned-collapsed={attached && !expanded}
                 onPointerEnter={(event) => {
-                  if (attached && event.pointerType !== 'touch')
+                  if (
+                    attached &&
+                    tool !== 'layout' &&
+                    event.pointerType !== 'touch' &&
+                    !event.currentTarget
+                      .getAnimations()
+                      .some((animation) => animation.id === LAYOUT_MOTION_ID)
+                  )
                     setHoveredPinnedId(item.id)
                 }}
                 onPointerLeave={() => {

@@ -5,8 +5,8 @@ type Point = { x: number; y: number }
 
 // Keep the native button held so the test can interrupt a real drag with a key.
 export const startDesktopDrag: BrowserCommand<
-  [title: string, delta: Point, offset?: Point]
-> = async ({ iframe, page }, title, delta, offset) => {
+  [title: string, delta: Point, offset?: Point, steps?: number]
+> = async ({ iframe, page }, title, delta, offset, steps = 8) => {
   const target = iframe.getByRole('button', { name: title, exact: true })
   await target.scrollIntoViewIfNeeded()
   const bounds = await target.boundingBox()
@@ -15,7 +15,7 @@ export const startDesktopDrag: BrowserCommand<
   const y = bounds.y + (offset?.y ?? bounds.height / 2)
   await page.mouse.move(x, y)
   await page.mouse.down()
-  await page.mouse.move(x + delta.x, y + delta.y, { steps: 8 })
+  await page.mouse.move(x + delta.x, y + delta.y, { steps })
 }
 
 export const releasePointer: BrowserCommand = async ({ page }) => {
@@ -72,6 +72,7 @@ declare module 'vitest/browser' {
       title: string,
       delta: Point,
       offset?: Point,
+      steps?: number,
     ) => Promise<void>
     releasePointer: () => Promise<void>
     startFrameWidgetDrag: (id: string, offset?: Point) => Promise<void>

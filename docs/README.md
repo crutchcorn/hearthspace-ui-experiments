@@ -17,9 +17,9 @@ interaction and points to its implementation.
 
 ## Frame and shell
 
-- [Change layout](frame-layout.md): canvas/background/frame placement, visible corner hit targets, toolbar orientation, removal, and recovery.
+- [Change layout](frame-layout.md): animated placement in both directions, visible corner hit targets, toolbar orientation, removal, and recovery.
 - [Frame groups](frame-groups.md): merging overlapping attachments, moving a group, and separating members.
-- [Pinned windows](pinned-windows.md): recessed layout previews, resting strips, hover peeks, focused opening, and close confirmation.
+- [Pinned windows](pinned-windows.md): recessed layout previews, smooth pinning and detaching, hover peeks, focused opening, and close confirmation.
 - [System controls](system-controls.md): independent status items, detail choices, canvas placement, and anchored popups above pinned items.
 - [Clock formats](clock-formats.md): date choices and the extension point for item-specific controls.
 - [Notifications](notifications.md): unread state, inbox actions, previews, and placement.

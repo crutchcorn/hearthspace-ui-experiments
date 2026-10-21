@@ -59,6 +59,18 @@ each corner square, checking the highlighted target and saved corner placement.
 [Frame layout tests](../tests/frame-layout.test.ts) cover all four sides of each
 corner target and the smaller guide geometry in narrow viewports.
 
+[Pin motion tests](../tests/browser/pin-motion.test.tsx) move windows and icons
+onto the frame, then back to the canvas through **Canvas** and **Remove from
+frame**. They pause the real browser animations and measure the full screen
+rectangle at the start, through the movement, and after completion. This checks
+that both directions start at the visible position and finish without an
+endpoint jump, including a window's recessed off-screen body.
+Native drag cases also detach a window and an icon, check continuity at the
+first movement, then move the pointer again and verify that the object follows
+the same distance before settling on release.
+Reversing a pin or pressing Escape halfway through detachment must begin the
+return from that intermediate position without a jump or a stray hover peek.
+
 [Layout layer tests](../tests/browser/layout-layers.test.tsx) check the browser's
 paint order where outlines, windows, and dragged items overlap. They also check
 that releasing or canceling a layout drag restores ordinary layering, including

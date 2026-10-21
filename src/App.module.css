@@ -86,6 +86,11 @@
   pointer-events: none;
 }
 
+.desktop[data-layout-editing='true'] .window {
+  /* Layout motion owns the full path, including the recessed frame offset. */
+  transition-property: box-shadow, border-color, background-color, opacity;
+}
+
 .window[data-preview-selected='true'] {
   outline: 2px solid var(--accent);
   outline-offset: 5px;

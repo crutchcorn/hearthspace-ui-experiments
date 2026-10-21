@@ -39,6 +39,8 @@ import { snapCanvasCoordinate } from './canvas-grid'
 
 type ToolbarGrip = { along: number; across: number }
 
+export const LAYOUT_MOTION_ID = 'layout-placement'
+
 function gripPoint(
   bounds: Pick<Bounds, 'width' | 'height'>,
   grip?: ToolbarGrip,
@@ -149,6 +151,51 @@ export default function useObjectLayout(
   })
   useLayoutEffect(() => {
     if (!pendingSnap.current || motionFrame.current !== null) return
+    if (!isToolbar(pendingSnap.current.target)) {
+      const snap = pendingSnap.current
+      pendingSnap.current = null
+      const element = targetElement(snap.target)
+      snapAnimation.current?.cancel()
+      if (
+        !element ||
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      )
+        return
+
+      // Hosts and pinned-window offsets change together. Measure the new layout
+      // before paint, without a CSS transition or the recessed transform, then
+      // start at the actual screen bounds captured before the change.
+      const transition = element.style.transition
+      const transform = element.style.transform || 'none'
+      element.style.transition = 'none'
+      element.style.transform = 'none'
+      const to = element.getBoundingClientRect()
+      element.style.transform = transform
+      const destination = element.getBoundingClientRect()
+      element.style.transition = transition
+      const from = snap.from
+      if (
+        !to.width ||
+        !to.height ||
+        (Math.abs(from.x - destination.x) < 0.5 &&
+          Math.abs(from.y - destination.y) < 0.5 &&
+          Math.abs(from.width - destination.width) < 0.5 &&
+          Math.abs(from.height - destination.height) < 0.5)
+      )
+        return
+      snapAnimation.current = element.animate(
+        [
+          {
+            transformOrigin: 'top left',
+            transform: `translate(${from.x - to.x}px, ${from.y - to.y}px) scale(${from.width / to.width}, ${from.height / to.height})`,
+          },
+          { transformOrigin: 'top left', transform },
+        ],
+        { duration: 300, easing: 'cubic-bezier(0.2,0.7,0.1,1)' },
+      )
+      snapAnimation.current.id = LAYOUT_MOTION_ID
+      return
+    }
     // Measure after the widget has laid out its new orientation. Keep this frame
     // queued across pointer updates so fast dragging cannot cancel the turn.
     motionFrame.current = requestAnimationFrame(() => {
@@ -198,24 +245,9 @@ export default function useObjectLayout(
             duration,
           )
         }
-      } else {
-        snapAnimation.current?.cancel()
-        snapAnimation.current = element.animate(
-          [
-            {
-              transformOrigin: 'center',
-              transform: `translate(${dx}px, ${dy}px) scale(${from.width / to.width},${from.height / to.height})`,
-            },
-            {
-              transformOrigin: 'center',
-              transform: element.style.transform || 'none',
-            },
-          ],
-          duration,
-        )
       }
     })
-  }, [layout])
+  })
 
   useLayoutEffect(() => {
     const frame = requestAnimationFrame(() => {
@@ -432,7 +464,22 @@ export default function useObjectLayout(
     const current = drag.current
     if (!current) return
     drag.current = null
-    cancelMotion()
+    const element =
+      current.moved &&
+      (current.target.kind === 'window' || current.target.kind === 'item')
+        ? targetElement(current.target)
+        : null
+    const from = element?.getBoundingClientRect()
+    if (current.moved) cancelMotion()
+    else if (snapAnimation.current?.playState === 'paused')
+      snapAnimation.current.play()
+    if (from)
+      pendingSnap.current = {
+        target: current.target,
+        from,
+        anchor: { x: from.x + from.width / 2, y: from.y + from.height / 2 },
+        preview: false,
+      }
     setDraggingTarget(null)
     setDraggingWidget(null)
     setDropTarget(null)
@@ -605,7 +652,14 @@ export default function useObjectLayout(
       bounds.x = event.clientX - x
       bounds.y = event.clientY - y
     }
-    cancelMotion()
+    if (isToolbar(target)) cancelMotion()
+    else if (
+      snapAnimation.current &&
+      movingElement.getAnimations().includes(snapAnimation.current)
+    )
+      // Keep the grabbed visual in place until movement or release. Canceling
+      // here would reveal the destination underneath an unfinished animation.
+      snapAnimation.current.pause()
     event.preventDefault()
     event.stopPropagation()
     event.currentTarget.setPointerCapture(event.pointerId)
@@ -668,7 +722,14 @@ export default function useObjectLayout(
     const dx = clientX - current.x,
       dy = clientY - current.y
     if (!current.moved && Math.hypot(dx, dy) < 6) return
-    if (!current.moved) setDraggingTarget(current.target)
+    if (!current.moved) {
+      setDraggingTarget(current.target)
+      if (
+        !isToolbar(current.target) &&
+        snapAnimation.current?.playState === 'paused'
+      )
+        queueMotion(current.target)
+    }
     current.moved = true
     const { bounds: movingBounds, drop } = frameDrag(current, dx, dy, altKey)
     const favorite = favorites?.hover(
@@ -719,8 +780,10 @@ export default function useObjectLayout(
       )
       return
     }
-    if (previous.surface === 'frame')
+    if (previous.surface === 'frame') {
+      if (!isToolbar(current.target)) queueMotion(current.target)
       place(current.target, { surface: 'canvas' }, false)
+    }
     move(current.target, view.x + movingBounds.x, view.y + movingBounds.y)
   }
   function onPointerUp(event: PointerEvent<HTMLElement>) {
@@ -777,8 +840,8 @@ export default function useObjectLayout(
       } else if (current.target.kind === 'group') {
         place(current.target, { surface: 'canvas' })
       } else {
+        queueMotion(current.target)
         if (isToolbar(current.target)) {
-          queueMotion(current.target)
           // Return to a row around the same grabbed point.
           movingBounds = dragBounds(current, dx, dy, 'top')
         }
@@ -812,6 +875,8 @@ export default function useObjectLayout(
     finishDrag(event)
   }
   function finishDrag(event: PointerEvent<HTMLElement>) {
+    if (!drag.current?.moved && snapAnimation.current?.playState === 'paused')
+      snapAnimation.current.play()
     drag.current = null
     setDraggingTarget(null)
     setDraggingWidget(null)

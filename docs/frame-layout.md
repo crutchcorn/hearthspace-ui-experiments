@@ -57,6 +57,14 @@ Pinning a window during layout editing shows its recessed edge strip, including
 at corners, so the preview matches its placement after **Done**. Drag that strip
 to reposition it; see [Pinned windows](pinned-windows.md).
 
+Icons and windows move smoothly both onto the frame and back onto the canvas.
+Dragging an attachment into the interior animates it out from its visible
+position; releasing it at an edge animates it into its new placement. The
+**Frame**, **Canvas**, and **Remove from frame** actions use the same movement.
+Windows slide into or out of their recessed position without shrinking their
+full body into the exposed strip. Reduced-motion preferences skip this movement
+and apply the placement immediately.
+
 Placement outlines stay above windows, including pinned windows, so a window
 can't hide your drop target. Their tinted backgrounds stay below frame items so
 icons and grouped window previews remain visible. The object you're dragging
@@ -98,9 +106,12 @@ pointer target stay aligned across viewport sizes. Ordinary edge capture still
 uses the dragged object's bounds; toolbars use a square probe at the pointer.
 The active drag remembers its orientation and grip between pointer events.
 Layout motion uses that grip as the turn's pivot and owns the toolbar's snap
-animation. [Peek motion](../src/usePeekMotion.ts) animates displaced neighbors
-and excludes that toolbar, keeping the two animations from moving it in
-different directions on release.
+animation. For icons and windows, it measures the current screen rectangle
+before changing placement, then starts the movement to the new rectangle before
+the browser paints. Window measurements include the off-screen body, so
+detaching begins from the recessed position. [Peek motion](../src/usePeekMotion.ts)
+animates displaced neighbors while layout motion owns the moved object,
+preventing competing placement animations.
 
 The editing overlays in [App](../src/App.tsx) separate the guides and active drag
 from the ordinary canvas stack. FrameGuides keeps the fill in the canvas
