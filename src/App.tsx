@@ -2570,8 +2570,7 @@ function App() {
             const slot = grouped
               ? framePreviewBounds.get(`window:${item.id}`)
               : undefined
-            const expanded =
-              expandedPinnedId === item.id || (tool === 'layout' && !grouped)
+            const expanded = expandedPinnedId === item.id
             const frameBounds = attached
               ? getFrameBounds(objectPlacement, item.width, item.height, view)
               : null

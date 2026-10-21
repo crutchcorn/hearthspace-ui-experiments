@@ -53,6 +53,9 @@ animates the toolbar into the indicated placement. Its surface, outline, and
 contents move together. Icons and toolbars keep their screen inset of 24 pixels
 on desktop and 12 pixels on narrow screens; the corner target doesn't add
 padding to the pointer's hit area. Standalone windows sit flush with the edge.
+Pinning a window during layout editing shows its recessed edge strip, including
+at corners, so the preview matches its placement after **Done**. Drag that strip
+to reposition it; see [Pinned windows](pinned-windows.md).
 
 Placement outlines stay above windows, including pinned windows, so a window
 can't hide your drop target. Their tinted backgrounds stay below frame items so

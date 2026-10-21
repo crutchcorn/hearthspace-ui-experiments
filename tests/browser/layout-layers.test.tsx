@@ -45,7 +45,7 @@ function leftGuide() {
 function paintedBefore(
   front: Element,
   back: Element,
-  point = { x: 45, y: 450 },
+  point = { x: 35, y: 450 },
 ) {
   const guide = leftGuide()
   const previous = guide.style.pointerEvents

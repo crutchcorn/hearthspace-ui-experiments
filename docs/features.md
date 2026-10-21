@@ -32,7 +32,7 @@ with reset, minus, and plus placeholders below the map. Reset is disabled.
 | --------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
 | [Change layout](frame-layout.md)        | Drag between canvas, background, and frame. Toolbars turn around your grip; corner squares are pointer targets. |
 | [Frame groups](frame-groups.md)         | Combine icons, controls, and window previews on a shared surface. Overlaps join groups.                         |
-| [Pinned windows](pinned-windows.md)     | Keep an edge strip, reveal more on hover, open on click, and tuck away when focus leaves.                       |
+| [Pinned windows](pinned-windows.md)     | Preview the recessed edge strip while editing, reveal more on hover, and open on click.                         |
 | [System controls](system-controls.md)   | Move Clock, Wi-Fi, Sound, and Battery independently, change their detail, and recover hidden controls.          |
 | [Clock formats](clock-formats.md)       | Choose a date/time presentation through item-specific layout controls.                                          |
 | [Notifications](notifications.md)       | Read, dismiss, and open sample events from the trigger, inbox, or preview toast.                                |

@@ -7,10 +7,10 @@ available when you need it.
 ## Reveal without losing the attachment
 
 Use [Change layout](frame-layout.md) to drag a window to an edge, or select it
-and choose **Frame**. After leaving layout editing, a standalone pinned window
-rests with a 42-pixel strip visible. Hovering with a mouse or trackpad reveals
-up to 100 pixels. That preview helps identify the window without opening all of
-its contents.
+and choose **Frame**. A standalone pinned window rests with a 42-pixel strip
+visible, including during layout editing. Hovering with a mouse or trackpad
+reveals up to 100 pixels. That preview helps identify the window without opening
+all of its contents.
 
 Click the strip to open and focus the window. Its chrome stays visible and its
 bounds fit the viewport. Focusing another window, clicking outside, or moving
@@ -24,11 +24,14 @@ it at its existing frame location.
 
 ## Editing, grouping, and closing
 
-Change layout opens standalone pinned windows so they're easy to position.
-[Grouped windows](frame-groups.md) keep their edge preview until explicitly
-opened. Their resting strip reaches the group's outer surface instead of
-receding behind its padding, and hover extends it a little further. The preview
-uses the actual window, including its content and chrome.
+Entering Change layout doesn't automatically open pinned windows. A window
+pinned at a corner previews the recessed strip that remains visible when editing
+ends, rather than suggesting its full body will stay on screen. During editing,
+the strip selects or moves the attachment; finish editing to click it open.
+[Grouped windows](frame-groups.md) use the same recessed preview. Their resting
+strip reaches the group's outer surface instead of receding behind its padding,
+and hover extends it a little further. The preview uses the actual window,
+including its content and chrome.
 
 Pinning preserves the app's visual identity too. Settings keeps Hearthspace's
 layered translucent material and custom icon; simulated third-party apps keep
@@ -58,6 +61,8 @@ available until that Settings window is closed.
 strip, with [tests](../tests/frame-layout.test.ts) for resting, hover, fully open,
 and small-window cases. [FramePreviewSlot](../src/components/FramePreviewSlot.tsx)
 measures grouped previews without substituting a second window visual.
+[Browser coverage](../tests/browser/pinned-window-preview.test.tsx) checks all
+four corner previews, dragging between corners, and reopening after editing.
 [WindowHost](../src/components/WindowHost.tsx) gives each window a persistent
 portal container. Changing placement moves that container without remounting
 the app inside it.
