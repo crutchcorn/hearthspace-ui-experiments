@@ -152,8 +152,10 @@ Background objects occupy the lowest canvas layer, including background
 ink. Raised icons and widgets sit above them but below ordinary windows.
 Frame attachments sit above all canvas work. A `canvas` placement for an icon doesn't
 give it the frame's foreground position. Selecting or activating a canvas
-control also leaves its surface beneath ordinary windows. Only its open panel
-uses a foreground layer, anchored to the control without raising the icon.
+control also leaves its surface beneath ordinary windows. Open widget panels
+use a separate host above frame attachments, anchored to their controls without
+raising the icons. Frame, grouped, and mobile controls use the same popup host;
+Overview shares its layer above pinned items.
 
 `FRAME_WIDGETS` defines Notifications, Clock, Wi-Fi, Sound, Battery, Canvas
 tools, and Apps, including default corners and search metadata. The four
@@ -616,7 +618,7 @@ across Settings windows.
 | [`src/components/FrameShell.tsx`](../src/components/FrameShell.tsx)                                                                                   | Shared frame-group surfaces, member rendering, whole-group grips, and default mobile bars.                   |
 | [`src/components/FramePreviewSlot.tsx`](../src/components/FramePreviewSlot.tsx)                                                                       | Measured slots and group bounds for existing window surfaces.                                                |
 | [`src/components/PlacedWidget.tsx`](../src/components/PlacedWidget.tsx)                                                                               | Measured shell-widget positioning, canvas selection and dragging, responsive merging, and popover placement. |
-| [`src/components/WidgetPopover.tsx`](../src/components/WidgetPopover.tsx), [`widget-popover-context.ts`](../src/components/widget-popover-context.ts) | Detached popup, menu, and toast portals with shared placement; the control stays on the canvas.              |
+| [`src/components/WidgetPopover.tsx`](../src/components/WidgetPopover.tsx), [`widget-popover-context.ts`](../src/components/widget-popover-context.ts) | Popup, menu, and toast portals above frame attachments; controls retain their chosen layer.                  |
 | [`src/components/LayoutConfirm.tsx`](../src/components/LayoutConfirm.tsx)                                                                             | Tool-removal warning and pinned-window close confirmation.                                                   |
 | [`src/drawings.ts`](../src/drawings.ts)                                                                                                               | Drawing types, stroke bounds, local coordinates, and stroke validation shared with the scene reader.         |
 | [`src/window-layout.ts`](../src/window-layout.ts)                                                                                                     | Responsive shell clearances and ordinary maximized window bounds.                                            |

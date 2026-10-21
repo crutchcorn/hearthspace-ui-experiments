@@ -36,7 +36,8 @@ Use rectangle or lasso [window selection](window-selection.md) to choose one
 or more anchors. The action appears while at least one selected window is
 visible. It uses the local **Gather windows** glyph on a raised shell surface,
 matching Canvas tools. While disabled or downloading, its tooltip explains
-availability.
+availability. The floating action stays above pinned items so nearby frame
+attachments cannot cover it.
 
 After opt-in, gathering finds other canvas windows with the selected apps'
 identities. Selecting windows from two apps gathers candidates from both.

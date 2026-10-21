@@ -7,7 +7,7 @@ interaction and points to its implementation.
 
 ## Canvas and windows
 
-- [Canvas navigation](canvas-navigation.md): panning, tool pickers, temporary drag navigation, and Overview with a zoom readout and reset icon placeholder.
+- [Canvas navigation](canvas-navigation.md): panning, tool pickers, temporary drag navigation, and Overview above pinned items with a zoom readout and reset icon placeholder.
 - [Desktop items](desktop-items.md): permanent app shortcuts, sample files and folders, and movable canvas controls.
 - [Window management](window-management.md): movement, resizing, active-window rims, Arrange, ordinary maximization, and focused view.
 - [Window selection](window-selection.md): rectangle/lasso selection, grouped dragging, and inert app contents.
@@ -20,7 +20,7 @@ interaction and points to its implementation.
 - [Change layout](frame-layout.md): canvas/background/frame placement, visible drop guides, pointer-driven toolbar targets, orientation, removal, and recovery.
 - [Frame groups](frame-groups.md): merging overlapping attachments, moving a group, and separating members.
 - [Pinned windows](pinned-windows.md): resting strips, hover peeks, focused opening, and close confirmation.
-- [System controls](system-controls.md): independent status items, detail choices, canvas placement, and anchored popups.
+- [System controls](system-controls.md): independent status items, detail choices, canvas placement, and anchored popups above pinned items.
 - [Clock formats](clock-formats.md): date choices and the extension point for item-specific controls.
 - [Notifications](notifications.md): unread state, inbox actions, previews, and placement.
 - [Responsive shell](responsive-shell.md): default mobile bars, horizontal scrolling, and flat tool choices.

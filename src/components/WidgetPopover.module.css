@@ -2,7 +2,6 @@
   --widget-popover-x: var(--widget-x);
 
   position: fixed;
-  z-index: 1100;
   color: var(--chrome-text);
   pointer-events: none;
 }
@@ -28,7 +27,10 @@
 }
 
 :global(
-    [data-layout-widget]:is([data-frame-edge='left'], [data-frame-edge='right'])
+    :is([data-layout-widget], [data-widget-popover]):is(
+      [data-frame-edge='left'],
+      [data-frame-edge='right']
+    )
   )
   .panel {
   inset: var(--widget-side-top) auto var(--widget-side-bottom)
@@ -43,7 +45,10 @@
   max-height: var(--widget-side-height);
 }
 
-:global([data-layout-widget][data-frame-edge='right']) .panel {
+:global(
+    :is([data-layout-widget], [data-widget-popover])[data-frame-edge='right']
+  )
+  .panel {
   left: clamp(
     calc(12px - var(--widget-x)),
     calc(-1 * (min(var(--widget-panel-width), 100vw - 24px) + 12px)),

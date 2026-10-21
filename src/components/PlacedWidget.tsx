@@ -252,10 +252,11 @@ export default function PlacedWidget({
       >
         <WidgetPopoverContext
           value={
-            canvasControl
+            kind === 'widget' && !hidden && placement.surface !== 'hidden'
               ? {
                   id,
                   host: popoverHost,
+                  edge,
                   style: {
                     ...style,
                     left: anchorX,

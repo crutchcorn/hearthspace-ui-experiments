@@ -15,7 +15,8 @@ starts another one. Escape cancels an unfinished stroke without removing
 completed ink.
 
 The floating actions use the same raised material and subtle light-mode accent
-hover as the canvas toolbar. Their [local glyphs](icons.md) identify Change
+hover as the canvas toolbar. They stay above pinned items so nearby frame
+attachments cannot cover the actions. Their [local glyphs](icons.md) identify Change
 layout with a divided frame, launch with a Play triangle, delete with a bin,
 and finish with a check. Hover or focus reveals the action's label. The ink
 keeps round stroke ends; the icon set's square caps apply to controls, not to

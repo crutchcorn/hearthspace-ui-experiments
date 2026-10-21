@@ -1,4 +1,6 @@
 .desktop {
+  --shell-popup-z: 1110;
+
   position: relative;
   isolation: isolate;
   width: 100%;
@@ -752,7 +754,7 @@
 
 .mapPanel {
   position: fixed;
-  z-index: 600;
+  z-index: var(--shell-popup-z);
   bottom: 90px;
   left: 24px;
   width: 352px;
@@ -896,12 +898,20 @@
   }
 }
 
-.frameHost {
+.frameHost,
+.popoverHost {
   position: fixed;
-  z-index: 1101;
   inset: 0;
   overflow: hidden;
   pointer-events: none;
+}
+
+.frameHost {
+  z-index: 1101;
+}
+
+.popoverHost {
+  z-index: var(--shell-popup-z);
 }
 
 .frameHost > * {
@@ -1034,7 +1044,7 @@
 }
 
 .desktop[data-focus-mode='true'][data-shell-peek='false']
-  :is(.frameHost, [data-layout-widget], [data-layout-group]) {
+  :is(.frameHost, .popoverHost, [data-layout-widget], [data-layout-group]) {
   opacity: 0;
   pointer-events: none;
 }

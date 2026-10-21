@@ -42,6 +42,8 @@ Four corners are the starting arrangement: notifications at top left, system
 status at top right, canvas tools at bottom left, and apps at bottom right.
 Custom layouts can depart from it. Canvas tools require an explicit hide-able
 setting before removal; keyboard search remains available to find them again.
+Open popovers and Overview appear above pinned icons, windows, and other frame
+attachments while their triggers keep their chosen placement.
 
 ## Find, launch, and draw
 

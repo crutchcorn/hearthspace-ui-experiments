@@ -204,12 +204,18 @@
   justify-self: center;
 }
 
-:global([data-layout-widget][data-frame-edge='left']) .tooltip {
+:global(
+    :is([data-layout-widget], [data-widget-popover])[data-frame-edge='left']
+  )
+  .tooltip {
   inset: var(--widget-side-top) auto var(--widget-side-bottom) calc(100% + 12px);
   max-width: calc(100vw - 78px);
 }
 
-:global([data-layout-widget][data-frame-edge='right']) .tooltip {
+:global(
+    :is([data-layout-widget], [data-widget-popover])[data-frame-edge='right']
+  )
+  .tooltip {
   inset: var(--widget-side-top) calc(100% + 12px) var(--widget-side-bottom) auto;
   max-width: calc(100vw - 78px);
 }

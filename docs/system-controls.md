@@ -23,6 +23,11 @@ Wi-Fi and volume are in-memory prototype state; they reset on reload and don't
 control the host computer. The battery is a fixed preview, not a device reading.
 Layout and detail choices do persist.
 
+Open popovers sit above pinned windows, icons, and other frame attachments,
+including controls inside a group or the narrow-screen bars. A Sound panel can
+therefore cover a neighboring pinned icon while its slider stays usable. The
+panel opens beside its control and stays within the viewport.
+
 The clock and status glyphs belong to Hearthspace's [local icon set](icons.md).
 Their toolbar uses the lighter raised material, while an open popover adds a
 separate translucent layer with strong blur. In light mode, toolbar buttons
@@ -46,9 +51,9 @@ shortcuts, including mixed selections. A click without a drag still opens the
 control. Covered controls participate in the same peek-and-return behavior as
 other canvas objects.
 
-Opening a detached control raises only its popover above windows. Its icon stays
-on its assigned canvas layer. This keeps the popup usable without letting the
-button itself jump in front of your work.
+Opening a detached control raises only its popover above windows and pinned
+items. Its icon stays on its assigned canvas layer. This keeps the popup usable
+without letting the button itself jump in front of your work.
 
 Search results preview the current icon and state. Activating a result opens the
 real control at its frame location, or scrolls a detached control into view
@@ -62,8 +67,9 @@ doesn't open the layout editor or alter a visible control's placement.
 Its Wi-Fi switch reuses the [Settings switch styles](../src/components/Settings.module.css)
 so both themes stay consistent with the Settings app.
 [PlacedWidget](../src/components/PlacedWidget.tsx) places it, and
-[WidgetPopover](../src/components/WidgetPopover.tsx) separates detached popup
-layering from the control body. Its [shared panel styles](../src/components/WidgetPopover.module.css)
+[WidgetPopover](../src/components/WidgetPopover.tsx) separates popup layering
+from the control body through a shared popup host above frame attachments.
+Its [shared panel styles](../src/components/WidgetPopover.module.css)
 also own viewport clamping, opening direction, and available height for system
 controls, notifications, running-app lists, and canvas tool menus. Each popup
 supplies its width through `--widget-panel-width` and keeps its own content

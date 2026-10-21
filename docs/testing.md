@@ -65,6 +65,10 @@ painting again. Its editor offers Background and Pin to top, while windows
 retain their Canvas choice. Keyboard checks cover finishing and deleting ink
 in both drawing placements.
 
+[Popup layer tests](../tests/browser/popup-layers.test.tsx) open Sound and
+Overview over pinned shortcuts, check the browser's paint order at their
+overlap, and use the slider or map without launching the covered app.
+
 ## Isolation and limits
 
 Each test mounts a fresh desktop into a full-height root and clears local

@@ -58,6 +58,10 @@ and the current viewport. Drag inside the viewport rectangle to keep the grabbed
 point under your pointer. Clicking elsewhere centers the viewport there; keep
 dragging to continue navigating. Canvas boundaries limit the destination.
 
+The map opens above pinned icons, windows, and other frame attachments, so
+neighboring pinned items cannot cover its navigation surface. Opening it leaves
+the Canvas tools in their chosen placement.
+
 The Overview glyph has four open corners surrounding a small window. **Change
 layout** uses the divided frame with a window inside it. Keeping these
 [local icons](icons.md) distinct helps separate navigating the canvas from

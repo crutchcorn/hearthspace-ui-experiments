@@ -199,6 +199,7 @@ function App() {
   const [tool, setTool] = useState(loadCanvasTool)
   const drawingLayer: DrawingLayerName = 'above'
   const [frameHost, setFrameHost] = useState<HTMLDivElement | null>(null)
+  const [popoverHost, setPopoverHost] = useState<HTMLDivElement | null>(null)
   const [pinnedDrawingHost, setPinnedDrawingHost] =
     useState<HTMLDivElement | null>(null)
   const [layoutDragHost, setLayoutDragHost] = useState<HTMLDivElement | null>(
@@ -2269,6 +2270,12 @@ function App() {
         className={styles.frameHost}
         data-shell-controls
       />
+      <div
+        ref={setPopoverHost}
+        className={styles.popoverHost}
+        inert={windowSwitcher.open || tool === 'layout'}
+        data-shell-controls
+      />
       <div className={styles.layoutDragOverlay}>
         <div
           ref={setLayoutDragHost}
@@ -3086,7 +3093,7 @@ function App() {
       <FrameShell
         canvasHost={canvasHost}
         dragHost={activeLayoutDragHost}
-        popoverHost={frameHost}
+        popoverHost={popoverHost}
         selectedControlIds={selectedControlIds}
         onControlPointerDown={startControlGesture}
         onControlSizeChange={measureControl}

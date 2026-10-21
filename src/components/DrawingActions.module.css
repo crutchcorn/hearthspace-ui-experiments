@@ -1,6 +1,6 @@
 .anchor {
   position: fixed;
-  z-index: 500;
+  z-index: var(--shell-popup-z);
   width: max-content;
 }
 
