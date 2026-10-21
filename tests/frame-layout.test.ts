@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import {
   getFrameBounds,
+  getFrameCornerAtPointer,
   getFrameDragBounds,
   getFrameDropTarget,
   getFrameGroups,
@@ -651,20 +652,20 @@ test('the dragged object can reach the frame while the pointer stays far from it
   )
 })
 
-test('frame drops prefer the closest object edge and snap near the corners', () => {
+test('frame drops preserve positions near corners without an extra snap margin', () => {
   assert.deepEqual(
     getFrameDropTarget(
       { x: 100, y: 35, width: 200, height: 150 },
       { width: 1000, height: 800 },
     ),
-    { surface: 'frame', edge: 'top', position: 0 },
+    { surface: 'frame', edge: 'top', position: (100 - 24) / (1000 - 48 - 200) },
   )
   assert.deepEqual(
     getFrameDropTarget(
       { x: 730, y: 35, width: 200, height: 150 },
       { width: 1000, height: 800 },
     ),
-    { surface: 'frame', edge: 'top', position: 1 },
+    { surface: 'frame', edge: 'top', position: (730 - 24) / (1000 - 48 - 200) },
   )
   assert.deepEqual(
     getFrameDropTarget(
@@ -678,8 +679,79 @@ test('frame drops prefer the closest object edge and snap near the corners', () 
       { x: 790, y: 560, width: 200, height: 150 },
       { width: 1000, height: 800 },
     ),
-    { surface: 'frame', edge: 'right', position: 1 },
+    {
+      surface: 'frame',
+      edge: 'right',
+      position: (560 - 24) / (800 - 48 - 150),
+    },
   )
+})
+
+for (const corner of [
+  { name: 'top-left', left: 8, top: 8, edge: 'top', position: 0 },
+  { name: 'top-right', left: 920, top: 8, edge: 'right', position: 0 },
+  { name: 'bottom-left', left: 8, top: 720, edge: 'bottom', position: 0 },
+  { name: 'bottom-right', left: 920, top: 720, edge: 'right', position: 1 },
+] as const) {
+  test(`the ${corner.name} snap target matches its visible square on all four sides`, () => {
+    const viewport = { width: 1000, height: 800 }
+    const centerX = corner.left + 36
+    const centerY = corner.top + 36
+    for (const [boundary, outside] of [
+      [
+        { x: corner.left, y: centerY },
+        { x: corner.left - 1, y: centerY },
+      ],
+      [
+        { x: corner.left + 72, y: centerY },
+        { x: corner.left + 73, y: centerY },
+      ],
+      [
+        { x: centerX, y: corner.top },
+        { x: centerX, y: corner.top - 1 },
+      ],
+      [
+        { x: centerX, y: corner.top + 72 },
+        { x: centerX, y: corner.top + 73 },
+      ],
+    ]) {
+      assert.equal(getFrameCornerAtPointer(boundary, viewport), corner.name)
+      assert.equal(getFrameCornerAtPointer(outside, viewport), null)
+    }
+    const pointer = { x: centerX, y: centerY }
+    assert.deepEqual(
+      getFrameDropTarget(
+        { x: pointer.x - 12, y: pointer.y - 12, width: 180, height: 120 },
+        viewport,
+        72,
+        pointer,
+      ),
+      { surface: 'frame', edge: corner.edge, position: corner.position },
+    )
+  })
+}
+
+test('a window stays attached to the side when its pointer enters the corner square', () => {
+  assert.deepEqual(
+    getFrameDropTarget(
+      { x: 0, y: 60, width: 200, height: 150 },
+      { width: 1000, height: 800 },
+      72,
+      { x: 12, y: 72 },
+    ),
+    { surface: 'frame', edge: 'left', position: 0 },
+  )
+})
+
+test('corner targets shrink with the visible squares in a narrow viewport', () => {
+  const viewport = { width: 160, height: 300 }
+  assert.equal(getFrameCornerAtPointer({ x: 72, y: 72 }, viewport), 'top-left')
+  assert.equal(getFrameCornerAtPointer({ x: 73, y: 72 }, viewport), null)
+  assert.equal(
+    getFrameCornerAtPointer({ x: 88, y: 228 }, viewport),
+    'bottom-right',
+  )
+  assert.equal(getFrameCornerAtPointer({ x: 87, y: 228 }, viewport), null)
 })
 
 test('full-width mobile attachments produce a finite centered drop position', () => {
@@ -733,27 +805,27 @@ test('turning a widget near the top edge does not switch its target to the left 
 
 test('a widget keeps its corner snap through an orientation change', () => {
   const viewport = { width: 1000, height: 800 }
-  const horizontal = { x: 90 - 299 / 2, y: 90 - 54 / 2, width: 299, height: 54 }
-  const vertical = { x: 90 - 54 / 2, y: 90 - 299 / 2, width: 54, height: 299 }
+  const horizontal = { x: 45 - 299 / 2, y: 45 - 54 / 2, width: 299, height: 54 }
+  const vertical = { x: 45 - 54 / 2, y: 45 - 299 / 2, width: 54, height: 299 }
   const target = { surface: 'frame', edge: 'top', position: 0 }
   assert.deepEqual(getWidgetFrameDropTarget(horizontal, viewport), target)
   assert.deepEqual(getWidgetFrameDropTarget(vertical, viewport), target)
 })
 
 for (const corner of [
-  { name: 'top-left', x: 90, y: 90, horizontal: 'top', vertical: 'left' },
-  { name: 'top-right', x: 910, y: 90, horizontal: 'top', vertical: 'right' },
+  { name: 'top-left', x: 45, y: 45, horizontal: 'top', vertical: 'left' },
+  { name: 'top-right', x: 955, y: 45, horizontal: 'top', vertical: 'right' },
   {
     name: 'bottom-left',
-    x: 90,
-    y: 710,
+    x: 45,
+    y: 755,
     horizontal: 'bottom',
     vertical: 'left',
   },
   {
     name: 'bottom-right',
-    x: 910,
-    y: 710,
+    x: 955,
+    y: 755,
     horizontal: 'bottom',
     vertical: 'right',
   },
@@ -828,6 +900,23 @@ test('a toolbar still changes orientation when entering an edge away from a corn
       'left',
     ),
     { surface: 'frame', edge: 'top', position: 0.5 },
+  )
+})
+
+test('a toolbar changes edge when its grab is outside the visible corner square', () => {
+  assert.deepEqual(
+    getWidgetFrameDropTarget(
+      { x: 20, y: 20, width: 299, height: 54 },
+      { width: 1000, height: 800 },
+      72,
+      'left',
+      { x: 90, y: 45 },
+    ),
+    {
+      surface: 'frame',
+      edge: 'top',
+      position: (90 - 27 - 24) / (1000 - 48 - 54),
+    },
   )
 })
 

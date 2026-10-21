@@ -32,8 +32,10 @@ or join frame groups. A pinned drawing stays pinned when moved into the middle
 of the screen; choose Background to unpin it. See
 [drawing placement](drawing.md#choose-where-it-belongs).
 
-For other objects, dragging near an edge attaches the object there; each corner
-has its own target.
+For other objects, dragging near an edge attaches the object there. To snap an
+icon, window, or toolbar into a corner, move your pointer inside that corner's
+visible square guide. The square marks the full corner target: the object's
+size and the point you grabbed don't extend it farther along either edge.
 Dragging back into the interior returns it to the canvas. Releasing there keeps
 that position, while continuing to another edge attaches it again. Edge dragging
 doesn't pan the canvas during layout editing, so reaching the frame has one
@@ -41,16 +43,16 @@ meaning. **Done** or Escape leaves the editor.
 
 Toolbars turn vertically at side edges and horizontally at the top or bottom.
 They turn around the point you grabbed, keeping it under your pointer even when
-you grab near either end. They keep their incoming orientation at corners and
-while crossing the interior. Releasing in the interior returns the toolbar to a
-row around that same grabbed point.
+you grab near either end. They keep their incoming orientation while your pointer
+is inside a corner square and while crossing the interior. Moving out of the
+square onto a side edge makes the toolbar vertical again. Releasing in the
+interior returns the toolbar to a row around that same grabbed point.
 
-For toolbars, your pointer chooses the highlighted target and the final position
-along the edge. A corner becomes the target when your pointer reaches its target
-area; the length of the toolbar doesn't pull it into a corner early. Releasing
+For toolbars, your pointer also chooses the final position along the edge. Releasing
 animates the toolbar into the indicated placement. Its surface, outline, and
-contents move together. Icons and toolbars share the same screen inset;
-standalone windows sit flush with the edge.
+contents move together. Icons and toolbars keep their screen inset of 24 pixels
+on desktop and 12 pixels on narrow screens; the corner target doesn't add
+padding to the pointer's hit area. Standalone windows sit flush with the edge.
 
 Placement outlines stay above windows, including pinned windows, so a window
 can't hide your drop target. Their tinted backgrounds stay below frame items so
@@ -87,6 +89,10 @@ window coverage remains temporary.
 
 [useObjectLayout](../src/useObjectLayout.ts) owns editing and drag transitions;
 [frame-layout](../src/frame-layout.ts) defines placement and recovery rules.
+The guide size and corner hit test share geometry with
+[FrameGuides](../src/components/FrameGuides.tsx), so the rendered square and
+pointer target stay aligned across viewport sizes. Ordinary edge capture still
+uses the dragged object's bounds; toolbars use a square probe at the pointer.
 The active drag remembers its orientation and grip between pointer events.
 Layout motion uses that grip as the turn's pivot and owns the toolbar's snap
 animation. [Peek motion](../src/usePeekMotion.ts) animates displaced neighbors
@@ -94,8 +100,8 @@ and excludes that toolbar, keeping the two animations from moving it in
 different directions on release.
 
 The editing overlays in [App](../src/App.tsx) separate the guides and active drag
-from the ordinary canvas stack. [FrameGuides](../src/components/FrameGuides.tsx)
-keeps the fill in the canvas background and the outline above windows. Dragged
+from the ordinary canvas stack. FrameGuides keeps the fill in the canvas
+background and the outline above windows. Dragged
 objects use canvas coordinates in an overlay that follows the current viewport.
 [WindowHost](../src/components/WindowHost.tsx) moves a window between these hosts
 without restarting the app inside it.
@@ -104,4 +110,5 @@ without restarting the app inside it.
 cover Alt alignment. [Layout workspace tests](../tests/layout-workspace.test.ts)
 cover settling, and [scene storage](../src/scene-storage.ts) saves the result.
 [Browser drag tests](../tests/browser/frame-drag.test.tsx) cover grabs near both
-ends, the gripped point throughout a turn, and release placement.
+ends, the gripped point throughout a turn, visible corner targets, and release
+placement.

@@ -2291,7 +2291,11 @@ function App() {
       <div ref={setPinnedDrawingHost} className={styles.pinnedDrawingHost} />
       {tool === 'layout' && (
         <>
-          <FrameGuides target={objectLayout.dropTarget} layer="outline" />
+          <FrameGuides
+            target={objectLayout.dropTarget}
+            viewport={view}
+            layer="outline"
+          />
           <LayoutEditor
             target={objectLayout.selected}
             title={objectLayout.title}
@@ -2471,7 +2475,11 @@ function App() {
           }
         >
           {tool === 'layout' && (
-            <FrameGuides target={objectLayout.dropTarget} layer="fill" />
+            <FrameGuides
+              target={objectLayout.dropTarget}
+              viewport={view}
+              layer="fill"
+            />
           )}
           <div inert={focusView !== null || windowSwitcher.open}>
             <DesktopItems

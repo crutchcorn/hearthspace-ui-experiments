@@ -16,12 +16,14 @@ import {
   setAllowHideTools,
   targetKey,
   getFrameDropTarget,
+  getFrameCornerAtPointer,
   getFrameDragBounds,
   getFrameBounds,
   getWidgetFrameDropTarget,
   type LayoutTarget,
   type ObjectPlacement,
   type FrameEdge,
+  type FrameGuideZone,
   FRAME_WIDGETS,
   getTargetGroup,
   getFrameGroups,
@@ -80,10 +82,12 @@ export default function useObjectLayout(
     edge?: FrameEdge
     center: { x: number; y: number }
   } | null>(null)
-  const [dropTarget, setDropTarget] = useState<Extract<
-    ObjectPlacement,
-    { surface: 'frame' }
-  > | null>(null)
+  const [dropTarget, setDropTarget] = useState<
+    | (Extract<ObjectPlacement, { surface: 'frame' }> & {
+        zone: FrameGuideZone
+      })
+    | null
+  >(null)
   const drag = useRef<{
     pointerId: number
     target: LayoutTarget
@@ -677,7 +681,17 @@ export default function useObjectLayout(
         ? null
         : (findGroupDrop(current.target, clientX, clientY)?.target ?? null),
     )
-    setDropTarget(drop)
+    // Reaching an edge's clamped endpoint is not itself a corner-square hit.
+    setDropTarget(
+      drop
+        ? {
+            ...drop,
+            zone:
+              getFrameCornerAtPointer({ x: clientX, y: clientY }, view) ??
+              drop.edge,
+          }
+        : null,
+    )
     if (isToolbar(current.target)) {
       const previousEdge = current.edge
       const nextEdge = drop?.edge ?? previousEdge
@@ -885,12 +899,10 @@ export default function useObjectLayout(
         }
       return { bounds, drop: null }
     }
+    const pointer = { x: current.x + dx, y: current.y + dy }
     const drop = isToolbar(current.target)
-      ? getWidgetFrameDropTarget(bounds, view, 72, current.edge, {
-          x: current.x + dx,
-          y: current.y + dy,
-        })
-      : getFrameDropTarget(bounds, view)
+      ? getWidgetFrameDropTarget(bounds, view, 72, current.edge, pointer)
+      : getFrameDropTarget(bounds, view, 72, pointer)
     if (drop && isToolbar(current.target)) {
       bounds = dragBounds(current, dx, dy, drop.edge)
     }

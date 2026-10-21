@@ -1,13 +1,11 @@
 .guides {
-  --zone-size: min(72px, calc((100vw - 32px) / 2), calc((100dvh - 32px) / 2));
-
   position: fixed;
   z-index: 1120;
-  inset: 8px;
+  inset: var(--guide-inset);
   display: grid;
   grid-template-columns: var(--zone-size) minmax(0, 1fr) var(--zone-size);
   grid-template-rows: var(--zone-size) minmax(0, 1fr) var(--zone-size);
-  gap: 8px;
+  gap: var(--guide-gap);
   pointer-events: none;
   animation: guides-in 160ms ease-out;
 }

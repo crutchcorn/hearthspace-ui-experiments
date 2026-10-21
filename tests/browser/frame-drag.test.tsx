@@ -1,6 +1,8 @@
 import { afterEach, expect, test, vi } from 'vitest'
 import { commands, page } from 'vitest/browser'
-import type { Scene } from '../../src/scene'
+import { createWorkspace } from '../../src/desktop'
+import { FRAME_WIDGETS, type FrameLayout } from '../../src/frame-layout'
+import { createScene, type Scene } from '../../src/scene'
 import { SCENE_STORAGE_KEY } from '../../src/scene-storage'
 import { renderDesktop } from './desktop'
 
@@ -106,6 +108,108 @@ function pauseToolsMotion() {
 afterEach(async () => {
   await commands.releasePointer()
 })
+
+test.each([
+  {
+    corner: 'top-left',
+    destinations: [
+      { edge: 'top', position: 0 },
+      { edge: 'left', position: 0 },
+    ],
+  },
+  {
+    corner: 'top-right',
+    destinations: [
+      { edge: 'top', position: 1 },
+      { edge: 'right', position: 0 },
+    ],
+  },
+  {
+    corner: 'bottom-left',
+    destinations: [
+      { edge: 'bottom', position: 0 },
+      { edge: 'left', position: 1 },
+    ],
+  },
+  {
+    corner: 'bottom-right',
+    destinations: [
+      { edge: 'bottom', position: 1 },
+      { edge: 'right', position: 1 },
+    ],
+  },
+] as const)(
+  'an off-center icon grab snaps only inside the visible $corner square',
+  async ({ corner, destinations }) => {
+    const workspace = createWorkspace()
+    workspace.windows = []
+    const layout: FrameLayout = {
+      allowHideTools: false,
+      groups: {},
+      placements: {
+        ...Object.fromEntries(
+          FRAME_WIDGETS.filter((widget) => widget.id !== 'tools').map(
+            (widget) => [`widget:${widget.id}`, { surface: 'hidden' }],
+          ),
+        ),
+        'widget:tools': { surface: 'frame', edge: 'bottom', position: 0.5 },
+        'item:browser-shortcut': {
+          surface: 'frame',
+          edge: 'top',
+          position: 0.5,
+        },
+      },
+    }
+    localStorage.setItem(
+      SCENE_STORAGE_KEY,
+      JSON.stringify(createScene(workspace, layout)),
+    )
+    await renderDesktop()
+    await page
+      .getByRole('button', { name: 'Change layout', exact: true })
+      .click()
+    const square = document
+      .querySelector<HTMLElement>(`[data-frame-guide="${corner}"]`)!
+      .getBoundingClientRect()
+    const activeGuide = () =>
+      document.querySelector<HTMLElement>(
+        '[data-frame-guide][data-active="true"]',
+      )?.dataset.frameGuide
+    const isLeft = corner.endsWith('left')
+    const y = square.top + square.height / 2
+
+    await commands.startDesktopDrag('Browser', { x: 0, y: 100 }, { x: 8, y: 8 })
+    await commands.movePointerTo({
+      x: isLeft ? square.right + 1 : square.left - 1,
+      y,
+    })
+    await expect.poll(activeGuide).toMatch(/^(top|right|bottom|left)$/)
+
+    await commands.movePointerTo({
+      x: isLeft ? square.right - 1 : square.left + 1,
+      y,
+    })
+    await expect.poll(activeGuide).toBe(corner)
+    await commands.releasePointer()
+    await expect
+      .poll(() => {
+        const scene: Scene | null = JSON.parse(
+          localStorage.getItem(SCENE_STORAGE_KEY) ?? 'null',
+        )
+        const location = scene?.items.find(
+          (item) => item.id === 'browser-shortcut',
+        )?.location
+        return (
+          location?.surface === 'frame' &&
+          destinations.some(
+            ({ edge, position }) =>
+              location.edge === edge && location.position === position,
+          )
+        )
+      })
+      .toBe(true)
+  },
+)
 
 test.each([
   { end: 'left', gripX: 22 },

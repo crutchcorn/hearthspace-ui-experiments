@@ -5,6 +5,47 @@ import {
 } from './layout-item-options.ts'
 
 export type FrameEdge = 'top' | 'right' | 'bottom' | 'left'
+export type FrameCorner = `${'top' | 'bottom'}-${'left' | 'right'}`
+export type FrameGuideZone = FrameEdge | FrameCorner
+
+export const FRAME_GUIDE_INSET = 8
+export const FRAME_GUIDE_GAP = 8
+
+export function getFrameGuideSize(viewport: { width: number; height: number }) {
+  const spacing = (FRAME_GUIDE_INSET + FRAME_GUIDE_GAP) * 2
+  return Math.max(
+    0,
+    Math.min(
+      72,
+      (viewport.width - spacing) / 2,
+      (viewport.height - spacing) / 2,
+    ),
+  )
+}
+
+export function getFrameCornerAtPointer(
+  pointer: { x: number; y: number },
+  viewport: { width: number; height: number },
+): FrameCorner | null {
+  const size = getFrameGuideSize(viewport)
+  const inset = FRAME_GUIDE_INSET
+  const horizontal =
+    pointer.x >= inset && pointer.x <= inset + size
+      ? 'left'
+      : pointer.x >= viewport.width - inset - size &&
+          pointer.x <= viewport.width - inset
+        ? 'right'
+        : null
+  const vertical =
+    pointer.y >= inset && pointer.y <= inset + size
+      ? 'top'
+      : pointer.y >= viewport.height - inset - size &&
+          pointer.y <= viewport.height - inset
+        ? 'bottom'
+        : null
+  return horizontal && vertical ? `${vertical}-${horizontal}` : null
+}
+
 export type LayoutTarget = {
   kind: 'widget' | 'item' | 'window' | 'drawing' | 'group'
   id: string
@@ -599,6 +640,7 @@ export function getFrameDropTarget(
   bounds: Bounds,
   viewport: { width: number; height: number },
   maximumDistance = 72,
+  pointer?: { x: number; y: number },
 ): Extract<ObjectPlacement, { surface: 'frame' }> | null {
   const distances: { edge: FrameEdge; distance: number }[] = [
     { edge: 'top', distance: bounds.y },
@@ -609,6 +651,17 @@ export function getFrameDropTarget(
   const closest = distances.reduce((nearest, candidate) =>
     candidate.distance < nearest.distance ? candidate : nearest,
   )
+  const corner = pointer && getFrameCornerAtPointer(pointer, viewport)
+  if (corner) {
+    const vertical = closest.edge === 'left' || closest.edge === 'right'
+    const atLeft = corner.endsWith('left')
+    const atTop = corner.startsWith('top')
+    return {
+      surface: 'frame',
+      edge: vertical ? (atLeft ? 'left' : 'right') : atTop ? 'top' : 'bottom',
+      position: vertical ? (atTop ? 0 : 1) : atLeft ? 0 : 1,
+    }
+  }
   if (closest.distance > maximumDistance) return null
   const horizontal = closest.edge === 'top' || closest.edge === 'bottom'
   const margin = viewport.width <= 760 ? 12 : 24
@@ -622,14 +675,7 @@ export function getFrameDropTarget(
   const center = start + originalSize / 2
   const span = extent - margin * 2 - size
   const offset = center - margin - size / 2
-  const position =
-    span <= 0
-      ? 0.5
-      : offset <= 80
-        ? 0
-        : span - offset <= 80
-          ? 1
-          : Math.max(0, Math.min(offset / span, 1))
+  const position = span <= 0 ? 0.5 : Math.max(0, Math.min(offset / span, 1))
   return { surface: 'frame', edge: closest.edge, position }
 }
 
@@ -643,18 +689,23 @@ export function getWidgetFrameDropTarget(
   // Use the pointer for hit testing, regardless of where the bar was grabbed.
   // A square probe also keeps turning from changing the target and turning back.
   const size = Math.min(bounds.width, bounds.height)
+  const anchor = pointer ?? {
+    x: bounds.x + bounds.width / 2,
+    y: bounds.y + bounds.height / 2,
+  }
   const target = getFrameDropTarget(
     {
-      x: (pointer?.x ?? bounds.x + bounds.width / 2) - size / 2,
-      y: (pointer?.y ?? bounds.y + bounds.height / 2) - size / 2,
+      x: anchor.x - size / 2,
+      y: anchor.y - size / 2,
       width: size,
       height: size,
     },
     viewport,
     maximumDistance,
+    anchor,
   )
   if (!target) return null
-  if (target.position !== 0 && target.position !== 1) return target
+  if (!getFrameCornerAtPointer(anchor, viewport)) return target
   const targetIsVertical = target.edge === 'left' || target.edge === 'right'
   const atLeft =
     target.edge === 'left' || (!targetIsVertical && target.position === 0)

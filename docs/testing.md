@@ -54,6 +54,11 @@ response from missing the animation. Release checks keep the
 highlighted target and final position tied to the pointer rather than the
 toolbar's length.
 
+The same flows drag an icon from an off-center grab just outside and then inside
+each corner square, checking the highlighted target and saved corner placement.
+[Frame layout tests](../tests/frame-layout.test.ts) cover all four sides of each
+corner target and the smaller guide geometry in narrow viewports.
+
 [Layout layer tests](../tests/browser/layout-layers.test.tsx) check the browser's
 paint order where outlines, windows, and dragged items overlap. They also check
 that releasing or canceling a layout drag restores ordinary layering, including

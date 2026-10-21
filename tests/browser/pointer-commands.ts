@@ -5,14 +5,14 @@ type Point = { x: number; y: number }
 
 // Keep the native button held so the test can interrupt a real drag with a key.
 export const startDesktopDrag: BrowserCommand<
-  [title: string, delta: Point]
-> = async ({ iframe, page }, title, delta) => {
+  [title: string, delta: Point, offset?: Point]
+> = async ({ iframe, page }, title, delta, offset) => {
   const target = iframe.getByRole('button', { name: title, exact: true })
   await target.scrollIntoViewIfNeeded()
   const bounds = await target.boundingBox()
   if (!bounds) throw new Error(`Desktop item ${title} has no visible bounds`)
-  const x = bounds.x + bounds.width / 2
-  const y = bounds.y + bounds.height / 2
+  const x = bounds.x + (offset?.x ?? bounds.width / 2)
+  const y = bounds.y + (offset?.y ?? bounds.height / 2)
   await page.mouse.move(x, y)
   await page.mouse.down()
   await page.mouse.move(x + delta.x, y + delta.y, { steps: 8 })
@@ -68,7 +68,11 @@ export const drawCanvasStroke: BrowserCommand<[points: Point[]]> = async (
 
 declare module 'vitest/browser' {
   interface BrowserCommands {
-    startDesktopDrag: (title: string, delta: Point) => Promise<void>
+    startDesktopDrag: (
+      title: string,
+      delta: Point,
+      offset?: Point,
+    ) => Promise<void>
     releasePointer: () => Promise<void>
     startFrameWidgetDrag: (id: string, offset?: Point) => Promise<void>
     movePointerTo: (point: Point) => Promise<void>

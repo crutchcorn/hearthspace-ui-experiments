@@ -1,8 +1,15 @@
-import type { FrameEdge } from '../frame-layout'
+import type { CSSProperties } from 'react'
+import {
+  FRAME_GUIDE_GAP,
+  FRAME_GUIDE_INSET,
+  getFrameGuideSize,
+  type FrameGuideZone,
+} from '../frame-layout'
 import styles from './FrameGuides.module.css'
 
 interface FrameGuidesProps {
-  target: { edge: FrameEdge; position: number } | null
+  target: { zone: FrameGuideZone } | null
+  viewport: { width: number; height: number }
   layer: 'fill' | 'outline'
 }
 
@@ -13,31 +20,31 @@ const corners = [
   'bottom-left',
   'bottom-right',
 ] as const
-const edgeCorners = {
-  top: ['top-left', 'top-right'],
-  right: ['top-right', 'bottom-right'],
-  bottom: ['bottom-left', 'bottom-right'],
-  left: ['top-left', 'bottom-left'],
-} as const
-
-export default function FrameGuides({ target, layer }: FrameGuidesProps) {
-  const activeCorner =
-    target && (target.position === 0 || target.position === 1)
-      ? edgeCorners[target.edge][target.position === 0 ? 0 : 1]
-      : null
-
+export default function FrameGuides({
+  target,
+  layer,
+  viewport,
+}: FrameGuidesProps) {
   return (
-    <div className={styles.guides} data-guide-layer={layer} aria-hidden="true">
+    <div
+      className={styles.guides}
+      style={
+        {
+          '--guide-inset': `${FRAME_GUIDE_INSET}px`,
+          '--guide-gap': `${FRAME_GUIDE_GAP}px`,
+          '--zone-size': `${getFrameGuideSize(viewport)}px`,
+        } as CSSProperties
+      }
+      data-guide-layer={layer}
+      aria-hidden="true"
+    >
       {[...edges, ...corners].map((zone) => (
         <div
           key={zone}
           className={styles.zone}
           data-frame-guide={layer === 'outline' ? zone : undefined}
           data-guide-zone={zone}
-          data-active={
-            activeCorner === zone ||
-            (activeCorner === null && target?.edge === zone)
-          }
+          data-active={target?.zone === zone}
         />
       ))}
     </div>
