@@ -27,7 +27,6 @@ export default function LockScreen({
   const dialog = useRef<HTMLDialogElement>(null)
   const passwordField = useRef<HTMLInputElement>(null)
   const [password, setPassword] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState(false)
   const [capsLock, setCapsLock] = useState(false)
 
@@ -82,10 +81,7 @@ export default function LockScreen({
       />
       <div className={styles.content}>
         <header className={styles.header}>
-          <span className={styles.brand}>
-            <Lock size={17} />
-            Hearthspace
-          </span>
+          <Lock className={styles.lockIcon} size={17} />
           <div className={styles.status} aria-label="System status">
             <span title={status.wifiEnabled ? 'Studio network' : 'Wi-Fi off'}>
               {status.wifiEnabled ? <Wifi size={18} /> : <WifiOff size={18} />}
@@ -124,9 +120,9 @@ export default function LockScreen({
             <div className={styles.passwordRow} data-invalid={error}>
               <input
                 ref={passwordField}
-                type={showPassword ? 'text' : 'password'}
+                type="password"
                 aria-label="Password"
-                aria-describedby="lockscreen-hint lockscreen-feedback"
+                aria-describedby="lockscreen-feedback"
                 aria-invalid={error}
                 placeholder="Password"
                 autoComplete="off"
@@ -140,12 +136,15 @@ export default function LockScreen({
                 onBlur={() => setCapsLock(false)}
               />
               <button
-                className={styles.reveal}
+                className={styles.fillPassword}
                 type="button"
-                aria-label={showPassword ? 'Hide password' : 'Show password'}
-                aria-pressed={showPassword}
-                title={showPassword ? 'Hide password' : 'Show password'}
-                onClick={() => setShowPassword((current) => !current)}
+                aria-label="Fill password"
+                title="Fill password"
+                onClick={() => {
+                  setPassword('hearthspace')
+                  setError(false)
+                  passwordField.current?.focus()
+                }}
               >
                 <Eye size={18} />
               </button>
@@ -172,13 +171,6 @@ export default function LockScreen({
             </p>
           </form>
         </div>
-
-        <footer className={styles.footer} id="lockscreen-hint">
-          <span>Lockscreen preview</span>
-          <span>
-            Demo password: <strong>hearthspace</strong>
-          </span>
-        </footer>
       </div>
     </dialog>
   )

@@ -1,9 +1,9 @@
 # Lockscreen and power menu
 
 Open **Power** in the top-right system group and choose **Lock screen**. The
-desktop gives way to a full-screen clock and a Guest password form. Enter
-`hearthspace` and press Enter or the arrow button to return to your work.
-The demo password is also printed at the bottom of the screen.
+desktop gives way to a full-screen clock and a Guest password form. Click the
+eye button to fill the demo password, or type `hearthspace`, then press Enter
+or the arrow button to return to your work.
 
 The same dropdown includes **Log off**, **Reboot**, and **Turn off**. These are
 inert preview actions: clicking them leaves the menu and session unchanged.
@@ -19,11 +19,13 @@ tinted layer. It has no app windows or notifications over it. The large clock
 uses local 24-hour time; the date, Wi-Fi, and battery read from the existing
 system-status state. The clock refreshes every 15 seconds, like the shell.
 
-Password entry starts focused and masked. The eye button reveals or hides the
-entry, and the arrow becomes available after typing. An incorrect password
-shows an inline message and selects the entry so it can be replaced. Caps Lock
-is reported when the browser supplies that modifier state. Escape stays on
-the lockscreen; only the demo password unlocks this preview.
+Password entry starts focused and stays masked. The eye button fills
+`hearthspace`, clears any wrong-password error, and focuses the password field.
+It leaves submission to Enter or the arrow button, which becomes available
+after typing or filling a password. An incorrect password shows an inline
+message and selects the entry so it can be replaced. Caps Lock is reported
+when the browser supplies that modifier state. Escape stays on the lockscreen;
+only the demo password unlocks this preview.
 
 Locking dismisses shell panels and search, cancels any window-switching or
 pointer session, and pauses desktop keyboard shortcuts. The desktop stays
@@ -43,6 +45,10 @@ center if it has no saved placement. Explicit placements, including a hidden
 Power control, are preserved.
 
 ## Prototype boundary
+
+The lockscreen omits visible preview and demo-password labels, the footer, and
+Hearthspace branding text. The power menu also omits its preview hint. These
+surfaces keep the desktop feel; their simulation limits are documented here.
 
 This is a visual and interaction experiment, not authentication or a Linux
 session lock. The password comparison runs locally against a public demo

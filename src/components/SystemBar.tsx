@@ -253,7 +253,6 @@ export default function SystemBar({
                 <Power size={18} />
                 Turn off
               </button>
-              <p className={styles.powerHint}>Power actions are a preview.</p>
             </div>
           )}
           {id === 'wifi' && openPanel === id && (

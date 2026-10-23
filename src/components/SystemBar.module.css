@@ -128,12 +128,6 @@
   background: var(--line);
 }
 
-.powerHint {
-  margin: 9px 12px 7px;
-  color: var(--chrome-muted);
-  font-size: 11px;
-}
-
 .popover:focus {
   outline: none;
 }

@@ -32,12 +32,11 @@ test('locking preserves edited work and app state through password errors and un
     .toHaveTextContent('That password didn’t match. Try again.')
   await expect.element(screen).toBeVisible()
   await expect.element(password).toHaveFocus()
-  await password.fill('hearthspace')
-  await page.getByRole('button', { name: 'Show password' }).click()
-  await expect.element(password).toHaveAttribute('type', 'text')
-  await page.getByRole('button', { name: 'Hide password' }).click()
+  await page.getByRole('button', { name: 'Fill password' }).click()
+  await expect.element(password).toHaveValue('hearthspace')
   await expect.element(password).toHaveAttribute('type', 'password')
-  await password.click()
+  await expect.element(password).toHaveFocus()
+  await expect.element(password).toHaveAttribute('aria-invalid', 'false')
   await userEvent.keyboard('{Enter}')
 
   await expect.element(screen).not.toBeInTheDocument()
@@ -63,7 +62,11 @@ test('the lockscreen blocks desktop shortcuts even outside the password field', 
   await page.getByRole('menuitem', { name: 'Lock screen' }).click()
   const screen = page.getByRole('dialog', { name: 'Lock screen' })
   await userEvent.keyboard('{Control>}k{/Control}{Control>}1{/Control}{Escape}')
-  await page.getByRole('button', { name: 'Show password' }).click()
+  await page.getByRole('button', { name: 'Fill password' }).click()
+  await userEvent.keyboard('{Tab}{Tab}')
+  await expect
+    .element(page.getByRole('button', { name: 'Unlock', exact: true }))
+    .toHaveFocus()
   await userEvent.keyboard(
     'mgn/d{Escape}{Control>}k{/Control}{Control>}1{/Control}',
   )
@@ -138,10 +141,8 @@ test('the power menu and password form fit on a narrow desktop', async () => {
     await page.getByRole('menuitem', { name: 'Lock screen' }).click()
     const password = page.getByLabelText('Password', { exact: true })
     await expect.element(password).toBeVisible()
-    await expect
-      .element(page.getByText('Demo password:', { exact: false }))
-      .toBeVisible()
-    await password.fill('hearthspace')
+    await page.getByRole('button', { name: 'Fill password' }).click()
+    await expect.element(password).toHaveValue('hearthspace')
     await page.getByRole('button', { name: 'Unlock', exact: true }).click()
     await expect
       .element(page.getByRole('dialog', { name: 'Lock screen' }))
