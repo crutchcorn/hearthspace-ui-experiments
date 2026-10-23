@@ -808,7 +808,7 @@ function App() {
         height: window.innerHeight,
       }))
     const keydown = (event: KeyboardEvent) => {
-      if (locked) return
+      if (locked || document.querySelector(':modal')) return
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
         event.preventDefault()
         openCanvasSearch({

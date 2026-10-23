@@ -20,7 +20,12 @@ older battery-percentage setting with one consistent detail control.
 | Power   | Icon only                                             | Opens the [lockscreen and power menu](lockscreen.md). |
 
 Power has no detail toggle. Its Lock screen action opens the password preview;
-Log off, Reboot, and Turn off are inert placeholders.
+Log off, Reboot, and Turn off close the menu and open centered confirmation
+previews. Each dialog names the selected action and focuses Cancel first.
+Cancel, Escape, or the named confirm button dismisses it and returns focus to
+Power. Desktop shortcuts are blocked behind the dialog. Confirmation leaves
+the session and open work unchanged; it performs no system action or reload.
+See [power action confirmations](lockscreen.md#power-action-confirmations).
 
 The clock uses the browser's local date and time, refreshing every 15 seconds.
 Wi-Fi and volume are in-memory prototype state; they reset on reload and don't
@@ -70,6 +75,8 @@ doesn't open the layout editor or alter a visible control's placement.
 [SystemBar](../src/components/SystemBar.tsx) renders each control.
 Its Wi-Fi switch reuses the [Settings switch styles](../src/components/Settings.module.css)
 so both themes stay consistent with the Settings app.
+Power confirmations reuse [LayoutConfirm](../src/components/LayoutConfirm.tsx)
+for the shell's native modal presentation and default Cancel focus.
 [PlacedWidget](../src/components/PlacedWidget.tsx) places it, and
 [WidgetPopover](../src/components/WidgetPopover.tsx) separates popup layering
 from the control body through a shared popup host above frame attachments.

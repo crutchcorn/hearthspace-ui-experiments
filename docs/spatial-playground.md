@@ -160,7 +160,7 @@ Overview shares its layer above pinned items.
 `FRAME_WIDGETS` defines Notifications, Clock, Wi-Fi, Sound, Battery, Power, Canvas
 tools, and Apps, including default corners and search metadata. The five
 system controls begin in a `system` frame group; that grouping is editable.
-Power opens the [lockscreen preview](lockscreen.md) and inert session actions.
+Power opens the [lockscreen preview](lockscreen.md) and session confirmation previews.
 `PlacedWidget` measures the
 control's contents, positions it relative to the viewport or world, and keeps
 its popovers within the available screen space. `FrameShell` arranges the

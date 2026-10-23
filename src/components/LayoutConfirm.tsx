@@ -22,21 +22,35 @@ export default function LayoutConfirm({
     element.showModal()
     return () => element.close()
   }, [])
+
+  function finish(action: () => void) {
+    // Close while mounted so the browser restores the invoking control's focus.
+    dialog.current?.close()
+    action()
+  }
+
   return (
     <dialog
       ref={dialog}
       className={styles.dialog}
       data-layout-editor
-      onCancel={onCancel}
+      onCancel={(event) => {
+        event.preventDefault()
+        finish(onCancel)
+      }}
       aria-label={title}
     >
       <h2>{title}</h2>
       <p>{children}</p>
       <div>
-        <button autoFocus onClick={onCancel}>
+        <button type="button" autoFocus onClick={() => finish(onCancel)}>
           Cancel
         </button>
-        <button data-destructive={destructive} onClick={onConfirm}>
+        <button
+          type="button"
+          data-destructive={destructive}
+          onClick={() => finish(onConfirm)}
+        >
           {confirmLabel}
         </button>
       </div>

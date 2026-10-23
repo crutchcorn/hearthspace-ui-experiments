@@ -34,7 +34,7 @@ with reset, minus, and plus placeholders below the map. Reset is disabled.
 | [Frame groups](frame-groups.md)            | Combine icons, controls, and window previews on a shared surface. Overlaps join groups.                               |
 | [Pinned windows](pinned-windows.md)        | Preview the recessed edge strip while editing, reveal more on hover, and open on click.                               |
 | [System controls](system-controls.md)      | Move Clock, Wi-Fi, Sound, Battery, and Power independently, and recover hidden controls.                              |
-| [Lockscreen and power menu](lockscreen.md) | Lock the preview from Power and return to the same work with the demo password.                                       |
+| [Lockscreen and power menu](lockscreen.md) | Lock and unlock with the demo password, or try power confirmations that preserve the session and open work.           |
 | [Clock formats](clock-formats.md)          | Choose a date/time presentation through item-specific layout controls.                                                |
 | [Notifications](notifications.md)          | Read, dismiss, and open sample events from the trigger, inbox, or preview toast.                                      |
 | [Responsive shell](responsive-shell.md)    | Merge the default corners into narrow-screen bars and use the flat tool picker.                                       |
@@ -91,17 +91,17 @@ give the neighboring toolbar actions distinct shapes.
 
 ## Know what is real
 
-| Capability                                        | Prototype boundary                                                                                                         |
-| ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| Windows, layouts, selection, drawings, and themes | Real browser interactions with locally saved data; no host window manager.                                                 |
-| App launches and files                            | Browser-rendered app previews and sample items, not host processes or filesystem access. The Scratchpad is editable.       |
-| System controls and notifications                 | Local sample state; no device management or external notification source. The clock uses the browser's local date/time.    |
-| Lockscreen and power menu                         | Local demo password `hearthspace`; no OS lock or authentication. Log off, Reboot, and Turn off are inert. Reload unlocks.  |
-| Monitor settings and Overview zoom                | Monitor arrangement and selected values update the preview; real display configuration and canvas zoom aren't implemented. |
-| App gesture matching                              | Real deterministic geometric matching, with no model download.                                                             |
-| Handwritten search                                | Real local inference, with model/runtime downloads on first recognition and fallible results.                              |
-| AI gathering                                      | A real same-app rearrangement after a one-second glow. The four-second 3 GB download and deletion flow are simulated.      |
-| Extensibility                                     | Built-in widgets exist; arbitrary third-party widgets, app uninstalling, and a favorites-management screen don't.          |
+| Capability                                        | Prototype boundary                                                                                                                                                         |
+| ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Windows, layouts, selection, drawings, and themes | Real browser interactions with locally saved data; no host window manager.                                                                                                 |
+| App launches and files                            | Browser-rendered app previews and sample items, not host processes or filesystem access. The Scratchpad is editable.                                                       |
+| System controls and notifications                 | Local sample state; no device management or external notification source. The clock uses the browser's local date/time.                                                    |
+| Lockscreen and power menu                         | Local demo password `hearthspace`; no OS lock or authentication. Log off, Reboot, and Turn off open confirmation previews; confirming only dismisses them. Reload unlocks. |
+| Monitor settings and Overview zoom                | Monitor arrangement and selected values update the preview; real display configuration and canvas zoom aren't implemented.                                                 |
+| App gesture matching                              | Real deterministic geometric matching, with no model download.                                                                                                             |
+| Handwritten search                                | Real local inference, with model/runtime downloads on first recognition and fallible results.                                                                              |
+| AI gathering                                      | A real same-app rearrangement after a one-second glow. The four-second 3 GB download and deletion flow are simulated.                                                      |
+| Extensibility                                     | Built-in widgets exist; arbitrary third-party widgets, app uninstalling, and a favorites-management screen don't.                                                          |
 
 The removed explanatory captions don't turn a preview into a system
 integration. Feature pages keep those limits visible for people evaluating or
@@ -139,10 +139,10 @@ window-list order, the tools-hiding preference, and Scratchpad text. Separate
 preferences save favorites, gestures, tool/selection choices, appearance,
 backgrounds, and completed AI opt-in.
 
-Open panels, selections, unfinished strokes, viewport travel, search and
-switcher arrangements, notifications, mock device values, and display settings
-are temporary. Handwriting assets may remain in the browser cache; its query
-and ink aren't saved.
+Open panels, power confirmations, selections, unfinished strokes, viewport
+travel, search and switcher arrangements, notifications, mock device values,
+and display settings are temporary. Handwriting assets may remain in the
+browser cache; its query and ink aren't saved.
 
 The current scene format starts fresh instead of importing older scenes,
 including the version where drawings could attach to frame edges and groups. Separately saved preferences remain independent. If

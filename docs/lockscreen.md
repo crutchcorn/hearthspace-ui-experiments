@@ -5,10 +5,9 @@ desktop gives way to a full-screen clock and a Guest password form. Click the
 eye button to fill the demo password, or type `hearthspace`, then press Enter
 or the arrow button to return to your work.
 
-The same dropdown includes **Log off**, **Reboot**, and **Turn off**. These are
-inert preview actions: clicking them leaves the menu and session unchanged.
-Click outside, click Power again, or press Escape to dismiss the dropdown.
-Up/Down and Home/End move between its actions.
+The same dropdown includes **Log off**, **Reboot**, and **Turn off**, each with
+a confirmation preview. Click outside, click Power again, or press Escape to
+dismiss the dropdown. Up/Down and Home/End move between its actions.
 
 ## The lockscreen experience
 
@@ -44,6 +43,24 @@ at its end. Customized groups stay intact; Power starts separately at the top
 center if it has no saved placement. Explicit placements, including a hidden
 Power control, are preserved.
 
+## Power action confirmations
+
+Choose **Log off**, **Reboot**, or **Turn off** to close the Power menu and open
+a centered native modal. Its heading is **Log off?**, **Reboot?**, or
+**Turn off?**, with a matching **Log off**, **Reboot**, or **Turn off** confirm
+button. These dialogs reuse the shared layout confirmation component, keeping
+the shell's confirmation appearance and behavior consistent.
+
+**Cancel** receives focus when the dialog opens, so pressing Enter initially
+cancels. Cancel or Escape dismisses it; the named confirm button also only
+dismisses it. Every dismissal returns focus to the Power trigger, with the menu
+closed. Desktop shortcuts are blocked while the dialog is open.
+
+Confirming does not log off, reboot, shut down, reload the page, or close any
+work. The session, open windows, and their contents remain in place. The
+confirmation previews let you try the intended interaction without ending the
+browser session; the selected action is temporary and is not saved.
+
 ## Prototype boundary
 
 The lockscreen omits visible preview and demo-password labels, the footer, and
@@ -63,7 +80,11 @@ continue independently of the lockscreen.
 - [LockScreen.tsx](../src/components/LockScreen.tsx) and its
   [CSS module](../src/components/LockScreen.module.css): modal, clock, wallpaper,
   password feedback, and responsive presentation.
-- [SystemBar.tsx](../src/components/SystemBar.tsx): power trigger and dropdown.
+- [SystemBar.tsx](../src/components/SystemBar.tsx): power trigger, dropdown,
+  and temporary power confirmation state.
+- [LayoutConfirm.tsx](../src/components/LayoutConfirm.tsx) and its
+  [CSS module](../src/components/LayoutConfirm.module.css): shared native modal,
+  centered presentation, Cancel focus, and action-specific confirmation labels.
 - [App.tsx](../src/App.tsx): lock state, session cleanup, and desktop shortcut gate.
 - [useWindowSwitcher.ts](../src/useWindowSwitcher.ts): capture-phase shortcut gate.
 - [frame-layout.ts](../src/frame-layout.ts), [FrameShell.tsx](../src/components/FrameShell.tsx),
@@ -71,5 +92,5 @@ continue independently of the lockscreen.
   placement, default group, mobile bar, and search discovery.
 - [system.tsx](../src/icons/system.tsx): power, lock, log-off, user, and eye glyphs.
 - [Lockscreen browser tests](../tests/browser/lockscreen.test.tsx): password
-  errors and unlocking, preserved work, shortcut isolation, inert power actions,
-  and narrow-screen operation.
+  errors and unlocking, preserved work, shortcut isolation, power confirmation
+  previews, and narrow-screen operation.

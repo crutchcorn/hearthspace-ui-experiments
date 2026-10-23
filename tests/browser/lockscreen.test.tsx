@@ -96,7 +96,7 @@ test('the lockscreen blocks desktop shortcuts even outside the password field', 
   await expect.poll(() => windowBounds('Scratchpad')).toEqual(before)
 })
 
-test('power actions are inert and the dropdown shares shell dismissal behavior', async () => {
+test('the power dropdown shares shell dismissal and keyboard navigation', async () => {
   await renderDesktop()
   const note = page.getByRole('textbox', { name: 'Note content' })
   await note.fill('Still here after power previews.')
@@ -106,9 +106,6 @@ test('power actions are inert and the dropdown shares shell dismissal behavior',
   await expect
     .element(page.getByRole('slider', { name: 'Sound' }))
     .not.toBeInTheDocument()
-  await page.getByRole('menuitem', { name: 'Log off' }).click()
-  await page.getByRole('menuitem', { name: 'Reboot' }).click()
-  await page.getByRole('menuitem', { name: 'Turn off' }).click()
   await expect.element(menu).toBeVisible()
   await expect.element(note).toHaveValue('Still here after power previews.')
   await expect
@@ -129,6 +126,71 @@ test('power actions are inert and the dropdown shares shell dismissal behavior',
     .toHaveFocus()
 })
 
+test.each(['Log off', 'Reboot', 'Turn off'])(
+  '%s confirms or cancels without changing the desktop session',
+  async (action) => {
+    await renderDesktop()
+    const note = page.getByRole('textbox', { name: 'Note content' })
+    await note.fill('Keep this work through power confirmations.')
+    const before = windowBounds('Scratchpad')
+    const power = page.getByRole('button', { name: 'Power', exact: true })
+    const dialog = page.getByRole('dialog', { name: `${action}?` })
+    const cancel = dialog.getByRole('button', { name: 'Cancel', exact: true })
+
+    await power.click()
+    await page.getByRole('menuitem', { name: action, exact: true }).click()
+    await expect.element(dialog).toBeVisible()
+    await expect.element(cancel).toHaveFocus()
+    await expect
+      .element(page.getByRole('menu', { name: 'Power', exact: true }))
+      .not.toBeInTheDocument()
+    await userEvent.keyboard('dgnm/{Control>}k{/Control}{Control>}1{/Control}')
+    await expect.element(dialog).toBeVisible()
+    await cancel.click()
+    await expect.element(dialog).not.toBeInTheDocument()
+    await expect.element(power).toHaveFocus()
+
+    await power.click()
+    await page.getByRole('menuitem', { name: action, exact: true }).click()
+    await userEvent.keyboard('{Escape}')
+    await expect.element(dialog).not.toBeInTheDocument()
+    await expect.element(power).toHaveFocus()
+
+    await power.click()
+    await page.getByRole('menuitem', { name: action, exact: true }).click()
+    await dialog.getByRole('button', { name: action, exact: true }).click()
+    await expect.element(dialog).not.toBeInTheDocument()
+    await expect.element(power).toHaveFocus()
+    await expect
+      .element(note)
+      .toHaveValue('Keep this work through power confirmations.')
+    await expect.poll(() => windowBounds('Scratchpad')).toEqual(before)
+    await expect
+      .element(page.getByRole('button', { name: 'Draw', exact: true }))
+      .toHaveAttribute('aria-pressed', 'false')
+    await expect
+      .element(page.getByRole('region', { name: 'App launcher' }))
+      .not.toBeInTheDocument()
+    await expect
+      .element(
+        page.getByRole('heading', { name: 'Notifications', exact: true }),
+      )
+      .not.toBeInTheDocument()
+    await expect
+      .element(page.getByRole('heading', { name: 'Overview', exact: true }))
+      .not.toBeInTheDocument()
+    await expect
+      .element(page.getByRole('search', { name: 'Canvas search' }))
+      .not.toBeInTheDocument()
+    await expect
+      .element(page.getByRole('listbox', { name: 'Switch windows' }))
+      .not.toBeInTheDocument()
+    await expect
+      .element(page.getByRole('dialog', { name: 'Lock screen' }))
+      .not.toBeInTheDocument()
+  },
+)
+
 test('the power menu and password form fit on a narrow desktop', async () => {
   await page.viewport(390, 844)
   try {
@@ -138,6 +200,16 @@ test('the power menu and password form fit on a narrow desktop', async () => {
     const bounds = menu.element().getBoundingClientRect()
     expect(bounds.left).toBeGreaterThanOrEqual(0)
     expect(bounds.right).toBeLessThanOrEqual(window.innerWidth)
+    await page.getByRole('menuitem', { name: 'Turn off' }).click()
+    const confirmation = page.getByRole('dialog', { name: 'Turn off?' })
+    await expect.element(confirmation).toBeVisible()
+    const confirmationBounds = confirmation.element().getBoundingClientRect()
+    expect(confirmationBounds.left).toBeGreaterThanOrEqual(0)
+    expect(confirmationBounds.right).toBeLessThanOrEqual(window.innerWidth)
+    await confirmation
+      .getByRole('button', { name: 'Cancel', exact: true })
+      .click()
+    await page.getByRole('button', { name: 'Power', exact: true }).click()
     await page.getByRole('menuitem', { name: 'Lock screen' }).click()
     const password = page.getByLabelText('Password', { exact: true })
     await expect.element(password).toBeVisible()

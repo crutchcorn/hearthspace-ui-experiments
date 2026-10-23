@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   BatteryFull,
   Check,
@@ -15,6 +15,7 @@ import {
 import type { SystemStatus } from '../useSystemStatus'
 import { formatClock, type ClockDateFormat } from '../clock-format'
 import WidgetPopover from './WidgetPopover'
+import LayoutConfirm from './LayoutConfirm'
 import popoverStyles from './WidgetPopover.module.css'
 import styles from './SystemBar.module.css'
 import shellStyles from './ShellControls.module.css'
@@ -22,6 +23,12 @@ import settingsStyles from './Settings.module.css'
 
 export type SystemPanel =
   'wifi' | 'volume' | 'battery' | 'clock' | 'power' | null
+
+const powerActions = {
+  'Log off': 'Save your work before ending this session.',
+  Reboot: 'Save your work before restarting your computer.',
+  'Turn off': 'Save your work before turning off your computer.',
+}
 
 interface SystemBarProps {
   status: SystemStatus
@@ -44,6 +51,9 @@ export default function SystemBar({
 }: SystemBarProps) {
   const root = useRef<HTMLElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)
+  const [powerAction, setPowerAction] = useState<
+    keyof typeof powerActions | null
+  >(null)
   const {
     wifiEnabled,
     setWifiEnabled,
@@ -92,6 +102,12 @@ export default function SystemBar({
 
   function togglePanel(panel: Exclude<SystemPanel, null>) {
     onPanelChange(openPanel === panel ? null : panel)
+  }
+
+  function confirmPowerAction(action: keyof typeof powerActions) {
+    root.current?.querySelector('button')?.focus({ preventScroll: true })
+    onPanelChange(null)
+    setPowerAction(action)
   }
 
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).getDay()
@@ -241,15 +257,27 @@ export default function SystemBar({
                 Lock screen
               </button>
               <div className={styles.menuDivider} role="separator" />
-              <button type="button" role="menuitem">
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => confirmPowerAction('Log off')}
+              >
                 <LogOut size={18} />
                 Log off
               </button>
-              <button type="button" role="menuitem">
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => confirmPowerAction('Reboot')}
+              >
                 <RotateCcw size={18} />
                 Reboot
               </button>
-              <button type="button" role="menuitem">
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => confirmPowerAction('Turn off')}
+              >
                 <Power size={18} />
                 Turn off
               </button>
@@ -387,6 +415,17 @@ export default function SystemBar({
             </div>
           )}
         </WidgetPopover>
+      )}
+      {powerAction && (
+        <LayoutConfirm
+          title={`${powerAction}?`}
+          confirmLabel={powerAction}
+          destructive
+          onCancel={() => setPowerAction(null)}
+          onConfirm={() => setPowerAction(null)}
+        >
+          {powerActions[powerAction]}
+        </LayoutConfirm>
       )}
     </header>
   )
