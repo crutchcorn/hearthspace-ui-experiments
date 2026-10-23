@@ -8,6 +8,7 @@ import {
   Pan,
   Cursor,
   Pencil,
+  Power,
   Volume,
   VolumeMuted,
   Wifi,
@@ -85,6 +86,11 @@ export default function SearchControlPreview({
         title = 'Battery'
         icon = <BatteryFull size={28} aria-hidden="true" />
         detail = `${status.batteryPercentage}%`
+        break
+      case 'power':
+        title = 'Power'
+        icon = <Power size={26} aria-hidden="true" />
+        detail = null
         break
       case 'clock':
         title = 'Clock'

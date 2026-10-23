@@ -1,0 +1,310 @@
+.screen {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  overflow: auto;
+  border: 0;
+  background: var(--field);
+  color: var(--ink);
+  animation: arrive 220ms ease-out;
+}
+
+.screen::backdrop {
+  background: var(--field);
+}
+
+.wallpaper {
+  position: fixed;
+  inset: 0;
+  background-color: var(--field);
+  background-image: radial-gradient(var(--field-dot) 1px, transparent 1.2px);
+  background-position: center;
+  pointer-events: none;
+}
+
+.wallpaper::after {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse at 50% 42%,
+    color-mix(in srgb, var(--accent-base) 9%, var(--field)) 0%,
+    transparent 70%
+  );
+  content: '';
+}
+
+.wallpaper[data-photo='true']::after {
+  background: color-mix(in srgb, var(--field) 68%, transparent);
+  backdrop-filter: blur(18px) saturate(0.85);
+}
+
+.content {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  min-height: 100%;
+  padding: 28px 32px;
+}
+
+.header,
+.status,
+.brand,
+.battery {
+  display: flex;
+  align-items: center;
+}
+
+.header {
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.brand {
+  gap: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+}
+
+.brand svg {
+  color: var(--accent-strong);
+}
+
+.status {
+  gap: 18px;
+  color: var(--muted);
+}
+
+.battery {
+  gap: 7px;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(36px, 8vh, 84px);
+  padding: 40px 0;
+}
+
+.clock {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.time {
+  font-size: clamp(68px, 10vw, 112px);
+  font-weight: 300;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -5px;
+  line-height: 1;
+}
+
+.date {
+  font-size: 16px;
+  color: var(--muted);
+}
+
+.signIn {
+  display: flex;
+  width: min(340px, 100%);
+  flex-direction: column;
+  align-items: center;
+}
+
+.avatar {
+  display: grid;
+  width: 64px;
+  height: 64px;
+  margin-bottom: 16px;
+  place-items: center;
+  border: 1px solid var(--accent-border);
+  border-radius: var(--radius-panel);
+  background: var(--material-surface);
+  box-shadow: var(--glass-edge), var(--shadow-panel);
+  backdrop-filter: var(--glass-blur);
+  color: var(--accent-strong);
+}
+
+.signIn h1 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: -0.4px;
+}
+
+.welcome {
+  margin: 8px 0 24px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.passwordRow {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 4px;
+  padding: 5px;
+  border: 1px solid var(--chrome-border);
+  border-radius: var(--radius-tile);
+  background: var(--material-raised);
+  box-shadow: var(--glass-edge), var(--shadow-panel);
+  backdrop-filter: var(--glass-blur);
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.passwordRow:focus-within {
+  border-color: var(--accent-border);
+  box-shadow: var(--glass-edge-active), var(--shadow-glow);
+}
+
+.passwordRow[data-invalid='true'] {
+  border-color: var(--accent-strong);
+}
+
+.passwordRow input {
+  width: 100%;
+  min-width: 0;
+  height: 38px;
+  padding: 0 9px;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--ink);
+  font-size: 14px;
+}
+
+.passwordRow input::placeholder {
+  color: var(--muted);
+}
+
+.passwordRow button {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  place-items: center;
+  border: 0;
+  border-radius: var(--radius-control);
+}
+
+.reveal {
+  background: transparent;
+  color: var(--muted);
+}
+
+.reveal:is(:hover, [aria-pressed='true']) {
+  background: var(--chrome-hover);
+  color: var(--accent-strong);
+}
+
+.unlock {
+  background: var(--accent);
+  color: var(--accent-ink);
+  box-shadow: var(--glass-edge);
+}
+
+.unlock:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.unlock:disabled {
+  background: var(--surface-control);
+  color: var(--muted);
+  box-shadow: none;
+}
+
+.passwordRow button:focus-visible {
+  outline: 2px solid var(--accent-strong);
+  outline-offset: 2px;
+}
+
+.feedback {
+  min-height: 18px;
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  text-align: center;
+  line-height: 1.5;
+}
+
+.footer {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  color: var(--muted);
+  font-size: 11px;
+  text-align: center;
+  line-height: 1.5;
+}
+
+.footer strong {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+@media (width <= 480px) {
+  .content {
+    padding: 24px;
+  }
+
+  .status {
+    gap: 12px;
+  }
+
+  .time {
+    letter-spacing: -3px;
+  }
+
+  .footer {
+    flex-direction: column;
+  }
+}
+
+@media (height <= 600px) {
+  .center {
+    gap: 24px;
+    padding: 24px 0;
+  }
+
+  .time {
+    font-size: 64px;
+  }
+
+  .avatar {
+    display: none;
+  }
+}
+
+@keyframes arrive {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .screen {
+    animation: none;
+  }
+
+  .passwordRow {
+    transition: none;
+  }
+}

@@ -28,15 +28,16 @@ with reset, minus, and plus placeholders below the map. Reset is disabled.
 
 ## Make the frame yours
 
-| Feature                                 | Start here                                                                                                            |
-| --------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| [Change layout](frame-layout.md)        | Animate icons and windows onto and off the frame. Toolbars turn around your grip; corner squares are pointer targets. |
-| [Frame groups](frame-groups.md)         | Combine icons, controls, and window previews on a shared surface. Overlaps join groups.                               |
-| [Pinned windows](pinned-windows.md)     | Preview the recessed edge strip while editing, reveal more on hover, and open on click.                               |
-| [System controls](system-controls.md)   | Move Clock, Wi-Fi, Sound, and Battery independently, change their detail, and recover hidden controls.                |
-| [Clock formats](clock-formats.md)       | Choose a date/time presentation through item-specific layout controls.                                                |
-| [Notifications](notifications.md)       | Read, dismiss, and open sample events from the trigger, inbox, or preview toast.                                      |
-| [Responsive shell](responsive-shell.md) | Merge the default corners into narrow-screen bars and use the flat tool picker.                                       |
+| Feature                                    | Start here                                                                                                            |
+| ------------------------------------------ | --------------------------------------------------------------------------------------------------------------------- |
+| [Change layout](frame-layout.md)           | Animate icons and windows onto and off the frame. Toolbars turn around your grip; corner squares are pointer targets. |
+| [Frame groups](frame-groups.md)            | Combine icons, controls, and window previews on a shared surface. Overlaps join groups.                               |
+| [Pinned windows](pinned-windows.md)        | Preview the recessed edge strip while editing, reveal more on hover, and open on click.                               |
+| [System controls](system-controls.md)      | Move Clock, Wi-Fi, Sound, Battery, and Power independently, and recover hidden controls.                              |
+| [Lockscreen and power menu](lockscreen.md) | Lock the preview from Power and return to the same work with the demo password.                                       |
+| [Clock formats](clock-formats.md)          | Choose a date/time presentation through item-specific layout controls.                                                |
+| [Notifications](notifications.md)          | Read, dismiss, and open sample events from the trigger, inbox, or preview toast.                                      |
+| [Responsive shell](responsive-shell.md)    | Merge the default corners into narrow-screen bars and use the flat tool picker.                                       |
 
 Four corners are the starting arrangement: notifications at top left, system
 status at top right, canvas tools at bottom left, and apps at bottom right.
@@ -95,6 +96,7 @@ give the neighboring toolbar actions distinct shapes.
 | Windows, layouts, selection, drawings, and themes | Real browser interactions with locally saved data; no host window manager.                                                 |
 | App launches and files                            | Browser-rendered app previews and sample items, not host processes or filesystem access. The Scratchpad is editable.       |
 | System controls and notifications                 | Local sample state; no device management or external notification source. The clock uses the browser's local date/time.    |
+| Lockscreen and power menu                         | Local demo password `hearthspace`; no OS lock or authentication. Log off, Reboot, and Turn off are inert. Reload unlocks.  |
 | Monitor settings and Overview zoom                | Monitor arrangement and selected values update the preview; real display configuration and canvas zoom aren't implemented. |
 | App gesture matching                              | Real deterministic geometric matching, with no model download.                                                             |
 | Handwritten search                                | Real local inference, with model/runtime downloads on first recognition and fallible results.                              |

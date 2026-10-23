@@ -111,6 +111,21 @@ export const FRAME_WIDGETS = [
     defaultPlacement: { surface: 'frame', edge: 'top', position: 1 },
   },
   {
+    id: 'power',
+    title: 'Power',
+    description: 'Lock, sign out, restart, or shut down.',
+    keywords: [
+      'lock',
+      'lock screen',
+      'sign out',
+      'log off',
+      'reboot',
+      'shutdown',
+      'system tray',
+    ],
+    defaultPlacement: { surface: 'frame', edge: 'top', position: 0.5 },
+  },
+  {
     id: 'tools',
     title: 'Canvas tools',
     description: 'Choose a canvas tool.',
@@ -453,10 +468,15 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === 'object' && !Array.isArray(value)
 }
 
-function systemGroup(): FrameGroup {
+const LEGACY_SYSTEM_WIDGET_IDS = ['clock', 'wifi', 'volume', 'battery']
+
+function systemGroup(includePower: boolean): FrameGroup {
   return {
     id: 'system',
-    members: ['clock', 'wifi', 'volume', 'battery'].map((id) => ({
+    members: [
+      ...LEGACY_SYSTEM_WIDGET_IDS,
+      ...(includePower ? ['power'] : []),
+    ].map((id) => ({
       kind: 'widget',
       id,
     })),
@@ -472,6 +492,20 @@ export function readFrameLayout(value: unknown): FrameLayout {
   const saved = isRecord(value) ? value : {}
   layout.allowHideTools = saved.allowHideTools === true
   const savedPlacements = isRecord(saved.placements) ? saved.placements : {}
+  const hasSavedPower =
+    Object.hasOwn(savedPlacements, 'widget:power') ||
+    (isRecord(saved.groups) &&
+      Object.values(saved.groups).some(
+        (group) =>
+          isRecord(group) &&
+          Array.isArray(group.members) &&
+          group.members.some(
+            (member) =>
+              isRecord(member) &&
+              member.kind === 'widget' &&
+              member.id === 'power',
+          ),
+      ))
   for (const [key, savedPlacement] of Object.entries(savedPlacements)) {
     const target = readTarget(key)
     const placement = readPlacement(savedPlacement)
@@ -511,6 +545,7 @@ export function readFrameLayout(value: unknown): FrameLayout {
         members.push(member)
       }
       const groupKey = targetKey({ kind: 'group', id })
+      const savedGroupPlacement = savedPlacements[groupKey]
       const placement =
         layout.placements[groupKey] ??
         (members[0] ? getPlacement(layout, members[0]) : undefined)
@@ -519,6 +554,24 @@ export function readFrameLayout(value: unknown): FrameLayout {
           if (placement) layout.placements[targetKey(member)] = placement
         continue
       }
+      // Only upgrade the untouched old default. An explicit Power placement
+      // or group, including a hidden control, is the user's existing choice.
+      if (
+        !hasSavedPower &&
+        id === 'system' &&
+        value.members.length === LEGACY_SYSTEM_WIDGET_IDS.length &&
+        members.length === LEGACY_SYSTEM_WIDGET_IDS.length &&
+        members.every(
+          (member, index) =>
+            member.kind === 'widget' &&
+            member.id === LEGACY_SYSTEM_WIDGET_IDS[index],
+        ) &&
+        isRecord(savedGroupPlacement) &&
+        savedGroupPlacement.surface === 'frame' &&
+        savedGroupPlacement.edge === 'top' &&
+        savedGroupPlacement.position === 1
+      )
+        members.push({ kind: 'widget', id: 'power' })
       layout.groups![id] = { id, members }
       layout.placements[groupKey] = placement!
       for (const member of members) {
@@ -527,7 +580,7 @@ export function readFrameLayout(value: unknown): FrameLayout {
       }
     }
   } else {
-    const group = systemGroup()
+    const group = systemGroup(!hasSavedPower)
     layout.groups![group.id] = group
     layout.placements[targetKey({ kind: 'group', id: group.id })] = {
       surface: 'frame',

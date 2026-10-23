@@ -157,9 +157,10 @@ use a separate host above frame attachments, anchored to their controls without
 raising the icons. Frame, grouped, and mobile controls use the same popup host;
 Overview shares its layer above pinned items.
 
-`FRAME_WIDGETS` defines Notifications, Clock, Wi-Fi, Sound, Battery, Canvas
-tools, and Apps, including default corners and search metadata. The four
-device controls begin in a `system` frame group; that grouping is editable.
+`FRAME_WIDGETS` defines Notifications, Clock, Wi-Fi, Sound, Battery, Power, Canvas
+tools, and Apps, including default corners and search metadata. The five
+system controls begin in a `system` frame group; that grouping is editable.
+Power opens the [lockscreen preview](lockscreen.md) and inert session actions.
 `PlacedWidget` measures the
 control's contents, positions it relative to the viewport or world, and keeps
 its popovers within the available screen space. `FrameShell` arranges the

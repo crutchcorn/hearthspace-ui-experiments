@@ -125,6 +125,7 @@ test('empty search includes drawings, widgets, and tools alongside shortcuts', (
       'widget:wifi',
       'widget:volume',
       'widget:battery',
+      'widget:power',
       'widget:tools',
       'widget:apps',
       'tool:cursor',
@@ -152,6 +153,33 @@ test('widget descriptions and keywords make removed defaults discoverable', () =
   assert.deepEqual(layout.results, [{ kind: 'widget', id: 'battery' }])
   assert.equal(layout.widgets.get('battery')?.matches, true)
   assert.equal(layout.widgets.get('tools')?.matches, false)
+})
+
+test('Power is discoverable through lock, session, and shutdown actions', () => {
+  for (const query of [
+    'lock',
+    'lock screen',
+    'sign out',
+    'log off',
+    'reboot',
+    'shutdown',
+  ]) {
+    const layout = getCanvasSearchLayout(
+      workspace,
+      view,
+      { x: 600, y: 150 },
+      query,
+      false,
+      { widgets: FRAME_WIDGETS },
+    )
+    assert.ok(
+      layout.results.some(
+        (result) => result.kind === 'widget' && result.id === 'power',
+      ),
+      query,
+    )
+    assert.equal(layout.widgets.get('power')?.matches, true)
+  }
 })
 
 test('drawings can be found by their displayed number or ink and sketch terms', () => {

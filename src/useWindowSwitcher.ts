@@ -9,6 +9,7 @@ import {
 import type { DesktopWindow } from './desktop'
 
 interface WindowSwitcherOptions {
+  enabled?: boolean
   windows: DesktopWindow[]
   activeWindowId: string | null
   onCommit: (id: string) => void
@@ -21,6 +22,7 @@ interface SwitchSession {
 }
 
 export default function useWindowSwitcher({
+  enabled = true,
   windows,
   activeWindowId,
   onCommit,
@@ -77,6 +79,7 @@ export default function useWindowSwitcher({
   )
 
   const keydown = useEffectEvent((event: KeyboardEvent) => {
+    if (!enabled) return
     const current = currentSession.current
     const shortcut =
       event.ctrlKey &&
@@ -157,6 +160,7 @@ export default function useWindowSwitcher({
   })
 
   const keyup = useEffectEvent((event: KeyboardEvent) => {
+    if (!enabled) return
     const current = currentSession.current
     if (!current) return
     event.preventDefault()

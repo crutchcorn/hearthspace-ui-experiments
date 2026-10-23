@@ -117,6 +117,13 @@ Reuse each definition wherever its action appears, including toolbars, tool
 menus, search previews, Settings, and drawing controls. The glyph identifies
 the action; it doesn't change its shortcut, selection state, or placement rules.
 
+## Session control glyphs
+
+The power menu and [lockscreen](lockscreen.md) use local `Power`, `Lock`,
+`LogOut`, `User`, and `Eye` glyphs from `system.tsx`. Reboot reuses `RotateCcw`,
+and the unlock button reuses `ChevronRight`. These use the same factory and
+optical sizing as the status controls.
+
 ## Source files
 
 - [`createIcon.ts`](../src/icons/createIcon.ts): variant selection, SVG defaults, and optical stroke sizing.

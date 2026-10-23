@@ -3,6 +3,10 @@ import {
   BatteryFull,
   Check,
   Clock,
+  Lock,
+  LogOut,
+  Power,
+  RotateCcw,
   Volume,
   VolumeMuted,
   Wifi,
@@ -16,7 +20,8 @@ import styles from './SystemBar.module.css'
 import shellStyles from './ShellControls.module.css'
 import settingsStyles from './Settings.module.css'
 
-export type SystemPanel = 'wifi' | 'volume' | 'battery' | 'clock' | null
+export type SystemPanel =
+  'wifi' | 'volume' | 'battery' | 'clock' | 'power' | null
 
 interface SystemBarProps {
   status: SystemStatus
@@ -25,6 +30,7 @@ interface SystemBarProps {
   id: Exclude<SystemPanel, null>
   expanded: boolean
   clockDateFormat: ClockDateFormat
+  onLock: () => void
 }
 
 export default function SystemBar({
@@ -34,6 +40,7 @@ export default function SystemBar({
   id,
   expanded,
   clockDateFormat,
+  onLock,
 }: SystemBarProps) {
   const root = useRef<HTMLElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)
@@ -69,7 +76,10 @@ export default function SystemBar({
     }
 
     function dismissOnEscape(event: KeyboardEvent) {
-      if (event.key === 'Escape') onPanelChange(null)
+      if (event.key === 'Escape') {
+        onPanelChange(null)
+        root.current?.querySelector('button')?.focus({ preventScroll: true })
+      }
     }
 
     document.addEventListener('pointerdown', dismissOnPointer, true)
@@ -174,8 +184,78 @@ export default function SystemBar({
         </button>
       )}
 
+      {id === 'power' && (
+        <button
+          type="button"
+          className={`${styles.statusButton} ${shellStyles.control}`}
+          title="Power"
+          aria-label="Power"
+          aria-haspopup="menu"
+          aria-expanded={openPanel === 'power'}
+          onClick={() => togglePanel('power')}
+        >
+          <Power size={18} />
+        </button>
+      )}
+
       {openPanel === id && (
         <WidgetPopover>
+          {id === 'power' && (
+            <div
+              className={`${popoverStyles.panel} ${styles.popover} ${styles.powerMenu}`}
+              ref={panelRef}
+              role="menu"
+              aria-label="Power"
+              data-system-panel
+              onKeyDown={(event) => {
+                const buttons = Array.from(
+                  event.currentTarget.querySelectorAll('button'),
+                )
+                const index = buttons.indexOf(
+                  document.activeElement as HTMLButtonElement,
+                )
+                let next: number
+                if (event.key === 'ArrowDown')
+                  next = (index + 1) % buttons.length
+                else if (event.key === 'ArrowUp')
+                  next = (index - 1 + buttons.length) % buttons.length
+                else if (event.key === 'Home') next = 0
+                else if (event.key === 'End') next = buttons.length - 1
+                else return
+                event.preventDefault()
+                event.stopPropagation()
+                buttons[next]?.focus()
+              }}
+            >
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => {
+                  root.current
+                    ?.querySelector('button')
+                    ?.focus({ preventScroll: true })
+                  onLock()
+                }}
+              >
+                <Lock size={18} />
+                Lock screen
+              </button>
+              <div className={styles.menuDivider} role="separator" />
+              <button type="button" role="menuitem">
+                <LogOut size={18} />
+                Log off
+              </button>
+              <button type="button" role="menuitem">
+                <RotateCcw size={18} />
+                Reboot
+              </button>
+              <button type="button" role="menuitem">
+                <Power size={18} />
+                Turn off
+              </button>
+              <p className={styles.powerHint}>Power actions are a preview.</p>
+            </div>
+          )}
           {id === 'wifi' && openPanel === id && (
             <div
               className={`${popoverStyles.panel} ${styles.popover} ${styles.systemPopover}`}

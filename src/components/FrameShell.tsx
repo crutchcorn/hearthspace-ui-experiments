@@ -87,7 +87,7 @@ export default function FrameShell({
     systemPlacement.edge === 'top' &&
     systemPlacement.position === 1 &&
     system?.members.map(targetKey).join(',') ===
-      'widget:clock,widget:wifi,widget:volume,widget:battery'
+      'widget:clock,widget:wifi,widget:volume,widget:battery,widget:power'
   const mergedBottom = isDefaultWidget('tools') && isDefaultWidget('apps')
 
   function renderWidget(

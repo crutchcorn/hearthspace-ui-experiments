@@ -35,7 +35,7 @@ menus use accent hover and which ordinary panels keep white highlights.
 ## Respect a customized frame
 
 Automatic merging is conditional. The top bar is used only while Notifications
-remains at its default corner and the original Clock, Wi-Fi, Sound, Battery group
+remains at its default corner and the Clock, Wi-Fi, Sound, Battery, Power group
 remains at the top right in that order. The bottom bar requires both Canvas tools
 and Apps to remain in their default corners.
 

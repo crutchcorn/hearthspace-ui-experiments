@@ -18,6 +18,7 @@ import {
   setWidgetExpanded,
   ungroupFrameTarget,
   type FrameLayout,
+  type ObjectPlacement,
 } from '../src/frame-layout.ts'
 
 const defaults: FrameLayout = { placements: {}, allowHideTools: false }
@@ -27,10 +28,11 @@ const clock = { kind: 'widget', id: 'clock' } as const
 const wifi = { kind: 'widget', id: 'wifi' } as const
 const volume = { kind: 'widget', id: 'volume' } as const
 const battery = { kind: 'widget', id: 'battery' } as const
+const power = { kind: 'widget', id: 'power' } as const
 const apps = { kind: 'widget', id: 'apps' } as const
 const defaultSystemGroup = {
   id: 'system',
-  members: [clock, wifi, volume, battery],
+  members: [clock, wifi, volume, battery, power],
 }
 const loadedDefaults: FrameLayout = {
   ...defaults,
@@ -38,6 +40,14 @@ const loadedDefaults: FrameLayout = {
     'group:system': { surface: 'frame', edge: 'top', position: 1 },
   },
   groups: { system: defaultSystemGroup },
+}
+const legacySystemGroup = {
+  id: 'system',
+  members: [clock, wifi, volume, battery],
+}
+const legacyDefaults: FrameLayout = {
+  ...loadedDefaults,
+  groups: { system: legacySystemGroup },
 }
 
 test('moving a detached toolbar retains its measured body while discarding the prior peek home', () => {
@@ -190,6 +200,176 @@ test('absent or invalid layout data restores the default status group', () => {
     })
 })
 
+test('the old default status group gains Power once and preserves its saved options', () => {
+  const layout = readFrameLayout({
+    ...legacyDefaults,
+    expanded: { clock: false, battery: true },
+  })
+  assert.deepEqual(layout, {
+    ...loadedDefaults,
+    expanded: { clock: false, battery: true },
+  })
+  assert.deepEqual(readFrameLayout(JSON.parse(JSON.stringify(layout))), layout)
+  assert.deepEqual(legacyDefaults.groups?.system, legacySystemGroup)
+})
+
+test('customized old status groups stay intact with Power separately at the top center', () => {
+  const variants: FrameLayout[] = [
+    { ...legacyDefaults, groups: {} },
+    {
+      ...legacyDefaults,
+      groups: {
+        system: { id: 'system', members: [wifi, clock, volume, battery] },
+      },
+    },
+    {
+      ...legacyDefaults,
+      groups: { system: { id: 'system', members: [clock, wifi, volume] } },
+    },
+    {
+      ...legacyDefaults,
+      groups: {
+        system: {
+          id: 'system',
+          members: [clock, wifi, volume, battery, notifications],
+        },
+      },
+    },
+    {
+      ...legacyDefaults,
+      groups: { custom: { id: 'custom', members: legacySystemGroup.members } },
+      placements: { 'group:custom': legacyDefaults.placements['group:system'] },
+    },
+    {
+      ...legacyDefaults,
+      placements: {
+        'group:system': { surface: 'frame', edge: 'bottom', position: 1 },
+      },
+    },
+    {
+      ...legacyDefaults,
+      placements: {
+        'group:system': { surface: 'frame', edge: 'top', position: 0.7 },
+      },
+    },
+  ]
+  for (const saved of variants) {
+    const layout = readFrameLayout(saved)
+    assert.deepEqual(layout.groups, saved.groups)
+    assert.equal(getTargetGroup(layout, power), undefined)
+    assert.deepEqual(getPlacement(layout, power), {
+      surface: 'frame',
+      edge: 'top',
+      position: 0.5,
+    })
+    assert.deepEqual(
+      readFrameLayout(JSON.parse(JSON.stringify(layout))),
+      layout,
+    )
+  }
+})
+
+test('normalizing incomplete or malformed groups does not qualify them for the default migration', () => {
+  for (const saved of [
+    { ...legacyDefaults, placements: {} },
+    {
+      ...legacyDefaults,
+      placements: {
+        'group:system': { surface: 'frame', edge: 'top', position: 4 },
+      },
+    },
+    {
+      ...legacyDefaults,
+      groups: {
+        system: {
+          id: 'system',
+          members: [...legacySystemGroup.members, clock],
+        },
+      },
+    },
+    {
+      ...legacyDefaults,
+      groups: {
+        system: {
+          id: 'system',
+          members: [
+            ...legacySystemGroup.members,
+            { kind: 'widget', id: 'unknown' },
+          ],
+        },
+      },
+    },
+  ]) {
+    const layout = readFrameLayout(saved)
+    assert.deepEqual(getFrameGroups(layout), [legacySystemGroup])
+    assert.equal(getTargetGroup(layout, power), undefined)
+  }
+})
+
+test('an explicit Power placement keeps it out of the old default group after reloading', () => {
+  const placements: ObjectPlacement[] = [
+    { surface: 'hidden' },
+    { surface: 'frame', edge: 'left', position: 0.3 },
+    { surface: 'canvas', x: 120, y: 240 },
+  ]
+  for (const placement of placements) {
+    const saved: FrameLayout = {
+      ...legacyDefaults,
+      placements: { ...legacyDefaults.placements, 'widget:power': placement },
+    }
+    const layout = readFrameLayout(saved)
+    assert.deepEqual(layout, saved)
+    assert.equal(getTargetGroup(layout, power), undefined)
+    assert.deepEqual(getPlacement(layout, power), placement)
+    const moved = setObjectPlacement(
+      readFrameLayout(legacyDefaults),
+      power,
+      placement,
+    )
+    assert.deepEqual(readFrameLayout(JSON.parse(JSON.stringify(moved))), moved)
+  }
+})
+
+test('Power in another saved group stays there regardless of group order', () => {
+  const custom = { id: 'custom', members: [apps, power] }
+  for (const groups of [
+    { system: legacySystemGroup, custom },
+    { custom, system: legacySystemGroup },
+  ]) {
+    const saved: FrameLayout = {
+      ...legacyDefaults,
+      groups,
+      placements: {
+        ...legacyDefaults.placements,
+        'group:custom': { surface: 'frame', edge: 'bottom', position: 1 },
+      },
+    }
+    const layout = readFrameLayout(saved)
+    assert.deepEqual(layout, saved)
+    assert.deepEqual(getTargetGroup(layout, power), custom)
+  }
+})
+
+test('restoring missing groups respects an explicitly hidden Power control', () => {
+  const layout = readFrameLayout({
+    placements: { 'widget:power': { surface: 'hidden' } },
+  })
+  assert.deepEqual(getFrameGroups(layout), [legacySystemGroup])
+  assert.equal(getTargetGroup(layout, power), undefined)
+  assert.deepEqual(getPlacement(layout, power), { surface: 'hidden' })
+})
+
+test('Power remains icon-only when expanded detail preferences are requested or loaded', () => {
+  assert.equal(getWidgetExpanded(loadedDefaults, 'power'), false)
+  assert.equal(setWidgetExpanded(loadedDefaults, 'power', true), loadedDefaults)
+  const layout = readFrameLayout({
+    ...loadedDefaults,
+    expanded: { power: true },
+  })
+  assert.equal(getWidgetExpanded(layout, 'power'), false)
+  assert.deepEqual(layout.expanded, {})
+})
+
 test('merging dock, tools, and a status group produces one flat ordered frame group', () => {
   let layout = mergeFrameTargets(loadedDefaults, tools, apps, true)
   const dockGroup = getTargetGroup(layout, apps)!
@@ -201,7 +381,7 @@ test('merging dock, tools, and a status group produces one flat ordered frame gr
   assert.deepEqual(getFrameGroups(layout), [
     {
       id: dockGroup.id,
-      members: [tools, apps, clock, wifi, volume, battery],
+      members: [tools, apps, clock, wifi, volume, battery, power],
     },
   ])
   for (const member of getFrameGroups(layout)[0]!.members)
@@ -225,7 +405,12 @@ test('an individual grouped status item can move independently without moving it
     edge: 'bottom',
     position: 0.5,
   })
-  assert.deepEqual(getFrameGroups(layout)[0]!.members, [clock, volume, battery])
+  assert.deepEqual(getFrameGroups(layout)[0]!.members, [
+    clock,
+    volume,
+    battery,
+    power,
+  ])
   assert.deepEqual(getPlacement(layout, clock), {
     surface: 'frame',
     edge: 'top',
@@ -244,6 +429,7 @@ test('moving one status item into another frame group leaves both groups valid',
     clock,
     volume,
     battery,
+    power,
   ])
   assert.deepEqual(getTargetGroup(moved, apps)?.members, [wifi, apps, tools])
   assert.deepEqual(getPlacement(moved, wifi), {
@@ -297,6 +483,7 @@ test('members can be reordered and inserted into an existing group without dupli
     clock,
     wifi,
     volume,
+    power,
   ])
   const item = { kind: 'item', id: 'projects' } as const
   const inserted = mergeFrameTargets(reordered, item, wifi)
@@ -306,6 +493,7 @@ test('members can be reordered and inserted into an existing group without dupli
     wifi,
     item,
     volume,
+    power,
   ])
   assert.deepEqual(getPlacement(inserted, item), {
     surface: 'frame',

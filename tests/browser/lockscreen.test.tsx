@@ -1,0 +1,152 @@
+import { expect, test } from 'vitest'
+import { page, userEvent } from 'vitest/browser'
+import { renderDesktop, windowBounds } from './desktop'
+
+test('locking preserves edited work and app state through password errors and unlocking', async () => {
+  await renderDesktop()
+  const note = page.getByRole('textbox', { name: 'Note content' })
+  await note.fill('Keep this work while I am away.')
+  await page.getByRole('button', { name: 'Open app launcher' }).click()
+  await page
+    .getByRole('region', { name: 'App launcher' })
+    .getByRole('button', { name: 'Settings', exact: true })
+    .click()
+  await page
+    .getByRole('navigation', { name: 'Settings categories' })
+    .getByRole('button', { name: 'Displays', exact: true })
+    .click()
+  const before = windowBounds('Settings')
+
+  await page.getByRole('button', { name: 'Power', exact: true }).click()
+  await page.getByRole('menuitem', { name: 'Lock screen' }).click()
+  const screen = page.getByRole('dialog', { name: 'Lock screen' })
+  const password = page.getByLabelText('Password', { exact: true })
+  const unlock = page.getByRole('button', { name: 'Unlock', exact: true })
+  await expect.element(screen).toBeVisible()
+  await expect.element(password).toHaveFocus()
+  await expect.element(unlock).toBeDisabled()
+  await password.fill('incorrect-demo-password')
+  await userEvent.keyboard('{Enter}')
+  await expect
+    .element(page.getByRole('status'))
+    .toHaveTextContent('That password didn’t match. Try again.')
+  await expect.element(screen).toBeVisible()
+  await expect.element(password).toHaveFocus()
+  await password.fill('hearthspace')
+  await page.getByRole('button', { name: 'Show password' }).click()
+  await expect.element(password).toHaveAttribute('type', 'text')
+  await page.getByRole('button', { name: 'Hide password' }).click()
+  await expect.element(password).toHaveAttribute('type', 'password')
+  await password.click()
+  await userEvent.keyboard('{Enter}')
+
+  await expect.element(screen).not.toBeInTheDocument()
+  await expect
+    .element(page.getByRole('heading', { name: 'Displays', exact: true }))
+    .toBeVisible()
+  await expect.element(note).toHaveValue('Keep this work while I am away.')
+  await expect.poll(() => windowBounds('Settings')).toEqual(before)
+  await expect
+    .element(page.getByRole('button', { name: 'Power', exact: true }))
+    .toHaveFocus()
+
+  await page.getByRole('button', { name: 'Power', exact: true }).click()
+  await page.getByRole('menuitem', { name: 'Lock screen' }).click()
+  await expect.element(password).toHaveValue('')
+  await expect.element(password).toHaveAttribute('type', 'password')
+})
+
+test('the lockscreen blocks desktop shortcuts even outside the password field', async () => {
+  await renderDesktop()
+  const before = windowBounds('Scratchpad')
+  await page.getByRole('button', { name: 'Power', exact: true }).click()
+  await page.getByRole('menuitem', { name: 'Lock screen' }).click()
+  const screen = page.getByRole('dialog', { name: 'Lock screen' })
+  await userEvent.keyboard('{Control>}k{/Control}{Control>}1{/Control}{Escape}')
+  await page.getByRole('button', { name: 'Show password' }).click()
+  await userEvent.keyboard(
+    'mgn/d{Escape}{Control>}k{/Control}{Control>}1{/Control}',
+  )
+  await expect.element(screen).toBeVisible()
+  await page.getByLabelText('Password', { exact: true }).fill('hearthspace')
+  await page.getByRole('button', { name: 'Unlock', exact: true }).click()
+
+  await expect.element(screen).not.toBeInTheDocument()
+  await expect
+    .element(page.getByRole('search', { name: 'Canvas search' }))
+    .not.toBeInTheDocument()
+  await expect
+    .element(page.getByRole('listbox', { name: 'Switch windows' }))
+    .not.toBeInTheDocument()
+  await expect
+    .element(page.getByRole('heading', { name: 'Overview', exact: true }))
+    .not.toBeInTheDocument()
+  await expect
+    .element(page.getByRole('heading', { name: 'Notifications', exact: true }))
+    .not.toBeInTheDocument()
+  await expect
+    .element(page.getByRole('region', { name: 'App launcher' }))
+    .not.toBeInTheDocument()
+  await expect
+    .element(page.getByRole('button', { name: 'Draw', exact: true }))
+    .toHaveAttribute('aria-pressed', 'false')
+  await expect.poll(() => windowBounds('Scratchpad')).toEqual(before)
+})
+
+test('power actions are inert and the dropdown shares shell dismissal behavior', async () => {
+  await renderDesktop()
+  const note = page.getByRole('textbox', { name: 'Note content' })
+  await note.fill('Still here after power previews.')
+  await page.getByRole('button', { name: 'Sound settings' }).click()
+  await page.getByRole('button', { name: 'Power', exact: true }).click()
+  const menu = page.getByRole('menu', { name: 'Power', exact: true })
+  await expect
+    .element(page.getByRole('slider', { name: 'Sound' }))
+    .not.toBeInTheDocument()
+  await page.getByRole('menuitem', { name: 'Log off' }).click()
+  await page.getByRole('menuitem', { name: 'Reboot' }).click()
+  await page.getByRole('menuitem', { name: 'Turn off' }).click()
+  await expect.element(menu).toBeVisible()
+  await expect.element(note).toHaveValue('Still here after power previews.')
+  await expect
+    .element(page.getByRole('dialog', { name: 'Lock screen' }))
+    .not.toBeInTheDocument()
+  await userEvent.keyboard('{Home}')
+  await expect
+    .element(page.getByRole('menuitem', { name: 'Lock screen' }))
+    .toHaveFocus()
+  await userEvent.keyboard('{End}')
+  await expect
+    .element(page.getByRole('menuitem', { name: 'Turn off' }))
+    .toHaveFocus()
+  await userEvent.keyboard('{Escape}')
+  await expect.element(menu).not.toBeInTheDocument()
+  await expect
+    .element(page.getByRole('button', { name: 'Power', exact: true }))
+    .toHaveFocus()
+})
+
+test('the power menu and password form fit on a narrow desktop', async () => {
+  await page.viewport(390, 844)
+  try {
+    await renderDesktop()
+    await page.getByRole('button', { name: 'Power', exact: true }).click()
+    const menu = page.getByRole('menu', { name: 'Power', exact: true })
+    const bounds = menu.element().getBoundingClientRect()
+    expect(bounds.left).toBeGreaterThanOrEqual(0)
+    expect(bounds.right).toBeLessThanOrEqual(window.innerWidth)
+    await page.getByRole('menuitem', { name: 'Lock screen' }).click()
+    const password = page.getByLabelText('Password', { exact: true })
+    await expect.element(password).toBeVisible()
+    await expect
+      .element(page.getByText('Demo password:', { exact: false }))
+      .toBeVisible()
+    await password.fill('hearthspace')
+    await page.getByRole('button', { name: 'Unlock', exact: true }).click()
+    await expect
+      .element(page.getByRole('dialog', { name: 'Lock screen' }))
+      .not.toBeInTheDocument()
+  } finally {
+    await page.viewport(1280, 900)
+  }
+})

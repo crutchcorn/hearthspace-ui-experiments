@@ -1,6 +1,6 @@
 # System controls
 
-The clock, Wi-Fi, sound, and battery start together at the top right. They're
+The clock, Wi-Fi, sound, battery, and power start together at the top right. They're
 individual controls, though, so a layout can put the clock elsewhere or keep only
 the battery beside the launcher.
 
@@ -11,12 +11,16 @@ or pressing Escape dismisses the popover. In [Change layout](frame-layout.md),
 select a control and choose **Show details** or **Icon only**. This replaces the
 older battery-percentage setting with one consistent detail control.
 
-| Control | Detailed appearance                                   | Popover behavior                                    |
-| ------- | ----------------------------------------------------- | --------------------------------------------------- |
-| Clock   | Time, plus the chosen [date format](clock-formats.md) | Shows the current month and highlights today.       |
-| Wi-Fi   | Network name or “Wi-Fi off”                           | Toggles the simulated connection.                   |
-| Sound   | Volume percentage                                     | Changes the simulated volume from 0 to 100.         |
-| Battery | Charge percentage                                     | Shows the fixed 87% charge and battery-power state. |
+| Control | Detailed appearance                                   | Popover behavior                                      |
+| ------- | ----------------------------------------------------- | ----------------------------------------------------- |
+| Clock   | Time, plus the chosen [date format](clock-formats.md) | Shows the current month and highlights today.         |
+| Wi-Fi   | Network name or “Wi-Fi off”                           | Toggles the simulated connection.                     |
+| Sound   | Volume percentage                                     | Changes the simulated volume from 0 to 100.           |
+| Battery | Charge percentage                                     | Shows the fixed 87% charge and battery-power state.   |
+| Power   | Icon only                                             | Opens the [lockscreen and power menu](lockscreen.md). |
+
+Power has no detail toggle. Its Lock screen action opens the password preview;
+Log off, Reboot, and Turn off are inert placeholders.
 
 The clock uses the browser's local date and time, refreshing every 15 seconds.
 Wi-Fi and volume are in-memory prototype state; they reset on reload and don't

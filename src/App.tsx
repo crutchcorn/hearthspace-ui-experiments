@@ -48,6 +48,7 @@ import {
   ZoomOut,
 } from './icons'
 import SystemBar, { type SystemPanel } from './components/SystemBar'
+import LockScreen from './components/LockScreen'
 import NotificationInbox, {
   type NotificationTarget,
 } from './components/NotificationInbox'
@@ -183,6 +184,7 @@ function App() {
   const [dragging, setDragging] = useState(false)
   const [spaceHeld, setSpaceHeld] = useState(false)
   const [shellPanel, setShellPanel] = useState<ShellPanel>(null)
+  const [locked, setLocked] = useState(false)
   const showMap = shellPanel?.kind === 'overview'
   const notificationsOpen = shellPanel?.kind === 'notifications'
   const systemPanel = shellPanel?.kind === 'system' ? shellPanel.panel : null
@@ -344,6 +346,7 @@ function App() {
     ? activeId
     : (workspace.windows.at(-1)?.id ?? null)
   const windowSwitcher = useWindowSwitcher({
+    enabled: !locked,
     windows: workspace.windows,
     activeWindowId: focusedWindowId,
     onCommit: (id) => revealWindow(id, { center: true }),
@@ -376,7 +379,7 @@ function App() {
     layout,
     setLayout,
     view,
-    tool === 'layout',
+    tool === 'layout' && !locked,
     (target) =>
       preparePeekMotion({
         excludedWindowId: target.kind === 'window' ? target.id : undefined,
@@ -622,6 +625,7 @@ function App() {
       id === 'wifi' ||
       id === 'volume' ||
       id === 'battery' ||
+      id === 'power' ||
       id === 'clock'
     )
       openShellPanel({ kind: 'system', panel: id })
@@ -804,6 +808,7 @@ function App() {
         height: window.innerHeight,
       }))
     const keydown = (event: KeyboardEvent) => {
+      if (locked) return
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
         event.preventDefault()
         openCanvasSearch({
@@ -908,6 +913,7 @@ function App() {
       window.removeEventListener('blur', release)
     }
   }, [
+    locked,
     home.x,
     home.y,
     setView,
@@ -2168,7 +2174,7 @@ function App() {
       />
     ),
     ...Object.fromEntries(
-      (['clock', 'wifi', 'volume', 'battery'] as const).map((id) => [
+      (['clock', 'wifi', 'volume', 'battery', 'power'] as const).map((id) => [
         id,
         <SystemBar
           status={status}
@@ -2177,6 +2183,12 @@ function App() {
           id={id}
           expanded={getWidgetExpanded(objectLayout.layout, id)}
           openPanel={systemPanel}
+          onLock={() => {
+            windowSwitcher.cancel(false)
+            closePopovers()
+            finishPointerSession(true)
+            setLocked(true)
+          }}
           onPanelChange={(panel) => {
             if (panel) openShellPanel({ kind: 'system', panel })
             else dismissShellPanel('system')
@@ -2191,6 +2203,7 @@ function App() {
       className={styles.desktop}
       data-layout-editing={tool === 'layout'}
       onPointerDownCapture={(event) => {
+        if (locked) return
         suppressedControlClick.current = null
         objectLayout.events.onPointerDownCapture(event)
         if (
@@ -2203,6 +2216,7 @@ function App() {
           setExpandedPinnedId(null)
       }}
       onFocusCapture={(event) => {
+        if (locked) return
         if (
           expandedPinnedId &&
           !(event.target as Element).closest(
@@ -2234,6 +2248,7 @@ function App() {
         if (event.target === captureTarget.current) endGesture(event)
       }}
       onClickCapture={(event) => {
+        if (locked) return
         const control = (event.target as Element).closest<HTMLElement>(
           '[data-canvas-control-id]',
         )
@@ -3259,6 +3274,13 @@ function App() {
               })
           }}
           empty={searchLayout.results.length === 0}
+        />
+      )}
+      {locked && (
+        <LockScreen
+          status={status}
+          photo={background.photo}
+          onUnlock={() => setLocked(false)}
         />
       )}
     </main>
