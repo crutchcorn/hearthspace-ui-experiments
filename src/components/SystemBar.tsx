@@ -1,8 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
 import {
   BatteryFull,
+  Bluetooth,
+  BluetoothOff,
   Check,
+  ChevronRight,
   Clock,
+  Headphones,
+  Keyboard,
   Lock,
   LogOut,
   Power,
@@ -12,7 +17,11 @@ import {
   Wifi,
   WifiOff,
 } from '../icons'
-import type { SystemStatus } from '../useSystemStatus'
+import {
+  BLUETOOTH_DEVICES,
+  WIFI_NETWORKS,
+  type SystemStatus,
+} from '../useSystemStatus'
 import { formatClock, type ClockDateFormat } from '../clock-format'
 import WidgetPopover from './WidgetPopover'
 import LayoutConfirm from './LayoutConfirm'
@@ -22,7 +31,7 @@ import shellStyles from './ShellControls.module.css'
 import settingsStyles from './Settings.module.css'
 
 export type SystemPanel =
-  'wifi' | 'volume' | 'battery' | 'clock' | 'power' | null
+  'wifi' | 'bluetooth' | 'volume' | 'battery' | 'clock' | 'power' | null
 
 const powerActions = {
   'Log off': 'Save your work before ending this session.',
@@ -57,6 +66,15 @@ export default function SystemBar({
   const {
     wifiEnabled,
     setWifiEnabled,
+    wifiNetwork,
+    wifiLabel,
+    selectWifiNetwork,
+    bluetoothEnabled,
+    bluetoothPairedIds,
+    bluetoothConnectedIds,
+    bluetoothLabel,
+    setBluetoothEnabled,
+    toggleBluetoothDevice,
     volume,
     setVolume,
     now,
@@ -152,15 +170,36 @@ export default function SystemBar({
         <button
           type="button"
           className={`${styles.statusButton} ${expanded ? styles.withDetail : ''} ${shellStyles.control}`}
-          title={wifiEnabled ? 'Wi-Fi · Studio network' : 'Wi-Fi · Off'}
+          title={`Wi-Fi · ${wifiLabel}`}
           aria-label="Wi-Fi settings"
           aria-expanded={openPanel === 'wifi'}
           onClick={() => togglePanel('wifi')}
         >
-          {wifiEnabled ? <Wifi size={17} /> : <WifiOff size={17} />}
+          {wifiNetwork ? <Wifi size={17} /> : <WifiOff size={17} />}
           {expanded && (
             <span className={styles.detail} aria-hidden="true">
-              {wifiEnabled ? 'Studio network' : 'Wi-Fi off'}
+              {wifiLabel}
+            </span>
+          )}
+        </button>
+      )}
+      {id === 'bluetooth' && (
+        <button
+          type="button"
+          className={`${styles.statusButton} ${expanded ? styles.withDetail : ''} ${shellStyles.control}`}
+          title={`Bluetooth · ${bluetoothLabel}`}
+          aria-label="Bluetooth settings"
+          aria-expanded={openPanel === 'bluetooth'}
+          onClick={() => togglePanel('bluetooth')}
+        >
+          {bluetoothEnabled ? (
+            <Bluetooth size={17} />
+          ) : (
+            <BluetoothOff size={17} />
+          )}
+          {expanded && (
+            <span className={styles.detail} aria-hidden="true">
+              {bluetoothLabel}
             </span>
           )}
         </button>
@@ -287,6 +326,8 @@ export default function SystemBar({
             <div
               className={`${popoverStyles.panel} ${styles.popover} ${styles.systemPopover}`}
               ref={panelRef}
+              role="region"
+              aria-label="Wi-Fi"
               data-system-panel
               tabIndex={-1}
             >
@@ -299,21 +340,126 @@ export default function SystemBar({
                   onChange={(event) => setWifiEnabled(event.target.checked)}
                 />
               </label>
-              <div className={styles.networkRow}>
-                <div>
-                  <strong>
-                    {wifiEnabled ? 'Studio network' : 'Disconnected'}
-                  </strong>
-                  <span>
-                    {wifiEnabled
-                      ? 'Connected · Private network'
-                      : 'Enable Wi-Fi to connect'}
-                  </span>
+              {wifiEnabled ? (
+                <div className={styles.wirelessList}>
+                  <h2 className={styles.listHeading}>Networks</h2>
+                  {WIFI_NETWORKS.map((network) => {
+                    const connected = wifiNetwork?.id === network.id
+                    const action = `${connected ? 'Disconnect from' : 'Connect to'} ${network.name}`
+                    return (
+                      <button
+                        key={network.id}
+                        type="button"
+                        className={styles.wirelessItem}
+                        data-connected={connected}
+                        aria-label={action}
+                        title={action}
+                        onClick={() =>
+                          selectWifiNetwork(connected ? null : network.id)
+                        }
+                      >
+                        <Wifi size={19} />
+                        <span className={styles.wirelessName}>
+                          <strong>{network.name}</strong>
+                          <span>
+                            {connected
+                              ? 'Connected'
+                              : network.secured
+                                ? 'Saved network'
+                                : 'Open network'}
+                          </span>
+                        </span>
+                        {connected ? (
+                          <Check size={17} />
+                        ) : network.secured ? (
+                          <Lock size={15} />
+                        ) : (
+                          <ChevronRight size={17} />
+                        )}
+                      </button>
+                    )
+                  })}
                 </div>
-                {wifiEnabled && (
-                  <Check size={18} className={styles.networkCheck} />
-                )}
-              </div>
+              ) : (
+                <div className={styles.wirelessOff}>
+                  <WifiOff size={28} />
+                  <strong>Wi-Fi is off</strong>
+                  <span>Turn on Wi-Fi to see available networks.</span>
+                </div>
+              )}
+            </div>
+          )}
+
+          {id === 'bluetooth' && (
+            <div
+              className={`${popoverStyles.panel} ${styles.popover} ${styles.systemPopover}`}
+              ref={panelRef}
+              role="region"
+              aria-label="Bluetooth"
+              data-system-panel
+              tabIndex={-1}
+            >
+              <label className={styles.toggleRow}>
+                <strong>Bluetooth</strong>
+                <input
+                  className={`${settingsStyles.toggle} ${styles.toggle}`}
+                  type="checkbox"
+                  checked={bluetoothEnabled}
+                  onChange={(event) =>
+                    setBluetoothEnabled(event.target.checked)
+                  }
+                />
+              </label>
+              {bluetoothEnabled ? (
+                <div className={styles.wirelessList}>
+                  <h2 className={styles.listHeading}>Devices</h2>
+                  {BLUETOOTH_DEVICES.map((device) => {
+                    const connected = bluetoothConnectedIds.includes(device.id)
+                    const paired = bluetoothPairedIds.includes(device.id)
+                    const action = `${connected ? 'Disconnect' : paired ? 'Connect' : 'Pair'} ${device.name}`
+                    const Icon =
+                      device.kind === 'headphones'
+                        ? Headphones
+                        : device.kind === 'keyboard'
+                          ? Keyboard
+                          : Volume
+                    return (
+                      <button
+                        key={device.id}
+                        type="button"
+                        className={styles.wirelessItem}
+                        data-connected={connected}
+                        aria-label={action}
+                        title={action}
+                        onClick={() => toggleBluetoothDevice(device.id)}
+                      >
+                        <Icon size={19} />
+                        <span className={styles.wirelessName}>
+                          <strong>{device.name}</strong>
+                          <span>
+                            {connected
+                              ? 'Connected'
+                              : paired
+                                ? 'Paired'
+                                : 'Available to pair'}
+                          </span>
+                        </span>
+                        {connected ? (
+                          <Check size={17} />
+                        ) : (
+                          <ChevronRight size={17} />
+                        )}
+                      </button>
+                    )
+                  })}
+                </div>
+              ) : (
+                <div className={styles.wirelessOff}>
+                  <BluetoothOff size={28} />
+                  <strong>Bluetooth is off</strong>
+                  <span>Turn on Bluetooth to connect your devices.</span>
+                </div>
+              )}
             </div>
           )}
 

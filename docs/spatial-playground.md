@@ -28,7 +28,7 @@ and [Icons](icons.md) describe the tokens, glyphs, and boundaries in detail.
 
 A native scroll container fills the viewport and hides its scrollbars. Its world starts ten screens wide and ten screens tall. At creation, one screen is the browser’s initial viewport size, with a minimum of 960 × 720 pixels. Arranging windows can expand the world to fit the result. The saved world keeps its dimensions across reloads.
 
-The home viewport starts at 4.5 screen widths and heights into that world. Desktop items, background drawings, and windows use absolute world coordinates, so ordinary scroll movement also moves the dotted wallpaper. The dots sit on one uniform field color for each color mode; changing the accent doesn't recolor the field or add a stationary glow. This keeps the background attached to the canvas as you pan. At desktop widths, the default frame controls sit above the scrolling viewport in four corners: notifications at top left, device status at top right, canvas tools at bottom left, and the app launcher at bottom right. Device status combines the clock and three icon buttons in one compact translucent row. At 760 pixels or less, pairs still in their default positions join into top and bottom bars, preserving their left-to-right roles. Custom placements remain independent attachments.
+The home viewport starts at 4.5 screen widths and heights into that world. Desktop items, background drawings, and windows use absolute world coordinates, so ordinary scroll movement also moves the dotted wallpaper. The dots sit on one uniform field color for each color mode; changing the accent doesn't recolor the field or add a stationary glow. This keeps the background attached to the canvas as you pan. At desktop widths, the default frame controls sit above the scrolling viewport in four corners: notifications at top left, device status at top right, canvas tools at bottom left, and the app launcher at bottom right. Device status combines Clock, Wi-Fi, Bluetooth, Sound, Battery, and Power in one compact translucent row. At 760 pixels or less, pairs still in their default positions join into top and bottom bars, preserving their left-to-right roles. Custom placements remain independent attachments.
 
 The minimap translates pointer positions into world coordinates. Grabbing its visible-area rectangle preserves the pointer’s offset within the viewport; pressing elsewhere centers the viewport there. Pointer capture keeps navigation continuous outside the map until release, and the native scroll container clamps travel at the world edges. The Overview panel contains the map without a window count, dragging hint, or Home button; the Home key still returns to the starting viewport. A fixed 100% zoom readout sits beside the heading. Below the map, a disabled reset icon sits to the left of zoom-out and zoom-in. All three buttons are presentational placeholders and do not change the map scale or canvas viewport.
 
@@ -157,9 +157,12 @@ use a separate host above frame attachments, anchored to their controls without
 raising the icons. Frame, grouped, and mobile controls use the same popup host;
 Overview shares its layer above pinned items.
 
-`FRAME_WIDGETS` defines Notifications, Clock, Wi-Fi, Sound, Battery, Power, Canvas
-tools, and Apps, including default corners and search metadata. The five
-system controls begin in a `system` frame group; that grouping is editable.
+`FRAME_WIDGETS` defines Notifications, Clock, Wi-Fi, Bluetooth, Sound, Battery,
+Power, Canvas tools, and Apps, including default corners and search metadata.
+The six system controls begin in a `system` frame group ordered
+`clock,wifi,bluetooth,volume,battery,power`; that grouping is editable.
+The [wireless controls](system-controls.md) share in-memory network selection,
+Bluetooth pairings, and connection state with search previews and the lockscreen.
 Power opens the [lockscreen preview](lockscreen.md) and session confirmation previews.
 `PlacedWidget` measures the
 control's contents, positions it relative to the viewport or world, and keeps
@@ -224,11 +227,12 @@ Moving a group excludes its own members from these targets. A shortcut over
 the launcher trigger instead adds a favorite, taking precedence over grouping.
 Cancellation restores the original group membership as well as placement.
 
-Clock, Wi-Fi, Sound, Battery, and Notifications also have a saved expanded
-state, edited from Change layout. Clock and Notifications begin expanded;
-the other three begin as icons. Expansion shows the time, connected network,
-volume, charge percentage, or unread status without changing the corresponding
-popover's controls. Group membership and detail are independent choices.
+Clock, Wi-Fi, Bluetooth, Sound, Battery, and Notifications also have a saved
+expanded state, edited from Change layout. Clock and Notifications begin
+expanded; the other four begin as icons. Expansion shows the time, connected
+network, Bluetooth connection count, volume, charge percentage, or unread status
+without changing the corresponding popover's controls. Group membership and
+detail are independent choices.
 The editor's detail action switches between **Show details** and **Icon only**.
 Expanded notification text uses vertical writing on left and right edges;
 the trigger stacks its upright bell and text in a 44-pixel-wide control.
@@ -426,7 +430,7 @@ The field stays near the clicked point, clamped to leave the shell controls avai
 
 Results place desktop items first, then matching windows in front-to-back order, drawings, catalog widgets, and canvas tools. Up and Down change the selected result, wrapping at either end; Left and Right retain normal text-cursor behavior. Enter or clicking a result closes search, then opens the item's associated preview or focuses and centers the existing window. A pinned window opens at its frame edge. A canvas drawing is selected and centered; a pinned drawing stays at its screen position. Escape, the field's close button, empty-canvas input, or another shell or tool action also closes search. Dismissing it preserves the Search tool, ready for another background click. The field has no result count or instruction footer; a query without matches displays **No matches**.
 
-`SearchControlPreview` gives widgets and tools recognizable icons. Status previews read the same `useSystemStatus` and `useNotifications` state as the placed controls, so their network, sound level, battery percentage, time, and unread state stay in sync. The Apps result previews favorite app icons. Individual app shortcuts retain their existing `AppIcon` rendering and launch their app.
+`SearchControlPreview` gives widgets and tools recognizable icons. Status previews read the same `useSystemStatus` and `useNotifications` state as the placed controls, so their selected network, Bluetooth connection count, sound level, battery percentage, time, and unread state stay in sync. The Apps result previews favorite app icons. Individual app shortcuts retain their existing `AppIcon` rendering and launch their app.
 
 Status results open the existing control at its actual placement. A frame attachment keeps its edge and group; a canvas control is brought into view before its panel opens. A hidden control receives a saved canvas placement near the current view and opens there, rather than returning to a default frame corner. The Canvas tools result follows the same reveal behavior and opens a flat picker anchored to the toolbar. Apps reveals its control and opens the launcher. These paths reuse the placed controls and their panels.
 
@@ -472,7 +476,7 @@ icon suggests tiling; it doesn't prescribe a three-window result.
 
 Default horizontal corner surfaces are 54 pixels high and sit 24 pixels inside the viewport edges. At 760 pixels or less, unchanged default attachments form two shared 54-pixel bars with a 12-pixel screen inset. Customized attachments keep their chosen edge and position with the same inset. The bottom bar contains one canvas-tool selector, the horizontally scrollable app strip, and the Apps launcher. The selector opens a single flat menu containing desktop-item selection, pan, search, rectangle select, freeform lasso, Draw, Change layout, Overview, and Arrange windows, without submenus. Choosing a tool or action closes the menu.
 
-The notification trigger defaults to a bell with a single-line unread status. Its expanded contents remain left-aligned at their natural width, preserving the full label on narrow screens; compact mode shows only the bell and its unread treatment. Clock, network, sound, and battery begin in one group on the right but can move independently. Their compact forms show icons; expanded forms show the chosen date/time format, network name, volume, or battery percentage. The full date and simulated device values remain available in hover titles and panels in either form.
+The notification trigger defaults to a bell with a single-line unread status. Its expanded contents remain left-aligned at their natural width, preserving the full label on narrow screens; compact mode shows only the bell and its unread treatment. Clock, Wi-Fi, Bluetooth, Sound, Battery, and Power begin in one group on the right but can move independently. Their compact forms show icons; expanded forms show the chosen date/time format, network name, Bluetooth connection count, volume, or battery percentage. Power remains icon-only. The full date and simulated device values remain available in hover titles and panels in either form.
 
 Placed widgets measure their actual size and available space to open panels above or below their current position. Default merged bars retain their compact mobile layout; relocated widgets clamp popovers within the viewport and scroll the panel internally when needed.
 
@@ -641,8 +645,8 @@ across Settings windows.
 | [`src/display-layout.ts`](../src/display-layout.ts)                                                                                                   | Monitor layout coordinates, nearest-edge snapping, and group centering for the two-display preview.          |
 | [`src/useBackground.ts`](../src/useBackground.ts)                                                                                                     | Photo decoding, shared background state, object URL lifetime, and IndexedDB persistence.                     |
 | [`src/App.tsx`](../src/App.tsx)                                                                                                                       | Workspace rendering, pointer gestures, viewport navigation, focused view, window actions, and saving.        |
-| [`src/components/SystemBar.tsx`](../src/components/SystemBar.tsx)                                                                                     | Independent clock, Wi-Fi, sound, and battery items, compact/detail views, popovers, and simulated controls.  |
-| [`src/useSystemStatus.ts`](../src/useSystemStatus.ts)                                                                                                 | Shared simulated Wi-Fi, volume, battery, and clock state for placed controls and search.                     |
+| [`src/components/SystemBar.tsx`](../src/components/SystemBar.tsx)                                                                                     | Clock, Wi-Fi, Bluetooth, sound, battery, and power controls, detail views, and popovers.                     |
+| [`src/useSystemStatus.ts`](../src/useSystemStatus.ts)                                                                                                 | Shared mock Wi-Fi, Bluetooth, volume, battery, and clock state for controls, search, and lockscreen.         |
 | [`src/useNotifications.ts`](../src/useNotifications.ts)                                                                                               | Shared notification records, unread count, and updates for the inbox and search.                             |
 | [`src/components/NotificationInbox.tsx`](../src/components/NotificationInbox.tsx)                                                                     | Notification trigger, inbox, read/dismiss actions, and sample toasts.                                        |
 | [`src/components/Minimap.tsx`](../src/components/Minimap.tsx)                                                                                         | Map rendering and pointer capture for dragging the visible canvas area.                                      |
@@ -691,6 +695,15 @@ Canvas drawing locations normalize to Background at the same world position,
 keeping their strokes. This change keeps the v3 save and doesn't reset it.
 The frame layout does not also save item or drawing positions.
 `useScene` debounces the single save by 200 milliseconds.
+
+Within the current scene format, untouched older default system groups migrate
+from Clock, Wi-Fi, Sound, Battery (with or without Power) to
+`clock,wifi,bluetooth,volume,battery,power`. This applies to the unchanged
+top-right default group, inserting Bluetooth after Wi-Fi and adding Power at
+the end when needed. Explicit widget placements, group membership, and hidden
+choices are preserved. Customized groups are not rebuilt. When Bluetooth has
+no saved placement in a custom layout, it starts as a standalone top-edge
+control at position `0.35`; a missing Power control starts at top-center.
 
 `FrameLayout.options` stores item preferences by target key, independently of
 placement, group membership, and expanded status. The clock currently saves
@@ -756,4 +769,4 @@ Battery detail is saved with the scene's frame layout.
 
 AI opt-in is stored under `hearthspace-ai-enabled-v1`. Only the literal string `true` enables it; missing, invalid, or unavailable storage defaults to off. Confirming opt-out or canceling an active download saves `false` immediately. Opting in saves `true` only after the simulated download completes, so an interrupted download does not enable the feature on reload. Download progress is temporary and no model file is stored. The shared session remains usable when preference storage fails.
 
-Viewport travel, selection, unfinished drawing strokes, open panels, temporary window-switcher layouts, search text and result arrangements, list/grid choice, notifications, and simulated device-control values remain temporary. Search and switching never write their presentation coordinates to workspace storage. Notification read/dismissal state and preview items reset to the initial samples on reload. If storage is unavailable, the current desktop session remains usable without persistence.
+Viewport travel, selection, unfinished drawing strokes, open panels, temporary window-switcher layouts, search text and result arrangements, list/grid choice, notifications, and simulated device-control values remain temporary. Wi-Fi selection and radio state, Bluetooth pairings and connections, and volume reset on reload; their widget placements and detail choices persist. Search and switching never write their presentation coordinates to workspace storage. Notification read/dismissal state and preview items reset to the initial samples on reload. If storage is unavailable, the current desktop session remains usable without persistence.

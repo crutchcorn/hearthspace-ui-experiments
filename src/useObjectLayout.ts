@@ -1097,9 +1097,14 @@ export default function useObjectLayout(
     group: selected ? getTargetGroup(layout, selected) : undefined,
     expanded:
       selected?.kind === 'widget' &&
-      ['notifications', 'clock', 'wifi', 'volume', 'battery'].includes(
-        selected.id,
-      )
+      [
+        'notifications',
+        'clock',
+        'wifi',
+        'bluetooth',
+        'volume',
+        'battery',
+      ].includes(selected.id)
         ? getWidgetExpanded(layout, selected.id)
         : undefined,
     toggleExpanded: () => {

@@ -123,6 +123,7 @@ test('empty search includes drawings, widgets, and tools alongside shortcuts', (
       'widget:notifications',
       'widget:clock',
       'widget:wifi',
+      'widget:bluetooth',
       'widget:volume',
       'widget:battery',
       'widget:power',
@@ -179,6 +180,32 @@ test('Power is discoverable through lock, session, and shutdown actions', () => 
       query,
     )
     assert.equal(layout.widgets.get('power')?.matches, true)
+  }
+})
+
+test('Bluetooth is discoverable through its name and device pairing keywords', () => {
+  for (const query of [
+    'bluetooth',
+    'wireless',
+    'devices',
+    'headphones',
+    'pairing',
+  ]) {
+    const layout = getCanvasSearchLayout(
+      workspace,
+      view,
+      { x: 600, y: 150 },
+      query,
+      false,
+      { widgets: FRAME_WIDGETS },
+    )
+    assert.ok(
+      layout.results.some(
+        (result) => result.kind === 'widget' && result.id === 'bluetooth',
+      ),
+      query,
+    )
+    assert.equal(layout.widgets.get('bluetooth')?.matches, true)
   }
 })
 

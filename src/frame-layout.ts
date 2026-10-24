@@ -97,6 +97,13 @@ export const FRAME_WIDGETS = [
     defaultPlacement: { surface: 'frame', edge: 'top', position: 1 },
   },
   {
+    id: 'bluetooth',
+    title: 'Bluetooth',
+    description: 'Bluetooth devices and connection controls.',
+    keywords: ['wireless', 'devices', 'headphones', 'pairing', 'system tray'],
+    defaultPlacement: { surface: 'frame', edge: 'top', position: 0.35 },
+  },
+  {
     id: 'volume',
     title: 'Sound',
     description: 'Sound output and volume.',
@@ -349,6 +356,7 @@ const EXPANDABLE_WIDGETS = new Set([
   'notifications',
   'clock',
   'wifi',
+  'bluetooth',
   'volume',
   'battery',
 ])
@@ -470,11 +478,18 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 const LEGACY_SYSTEM_WIDGET_IDS = ['clock', 'wifi', 'volume', 'battery']
 
-function systemGroup(includePower: boolean): FrameGroup {
+function systemGroup(
+  includePower: boolean,
+  includeBluetooth: boolean,
+): FrameGroup {
   return {
     id: 'system',
     members: [
-      ...LEGACY_SYSTEM_WIDGET_IDS,
+      'clock',
+      'wifi',
+      ...(includeBluetooth ? ['bluetooth'] : []),
+      'volume',
+      'battery',
       ...(includePower ? ['power'] : []),
     ].map((id) => ({
       kind: 'widget',
@@ -492,8 +507,8 @@ export function readFrameLayout(value: unknown): FrameLayout {
   const saved = isRecord(value) ? value : {}
   layout.allowHideTools = saved.allowHideTools === true
   const savedPlacements = isRecord(saved.placements) ? saved.placements : {}
-  const hasSavedPower =
-    Object.hasOwn(savedPlacements, 'widget:power') ||
+  const hasSavedWidget = (id: string) =>
+    Object.hasOwn(savedPlacements, `widget:${id}`) ||
     (isRecord(saved.groups) &&
       Object.values(saved.groups).some(
         (group) =>
@@ -501,11 +516,11 @@ export function readFrameLayout(value: unknown): FrameLayout {
           Array.isArray(group.members) &&
           group.members.some(
             (member) =>
-              isRecord(member) &&
-              member.kind === 'widget' &&
-              member.id === 'power',
+              isRecord(member) && member.kind === 'widget' && member.id === id,
           ),
       ))
+  const hasSavedPower = hasSavedWidget('power')
+  const hasSavedBluetooth = hasSavedWidget('bluetooth')
   for (const [key, savedPlacement] of Object.entries(savedPlacements)) {
     const target = readTarget(key)
     const placement = readPlacement(savedPlacement)
@@ -554,24 +569,30 @@ export function readFrameLayout(value: unknown): FrameLayout {
           if (placement) layout.placements[targetKey(member)] = placement
         continue
       }
-      // Only upgrade the untouched old default. An explicit Power placement
-      // or group, including a hidden control, is the user's existing choice.
+      // Upgrade only exact saved defaults. Explicit placements and groups,
+      // including hidden controls, take precedence over new defaults.
       if (
-        !hasSavedPower &&
         id === 'system' &&
-        value.members.length === LEGACY_SYSTEM_WIDGET_IDS.length &&
-        members.length === LEGACY_SYSTEM_WIDGET_IDS.length &&
-        members.every(
-          (member, index) =>
-            member.kind === 'widget' &&
-            member.id === LEGACY_SYSTEM_WIDGET_IDS[index],
-        ) &&
+        value.members.length === members.length &&
         isRecord(savedGroupPlacement) &&
         savedGroupPlacement.surface === 'frame' &&
         savedGroupPlacement.edge === 'top' &&
         savedGroupPlacement.position === 1
-      )
-        members.push({ kind: 'widget', id: 'power' })
+      ) {
+        const matchesWidgets = (ids: string[]) =>
+          members.length === ids.length &&
+          members.every(
+            (member, index) =>
+              member.kind === 'widget' && member.id === ids[index],
+          )
+        if (!hasSavedPower && matchesWidgets(LEGACY_SYSTEM_WIDGET_IDS))
+          members.push({ kind: 'widget', id: 'power' })
+        if (
+          !hasSavedBluetooth &&
+          matchesWidgets([...LEGACY_SYSTEM_WIDGET_IDS, 'power'])
+        )
+          members.splice(2, 0, { kind: 'widget', id: 'bluetooth' })
+      }
       layout.groups![id] = { id, members }
       layout.placements[groupKey] = placement!
       for (const member of members) {
@@ -580,7 +601,7 @@ export function readFrameLayout(value: unknown): FrameLayout {
       }
     }
   } else {
-    const group = systemGroup(!hasSavedPower)
+    const group = systemGroup(!hasSavedPower, !hasSavedBluetooth)
     layout.groups![group.id] = group
     layout.placements[targetKey({ kind: 'group', id: group.id })] = {
       surface: 'frame',

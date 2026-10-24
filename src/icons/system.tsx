@@ -106,6 +106,35 @@ export const WifiOff = createIcon(
   </>,
 )
 
+const bluetooth = <path d="m6 6 12 12-6 4V2l6 4L6 18" />
+
+export const Bluetooth = createIcon('Bluetooth', bluetooth)
+
+export const BluetoothOff = createIcon(
+  'BluetoothOff',
+  <>
+    {bluetooth}
+    <path d="m3 3 18 18" />
+  </>,
+)
+
+export const Headphones = createIcon(
+  'Headphones',
+  <>
+    <path d="M4 13V10a8 8 0 0 1 16 0v3" />
+    <rect x="3" y="12" width="5" height="9" rx="1" />
+    <rect x="16" y="12" width="5" height="9" rx="1" />
+  </>,
+)
+
+export const Keyboard = createIcon(
+  'Keyboard',
+  <>
+    <rect x="2" y="5" width="20" height="14" rx="1" />
+    <path d="M6 9h1m4 0h1m4 0h2M6 12h1m4 0h1m4 0h2M7 16h10" />
+  </>,
+)
+
 export const Monitor = createIcon(
   'Monitor',
   <>

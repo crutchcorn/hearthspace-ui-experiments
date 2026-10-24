@@ -35,9 +35,14 @@ menus use accent hover and which ordinary panels keep white highlights.
 ## Respect a customized frame
 
 Automatic merging is conditional. The top bar is used only while Notifications
-remains at its default corner and the Clock, Wi-Fi, Sound, Battery, Power group
-remains at the top right in that order. The bottom bar requires both Canvas tools
-and Apps to remain in their default corners.
+remains at its default corner and the Clock, Wi-Fi, Bluetooth, Sound, Battery,
+Power group remains at the top right in that order. The bottom bar requires
+both Canvas tools and Apps to remain in their default corners.
+
+Untouched older four- or five-control default groups migrate to this six-control
+order. Bluetooth joins immediately after Wi-Fi, so those layouts still qualify
+for the merged top bar. Explicit placements, groups, and hidden choices remain
+intact; see [saved state](spatial-playground.md#saved-state).
 
 Changing one of those arrangements through [Change layout](frame-layout.md)
 keeps the chosen attachments instead of rebuilding a default mobile bar over

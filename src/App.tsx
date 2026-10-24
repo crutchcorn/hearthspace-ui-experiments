@@ -623,6 +623,7 @@ function App() {
     } else if (id === 'tools') setToolMenuRequest((current) => current + 1)
     else if (
       id === 'wifi' ||
+      id === 'bluetooth' ||
       id === 'volume' ||
       id === 'battery' ||
       id === 'power' ||
@@ -2174,7 +2175,9 @@ function App() {
       />
     ),
     ...Object.fromEntries(
-      (['clock', 'wifi', 'volume', 'battery', 'power'] as const).map((id) => [
+      (
+        ['clock', 'wifi', 'bluetooth', 'volume', 'battery', 'power'] as const
+      ).map((id) => [
         id,
         <SystemBar
           status={status}

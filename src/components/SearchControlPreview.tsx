@@ -3,6 +3,8 @@ import {
   BatteryFull,
   Bell,
   BellUnread,
+  Bluetooth,
+  BluetoothOff,
   Clock,
   AppsGrid,
   Pan,
@@ -70,9 +72,16 @@ export default function SearchControlPreview({
       }
       case 'wifi': {
         title = 'Wi-Fi'
-        const Icon = status.wifiEnabled ? Wifi : WifiOff
+        const Icon = status.wifiNetwork ? Wifi : WifiOff
         icon = <Icon size={26} aria-hidden="true" />
-        detail = status.wifiEnabled ? 'Studio network' : 'Off'
+        detail = status.wifiLabel
+        break
+      }
+      case 'bluetooth': {
+        title = 'Bluetooth'
+        const Icon = status.bluetoothEnabled ? Bluetooth : BluetoothOff
+        icon = <Icon size={26} aria-hidden="true" />
+        detail = status.bluetoothLabel
         break
       }
       case 'volume': {

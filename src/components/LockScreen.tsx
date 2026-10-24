@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import {
   BatteryFull,
+  Bluetooth,
+  BluetoothOff,
   ChevronRight,
   Eye,
   Lock,
@@ -83,8 +85,15 @@ export default function LockScreen({
         <header className={styles.header}>
           <Lock className={styles.lockIcon} size={17} />
           <div className={styles.status} aria-label="System status">
-            <span title={status.wifiEnabled ? 'Studio network' : 'Wi-Fi off'}>
-              {status.wifiEnabled ? <Wifi size={18} /> : <WifiOff size={18} />}
+            <span title={status.wifiLabel}>
+              {status.wifiNetwork ? <Wifi size={18} /> : <WifiOff size={18} />}
+            </span>
+            <span title={`Bluetooth · ${status.bluetoothLabel}`}>
+              {status.bluetoothEnabled ? (
+                <Bluetooth size={18} />
+              ) : (
+                <BluetoothOff size={18} />
+              )}
             </span>
             <span className={styles.battery}>
               <BatteryFull size={20} />

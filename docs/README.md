@@ -20,11 +20,11 @@ interaction and points to its implementation.
 - [Change layout](frame-layout.md): animated placement in both directions, visible corner hit targets, toolbar orientation, removal, and recovery.
 - [Frame groups](frame-groups.md): merging overlapping attachments, moving a group, and separating members.
 - [Pinned windows](pinned-windows.md): recessed layout previews, smooth pinning and detaching, hover peeks, focused opening, and close confirmation.
-- [System controls](system-controls.md): independent status items, detail choices, canvas placement, and anchored popups above pinned items.
+- [System controls](system-controls.md): movable status items, mock Wi-Fi selection and Bluetooth pairing, shared status, detail choices, and anchored popups above pinned items.
 - [Lockscreen and power menu](lockscreen.md): a themed password preview, preserved desktop session, and power confirmation previews whose confirm actions only dismiss the dialog.
 - [Clock formats](clock-formats.md): date choices and the extension point for item-specific controls.
 - [Notifications](notifications.md): unread state, inbox actions, previews, and placement.
-- [Responsive shell](responsive-shell.md): default mobile bars, horizontal scrolling, and flat tool choices.
+- [Responsive shell](responsive-shell.md): default mobile bars with all six system controls, horizontal scrolling, and flat tool choices.
 
 ## Discovery and ink
 

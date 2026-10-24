@@ -15,8 +15,11 @@ The lockscreen uses the current accent and light/dark mode, the shell's thin
 glass surfaces, and local Hearthspace glyphs. The default wallpaper keeps the
 dotted canvas; an uploaded background keeps its fit setting under a softened,
 tinted layer. It has no app windows or notifications over it. The large clock
-uses local 24-hour time; the date, Wi-Fi, and battery read from the existing
-system-status state. The clock refreshes every 15 seconds, like the shell.
+uses local 24-hour time; the date, Wi-Fi, Bluetooth, and battery read from the
+existing system-status state. The Wi-Fi icon's hover title shows the chosen
+network, **Not connected**, or **Wi-Fi off**; Bluetooth's shows its connection
+count, **Not connected**, or **Bluetooth off**. Locking preserves the current
+wireless choices. The clock refreshes every 15 seconds, like the shell.
 
 Password entry starts focused and stays masked. The eye button fills
 `hearthspace`, clears any wrong-password error, and focuses the password field.
@@ -38,10 +41,12 @@ grouped, hidden, or recovered through canvas search like the other controls.
 Searching for **Power**, **Lock screen**, or **Reboot** finds its menu. Its
 placement is saved with the scene.
 
-An older saved layout with the untouched four-control system group gains Power
-at its end. Customized groups stay intact; Power starts separately at the top
-center if it has no saved placement. Explicit placements, including a hidden
-Power control, are preserved.
+An older saved layout with an untouched four- or five-control system group
+migrates to Clock, Wi-Fi, Bluetooth, Sound, Battery, Power. Customized groups
+stay intact; Power starts separately at the top center if it has no saved
+placement. Explicit placements, including a hidden Power control, are
+preserved. See [saved state](spatial-playground.md#saved-state) for the Bluetooth
+fallback and migration boundary.
 
 ## Power action confirmations
 
@@ -86,6 +91,8 @@ continue independently of the lockscreen.
   [CSS module](../src/components/LayoutConfirm.module.css): shared native modal,
   centered presentation, Cancel focus, and action-specific confirmation labels.
 - [App.tsx](../src/App.tsx): lock state, session cleanup, and desktop shortcut gate.
+- [useSystemStatus.ts](../src/useSystemStatus.ts): shared clock, battery, selected
+  Wi-Fi network, and Bluetooth connection count.
 - [useWindowSwitcher.ts](../src/useWindowSwitcher.ts): capture-phase shortcut gate.
 - [frame-layout.ts](../src/frame-layout.ts), [FrameShell.tsx](../src/components/FrameShell.tsx),
   and [SearchControlPreview.tsx](../src/components/SearchControlPreview.tsx):

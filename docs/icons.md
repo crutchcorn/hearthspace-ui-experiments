@@ -117,7 +117,14 @@ Reuse each definition wherever its action appears, including toolbars, tool
 menus, search previews, Settings, and drawing controls. The glyph identifies
 the action; it doesn't change its shortcut, selection state, or placement rules.
 
-## Session control glyphs
+## Wireless and session control glyphs
+
+The [wireless controls](system-controls.md) use local `Wifi`, `WifiOff`,
+`Bluetooth`, and `BluetoothOff` glyphs from `system.tsx`. Their off variants add
+a diagonal stroke. Bluetooth device rows use `Headphones`, `Keyboard`, and
+`Volume` for the speaker, through the same `createIcon` factory and optical
+stroke sizing. Status controls, search previews, and the lockscreen share the
+wireless glyphs; third-party app artwork stays unchanged.
 
 The power menu and [lockscreen](lockscreen.md) use local `Power`, `Lock`,
 `LogOut`, `User`, and `Eye` glyphs from `system.tsx`. Reboot reuses `RotateCcw`,

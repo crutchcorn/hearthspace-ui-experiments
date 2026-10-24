@@ -26,13 +26,14 @@ const tools = { kind: 'widget', id: 'tools' } as const
 const notifications = { kind: 'widget', id: 'notifications' } as const
 const clock = { kind: 'widget', id: 'clock' } as const
 const wifi = { kind: 'widget', id: 'wifi' } as const
+const bluetooth = { kind: 'widget', id: 'bluetooth' } as const
 const volume = { kind: 'widget', id: 'volume' } as const
 const battery = { kind: 'widget', id: 'battery' } as const
 const power = { kind: 'widget', id: 'power' } as const
 const apps = { kind: 'widget', id: 'apps' } as const
 const defaultSystemGroup = {
   id: 'system',
-  members: [clock, wifi, volume, battery, power],
+  members: [clock, wifi, bluetooth, volume, battery, power],
 }
 const loadedDefaults: FrameLayout = {
   ...defaults,
@@ -48,6 +49,14 @@ const legacySystemGroup = {
 const legacyDefaults: FrameLayout = {
   ...loadedDefaults,
   groups: { system: legacySystemGroup },
+}
+const powerSystemGroup = {
+  id: 'system',
+  members: [clock, wifi, volume, battery, power],
+}
+const powerDefaults: FrameLayout = {
+  ...loadedDefaults,
+  groups: { system: powerSystemGroup },
 }
 
 test('moving a detached toolbar retains its measured body while discarding the prior peek home', () => {
@@ -200,7 +209,7 @@ test('absent or invalid layout data restores the default status group', () => {
     })
 })
 
-test('the old default status group gains Power once and preserves its saved options', () => {
+test('the old four-item default status group gains Bluetooth and Power once and preserves its saved options', () => {
   const layout = readFrameLayout({
     ...legacyDefaults,
     expanded: { clock: false, battery: true },
@@ -213,7 +222,22 @@ test('the old default status group gains Power once and preserves its saved opti
   assert.deepEqual(legacyDefaults.groups?.system, legacySystemGroup)
 })
 
-test('customized old status groups stay intact with Power separately at the top center', () => {
+test('the five-item default status group gains Bluetooth once and preserves its saved options', () => {
+  const layout = readFrameLayout({
+    ...powerDefaults,
+    expanded: { clock: false, battery: true },
+    options: { 'widget:clock': { dateFormat: 'weekday' } },
+  })
+  assert.deepEqual(layout, {
+    ...loadedDefaults,
+    expanded: { clock: false, battery: true },
+    options: { 'widget:clock': { dateFormat: 'weekday' } },
+  })
+  assert.deepEqual(readFrameLayout(JSON.parse(JSON.stringify(layout))), layout)
+  assert.deepEqual(powerDefaults.groups?.system, powerSystemGroup)
+})
+
+test('customized old status groups stay intact with Bluetooth and Power separately at distinct top positions', () => {
   const variants: FrameLayout[] = [
     { ...legacyDefaults, groups: {} },
     {
@@ -262,6 +286,73 @@ test('customized old status groups stay intact with Power separately at the top 
       edge: 'top',
       position: 0.5,
     })
+    assert.equal(getTargetGroup(layout, bluetooth), undefined)
+    assert.deepEqual(getPlacement(layout, bluetooth), {
+      surface: 'frame',
+      edge: 'top',
+      position: 0.35,
+    })
+    assert.deepEqual(
+      readFrameLayout(JSON.parse(JSON.stringify(layout))),
+      layout,
+    )
+  }
+})
+
+test('customized five-item status groups preserve their order, membership, identity, and position', () => {
+  const variants: FrameLayout[] = [
+    { ...powerDefaults, groups: {}, placements: {} },
+    {
+      ...powerDefaults,
+      groups: {
+        system: {
+          id: 'system',
+          members: [wifi, clock, volume, battery, power],
+        },
+      },
+    },
+    {
+      ...powerDefaults,
+      groups: {
+        system: { id: 'system', members: [clock, wifi, volume, power] },
+      },
+    },
+    {
+      ...powerDefaults,
+      groups: {
+        system: {
+          id: 'system',
+          members: [...powerSystemGroup.members, notifications],
+        },
+      },
+    },
+    {
+      ...powerDefaults,
+      groups: { custom: { id: 'custom', members: powerSystemGroup.members } },
+      placements: { 'group:custom': powerDefaults.placements['group:system'] },
+    },
+    {
+      ...powerDefaults,
+      placements: {
+        'group:system': { surface: 'frame', edge: 'bottom', position: 1 },
+      },
+    },
+    {
+      ...powerDefaults,
+      placements: {
+        'group:system': { surface: 'frame', edge: 'top', position: 0.7 },
+      },
+    },
+  ]
+  for (const saved of variants) {
+    const layout = readFrameLayout(saved)
+    assert.deepEqual(layout, saved)
+    assert.equal(getTargetGroup(layout, bluetooth), undefined)
+    assert.deepEqual(getPlacement(layout, bluetooth), {
+      surface: 'frame',
+      edge: 'top',
+      position: 0.35,
+    })
     assert.deepEqual(
       readFrameLayout(JSON.parse(JSON.stringify(layout))),
       layout,
@@ -303,7 +394,107 @@ test('normalizing incomplete or malformed groups does not qualify them for the d
     const layout = readFrameLayout(saved)
     assert.deepEqual(getFrameGroups(layout), [legacySystemGroup])
     assert.equal(getTargetGroup(layout, power), undefined)
+    assert.equal(getTargetGroup(layout, bluetooth), undefined)
   }
+})
+
+test('normalizing an incomplete or malformed five-item group does not add Bluetooth', () => {
+  for (const saved of [
+    { ...powerDefaults, placements: {} },
+    {
+      ...powerDefaults,
+      placements: {
+        'group:system': { surface: 'frame', edge: 'top', position: 4 },
+      },
+    },
+    {
+      ...powerDefaults,
+      groups: {
+        system: { id: 'system', members: [...powerSystemGroup.members, clock] },
+      },
+    },
+    {
+      ...powerDefaults,
+      groups: {
+        system: {
+          id: 'system',
+          members: [
+            ...powerSystemGroup.members,
+            { kind: 'widget', id: 'unknown' },
+          ],
+        },
+      },
+    },
+  ]) {
+    const layout = readFrameLayout(saved)
+    assert.deepEqual(getFrameGroups(layout), [powerSystemGroup])
+    assert.equal(getTargetGroup(layout, bluetooth), undefined)
+  }
+})
+
+test('an explicit Bluetooth placement stays separate from the five-item default after reloading', () => {
+  const placements: ObjectPlacement[] = [
+    { surface: 'hidden' },
+    { surface: 'frame', edge: 'left', position: 0.3 },
+    { surface: 'canvas', x: 120, y: 240, width: 96, height: 54 },
+    { surface: 'background', x: 320, y: 440 },
+  ]
+  for (const placement of placements) {
+    const saved: FrameLayout = {
+      ...powerDefaults,
+      placements: {
+        ...powerDefaults.placements,
+        'widget:bluetooth': placement,
+      },
+    }
+    const layout = readFrameLayout(saved)
+    assert.deepEqual(layout, saved)
+    assert.equal(getTargetGroup(layout, bluetooth), undefined)
+    assert.deepEqual(getPlacement(layout, bluetooth), placement)
+    const moved = setObjectPlacement(
+      readFrameLayout(undefined),
+      bluetooth,
+      placement,
+    )
+    assert.deepEqual(readFrameLayout(JSON.parse(JSON.stringify(moved))), moved)
+  }
+})
+
+test('Bluetooth in another saved group stays there regardless of group order', () => {
+  const custom = { id: 'custom', members: [apps, bluetooth] }
+  for (const groups of [
+    { system: powerSystemGroup, custom },
+    { custom, system: powerSystemGroup },
+  ]) {
+    const saved: FrameLayout = {
+      ...powerDefaults,
+      groups,
+      placements: {
+        ...powerDefaults.placements,
+        'group:custom': { surface: 'frame', edge: 'bottom', position: 0.4 },
+      },
+    }
+    const layout = readFrameLayout(saved)
+    assert.deepEqual(layout, saved)
+    assert.deepEqual(getTargetGroup(layout, bluetooth), custom)
+    assert.deepEqual(
+      readFrameLayout(JSON.parse(JSON.stringify(layout))),
+      layout,
+    )
+  }
+})
+
+test('an explicit hidden Bluetooth control still allows the old Power migration', () => {
+  const layout = readFrameLayout({
+    ...legacyDefaults,
+    placements: {
+      ...legacyDefaults.placements,
+      'widget:bluetooth': { surface: 'hidden' },
+    },
+  })
+  assert.deepEqual(getFrameGroups(layout), [powerSystemGroup])
+  assert.deepEqual(getPlacement(layout, bluetooth), { surface: 'hidden' })
+  assert.deepEqual(readFrameLayout(JSON.parse(JSON.stringify(layout))), layout)
 })
 
 test('an explicit Power placement keeps it out of the old default group after reloading', () => {
@@ -354,9 +545,51 @@ test('restoring missing groups respects an explicitly hidden Power control', () 
   const layout = readFrameLayout({
     placements: { 'widget:power': { surface: 'hidden' } },
   })
-  assert.deepEqual(getFrameGroups(layout), [legacySystemGroup])
+  assert.deepEqual(getFrameGroups(layout), [
+    { id: 'system', members: [clock, wifi, bluetooth, volume, battery] },
+  ])
   assert.equal(getTargetGroup(layout, power), undefined)
   assert.deepEqual(getPlacement(layout, power), { surface: 'hidden' })
+  assert.deepEqual(readFrameLayout(JSON.parse(JSON.stringify(layout))), layout)
+})
+
+test('restoring missing groups respects an explicitly hidden Bluetooth control', () => {
+  const layout = readFrameLayout({
+    placements: { 'widget:bluetooth': { surface: 'hidden' } },
+  })
+  assert.deepEqual(getFrameGroups(layout), [powerSystemGroup])
+  assert.equal(getTargetGroup(layout, bluetooth), undefined)
+  assert.deepEqual(getPlacement(layout, bluetooth), { surface: 'hidden' })
+  assert.deepEqual(readFrameLayout(JSON.parse(JSON.stringify(layout))), layout)
+})
+
+test('restoring missing groups preserves both hidden Bluetooth and Power controls', () => {
+  const layout = readFrameLayout({
+    placements: {
+      'widget:bluetooth': { surface: 'hidden' },
+      'widget:power': { surface: 'hidden' },
+    },
+  })
+  assert.deepEqual(getFrameGroups(layout), [legacySystemGroup])
+  assert.deepEqual(getPlacement(layout, bluetooth), { surface: 'hidden' })
+  assert.deepEqual(getPlacement(layout, power), { surface: 'hidden' })
+  assert.deepEqual(readFrameLayout(JSON.parse(JSON.stringify(layout))), layout)
+})
+
+test('Bluetooth detail starts collapsed and persists explicit expanded and collapsed choices', () => {
+  assert.equal(getWidgetExpanded(loadedDefaults, 'bluetooth'), false)
+  const expanded = setWidgetExpanded(loadedDefaults, 'bluetooth', true)
+  assert.equal(getWidgetExpanded(expanded, 'bluetooth'), true)
+  assert.deepEqual(
+    readFrameLayout(JSON.parse(JSON.stringify(expanded))),
+    expanded,
+  )
+  const collapsed = setWidgetExpanded(expanded, 'bluetooth', false)
+  assert.equal(getWidgetExpanded(collapsed, 'bluetooth'), false)
+  assert.deepEqual(
+    readFrameLayout(JSON.parse(JSON.stringify(collapsed))),
+    collapsed,
+  )
 })
 
 test('Power remains icon-only when expanded detail preferences are requested or loaded', () => {
@@ -381,7 +614,7 @@ test('merging dock, tools, and a status group produces one flat ordered frame gr
   assert.deepEqual(getFrameGroups(layout), [
     {
       id: dockGroup.id,
-      members: [tools, apps, clock, wifi, volume, battery, power],
+      members: [tools, apps, clock, wifi, bluetooth, volume, battery, power],
     },
   ])
   for (const member of getFrameGroups(layout)[0]!.members)
@@ -407,6 +640,7 @@ test('an individual grouped status item can move independently without moving it
   })
   assert.deepEqual(getFrameGroups(layout)[0]!.members, [
     clock,
+    bluetooth,
     volume,
     battery,
     power,
@@ -427,6 +661,7 @@ test('moving one status item into another frame group leaves both groups valid',
   const moved = mergeFrameTargets(grouped, wifi, apps, true)
   assert.deepEqual(getTargetGroup(moved, clock)?.members, [
     clock,
+    bluetooth,
     volume,
     battery,
     power,
@@ -482,6 +717,7 @@ test('members can be reordered and inserted into an existing group without dupli
     battery,
     clock,
     wifi,
+    bluetooth,
     volume,
     power,
   ])
@@ -492,6 +728,7 @@ test('members can be reordered and inserted into an existing group without dupli
     clock,
     wifi,
     item,
+    bluetooth,
     volume,
     power,
   ])
