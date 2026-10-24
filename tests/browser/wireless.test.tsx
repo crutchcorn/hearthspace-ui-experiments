@@ -1,5 +1,6 @@
 import { expect, test } from 'vitest'
 import { page, userEvent } from 'vitest/browser'
+import { completeSpeakerPairing } from './wireless-helpers'
 import { SCENE_STORAGE_KEY } from '../../src/views/desktop/services/scene-storage'
 import { renderDesktop } from './desktop'
 
@@ -69,6 +70,7 @@ test('Bluetooth pairs devices, supports multiple connections, and keeps pairings
   const toggle = panel.getByRole('checkbox', { name: 'Bluetooth' })
   await expect.element(toggle).toHaveFocus()
   await panel.getByRole('button', { name: 'Pair Pocket speaker' }).click()
+  await completeSpeakerPairing()
   await panel
     .getByRole('button', { name: 'Connect Mechanical keyboard' })
     .click()
@@ -133,6 +135,7 @@ test('wireless state stays consistent in search and through locking', async () =
     .click()
   await expect.element(search).not.toBeInTheDocument()
   await page.getByRole('button', { name: 'Pair Pocket speaker' }).click()
+  await completeSpeakerPairing()
 
   await page.getByRole('button', { name: 'Power', exact: true }).click()
   await page.getByRole('menuitem', { name: 'Lock screen' }).click()
@@ -171,6 +174,7 @@ test('Bluetooth can show live connection details through Change layout and save 
   await page.getByRole('button', { name: 'Done changing layout' }).click()
   await trigger.click()
   await page.getByRole('button', { name: 'Pair Pocket speaker' }).click()
+  await completeSpeakerPairing()
   await expect.element(trigger).toHaveTextContent('2 connected')
   await expect
     .poll(() => {
@@ -214,6 +218,7 @@ test('wireless pickers fit and stay interactive on a narrow desktop', async () =
               : 'Pair Pocket speaker',
         })
         .click()
+      if (name === 'Bluetooth') await completeSpeakerPairing()
       await panel.getByRole('checkbox', { name }).click()
       await expect
         .element(panel.getByRole('checkbox', { name }))

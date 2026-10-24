@@ -76,6 +76,7 @@ export default function SystemBar({
     if (openPanel !== id) return
 
     function dismissOnPointer(event: PointerEvent) {
+      if (document.querySelector(':modal')) return
       if (
         event.target instanceof Element &&
         !root.current?.contains(event.target) &&
@@ -86,6 +87,7 @@ export default function SystemBar({
     }
 
     function dismissOnEscape(event: KeyboardEvent) {
+      if (document.querySelector(':modal')) return
       if (event.key === 'Escape') {
         onPanelChange(null)
         root.current?.querySelector('button')?.focus({ preventScroll: true })

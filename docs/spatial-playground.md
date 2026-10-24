@@ -162,8 +162,8 @@ Power, Canvas tools, and Apps, including default corners and search metadata.
 The six system controls begin in a `system` frame group ordered
 `clock,wifi,bluetooth,volume,battery,power`; that grouping is editable.
 The [wireless controls](system-controls.md) share in-memory network selection,
-Bluetooth pairings, and connection state with Settings, search previews, and
-the lockscreen.
+Bluetooth pairings, connection state, and wireless preferences with Settings.
+Search previews and the lockscreen read the same connection status.
 Power opens the [lockscreen preview](lockscreen.md) and session confirmation previews.
 `PlacedWidget` measures the
 control's contents, positions it relative to the viewport or world, and keeps
@@ -568,11 +568,14 @@ The normal pad uses the local $P geometric template matcher to compare a complet
 The Settings app has sidebar navigation for **Appearance**, **Displays**, **Background**, **Wi-Fi**, **Bluetooth**, **Gestures**, **AI**, and **System**, ordinarily opening on Appearance. The gesture pad’s cog opens directly to Gestures. Its 160-pixel sidebar collapses behind a category toggle when the Settings content container is narrower than 560 pixels. Choosing a category closes the compact navigation and returns the content pane to its top. Navigation belongs to each Settings window; saved preferences, gesture assignments, and session wireless state are shared across them. New Settings windows open up to 680 pixels wide, constrained by the viewport and ordinary minimum window size; existing saved window sizes remain intact.
 
 **Wi-Fi** and **Bluetooth** reuse the shell dropdowns' switches, sample lists,
-and immediate connection actions through `WirelessControls`. The desktop hook passes its
-single `useSystemStatus` result through `WindowContent` to every Settings
-window. Switching categories or closing Settings leaves that state intact;
-reloading restores the sample defaults. These pages add no wireless APIs or
-storage. See [wireless controls in Settings](system-controls.md#wireless-controls-in-settings)
+connection and pairing prompts, details, and settings through
+`WirelessControls`. The desktop hook passes its single `useSystemStatus` result through
+`WindowContent` to every Settings window. Switching categories or closing
+Settings leaves that state intact;
+reloading restores the sample defaults. Scanning, authentication, pairing,
+network configuration, and recovery operate on local samples. These pages add
+no wireless APIs, real credentials, or persistent wireless storage. See
+[wireless controls in Settings](system-controls.md#wireless-controls-in-settings)
 for use, reconnect behavior, and simulation limits.
 
 **Background** accepts a local photo and applies it beneath desktop items and windows. **Repeat with canvas** tiles the image at its native size on the scrolling world. **Stretch**, **Contain**, and **Cover** instead use a centered, viewport-sized background layer that stays still while the canvas moves. Stretch scales both axes independently, Contain preserves the whole image with the current theme’s field color around it, and Cover preserves proportions while cropping to fill the viewport. Cover is the initial fit; replacing a photo retains the existing fit. **Use default background** restores the uniform dotted field for the current color mode without changing the other appearance preferences.
@@ -659,7 +662,12 @@ across Settings windows.
 | [`desktop-canvas.tsx`](../src/views/desktop/components/desktop-canvas.tsx), [`desktop-window.tsx`](../src/views/desktop/components/desktop-window.tsx)              | Canvas and window rendering, surface layers, and preview affordances.                                        |
 | [`system-bar.tsx`](../src/views/desktop/components/system-bar.tsx)                                                                                                  | Clock, Wi-Fi, Bluetooth, sound, battery, and power controls, detail views, and popovers.                     |
 | [`use-system-status.ts`](../src/views/desktop/hooks/use-system-status.ts)                                                                                           | Shared mock Wi-Fi, Bluetooth, volume, battery, and clock state for controls, search, and lockscreen.         |
-| [`wireless-controls.tsx`](../src/views/desktop/components/wireless-controls.tsx)                                                                                    | Shared wireless switches and rows for Settings and the tray.                                                 |
+| [`use-wifi.ts`](../src/views/desktop/hooks/use-wifi.ts), [`wifi.ts`](../src/views/desktop/utils/wifi.ts)                                                            | Session networks, credential checks, scans, connection progress, captive portal, and IPv4/DNS settings.      |
+| [`use-bluetooth.ts`](../src/views/desktop/hooks/use-bluetooth.ts), [`bluetooth.ts`](../src/views/desktop/utils/bluetooth.ts)                                        | Session devices, pairing and connection progress, discovery, adapter/device preferences, and recovery.       |
+| [`wireless-controls.tsx`](../src/views/desktop/components/wireless-controls.tsx)                                                                                    | Chooses the Wi-Fi or Bluetooth controls for the tray and Settings.                                           |
+| [`wifi-controls.tsx`](../src/views/desktop/components/wifi-controls.tsx)                                                                                            | Network rows, password and hidden-network forms, captive portal, connection details, and network settings.   |
+| [`bluetooth-controls.tsx`](../src/views/desktop/components/bluetooth-controls.tsx)                                                                                  | Device rows, pairing prompts, adapter and device settings, and availability/recovery actions.                |
+| [`wireless-dialog.tsx`](../src/views/desktop/components/wireless-dialog.tsx)                                                                                        | Shared wireless modal surface, initial focus, dismissal, and keyboard isolation.                             |
 | [`use-notifications.ts`](../src/views/desktop/hooks/use-notifications.ts)                                                                                           | Shared notification records, unread count, and updates for the inbox and search.                             |
 | [`notification-inbox.tsx`](../src/views/desktop/components/notification-inbox.tsx)                                                                                  | Notification trigger, inbox, read/dismiss actions, and sample toasts.                                        |
 | [`minimap.tsx`](../src/views/desktop/components/minimap.tsx)                                                                                                        | Map rendering and pointer capture for dragging the visible canvas area.                                      |
@@ -783,4 +791,4 @@ Battery detail is saved with the scene's frame layout.
 
 AI opt-in is stored under `hearthspace-ai-enabled-v1`. Only the literal string `true` enables it; missing, invalid, or unavailable storage defaults to off. Confirming opt-out or canceling an active download saves `false` immediately. Opting in saves `true` only after the simulated download completes, so an interrupted download does not enable the feature on reload. Download progress is temporary and no model file is stored. The shared session remains usable when preference storage fails.
 
-Viewport travel, selection, unfinished drawing strokes, open panels, temporary window-switcher layouts, search text and result arrangements, list/grid choice, notifications, and simulated device-control values remain temporary. Wi-Fi selection and radio state, Bluetooth pairings and connections, and volume reset on reload; their widget placements and detail choices persist. Search and switching never write their presentation coordinates to workspace storage. Notification read/dismissal state and preview items reset to the initial samples on reload. If storage is unavailable, the current desktop session remains usable without persistence.
+Viewport travel, selection, unfinished drawing strokes, open panels, temporary window-switcher layouts, search text and result arrangements, list/grid choice, notifications, and simulated device-control values remain temporary. Wireless networks, radio state, network/device preferences, adapter settings, pairings, connections, and volume reset on reload; their widget placements and detail choices persist. Passwords and PINs stay in temporary form state and are not saved as credentials. Search and switching never write their presentation coordinates to workspace storage. Notification read/dismissal state and preview items reset to the initial samples on reload. If storage is unavailable, the current desktop session remains usable without persistence.

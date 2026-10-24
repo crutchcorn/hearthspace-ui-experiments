@@ -33,7 +33,7 @@ with reset, minus, and plus placeholders below the map. Reset is disabled.
 | [Change layout](frame-layout.md)           | Animate icons and windows onto and off the frame. Toolbars turn around your grip; corner squares are pointer targets. |
 | [Frame groups](frame-groups.md)            | Combine icons, controls, and window previews on a shared surface. Overlaps join groups.                               |
 | [Pinned windows](pinned-windows.md)        | Preview the recessed edge strip while editing, reveal more on hover, and open on click.                               |
-| [System controls](system-controls.md)      | Move Clock, Wi-Fi, Bluetooth, Sound, Battery, and Power independently; try mock network selection and device pairing. |
+| [System controls](system-controls.md)      | Move Clock, Wi-Fi, Bluetooth, Sound, Battery, and Power independently; open wireless lists, prompts, and details.     |
 | [Lockscreen and power menu](lockscreen.md) | Lock and unlock with the demo password, or try power confirmations that preserve the session and open work.           |
 | [Clock formats](clock-formats.md)          | Choose a date/time presentation through item-specific layout controls.                                                |
 | [Notifications](notifications.md)          | Read, dismiss, and open sample events from the trigger, inbox, or preview toast.                                      |
@@ -68,7 +68,7 @@ and [gathering](ai-gathering.md) instead change window positions for later use.
 | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
 | [Appearance](appearance.md)                                             | Choose Light/Dark and one of six accents, with translucent Hearthspace surfaces and distinct app identities. |
 | [Backgrounds](background.md)                                            | Upload a local photo, choose its fit and movement, or restore the dotted wallpaper.                          |
-| [Wi-Fi and Bluetooth](system-controls.md#wireless-controls-in-settings) | Choose mock networks and pair devices in Settings, sharing state with the shell dropdowns.                   |
+| [Wi-Fi and Bluetooth](system-controls.md#wireless-controls-in-settings) | Try passwords, pairing, scans, connection problems, and network/device settings shared with the shell.       |
 | [Display layout preview](display-layout.md)                             | Drag two monitors, snap and recenter them, and try per-display settings.                                     |
 | [Gather similar windows](ai-gathering.md)                               | Opt into the simulated download flow, then bring same-app canvas windows near a selection.                   |
 
@@ -99,7 +99,7 @@ give the neighboring toolbar actions distinct shapes.
 | Windows, layouts, selection, drawings, and themes | Real browser interactions with locally saved data; no host window manager.                                                                                                 |
 | App launches and files                            | Browser-rendered app previews and sample items, not host processes or filesystem access. The Scratchpad is editable.                                                       |
 | System controls and notifications                 | Local sample state; no device management or external notification source. The clock uses the browser's local date/time.                                                    |
-| Wi-Fi and Bluetooth                               | Immediate mock network selection, pairing, and connections; no real radios, scans, network APIs, or password exchanges. Wireless state resets on reload.                   |
+| Wi-Fi and Bluetooth                               | Mock password/PIN forms, pairing prompts, scans, and network/device settings; no real radios, APIs, or saved credentials. Wireless state resets on reload.                 |
 | Lockscreen and power menu                         | Local demo password `hearthspace`; no OS lock or authentication. Log off, Reboot, and Turn off open confirmation previews; confirming only dismisses them. Reload unlocks. |
 | Monitor settings and Overview zoom                | Monitor arrangement and selected values update the preview; real display configuration and canvas zoom aren't implemented.                                                 |
 | App gesture matching                              | Real deterministic geometric matching, with no model download.                                                                                                             |
@@ -145,9 +145,10 @@ backgrounds, and completed AI opt-in.
 
 Open panels, power confirmations, selections, unfinished strokes, viewport
 travel, search and switcher arrangements, notifications, mock device values,
-and display settings are temporary. Wi-Fi selection, radio toggles, Bluetooth
-pairings, and active connections all reset to their sample defaults on reload;
-the controls' placement and detail choices remain saved. Handwriting assets may
+and display settings are temporary. Wireless networks, radio toggles,
+preferences, device names, pairings, and active connections all reset to their
+sample defaults on reload; the controls' placement and detail choices remain
+saved. Handwriting assets may
 remain in the browser cache; its query and ink aren't saved.
 
 The current scene format starts fresh instead of importing older scenes,

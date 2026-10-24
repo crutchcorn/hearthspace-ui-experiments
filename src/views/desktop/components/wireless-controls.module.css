@@ -164,9 +164,108 @@
   box-shadow: var(--control-glow), var(--glass-edge-active);
 }
 
+.row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 40px;
+  align-items: stretch;
+  border: 1px solid transparent;
+  border-radius: var(--radius-control);
+}
+
+.detailButton,
+.smallButton {
+  display: inline-flex;
+  min-height: 36px;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--chrome-muted);
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.detailButton:is(:hover, :focus-visible),
+.smallButton:is(:hover, :focus-visible) {
+  outline: none;
+  border-color: var(--accent-border);
+  background: var(--chrome-hover);
+  box-shadow: var(--control-glow), var(--glass-edge-active);
+  color: var(--chrome-text);
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 14px;
+}
+
+.feedback {
+  margin: 12px 0;
+  color: var(--chrome-muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.group {
+  margin-top: 18px;
+}
+
+.badge {
+  padding: 3px 6px;
+  border-radius: var(--radius-control);
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+  font-size: 10px;
+}
+
+.controls[data-presentation='settings'] .row {
+  border-color: var(--line);
+  border-radius: var(--radius-tile);
+  background: var(--surface-control);
+  box-shadow: var(--glass-edge);
+}
+
+.controls[data-presentation='settings'] .row .item {
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+}
+
+.controls[data-presentation='settings'] .row .item:is(:hover, :focus-visible) {
+  background: var(--chrome-hover);
+  box-shadow: var(--control-glow), var(--glass-edge-active);
+}
+
+.controls button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.spinning {
+  animation: wireless-scan 1s linear infinite;
+}
+
+@keyframes wireless-scan {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .toggle,
   .toggle::before {
     transition: none;
+  }
+
+  .spinning {
+    animation: none;
   }
 }

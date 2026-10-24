@@ -1,5 +1,6 @@
 import { expect, test } from 'vitest'
 import { page, userEvent } from 'vitest/browser'
+import { completeSpeakerPairing } from './wireless-helpers'
 import { renderDesktop } from './desktop'
 
 async function openSettings() {
@@ -98,6 +99,7 @@ test('Bluetooth shares connections and pairings with the tray and keeps session 
     .element(settings.getByRole('heading', { name: 'Bluetooth', exact: true }))
     .toBeVisible()
   await settings.getByRole('button', { name: 'Pair Pocket speaker' }).click()
+  await completeSpeakerPairing()
 
   const trigger = page.getByRole('button', { name: 'Bluetooth settings' })
   await expect
@@ -199,6 +201,7 @@ test('wireless changes in one Settings window update another open Settings windo
   await first.getByRole('button', { name: 'Connect to Phone hotspot' }).click()
   await first.getByRole('button', { name: 'Bluetooth', exact: true }).click()
   await first.getByRole('button', { name: 'Pair Pocket speaker' }).click()
+  await completeSpeakerPairing()
 
   await openSettings()
   const second = windows.last()
@@ -268,6 +271,7 @@ test('compact Settings navigation reaches both wireless categories and retains t
       .toBeVisible()
     await expect.element(categories).toHaveAttribute('aria-expanded', 'false')
     await settings.getByRole('button', { name: 'Pair Pocket speaker' }).click()
+    await completeSpeakerPairing()
     await categories.click()
     await userEvent.keyboard('{Escape}')
     await expect.element(categories).toHaveAttribute('aria-expanded', 'false')
