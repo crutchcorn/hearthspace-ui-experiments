@@ -17,10 +17,17 @@ the launcher, dock, window titles, notifications, and previews. The simulated
 app contents also keep their Lucide icons.
 
 Settings belongs to Hearthspace. Its app icon is the local `AppSettings` glyph,
-with two vertical sliders. The shortcut from the gesture pad uses the local
-`Settings` cog. Neither gets simulated third-party artwork. Likewise, a desktop
-folder or file is a Hearthspace object and uses the local `Folder` or `FileText`
-glyph; the **Files app** keeps its own artwork.
+with two vertical sliders. The separate local `Settings` cog has rounded teeth
+and a circular center to keep its outline smooth at small sizes, using the
+shared factory's optical stroke widths. Neither gets simulated third-party
+artwork. Likewise, a desktop folder or file is a Hearthspace object and uses
+the local `Folder` or `FileText` glyph; the **Files app** keeps its own artwork.
+
+The cog appears in the [gesture pad](../src/components/GesturePad.tsx) at
+18 pixels for **Customize gestures**, and in the
+[Bluetooth controls](../src/components/BluetoothControls.tsx) at 17 pixels for
+device details and 15 pixels for **Adapter settings**. Both the shell popup and
+the Bluetooth page in Settings share those controls.
 
 The current desktop uses the `realistic` presentation, which makes `AppIcon`
 show the third-party artwork in place of the catalog's local fallback glyph.
