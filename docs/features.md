@@ -64,16 +64,19 @@ and [gathering](ai-gathering.md) instead change window positions for later use.
 
 ## Change the environment
 
-| Feature                                     | Start here                                                                                                   |
-| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| [Appearance](appearance.md)                 | Choose Light/Dark and one of six accents, with translucent Hearthspace surfaces and distinct app identities. |
-| [Backgrounds](background.md)                | Upload a local photo, choose its fit and movement, or restore the dotted wallpaper.                          |
-| [Display layout preview](display-layout.md) | Drag two monitors, snap and recenter them, and try per-display settings.                                     |
-| [Gather similar windows](ai-gathering.md)   | Opt into the simulated download flow, then bring same-app canvas windows near a selection.                   |
+| Feature                                                                 | Start here                                                                                                   |
+| ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| [Appearance](appearance.md)                                             | Choose Light/Dark and one of six accents, with translucent Hearthspace surfaces and distinct app identities. |
+| [Backgrounds](background.md)                                            | Upload a local photo, choose its fit and movement, or restore the dotted wallpaper.                          |
+| [Wi-Fi and Bluetooth](system-controls.md#wireless-controls-in-settings) | Choose mock networks and pair devices in Settings, sharing state with the shell dropdowns.                   |
+| [Display layout preview](display-layout.md)                             | Drag two monitors, snap and recenter them, and try per-display settings.                                     |
+| [Gather similar windows](ai-gathering.md)                               | Opt into the simulated download flow, then bring same-app canvas windows near a selection.                   |
 
 Settings has categories in a sidebar that collapses when the app window is
-small. Gestures opens its own editor screen with a back button; System links
-to Change layout rather than duplicating placement and battery-detail options.
+small. Wi-Fi and Bluetooth have separate categories; their state is shared
+across Settings windows while each window keeps its own category selection.
+Gestures opens its own editor screen with a back button; System links to
+Change layout rather than duplicating placement and battery-detail options.
 
 The [materials](materials-and-light.md) use strong blur and thin translucent
 layers. Toolbars and monitor previews use a lighter base than ordinary surfaces;

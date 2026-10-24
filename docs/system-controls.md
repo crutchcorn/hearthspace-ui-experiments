@@ -52,10 +52,29 @@ without making them glow brighter than the panel. Connected network and device
 rows use accent-colored glyphs and checkmarks. Turning either radio off moves
 the thumb left and returns the track to its neutral fill.
 
+## Wireless controls in Settings
+
+Open **Settings** from Apps and choose **Wi-Fi** or **Bluetooth** in the
+sidebar. In a narrow Settings window, open **Settings categories** to reveal
+those choices. Each category has its own page with the same on/off switch,
+sample choices, and connection actions as its shell dropdown.
+
+Changes take effect immediately, with no Apply step. Settings, shell controls,
+search previews, and the lockscreen all read the same wireless state. Multiple
+Settings windows share those values while keeping their selected categories
+independent. Changing categories or closing Settings leaves the radio and
+connection state intact for the current page session.
+
+The pages use Settings' spacing and surfaces while keeping the dropdowns'
+interaction. **System → Frame layout** still opens Change layout for moving
+controls or changing their details; wireless connections live in their own
+categories.
+
 ## Choose a Wi-Fi network
 
-Open **Wi-Fi** to use the on/off switch and network list. The radio starts on
-with **Studio network** connected. The fixed sample list contains:
+Open **Wi-Fi** from the shell or Settings to use the on/off switch and network
+list. The radio starts on with **Studio network** connected. The fixed sample
+list contains:
 
 | Network           | Sample state                |
 | ----------------- | --------------------------- |
@@ -74,8 +93,8 @@ that case, Wi-Fi comes back on without a connection until you choose a network.
 
 ## Pair and connect Bluetooth devices
 
-Open **Bluetooth** to use its on/off switch and device rows. Bluetooth starts
-on with these sample devices:
+Open **Bluetooth** from the shell or Settings to use its on/off switch and
+device rows. Bluetooth starts on with these sample devices:
 
 | Device              | Initial state            |
 | ------------------- | ------------------------ |
@@ -95,15 +114,17 @@ Wi-Fi's remembered network.
 
 ## Prototype boundary
 
-Both pickers use fixed local samples. There are no real radios, scans, network
-or Bluetooth APIs, device pairing, or password exchanges. The rows apply their
-changes immediately to make the intended desktop interaction easy to try.
+Both the dropdowns and Settings use fixed local samples. There are no real
+radios, scans, network or Bluetooth APIs, device pairing, or password exchanges.
+The rows apply their changes immediately to make the intended desktop
+interaction easy to try.
 Reloading restores Studio network, the initial Bluetooth pairings and headphone
 connection, and both radios' enabled state. Locking and unlocking preserves
 this state because the same desktop session stays mounted.
 
-The dropdowns have no persistent simulation banner or explanatory footer. The
-shell keeps its desktop feel while this page records the simulation limits.
+The dropdowns and Settings pages have no persistent simulation banner or
+explanatory footer. They keep their desktop feel while this page records the
+simulation limits.
 
 ## Canvas placement and search
 
@@ -133,10 +154,19 @@ doesn't open the layout editor or alter a visible control's placement.
 
 [useSystemStatus](../src/views/desktop/hooks/use-system-status.ts) owns the sample network/device lists,
 radio state, Wi-Fi selection, Bluetooth pairings and connections, and shared
-status labels. [SystemBar](../src/views/desktop/components/system-bar.tsx) renders each control
-and its immediate row actions. Its wireless switches reuse the
+status labels. [The desktop hook](../src/views/desktop/hooks/use-desktop.ts) creates that state once and passes it to
+[Settings](../src/views/desktop/components/settings.tsx) through
+[WindowContent](../src/views/desktop/components/window-content.tsx), keeping wireless values
+outside each Settings window's local category state.
+
+[WirelessControls](../src/views/desktop/components/wireless-controls.tsx) renders the switches,
+sample rows, connection actions, and off states for both Settings and
+[SystemBar](../src/views/desktop/components/system-bar.tsx). Its
+[CSS Module](../src/views/desktop/components/wireless-controls.module.css) adapts the shared
+controls to dropdown and Settings page presentation. The switches reuse the
 [Settings switch styles](../src/views/desktop/components/settings.module.css)
-so both themes stay consistent with the Settings app.
+so both themes stay consistent with the Settings app. SystemBar retains the
+shell triggers, detail labels, and popover placement.
 Power confirmations reuse [LayoutConfirm](../src/views/desktop/components/layout-confirm.tsx)
 for the shell's native modal presentation and default Cancel focus.
 [PlacedWidget](../src/views/desktop/components/placed-widget.tsx) places it, and
@@ -153,5 +183,8 @@ in each popup.
 [LockScreen](../src/views/desktop/components/lock-screen.tsx) read the same state.
 [System glyphs](../src/components/icons/system.tsx) supply the wireless and device icons.
 [Wireless browser tests](../tests/browser/wireless.test.tsx) cover the pickers
-and shared status behavior. Movement and settling are covered by
+and shared status behavior.
+[Wireless Settings browser tests](../tests/browser/wireless-settings.test.tsx)
+cover the Settings controls and state shared with the shell and other Settings
+windows. Movement and settling are covered by
 [layout workspace tests](../tests/layout-workspace.test.ts).

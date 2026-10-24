@@ -1,5 +1,12 @@
 export type SettingsCategory =
-  'appearance' | 'displays' | 'background' | 'gestures' | 'ai' | 'system'
+  | 'appearance'
+  | 'displays'
+  | 'background'
+  | 'wifi'
+  | 'bluetooth'
+  | 'gestures'
+  | 'ai'
+  | 'system'
 
 export type SettingsNavigationRequest = {
   id: string

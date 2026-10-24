@@ -15,6 +15,8 @@ import {
   Sliders,
   GestureStroke,
   Sun,
+  Wifi,
+  Bluetooth,
 } from '../../../components/icons'
 import {
   useId,
@@ -36,11 +38,14 @@ import BackgroundSettings from './background-settings'
 import AISettings from './ai-settings'
 import DisplaySettings, { type DisplayPreferences } from './display-settings'
 import GestureSettings from './gesture-settings'
+import type { SystemStatus } from '../types/system-status'
+import WirelessControls from './wireless-controls'
 import styles from './settings.module.css'
 
 interface SettingsProps {
   navigation?: SettingsNavigationRequest
   ai: AIControls
+  status: SystemStatus
   colorMode: ColorMode
   onColorModeChange: (mode: ColorMode) => void
   accentTheme: AccentThemeId
@@ -88,6 +93,18 @@ const CATEGORIES = [
     icon: Photo,
   },
   {
+    id: 'wifi',
+    label: 'Wi-Fi',
+    description: 'Choose a network for your workspace.',
+    icon: Wifi,
+  },
+  {
+    id: 'bluetooth',
+    label: 'Bluetooth',
+    description: 'Connect your headphones, keyboards, and other devices.',
+    icon: Bluetooth,
+  },
+  {
     id: 'gestures',
     label: 'Gestures',
     description: 'Draw shortcuts for your apps.',
@@ -110,6 +127,7 @@ const CATEGORIES = [
 export default function Settings({
   navigation,
   ai,
+  status,
   colorMode,
   onColorModeChange,
   accentTheme,
@@ -246,6 +264,13 @@ export default function Settings({
               />
             )}
             {category === 'ai' && <AISettings ai={ai} />}
+            {(category === 'wifi' || category === 'bluetooth') && (
+              <WirelessControls
+                kind={category}
+                status={status}
+                presentation="settings"
+              />
+            )}
             {category === 'appearance' && (
               <>
                 <fieldset className={styles.palette}>

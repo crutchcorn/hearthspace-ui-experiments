@@ -162,7 +162,8 @@ Power, Canvas tools, and Apps, including default corners and search metadata.
 The six system controls begin in a `system` frame group ordered
 `clock,wifi,bluetooth,volume,battery,power`; that grouping is editable.
 The [wireless controls](system-controls.md) share in-memory network selection,
-Bluetooth pairings, and connection state with search previews and the lockscreen.
+Bluetooth pairings, and connection state with Settings, search previews, and
+the lockscreen.
 Power opens the [lockscreen preview](lockscreen.md) and session confirmation previews.
 `PlacedWidget` measures the
 control's contents, positions it relative to the viewport or world, and keeps
@@ -564,7 +565,15 @@ The normal pad uses the local $P geometric template matcher to compare a complet
 
 ## Settings
 
-The Settings app has sidebar navigation for **Appearance**, **Displays**, **Background**, **Gestures**, **AI**, and **System**, ordinarily opening on Appearance. The gesture pad’s cog opens directly to Gestures. Its 160-pixel sidebar collapses behind a category toggle when the Settings content container is narrower than 560 pixels. Choosing a category closes the compact navigation and returns the content pane to its top. Navigation belongs to each Settings window; saved preferences and gesture assignments are shared across them. New Settings windows open up to 680 pixels wide, constrained by the viewport and ordinary minimum window size; existing saved window sizes remain intact.
+The Settings app has sidebar navigation for **Appearance**, **Displays**, **Background**, **Wi-Fi**, **Bluetooth**, **Gestures**, **AI**, and **System**, ordinarily opening on Appearance. The gesture pad’s cog opens directly to Gestures. Its 160-pixel sidebar collapses behind a category toggle when the Settings content container is narrower than 560 pixels. Choosing a category closes the compact navigation and returns the content pane to its top. Navigation belongs to each Settings window; saved preferences, gesture assignments, and session wireless state are shared across them. New Settings windows open up to 680 pixels wide, constrained by the viewport and ordinary minimum window size; existing saved window sizes remain intact.
+
+**Wi-Fi** and **Bluetooth** reuse the shell dropdowns' switches, sample lists,
+and immediate connection actions through `WirelessControls`. The desktop hook passes its
+single `useSystemStatus` result through `WindowContent` to every Settings
+window. Switching categories or closing Settings leaves that state intact;
+reloading restores the sample defaults. These pages add no wireless APIs or
+storage. See [wireless controls in Settings](system-controls.md#wireless-controls-in-settings)
+for use, reconnect behavior, and simulation limits.
 
 **Background** accepts a local photo and applies it beneath desktop items and windows. **Repeat with canvas** tiles the image at its native size on the scrolling world. **Stretch**, **Contain**, and **Cover** instead use a centered, viewport-sized background layer that stays still while the canvas moves. Stretch scales both axes independently, Contain preserves the whole image with the current theme’s field color around it, and Cover preserves proportions while cropping to fill the viewport. Cover is the initial fit; replacing a photo retains the existing fit. **Use default background** restores the uniform dotted field for the current color mode without changing the other appearance preferences.
 
@@ -650,6 +659,7 @@ across Settings windows.
 | [`desktop-canvas.tsx`](../src/views/desktop/components/desktop-canvas.tsx), [`desktop-window.tsx`](../src/views/desktop/components/desktop-window.tsx)              | Canvas and window rendering, surface layers, and preview affordances.                                        |
 | [`system-bar.tsx`](../src/views/desktop/components/system-bar.tsx)                                                                                                  | Clock, Wi-Fi, Bluetooth, sound, battery, and power controls, detail views, and popovers.                     |
 | [`use-system-status.ts`](../src/views/desktop/hooks/use-system-status.ts)                                                                                           | Shared mock Wi-Fi, Bluetooth, volume, battery, and clock state for controls, search, and lockscreen.         |
+| [`wireless-controls.tsx`](../src/views/desktop/components/wireless-controls.tsx)                                                                                    | Shared wireless switches and rows for Settings and the tray.                                                 |
 | [`use-notifications.ts`](../src/views/desktop/hooks/use-notifications.ts)                                                                                           | Shared notification records, unread count, and updates for the inbox and search.                             |
 | [`notification-inbox.tsx`](../src/views/desktop/components/notification-inbox.tsx)                                                                                  | Notification trigger, inbox, read/dismiss actions, and sample toasts.                                        |
 | [`minimap.tsx`](../src/views/desktop/components/minimap.tsx)                                                                                                        | Map rendering and pointer capture for dragging the visible canvas area.                                      |

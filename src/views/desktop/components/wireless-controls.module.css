@@ -1,0 +1,172 @@
+.controls {
+  color: var(--chrome-text);
+}
+
+.toggleRow {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  cursor: pointer;
+}
+
+.toggleCopy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.toggleCopy strong {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.toggleCopy > span {
+  color: var(--chrome-muted);
+  font-size: 11px;
+}
+
+.toggle {
+  transition:
+    background 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.toggle::before {
+  transition: transform 140ms ease;
+}
+
+.list {
+  margin: 16px -8px -8px;
+}
+
+.listHeading {
+  margin: 0 8px 8px;
+  color: var(--chrome-muted);
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.item {
+  display: flex;
+  width: 100%;
+  min-height: 64px;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 8px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--chrome-text);
+  text-align: left;
+}
+
+.item > svg {
+  flex-shrink: 0;
+}
+
+.item[data-connected='true'] > svg {
+  color: var(--accent-strong);
+}
+
+.item:is(:hover, :focus-visible) {
+  outline: none;
+  border-color: var(--accent-border);
+  background: var(--chrome-hover);
+  box-shadow: var(--control-glow), var(--glass-edge-active);
+}
+
+.name {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.name strong {
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.name > span {
+  font-size: 11px;
+  color: var(--chrome-muted);
+}
+
+.off {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 28px 0 16px;
+  color: var(--chrome-muted);
+  text-align: center;
+  font-size: 12px;
+}
+
+.off strong {
+  color: var(--chrome-text);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.controls[data-presentation='settings'] {
+  margin-top: 25px;
+}
+
+.controls[data-presentation='settings'] .toggleRow {
+  min-height: 68px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-tile);
+  background: var(--surface-control);
+  box-shadow: var(--glass-edge);
+}
+
+.controls[data-presentation='settings'] .toggleCopy strong {
+  font-size: 12px;
+}
+
+.controls[data-presentation='settings'] .list {
+  display: grid;
+  gap: 8px;
+  margin: 24px 0 0;
+}
+
+.controls[data-presentation='settings'] .listHeading {
+  margin: 0 0 4px;
+}
+
+.controls[data-presentation='settings'] .item {
+  padding: 12px;
+  border-color: var(--line);
+  border-radius: var(--radius-tile);
+  background: var(--surface-control);
+  box-shadow: var(--glass-edge);
+}
+
+.controls[data-presentation='settings'] .name strong {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.controls[data-presentation='settings'] .item:is(:hover, :focus-visible),
+.controls[data-presentation='settings'] .toggleRow:hover {
+  border-color: var(--accent-border);
+  background: var(--chrome-hover);
+  box-shadow: var(--control-glow), var(--glass-edge-active);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toggle,
+  .toggle::before {
+    transition: none;
+  }
+}

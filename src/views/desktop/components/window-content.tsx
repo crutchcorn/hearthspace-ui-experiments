@@ -9,6 +9,7 @@ import type { DesktopWindow } from '../types/desktop'
 import type { AccentThemeId, ColorMode } from '../constants/theme'
 import type { BackgroundFit, BackgroundPhoto } from '../types/background'
 import type { GestureShortcut } from '../types/gestures'
+import type { SystemStatus } from '../types/system-status'
 import type { AIControls } from '../types/ai'
 import Settings from './settings'
 import type { SettingsNavigationRequest } from '../types/settings'
@@ -19,6 +20,7 @@ import styles from './window-content.module.css'
 interface WindowContentProps {
   settingsNavigation?: SettingsNavigationRequest
   ai: AIControls
+  status: SystemStatus
   item: DesktopWindow
   note: string
   onNoteChange: (note: string) => void
@@ -60,6 +62,7 @@ const bookmarks = [
 export default function WindowContent({
   settingsNavigation,
   ai,
+  status,
   item,
   note,
   onNoteChange,
@@ -189,6 +192,7 @@ export default function WindowContent({
       <Settings
         navigation={settingsNavigation}
         ai={ai}
+        status={status}
         colorMode={colorMode}
         onColorModeChange={onColorModeChange}
         accentTheme={accentTheme}

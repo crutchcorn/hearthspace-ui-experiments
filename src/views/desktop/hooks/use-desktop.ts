@@ -1772,6 +1772,7 @@ export function useDesktop() {
     },
     windows,
     windowContent: {
+      status,
       allowHideTools: objectLayout.layout.allowHideTools,
       onAllowHideToolsChange: objectLayout.setAllowHideTools,
       onRestoreCanvasTools: objectLayout.restoreTools,

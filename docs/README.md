@@ -20,7 +20,7 @@ interaction and points to its implementation.
 - [Change layout](frame-layout.md): animated placement in both directions, visible corner hit targets, toolbar orientation, removal, and recovery.
 - [Frame groups](frame-groups.md): merging overlapping attachments, moving a group, and separating members.
 - [Pinned windows](pinned-windows.md): recessed layout previews, smooth pinning and detaching, hover peeks, focused opening, and close confirmation.
-- [System controls](system-controls.md): movable status items, mock Wi-Fi selection and Bluetooth pairing, shared status, detail choices, and anchored popups above pinned items.
+- [System controls](system-controls.md): movable status items, Wi-Fi and Bluetooth shared with Settings, detail choices, and anchored popups above pinned items.
 - [Lockscreen and power menu](lockscreen.md): a themed password preview, preserved desktop session, and power confirmation previews whose confirm actions only dismiss the dialog.
 - [Clock formats](clock-formats.md): date choices and the extension point for item-specific controls.
 - [Notifications](notifications.md): unread state, inbox actions, previews, and placement.
@@ -38,6 +38,7 @@ interaction and points to its implementation.
 
 ## Settings
 
+- [Wi-Fi and Bluetooth](system-controls.md#wireless-controls-in-settings): separate categories for mock network selection and device pairing, shared with the shell and other Settings windows.
 - [Appearance](appearance.md): coordinated accents, compact light/dark previews, translucent Settings, and preserved app identities.
 - [Backgrounds](background.md): local photos, fit modes, canvas movement, photo-specific contrast, and storage failures.
 - [Display layout](display-layout.md): two-monitor placement, recentering, and temporary settings.
