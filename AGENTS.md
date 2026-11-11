@@ -9,6 +9,8 @@ full accessibility workflow are not requirements for these experiments.
 
 - Keep the existing React, Vite, TypeScript 6, and pnpm setup. `package.json` is
   authoritative for the package manager and supported Node versions.
+- Use the [Layered React Structure skill](.agents/skills/layered-react-structure/SKILL.md)
+  when organizing or reviewing React code. Apply it within the scope of the change.
 - Use CSS Modules and the local SVG icon set in `src/icons/`. Follow
   [docs/icons.md](docs/icons.md) when adding or changing glyphs; reuse the shared
   factory and optical stroke sizing for Hearthspace controls. Preserve the

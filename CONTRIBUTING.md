@@ -49,6 +49,8 @@ Open the printed address at `/hearthspace-ui-experiments/` and check that the de
 
 Keep experiments small enough to change quickly. The app uses React, TypeScript, Vite, CSS Modules, and its [local SVG icon set](docs/icons.md). Local interaction state is sufficient for the current desktop; add routing, server rendering, or an API when an experiment actually needs them.
 
+Use [Layered React Structure](docs/layered-react-structure.md) to guide React code placement. `pnpm lint` runs the architecture rules alongside the existing checks.
+
 See the [features list](docs/features.md) for the current experiment, and [the spatial playground architecture](docs/spatial-playground.md) for file ownership and coordinate behavior. Keep durable technical decisions in [docs](docs/README.md) and provisional investigations in [notes](notes/README.md).
 
 ## Verify interactions
