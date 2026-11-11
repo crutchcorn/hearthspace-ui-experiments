@@ -74,7 +74,10 @@ independent. Changing categories or closing Settings leaves the radio and
 connection state intact for the current page session.
 
 The pages use Settings' spacing and surfaces while keeping the dropdowns'
-interaction. **System → Frame layout** still opens Change layout for moving
+interaction. In both places, the connection and details buttons share one
+row highlight. The button under the pointer or keyboard focus gets a
+subtle accent tint, and the keyboard focus ring marks that button.
+**System → Frame layout** still opens Change layout for moving
 controls or changing their details; wireless connections live in their own
 categories.
 
@@ -82,7 +85,8 @@ Password, pairing, and settings forms opened from Settings stay inside that
 Settings window. Their backdrop covers only its content, so other apps and
 shell controls remain usable. The dialog follows its window when moved, and
 long forms scroll within the available app space while the heading and action
-buttons stay visible.
+buttons stay visible. The body and footer share the dialog's raised surface.
+A thin divider marks the footer.
 
 The same forms opened from a shell dropdown use centered desktop dialogs.
 Escape or the close button dismisses the active dialog without also closing

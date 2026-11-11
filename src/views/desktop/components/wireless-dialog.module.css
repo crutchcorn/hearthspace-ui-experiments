@@ -203,8 +203,6 @@
   flex-shrink: 0;
   padding: 14px 22px;
   border-top: 1px solid var(--line);
-  background: var(--material-raised);
-  backdrop-filter: var(--glass-blur);
 }
 
 .dialog .primary {
@@ -247,7 +245,9 @@
 }
 
 .inline > button {
+  display: grid;
   flex-shrink: 0;
+  place-items: center;
 }
 
 @container settings (width < 420px) {

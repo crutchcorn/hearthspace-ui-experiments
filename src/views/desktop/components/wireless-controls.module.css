@@ -47,7 +47,9 @@
   gap: 12px;
   padding: 10px 8px;
   border: 1px solid transparent;
-  border-radius: var(--radius-control);
+  border-radius: inherit;
+  border-start-end-radius: 0;
+  border-end-end-radius: 0;
   background: transparent;
   color: var(--chrome-text);
   text-align: left;
@@ -59,13 +61,6 @@
 
 .item[data-connected='true'] > svg {
   color: var(--accent-strong);
-}
-
-.item:is(:hover, :focus-visible) {
-  outline: none;
-  border-color: var(--accent-border);
-  background: var(--chrome-hover);
-  box-shadow: var(--control-glow), var(--glass-edge-active);
 }
 
 .name {
@@ -135,10 +130,6 @@
 
 .controls[data-presentation='settings'] .item {
   padding: 12px;
-  border-color: var(--line);
-  border-radius: var(--radius-tile);
-  background: var(--surface-control);
-  box-shadow: var(--glass-edge);
 }
 
 .controls[data-presentation='settings'] .name strong {
@@ -146,7 +137,6 @@
   overflow-wrap: anywhere;
 }
 
-.controls[data-presentation='settings'] .item:is(:hover, :focus-visible),
 .controls[data-presentation='settings'] .toggleRow:hover {
   border-color: var(--accent-border);
   background: var(--chrome-hover);
@@ -178,7 +168,12 @@
   cursor: pointer;
 }
 
-.detailButton:is(:hover, :focus-visible),
+.detailButton {
+  border-radius: inherit;
+  border-start-start-radius: 0;
+  border-end-start-radius: 0;
+}
+
 .smallButton:is(:hover, :focus-visible) {
   outline: none;
   border-color: var(--accent-border);
@@ -222,15 +217,20 @@
   box-shadow: var(--glass-edge);
 }
 
-.controls[data-presentation='settings'] .row .item {
-  border-color: transparent;
-  background: transparent;
-  box-shadow: none;
+.row:has(> button:is(:hover, :focus-visible):not(:disabled)) {
+  border-color: var(--accent-border);
+  background: var(--chrome-hover);
+  box-shadow: var(--glass-edge);
 }
 
-.controls[data-presentation='settings'] .row .item:is(:hover, :focus-visible) {
-  background: var(--chrome-hover);
-  box-shadow: var(--control-glow), var(--glass-edge-active);
+.row > button:is(:hover, :focus-visible):not(:disabled) {
+  background: var(--accent-wash);
+  color: var(--chrome-text);
+}
+
+.row > button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -3px;
 }
 
 .controls button:disabled {
