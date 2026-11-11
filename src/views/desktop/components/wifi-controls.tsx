@@ -402,38 +402,24 @@ function EnterpriseFields({
         </div>
       </div>
       <div className={dialogStyles.fieldRow}>
-        <label className={dialogStyles.field}>
-          EAP method
-          <SelectControl
-            value={value.method}
-            onChange={(event) =>
-              onChange({
-                ...value,
-                method: event.target
-                  .value as WifiEnterpriseCredentials['method'],
-              })
-            }
-          >
-            <option value="PEAP">PEAP</option>
-            <option value="TTLS">TTLS</option>
-          </SelectControl>
-        </label>
-        <label className={dialogStyles.field}>
-          Certificate validation
-          <SelectControl
-            value={value.certificate}
-            onChange={(event) =>
-              onChange({
-                ...value,
-                certificate: event.target
-                  .value as WifiEnterpriseCredentials['certificate'],
-              })
-            }
-          >
-            <option value="hearthspace">Hearthspace certificate</option>
-            <option value="system">System certificates</option>
-          </SelectControl>
-        </label>
+        <SelectControl
+          label="EAP method"
+          value={value.method}
+          onChange={(method) => onChange({ ...value, method })}
+          options={[
+            { id: 'PEAP', label: 'PEAP' },
+            { id: 'TTLS', label: 'TTLS' },
+          ]}
+        />
+        <SelectControl
+          label="Certificate validation"
+          value={value.certificate}
+          onChange={(certificate) => onChange({ ...value, certificate })}
+          options={[
+            { id: 'hearthspace', label: 'Hearthspace certificate' },
+            { id: 'system', label: 'System certificates' },
+          ]}
+        />
       </div>
       <p className={dialogStyles.notice}>
         Authentication server: radius.hearthspace.test
@@ -585,22 +571,21 @@ function HiddenNetworkDialog({
             spellCheck={false}
           />
         </label>
-        <label className={dialogStyles.field}>
-          Security
-          <SelectControl
-            value={security}
-            onChange={(event) => {
-              setSecurity(event.target.value as WifiSecurity)
-              setPassword('')
-              setError(null)
-            }}
-          >
-            <option>WPA2 Personal</option>
-            <option>WPA3 Personal</option>
-            <option>WPA2 Enterprise</option>
-            <option>Open</option>
-          </SelectControl>
-        </label>
+        <SelectControl
+          label="Security"
+          value={security}
+          onChange={(selected) => {
+            setSecurity(selected)
+            setPassword('')
+            setError(null)
+          }}
+          options={[
+            { id: 'WPA2 Personal', label: 'WPA2 Personal' },
+            { id: 'WPA3 Personal', label: 'WPA3 Personal' },
+            { id: 'WPA2 Enterprise', label: 'WPA2 Enterprise' },
+            { id: 'Open', label: 'Open' },
+          ]}
+        />
         {security === 'WPA2 Enterprise' && (
           <EnterpriseFields
             value={enterprise}
@@ -827,21 +812,15 @@ function NetworkDetailsDialog({
             Treat this connection as a limited data plan.
           </p>
         )}
-        <label className={dialogStyles.field}>
-          IPv4 configuration
-          <SelectControl
-            value={draft.ipv4Mode}
-            onChange={(event) =>
-              update(
-                'ipv4Mode',
-                event.target.value as WifiNetworkSettings['ipv4Mode'],
-              )
-            }
-          >
-            <option value="automatic">Automatic (DHCP)</option>
-            <option value="manual">Manual</option>
-          </SelectControl>
-        </label>
+        <SelectControl
+          label="IPv4 configuration"
+          value={draft.ipv4Mode}
+          onChange={(mode) => update('ipv4Mode', mode)}
+          options={[
+            { id: 'automatic', label: 'Automatic (DHCP)' },
+            { id: 'manual', label: 'Manual' },
+          ]}
+        />
         {draft.ipv4Mode === 'manual' && (
           <>
             <div className={dialogStyles.fieldRow}>
@@ -875,21 +854,15 @@ function NetworkDetailsDialog({
             </label>
           </>
         )}
-        <label className={dialogStyles.field}>
-          DNS configuration
-          <SelectControl
-            value={draft.dnsMode}
-            onChange={(event) =>
-              update(
-                'dnsMode',
-                event.target.value as WifiNetworkSettings['dnsMode'],
-              )
-            }
-          >
-            <option value="automatic">Automatic</option>
-            <option value="manual">Manual</option>
-          </SelectControl>
-        </label>
+        <SelectControl
+          label="DNS configuration"
+          value={draft.dnsMode}
+          onChange={(mode) => update('dnsMode', mode)}
+          options={[
+            { id: 'automatic', label: 'Automatic' },
+            { id: 'manual', label: 'Manual' },
+          ]}
+        />
         {draft.dnsMode === 'manual' && (
           <label className={dialogStyles.field}>
             DNS servers

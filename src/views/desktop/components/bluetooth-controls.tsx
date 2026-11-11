@@ -394,24 +394,15 @@ function DeviceDetails({
             </label>
           )}
           {audioProfile && (
-            <label className={dialogStyles.field}>
-              Audio profile
-              <SelectControl
-                value={audioProfile}
-                onChange={(event) =>
-                  setAudioProfile(
-                    event.target.value === 'hands-free'
-                      ? 'hands-free'
-                      : 'stereo',
-                  )
-                }
-              >
-                <option value="stereo">High quality stereo (A2DP)</option>
-                <option value="hands-free">
-                  Hands-free with microphone (HFP)
-                </option>
-              </SelectControl>
-            </label>
+            <SelectControl
+              label="Audio profile"
+              value={audioProfile}
+              onChange={setAudioProfile}
+              options={[
+                { id: 'stereo', label: 'High quality stereo (A2DP)' },
+                { id: 'hands-free', label: 'Hands-free with microphone (HFP)' },
+              ]}
+            />
           )}
           {audioProfile && (
             <p className={dialogStyles.notice}>

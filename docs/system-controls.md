@@ -84,9 +84,11 @@ pairing or forgetting can move focus to the device's replacement row. Desktop
 shortcuts do not run from inside a wireless dialog. Outside a Settings dialog,
 the desktop remains available; shell dialogs block it until dismissed.
 
-Wireless forms use padded selects with an inset chevron and themed checkboxes
-with the local checkmark glyph. Both keep their native keyboard and form
-behavior while sharing Hearthspace's surfaces, accent, and focus treatment.
+Wireless selects open a themed list above or below the field, depending on
+available space. A checkmark identifies the current choice. Use Enter or
+Space to open the list, the arrow keys to move, and Enter to select. Escape
+closes the list and returns focus to the field. The choice stays in the
+form draft until you save or connect.
 
 ## Choose a Wi-Fi network
 
@@ -324,9 +326,11 @@ each Settings window its own portal host through the
 is inert while a local dialog is open; the rest of the desktop is unaffected.
 The boundary's [CSS Module](../src/views/desktop/components/settings-dialog-boundary.module.css)
 keeps the backdrop and scrolling form within that window.
-[Checkbox](../src/components/controls/checkbox.tsx) and
-[SelectControl](../src/components/controls/select-control.tsx) style native
-inputs with the local `Check` and `ChevronDown` glyphs. The dialog's
+[Checkbox](../src/components/controls/checkbox.tsx) styles a native input.
+[SelectControl](../src/components/controls/select-control.tsx) uses
+[React Aria Select](https://react-aria.adobe.com/Select) for the trigger,
+list, selection, and keyboard behavior. The list renders inside its dialog
+to stay in the same theme and remain usable in desktop-modal dialogs. The dialog's
 [CSS Module](../src/views/desktop/components/wireless-dialog.module.css)
 lays out the fields and keeps long forms scrollable.
 Power confirmations reuse [LayoutConfirm](../src/views/desktop/components/layout-confirm.tsx)

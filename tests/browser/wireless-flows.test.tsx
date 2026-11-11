@@ -252,9 +252,13 @@ test('Bluetooth device settings drive reconnection and recover from an out-of-ra
   await details
     .getByLabelText('Device name', { exact: true })
     .fill('Travel headphones')
+  await details.getByRole('button', { name: /Audio profile/ }).click()
   await details
-    .getByRole('combobox', { name: 'Audio profile', exact: true })
-    .selectOptions('hands-free')
+    .getByRole('option', {
+      name: 'Hands-free with microphone (HFP)',
+      exact: true,
+    })
+    .click()
   await details
     .getByRole('checkbox', {
       name: 'Automatically reconnect when Bluetooth turns on',
@@ -282,10 +286,8 @@ test('Bluetooth device settings drive reconnection and recover from an out-of-ra
     exact: true,
   })
   await expect
-    .element(
-      details.getByRole('combobox', { name: 'Audio profile', exact: true }),
-    )
-    .toHaveValue('hands-free')
+    .element(details.getByRole('button', { name: /Audio profile/ }))
+    .toHaveTextContent('Hands-free with microphone (HFP)')
   const nearby = details.getByRole('checkbox', {
     name: 'Device nearby',
     exact: true,
@@ -398,18 +400,16 @@ test('Wi-Fi details validate and save network configuration, auto-connect, and f
   await details
     .getByRole('checkbox', { name: 'Private MAC address', exact: true })
     .click()
-  await details
-    .getByRole('combobox', { name: 'IPv4 configuration', exact: true })
-    .selectOptions('manual')
+  await details.getByRole('button', { name: /IPv4 configuration/ }).click()
+  await details.getByRole('option', { name: 'Manual', exact: true }).click()
   await details.getByLabelText('IP address', { exact: true }).fill('999.2.3.4')
   await details.getByRole('button', { name: 'Save', exact: true }).click()
   await expect.element(details.getByRole('alert')).toBeVisible()
   await details
     .getByLabelText('IP address', { exact: true })
     .fill('192.168.1.55')
-  await details
-    .getByRole('combobox', { name: 'DNS configuration', exact: true })
-    .selectOptions('manual')
+  await details.getByRole('button', { name: /DNS configuration/ }).click()
+  await details.getByRole('option', { name: 'Manual', exact: true }).click()
   await details.getByLabelText(/^DNS servers/).fill('1.1.1.1, 8.8.8.8')
   await details.getByRole('button', { name: 'Save', exact: true }).click()
   await expect.element(details).not.toBeInTheDocument()
@@ -598,13 +598,19 @@ test('enterprise credentials, failed connections, retries, and no-internet statu
     .getByRole('button', { name: 'Fill password', exact: true })
     .click()
   await enterprise
-    .getByRole('combobox', { name: 'Certificate validation', exact: true })
-    .selectOptions('system')
+    .getByRole('button', { name: /Certificate validation/ })
+    .click()
+  await enterprise
+    .getByRole('option', { name: 'System certificates', exact: true })
+    .click()
   await enterprise.getByRole('button', { name: 'Connect', exact: true }).click()
   await expect.element(enterprise.getByRole('alert')).toBeVisible()
   await enterprise
-    .getByRole('combobox', { name: 'Certificate validation', exact: true })
-    .selectOptions('hearthspace')
+    .getByRole('button', { name: /Certificate validation/ })
+    .click()
+  await enterprise
+    .getByRole('option', { name: 'Hearthspace certificate', exact: true })
+    .click()
   await enterprise.getByRole('button', { name: 'Connect', exact: true }).click()
   await expect
     .element(trigger)

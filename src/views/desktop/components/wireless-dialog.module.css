@@ -63,7 +63,7 @@
   scrollbar-color: var(--scrollbar) transparent;
 }
 
-.dialog button {
+.dialog button:where(:not([aria-haspopup='listbox'])) {
   min-height: 36px;
   padding: 8px 12px;
   border: 1px solid var(--line);
@@ -76,13 +76,16 @@
   cursor: pointer;
 }
 
-.dialog button:is(:hover, :focus-visible):not(:disabled) {
+.dialog
+  button:where(:not([aria-haspopup='listbox'])):is(:hover, :focus-visible):not(
+    :disabled
+  ) {
   border-color: var(--accent-border);
   background: var(--chrome-hover);
   box-shadow: var(--control-glow), var(--glass-edge-active);
 }
 
-.dialog button:disabled {
+.dialog button:where(:not([aria-haspopup='listbox'])):disabled {
   opacity: 0.5;
   cursor: default;
 }

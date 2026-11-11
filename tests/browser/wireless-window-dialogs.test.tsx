@@ -188,7 +188,7 @@ test('finishing Bluetooth pairing in Settings leaves focus with the app the user
     .toHaveValue('Keep typing while Bluetooth finishes connecting.')
 })
 
-test('a compact Settings detail form fits its window and saves native select and checkbox edits', async () => {
+test('a compact Settings detail form fits its window and saves select and checkbox edits', async () => {
   await page.viewport(390, 844)
   try {
     await renderDesktop()
@@ -220,9 +220,18 @@ test('a compact Settings detail form fits its window and saves native select and
     await details
       .getByRole('checkbox', { name: 'Metered connection', exact: true })
       .click()
-    await details
-      .getByRole('combobox', { name: 'DNS configuration', exact: true })
-      .selectOptions('manual')
+    const dns = details.getByRole('button', { name: /DNS configuration/ })
+    await dns.click()
+    const menu = details.getByRole('listbox')
+    await expect.element(menu).toBeVisible()
+    await userEvent.keyboard('{Escape}')
+    await expect.element(menu).not.toBeInTheDocument()
+    await expect.element(details).toBeVisible()
+    await expect.element(dns).toHaveFocus()
+    await userEvent.keyboard('{Enter}')
+    await expect.element(menu).toBeVisible()
+    await userEvent.keyboard('{ArrowDown}{Enter}')
+    await expect.element(dns).toHaveTextContent('Manual')
     await details.getByLabelText(/^DNS servers/).fill('1.1.1.1, 8.8.8.8')
     await details.getByRole('button', { name: 'Save', exact: true }).click()
     await expect.element(details).not.toBeInTheDocument()
@@ -237,14 +246,7 @@ test('a compact Settings detail form fits its window and saves native select and
         }),
       )
       .toBeChecked()
-    await expect
-      .element(
-        details.getByRole('combobox', {
-          name: 'DNS configuration',
-          exact: true,
-        }),
-      )
-      .toHaveValue('manual')
+    await expect.element(dns).toHaveTextContent('Manual')
     await expect
       .element(details.getByLabelText(/^DNS servers/))
       .toHaveValue('1.1.1.1, 8.8.8.8')

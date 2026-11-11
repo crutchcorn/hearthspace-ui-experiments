@@ -41,7 +41,7 @@ export default function WirelessDialog({
     else element.showModal()
     const focus =
       element.querySelector<HTMLElement>(
-        '[autofocus], input:not(:disabled):not([type="checkbox"]):not([type="hidden"]), select:not(:disabled)',
+        '[autofocus], input:not(:disabled):not([type="checkbox"]):not([type="hidden"]), button[aria-haspopup="listbox"]:not(:disabled)',
       ) ?? element.querySelector<HTMLElement>('footer button:not(:disabled)')
     focus?.focus({ preventScroll: true })
     return () => {
@@ -67,7 +67,7 @@ export default function WirelessDialog({
       }}
       onKeyDown={(event) => {
         event.stopPropagation()
-        if (!scope) return
+        if (!scope || event.defaultPrevented) return
         if (event.key === 'Escape') {
           event.preventDefault()
           close()
@@ -75,7 +75,7 @@ export default function WirelessDialog({
         if (event.key === 'Tab') {
           const fields = [
             ...event.currentTarget.querySelectorAll<HTMLElement>(
-              'button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex="0"]',
+              'button:not(:disabled), input:not(:disabled), textarea:not(:disabled), [tabindex="0"]',
             ),
           ].filter((field) => field.getClientRects().length > 0)
           const first = fields[0]

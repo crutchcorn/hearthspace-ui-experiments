@@ -7,37 +7,35 @@ const meta = preview.meta({
   title: 'Shared/Controls/Select',
   component: SelectControl,
   args: {
+    label: 'DNS configuration',
     value: 'automatic',
     onChange: fn(),
-    children: (
-      <>
-        <option value="automatic">Automatic</option>
-        <option value="manual">Manual</option>
-      </>
-    ),
+    options: [
+      { id: 'automatic', label: 'Automatic' },
+      { id: 'manual', label: 'Manual' },
+    ],
   },
   argTypes: {
     value: { control: 'select', options: ['automatic', 'manual'] },
-    children: { control: false },
+    options: { control: false },
   },
   render: function Render(args) {
     const [, updateArgs] = useArgs()
 
     return (
-      <label style={{ display: 'grid', width: 220, gap: 8 }}>
-        DNS configuration
+      <div style={{ width: 220, maxWidth: '100%' }}>
         <SelectControl
           {...args}
-          onChange={(event) => {
-            updateArgs({ value: event.currentTarget.value })
-            args.onChange?.(event)
+          onChange={(value) => {
+            updateArgs({ value })
+            args.onChange(value)
           }}
         />
-      </label>
+      </div>
     )
   },
 })
 
 export const Automatic = meta.story({})
 
-export const Disabled = meta.story({ args: { disabled: true } })
+export const Disabled = meta.story({ args: { isDisabled: true } })
