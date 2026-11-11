@@ -75,6 +75,9 @@ and [gathering](ai-gathering.md) instead change window positions for later use.
 Settings has categories in a sidebar that collapses when the app window is
 small. Wi-Fi and Bluetooth have separate categories; their state is shared
 across Settings windows while each window keeps its own category selection.
+Wireless dialogs stay within the Settings window that opened them, leaving
+other apps usable. Opening a wireless form from the shell instead uses a
+desktop modal.
 Gestures opens its own editor screen with a back button; System links to
 Change layout rather than duplicating placement and battery-detail options.
 

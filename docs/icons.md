@@ -25,7 +25,7 @@ the local `Folder` or `FileText` glyph; the **Files app** keeps its own artwork.
 
 The cog appears in the [gesture pad](../src/views/desktop/components/gesture-pad.tsx) at
 18 pixels for **Customize gestures**, and in the
-[Bluetooth controls](../src/views/desktop/components/system-bar.tsx) at 17 pixels for
+[Bluetooth controls](../src/views/desktop/components/bluetooth-controls.tsx) at 17 pixels for
 device details and 15 pixels for **Adapter settings**. Both the shell popup and
 the Bluetooth page in Settings share those controls.
 

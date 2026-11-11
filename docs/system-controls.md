@@ -71,11 +71,22 @@ interaction. **System → Frame layout** still opens Change layout for moving
 controls or changing their details; wireless connections live in their own
 categories.
 
-Password, pairing, and settings forms open in centered dialogs above the
-desktop. Escape or the close button dismisses the active dialog without also
-closing the wireless popover beneath it. Long forms scroll within the screen,
-including on narrow layouts. Desktop shortcuts do not run while a wireless
-dialog is open.
+Password, pairing, and settings forms opened from Settings stay inside that
+Settings window. Their backdrop covers only its content, so other apps and
+shell controls remain usable. The dialog follows its window when moved, and
+long forms scroll within the available app space while the heading and action
+buttons stay visible.
+
+The same forms opened from a shell dropdown use centered desktop dialogs.
+Escape or the close button dismisses the active dialog without also closing
+the wireless popover beneath it. Closing a form returns focus to its control;
+pairing or forgetting can move focus to the device's replacement row. Desktop
+shortcuts do not run from inside a wireless dialog. Outside a Settings dialog,
+the desktop remains available; shell dialogs block it until dismissed.
+
+Wireless forms use padded selects with an inset chevron and themed checkboxes
+with the local checkmark glyph. Both keep their native keyboard and form
+behavior while sharing Hearthspace's surfaces, accent, and focus treatment.
 
 ## Choose a Wi-Fi network
 
@@ -85,6 +96,8 @@ is also a saved sample, so either can connect without a password prompt.
 Clicking a connected row disconnects while leaving Wi-Fi on. Connecting to
 another network replaces the active connection only after the attempt
 succeeds. Canceling or failing an attempt keeps the previous connection.
+The separate arrow at the end of each row opens details. Open networks have
+one arrow for that action; their main row connects directly.
 
 **Workshop** exercises a new secured connection: enter the demo password
 `hearthspace`, or use **Fill password** (the eye button) to fill the masked
@@ -294,11 +307,20 @@ controls to dropdown and Settings page presentation. The switches reuse the
 [Settings switch styles](../src/views/desktop/components/settings.module.css)
 so both themes stay consistent with the Settings app. SystemBar retains the
 shell triggers, detail labels, and popover placement.
-[WirelessDialog](../src/views/desktop/components/wireless-dialog.tsx) provides the native modal
-surface for wireless prompts and detail/settings forms. It handles initial
-field focus, Escape/close dismissal, and keyboard isolation from the desktop;
-its [CSS Module](../src/views/desktop/components/wireless-dialog.module.css) keeps long forms
-scrollable within narrow viewports.
+[WirelessDialog](../src/views/desktop/components/wireless-dialog.tsx) provides the shared
+prompt and detail/settings surface, choosing a window-contained overlay in
+Settings or a native desktop modal for shell controls. It handles initial
+field focus, Escape/close dismissal, and keyboard isolation from the desktop.
+[SettingsDialogBoundary](../src/views/desktop/components/settings-dialog-boundary.tsx) gives
+each Settings window its own portal host through the
+[dialog context](../src/views/desktop/constants/settings-dialog-context.ts). Its content
+is inert while a local dialog is open; the rest of the desktop is unaffected.
+The boundary's [CSS Module](../src/views/desktop/components/settings-dialog-boundary.module.css)
+keeps the backdrop and scrolling form within that window.
+[WirelessFormControls](../src/views/desktop/components/wireless-form-controls.tsx) wraps native
+selects and checkboxes with the local `ChevronDown` and `Check` glyphs; the
+dialog's [CSS Module](../src/views/desktop/components/wireless-dialog.module.css) supplies
+their spacing and theme treatment and keeps long forms scrollable.
 Power confirmations reuse [LayoutConfirm](../src/views/desktop/components/layout-confirm.tsx)
 for the shell's native modal presentation and default Cancel focus.
 [PlacedWidget](../src/views/desktop/components/placed-widget.tsx) places it, and
@@ -326,3 +348,6 @@ narrow-screen prompts. Movement and settling are covered by
 [layout workspace tests](../tests/layout-workspace.test.ts).
 [Bluetooth timing coverage](../tests/browser/bluetooth-timers.test.tsx) checks
 independent connection deadlines through the shell controls.
+[Settings dialog tests](../tests/browser/wireless-window-dialogs.test.tsx)
+cover per-window boundaries, other-app access, compact form edits, and keyboard
+focus through pairing and confirmation flows.

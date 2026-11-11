@@ -20,6 +20,7 @@ import type {
 import settingsStyles from './settings.module.css'
 import styles from './wireless-controls.module.css'
 import WirelessDialog from './wireless-dialog'
+import { WirelessCheckbox, WirelessSelect } from './wireless-form-controls'
 import dialogStyles from './wireless-dialog.module.css'
 
 interface BluetoothControlsProps {
@@ -70,9 +71,20 @@ function PairingDialog({
   const formId = useId()
   const errorId = useId()
   const [pin, setPin] = useState('')
+  const cancelAction = useRef<HTMLButtonElement>(null)
   const pairing = status.bluetoothPairing!
   const busy = pairing.stage === 'pairing' || pairing.stage === 'connecting'
   const comparison = pairing.stage === 'comparison'
+  useLayoutEffect(() => {
+    const active = document.activeElement
+    if (
+      busy &&
+      (active === document.body ||
+        active === cancelAction.current?.closest('dialog'))
+    ) {
+      cancelAction.current?.focus({ preventScroll: true })
+    }
+  }, [busy])
   return (
     <WirelessDialog
       title={`Pair ${device.name}`}
@@ -84,7 +96,7 @@ function PairingDialog({
       onClose={onClose}
       actions={
         <>
-          <button type="button" onClick={onClose}>
+          <button ref={cancelAction} type="button" onClick={onClose}>
             {pairing.stage === 'connecting' ? 'Cancel connection' : 'Cancel'}
           </button>
           {pairing.stage === 'pin' && (
@@ -213,8 +225,7 @@ function PairingDialog({
       {pairing.stage === 'failed' && (
         <label className={dialogStyles.checkRow}>
           Device nearby
-          <input
-            type="checkbox"
+          <WirelessCheckbox
             checked={device.available}
             onChange={(event) =>
               status.bluetoothSetDeviceAvailable(
@@ -375,8 +386,7 @@ function DeviceDetails({
           {paired && (
             <label className={dialogStyles.checkRow}>
               Automatically reconnect when Bluetooth turns on
-              <input
-                type="checkbox"
+              <WirelessCheckbox
                 checked={autoConnect}
                 onChange={(event) => setAutoConnect(event.target.checked)}
               />
@@ -385,7 +395,7 @@ function DeviceDetails({
           {audioProfile && (
             <label className={dialogStyles.field}>
               Audio profile
-              <select
+              <WirelessSelect
                 value={audioProfile}
                 onChange={(event) =>
                   setAudioProfile(
@@ -399,7 +409,7 @@ function DeviceDetails({
                 <option value="hands-free">
                   Hands-free with microphone (HFP)
                 </option>
-              </select>
+              </WirelessSelect>
             </label>
           )}
           {audioProfile && (
@@ -414,8 +424,7 @@ function DeviceDetails({
         <strong>Connection testing</strong>
         <label className={dialogStyles.checkRow}>
           Device nearby
-          <input
-            type="checkbox"
+          <WirelessCheckbox
             checked={device.available}
             onChange={(event) =>
               status.bluetoothSetDeviceAvailable(
@@ -502,16 +511,14 @@ function AdapterSettings({
           </label>
           <label className={dialogStyles.checkRow}>
             Discoverable to nearby devices
-            <input
-              type="checkbox"
+            <WirelessCheckbox
               checked={discoverable}
               onChange={(event) => setDiscoverable(event.target.checked)}
             />
           </label>
           <label className={dialogStyles.checkRow}>
             Allow new pairings
-            <input
-              type="checkbox"
+            <WirelessCheckbox
               checked={allowNewPairings}
               onChange={(event) => setAllowNewPairings(event.target.checked)}
             />

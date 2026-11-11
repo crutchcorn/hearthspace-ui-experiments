@@ -80,6 +80,11 @@ export default function useWindowSwitcher({
 
   const keydown = useEffectEvent((event: KeyboardEvent) => {
     if (!enabled) return
+    if (
+      event.target instanceof Element &&
+      event.target.closest('[data-window-dialog]')
+    )
+      return
     const current = currentSession.current
     const shortcut =
       event.ctrlKey &&

@@ -38,7 +38,7 @@ interaction and points to its implementation.
 
 ## Settings
 
-- [Wi-Fi and Bluetooth](system-controls.md#wireless-controls-in-settings): mock passwords and pairing prompts, scanning, connection problems, and network/device settings shared with the shell and other Settings windows.
+- [Wi-Fi and Bluetooth](system-controls.md#wireless-controls-in-settings): mock network/device controls with dialogs contained in their Settings window, shared connection state, and shell dropdowns.
 - [Appearance](appearance.md): coordinated accents, compact light/dark previews, translucent Settings, and preserved app identities.
 - [Backgrounds](background.md): local photos, fit modes, canvas movement, photo-specific contrast, and storage failures.
 - [Display layout](display-layout.md): two-monitor placement, recentering, and temporary settings.

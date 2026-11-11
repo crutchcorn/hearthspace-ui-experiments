@@ -1,6 +1,15 @@
-import { useLayoutEffect, useId, useRef, type ReactNode } from 'react'
+import {
+  useContext,
+  useLayoutEffect,
+  useId,
+  useRef,
+  type ReactNode,
+} from 'react'
+import { createPortal } from 'react-dom'
 import { X } from '../../../components/icons'
+import { SettingsDialogContext } from '../constants/settings-dialog-context'
 import styles from './wireless-dialog.module.css'
+import scopeStyles from './settings-dialog-boundary.module.css'
 
 interface WirelessDialogProps {
   title: string
@@ -20,34 +29,66 @@ export default function WirelessDialog({
   const dialog = useRef<HTMLDialogElement>(null)
   const titleId = useId()
   const descriptionId = useId()
+  const scope = useContext(SettingsDialogContext)
+  const host = scope?.host
+  const registerDialog = scope?.registerDialog
 
   useLayoutEffect(() => {
-    const element = dialog.current!
-    element.showModal()
+    const element = dialog.current
+    if (!element) return
+    const unregister = registerDialog?.(element)
+    if (host) element.show()
+    else element.showModal()
     const focus =
       element.querySelector<HTMLElement>(
         '[autofocus], input:not(:disabled):not([type="checkbox"]):not([type="hidden"]), select:not(:disabled)',
       ) ?? element.querySelector<HTMLElement>('footer button:not(:disabled)')
     focus?.focus({ preventScroll: true })
-    return () => element.close()
-  }, [])
+    return () => {
+      unregister?.()
+      element.close()
+    }
+  }, [host, registerDialog])
 
   function close() {
-    dialog.current?.close()
     onClose()
   }
 
-  return (
+  const content = (
     <dialog
       ref={dialog}
-      className={styles.dialog}
+      className={`${styles.dialog}${scope ? ` ${scopeStyles.dialog}` : ''}`}
+      data-window-dialog={scope ? '' : undefined}
       aria-labelledby={titleId}
       aria-describedby={description ? descriptionId : undefined}
       onCancel={(event) => {
         event.preventDefault()
         close()
       }}
-      onKeyDown={(event) => event.stopPropagation()}
+      onKeyDown={(event) => {
+        event.stopPropagation()
+        if (!scope) return
+        if (event.key === 'Escape') {
+          event.preventDefault()
+          close()
+        }
+        if (event.key === 'Tab') {
+          const fields = [
+            ...event.currentTarget.querySelectorAll<HTMLElement>(
+              'button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex="0"]',
+            ),
+          ].filter((field) => field.getClientRects().length > 0)
+          const first = fields[0]
+          const last = fields.at(-1)
+          if (event.shiftKey && document.activeElement === first) {
+            event.preventDefault()
+            last?.focus()
+          } else if (!event.shiftKey && document.activeElement === last) {
+            event.preventDefault()
+            first?.focus()
+          }
+        }
+      }}
     >
       <header className={styles.header}>
         <div>
@@ -68,4 +109,9 @@ export default function WirelessDialog({
       {actions && <footer className={styles.actions}>{actions}</footer>}
     </dialog>
   )
+
+  if (!scope) return content
+  return host
+    ? createPortal(<div className={scopeStyles.backdrop}>{content}</div>, host)
+    : null
 }

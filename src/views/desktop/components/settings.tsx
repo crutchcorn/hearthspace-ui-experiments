@@ -41,6 +41,7 @@ import GestureSettings from './gesture-settings'
 import type { SystemStatus } from '../types/system-status'
 import WirelessControls from './wireless-controls'
 import styles from './settings.module.css'
+import SettingsDialogBoundary from './settings-dialog-boundary'
 
 interface SettingsProps {
   navigation?: SettingsNavigationRequest
@@ -177,7 +178,7 @@ export default function Settings({
   }, [navigation])
 
   return (
-    <section className={styles.settings} aria-label="Settings">
+    <SettingsDialogBoundary>
       <div
         className={styles.layout}
         onKeyDown={(event) => {
@@ -400,6 +401,6 @@ export default function Settings({
           </div>
         </div>
       </div>
-    </section>
+    </SettingsDialogBoundary>
   )
 }
