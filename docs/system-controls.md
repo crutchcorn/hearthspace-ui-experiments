@@ -20,6 +20,11 @@ older battery-percentage setting with one consistent detail control.
 | Battery   | Charge percentage                                                  | Shows the fixed 87% charge and battery-power state.        |
 | Power     | Icon only                                                          | Opens the [lockscreen and power menu](lockscreen.md).      |
 
+Click the Sound track or drag its thumb to change the simulated volume.
+The arrow keys adjust it one point at a time, and Home and End jump to
+0 and 100. The track and accent fill use the same inset edge lighting as
+other system controls.
+
 Power has no detail toggle. Its Lock screen action opens the password preview;
 Log off, Reboot, and Turn off close the menu and open centered confirmation
 previews. Each dialog names the selected action and focuses Cancel first.
@@ -309,9 +314,11 @@ controls to dropdown and Settings page presentation.
 [ToggleSwitch](../src/components/controls/toggle-switch.tsx) supplies the
 same themed control to Wi-Fi, Bluetooth, AI, and canvas-tool settings.
 SystemBar owns the shell triggers, detail labels, and popover placement.
-[SoundControl](../src/components/system-status/sound-control.tsx) displays the
-current simulated volume and reports changes from its native
-[LevelSlider](../src/components/controls/level-slider.tsx).
+[SoundControl](../src/components/system-status/sound-control.tsx) displays
+the current simulated volume. Its [LevelSlider](../src/components/controls/level-slider.tsx)
+uses [React Aria Slider](https://react-aria.adobe.com/Slider) for pointer
+and keyboard input and applies the playground's theme to the track, fill,
+and thumb.
 [BatteryStatus](../src/components/system-status/battery-status.tsx) displays the
 simulated percentage and power source, and its
 [LevelBar](../src/components/controls/level-bar.tsx) fills to the supplied

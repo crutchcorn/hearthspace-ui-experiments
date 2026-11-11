@@ -1,26 +1,88 @@
 .slider {
   flex: 1;
   min-width: 0;
-  height: 28px;
-  margin: 0;
-  accent-color: var(--accent);
-  cursor: pointer;
-  transition: filter 180ms ease;
 }
 
-.slider:is(:hover, :focus-visible) {
-  filter: drop-shadow(
-    0 0 8px color-mix(in srgb, var(--accent) 35%, transparent)
+.track {
+  --slider-fill-top: var(--accent-bright);
+  --slider-fill-bottom: var(--accent);
+  --slider-thumb-size: 20px;
+
+  display: grid;
+  min-width: 0;
+  height: 32px;
+  flex: 1;
+  align-items: center;
+  margin-inline: calc(var(--slider-thumb-size) / 2);
+  cursor: pointer;
+}
+
+:global([data-color-mode='dark']) .track {
+  --slider-fill-top: var(--accent);
+  --slider-fill-bottom: color-mix(
+    in srgb,
+    var(--accent-base) 72%,
+    var(--surface-tint)
   );
 }
 
-.slider:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: -2px;
+.rail {
+  position: relative;
+  height: 10px;
+  border-radius: var(--radius-round);
+  background: var(--control-track);
+  box-shadow:
+    inset 0 1px 2px var(--line),
+    var(--glass-edge);
+  pointer-events: none;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .slider {
-    transition: none;
-  }
+.fill {
+  border-radius: inherit;
+  background: linear-gradient(
+    var(--slider-fill-top),
+    var(--slider-fill-bottom)
+  );
+  box-shadow:
+    var(--glass-edge),
+    inset 0 -1px 0 color-mix(in srgb, var(--accent-strong) 25%, transparent);
+}
+
+.thumb {
+  top: 50%;
+  width: var(--slider-thumb-size);
+  height: var(--slider-thumb-size);
+  border: 1px solid var(--chrome-border);
+  border-radius: var(--radius-round);
+  background: var(--control-thumb);
+  box-shadow:
+    var(--glass-edge-active),
+    0 1px 3px var(--line);
+  cursor: grab;
+}
+
+.thumb[data-hovered],
+.thumb[data-dragging] {
+  border-color: var(--accent-border);
+  box-shadow:
+    var(--glass-edge-active),
+    0 1px 4px var(--accent-border);
+}
+
+.thumb[data-dragging] {
+  cursor: grabbing;
+}
+
+.thumb[data-focus-visible] {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.slider[data-disabled] {
+  opacity: 0.5;
+}
+
+.track[data-disabled],
+.thumb[data-disabled] {
+  cursor: default;
 }

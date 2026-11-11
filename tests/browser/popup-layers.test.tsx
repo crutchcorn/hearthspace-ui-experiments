@@ -59,6 +59,7 @@ test('the grouped Sound popup stays above pinned shortcuts and accepts volume ch
   await renderDesktop()
   await page.getByRole('button', { name: 'Sound settings' }).click()
   const slider = page.getByRole('slider', { name: 'Sound' })
+  const sound = page.getByRole('group', { name: 'Sound', exact: true })
   const shortcut = page.getByRole('button', { name: 'Browser', exact: true })
   const panel = () => slider.element().closest('[data-system-panel]')!
 
@@ -69,11 +70,13 @@ test('the grouped Sound popup stays above pinned shortcuts and accepts volume ch
     position: { x: point.x - bounds.x, y: point.y - bounds.y },
   })
   await expect.element(slider).toBeVisible()
-  await slider.click()
-  await expect.element(slider).toBeVisible()
-  await expect
-    .poll(() => Number((slider.element() as HTMLInputElement).value))
-    .toBeCloseTo(50, 0)
+  const track = slider.element().closest('[data-orientation="horizontal"]')!
+  await page.elementLocator(track).click()
+  await expect.element(slider).toHaveValue('50')
+  await sound.getByText('Sound', { exact: true }).click()
+  await expect.element(slider).toHaveFocus()
+  await userEvent.keyboard('{Home}{ArrowRight}')
+  await expect.element(slider).toHaveValue('1')
   await expect
     .element(page.getByRole('button', { name: 'Close Browser', exact: true }))
     .not.toBeInTheDocument()
