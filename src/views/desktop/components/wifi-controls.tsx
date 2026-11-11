@@ -1,3 +1,5 @@
+import Button from '../../../components/controls/button'
+import TextInput from '../../../components/controls/text-input'
 import Checkbox from '../../../components/controls/checkbox'
 import SelectControl from '../../../components/controls/select-control'
 import ToggleSwitch from '../../../components/controls/toggle-switch'
@@ -161,8 +163,8 @@ function WifiNetworks({ status, presentation }: WifiControlsProps) {
         })}
       </div>
       <div className={styles.toolbar}>
-        <button
-          className={styles.smallButton}
+        <Button
+          variant="quiet"
           type="button"
           disabled={status.wifiScanning}
           onClick={status.wifiScan}
@@ -172,14 +174,14 @@ function WifiNetworks({ status, presentation }: WifiControlsProps) {
             className={status.wifiScanning ? styles.spinning : undefined}
           />
           {status.wifiScanning ? 'Scanning…' : 'Refresh networks'}
-        </button>
-        <button
-          className={styles.smallButton}
+        </Button>
+        <Button
+          variant="quiet"
           type="button"
           onClick={() => setDialog({ kind: 'hidden' })}
         >
           <Plus size={15} /> Join hidden network
-        </button>
+        </Button>
       </div>
       {(status.wifiScanning || status.wifiScanCount > 0) && (
         <p className={styles.feedback} role="status">
@@ -191,13 +193,13 @@ function WifiNetworks({ status, presentation }: WifiControlsProps) {
       {status.wifiPendingNetwork ? (
         <div className={styles.feedback} role="status">
           {status.wifiConnectionStatus}
-          <button
-            className={styles.smallButton}
+          <Button
+            variant="quiet"
             type="button"
             onClick={status.wifiCancelConnection}
           >
             Cancel connection
-          </button>
+          </Button>
         </div>
       ) : (
         <>
@@ -208,8 +210,8 @@ function WifiNetworks({ status, presentation }: WifiControlsProps) {
             >
               {status.wifiFeedback.message}
               {status.wifiFeedback.error && status.wifiFeedback.networkId && (
-                <button
-                  className={styles.smallButton}
+                <Button
+                  variant="quiet"
                   type="button"
                   onClick={() => {
                     const network = status.wifiNetworks.find(
@@ -219,29 +221,29 @@ function WifiNetworks({ status, presentation }: WifiControlsProps) {
                   }}
                 >
                   Retry
-                </button>
+                </Button>
               )}
             </div>
           )}
           {portalRequired && (
-            <button
-              className={styles.smallButton}
+            <Button
+              variant="quiet"
               type="button"
               onClick={() =>
                 setDialog({ kind: 'portal', networkId: connected.id })
               }
             >
               Sign in to {connected.name}
-            </button>
+            </Button>
           )}
           {connected?.scenario === 'limited' && (
-            <button
-              className={styles.smallButton}
+            <Button
+              variant="quiet"
               type="button"
               onClick={() => status.selectWifiNetwork(connected.id)}
             >
               Retry connection
-            </button>
+            </Button>
           )}
         </>
       )}
@@ -274,16 +276,16 @@ function WifiNetworks({ status, presentation }: WifiControlsProps) {
           onClose={closeDialog}
           actions={
             <>
-              <button
+              <Button
                 type="button"
                 onClick={() =>
                   setDialog({ kind: 'details', networkId: selected.id })
                 }
               >
                 Cancel
-              </button>
-              <button
-                className={dialogStyles.danger}
+              </Button>
+              <Button
+                variant="danger"
                 type="button"
                 onClick={() => {
                   status.wifiForgetNetwork(selected.id)
@@ -291,7 +293,7 @@ function WifiNetworks({ status, presentation }: WifiControlsProps) {
                 }}
               >
                 Forget
-              </button>
+              </Button>
             </>
           }
         >
@@ -333,7 +335,7 @@ function PasswordField({
     <div className={dialogStyles.field}>
       <label htmlFor={id}>Password</label>
       <div className={dialogStyles.inline}>
-        <input
+        <TextInput
           ref={input}
           id={id}
           type="password"
@@ -346,7 +348,7 @@ function PasswordField({
           value={value}
           onChange={(event) => onChange(event.target.value)}
         />
-        <button
+        <Button
           type="button"
           aria-label="Fill password"
           title="Fill password"
@@ -356,7 +358,7 @@ function PasswordField({
           }}
         >
           <Eye size={18} />
-        </button>
+        </Button>
       </div>
     </div>
   )
@@ -376,7 +378,7 @@ function EnterpriseFields({
       <div className={dialogStyles.field}>
         <label htmlFor={identityId}>Identity</label>
         <div className={dialogStyles.inline}>
-          <input
+          <TextInput
             ref={identityInput}
             id={identityId}
             autoComplete="off"
@@ -388,7 +390,7 @@ function EnterpriseFields({
               onChange({ ...value, identity: event.target.value })
             }
           />
-          <button
+          <Button
             type="button"
             aria-label="Fill identity"
             title="Fill identity"
@@ -398,7 +400,7 @@ function EnterpriseFields({
             }}
           >
             <User size={18} />
-          </button>
+          </Button>
         </div>
       </div>
       <div className={dialogStyles.fieldRow}>
@@ -466,12 +468,12 @@ function PasswordDialog({
       onClose={onClose}
       actions={
         <>
-          <button type="button" onClick={onClose}>
+          <Button type="button" onClick={onClose}>
             Cancel
-          </button>
-          <button className={dialogStyles.primary} type="submit" form={formId}>
+          </Button>
+          <Button variant="primary" type="submit" form={formId}>
             Connect
-          </button>
+          </Button>
         </>
       }
     >
@@ -548,19 +550,19 @@ function HiddenNetworkDialog({
       onClose={onClose}
       actions={
         <>
-          <button type="button" onClick={onClose}>
+          <Button type="button" onClick={onClose}>
             Cancel
-          </button>
-          <button className={dialogStyles.primary} type="submit" form={formId}>
+          </Button>
+          <Button variant="primary" type="submit" form={formId}>
             Connect
-          </button>
+          </Button>
         </>
       }
     >
       <form className={dialogStyles.form} id={formId} onSubmit={submit}>
         <label className={dialogStyles.field}>
           Network name
-          <input
+          <TextInput
             value={name}
             onChange={(event) => {
               setName(event.target.value)
@@ -684,12 +686,12 @@ function NetworkDetailsDialog({
       onClose={onClose}
       actions={
         <>
-          <button type="button" onClick={onClose}>
+          <Button type="button" onClick={onClose}>
             Cancel
-          </button>
-          <button className={dialogStyles.primary} type="submit" form={formId}>
+          </Button>
+          <Button variant="primary" type="submit" form={formId}>
             Save
-          </button>
+          </Button>
         </>
       }
     >
@@ -747,12 +749,12 @@ function NetworkDetailsDialog({
         </dl>
         <div className={dialogStyles.actions}>
           {network.saved || network.hidden ? (
-            <button type="button" onClick={onForget}>
+            <Button type="button" onClick={onForget}>
               Forget network
-            </button>
+            </Button>
           ) : null}
           {pending ? (
-            <button
+            <Button
               type="button"
               onClick={() => {
                 status.wifiCancelConnection()
@@ -760,9 +762,9 @@ function NetworkDetailsDialog({
               }}
             >
               Cancel connection
-            </button>
+            </Button>
           ) : connected ? (
-            <button
+            <Button
               type="button"
               onClick={() => {
                 status.selectWifiNetwork(null)
@@ -770,18 +772,18 @@ function NetworkDetailsDialog({
               }}
             >
               Disconnect
-            </button>
+            </Button>
           ) : (
-            <button type="button" onClick={onConnect}>
+            <Button type="button" onClick={onConnect}>
               Connect
-            </button>
+            </Button>
           )}
           {connected &&
             network.scenario === 'portal' &&
             !network.portalAccepted && (
-              <button type="button" onClick={onPortal}>
+              <Button type="button" onClick={onPortal}>
                 Sign in
-              </button>
+              </Button>
             )}
         </div>
       </div>
@@ -826,7 +828,7 @@ function NetworkDetailsDialog({
             <div className={dialogStyles.fieldRow}>
               <label className={dialogStyles.field}>
                 IP address
-                <input
+                <TextInput
                   value={draft.address}
                   onChange={(event) => update('address', event.target.value)}
                   inputMode="decimal"
@@ -835,7 +837,7 @@ function NetworkDetailsDialog({
               </label>
               <label className={dialogStyles.field}>
                 Subnet mask
-                <input
+                <TextInput
                   value={draft.subnetMask}
                   onChange={(event) => update('subnetMask', event.target.value)}
                   inputMode="decimal"
@@ -845,7 +847,7 @@ function NetworkDetailsDialog({
             </div>
             <label className={dialogStyles.field}>
               Gateway
-              <input
+              <TextInput
                 value={draft.gateway}
                 onChange={(event) => update('gateway', event.target.value)}
                 inputMode="decimal"
@@ -866,7 +868,7 @@ function NetworkDetailsDialog({
         {draft.dnsMode === 'manual' && (
           <label className={dialogStyles.field}>
             DNS servers
-            <input
+            <TextInput
               value={draft.dns}
               onChange={(event) => update('dns', event.target.value)}
               placeholder="1.1.1.1, 8.8.8.8"
@@ -903,17 +905,17 @@ function PortalDialog({
       onClose={onClose}
       actions={
         <>
-          <button type="button" onClick={onClose}>
+          <Button type="button" onClick={onClose}>
             Cancel
-          </button>
-          <button
-            className={dialogStyles.primary}
+          </Button>
+          <Button
+            variant="primary"
             type="submit"
             form={formId}
             disabled={!accepted || !connected}
           >
             Connect to internet
-          </button>
+          </Button>
         </>
       }
     >

@@ -1,3 +1,4 @@
+import Button from '../../../components/controls/button'
 import {
   useContext,
   useLayoutEffect,
@@ -95,15 +96,16 @@ export default function WirelessDialog({
           <h2 id={titleId}>{title}</h2>
           {description && <p id={descriptionId}>{description}</p>}
         </div>
-        <button
+        <Button
           type="button"
           className={styles.close}
+          variant="quiet"
           aria-label="Close dialog"
           title="Close"
           onClick={close}
         >
           <X size={18} />
-        </button>
+        </Button>
       </header>
       <div className={styles.body}>{children}</div>
       {actions && <footer className={styles.actions}>{actions}</footer>}

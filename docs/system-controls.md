@@ -340,6 +340,10 @@ is inert while a local dialog is open; the rest of the desktop is unaffected.
 The boundary's [CSS Module](../src/views/desktop/components/settings-dialog-boundary.module.css)
 keeps the backdrop and scrolling form within that window.
 [Checkbox](../src/components/controls/checkbox.tsx) styles a native input.
+[Button](../src/components/controls/button.tsx) supplies the standard
+wireless toolbar and dialog actions. [TextInput](../src/components/controls/text-input.tsx)
+supplies the editable fields, including masked Wi-Fi passwords and Bluetooth
+PINs. The forms own their values, validation, and submission.
 [SelectControl](../src/components/controls/select-control.tsx) uses
 [React Aria Select](https://react-aria.adobe.com/Select) for the trigger,
 list, selection, and keyboard behavior. The list renders inside its dialog

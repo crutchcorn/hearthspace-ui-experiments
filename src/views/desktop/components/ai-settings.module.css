@@ -145,48 +145,8 @@
   margin-top: 24px;
 }
 
-.confirmationActions button {
-  min-height: 40px;
-  padding: 9px 12px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-control);
-  background: var(--surface-control);
-  box-shadow: var(--glass-edge);
-  color: var(--ink);
-  font: inherit;
-  font-size: 11px;
-  cursor: pointer;
-}
-
-.confirmationActions button:hover {
-  border-color: var(--accent-border);
-  background: var(--chrome-hover);
-  box-shadow: var(--control-glow), var(--glass-edge-active);
-}
-
-.confirmationActions .confirmButton {
-  border-color: #bc3b39;
-  background: #bc3b39;
-  color: #fff;
-}
-
-.confirmationActions .confirmButton:hover {
-  border-color: #a6302e;
-  background: #a6302e;
-}
-
-.confirmationActions button:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-
-.confirmationActions .confirmButton:focus-visible {
-  outline-color: #bc3b39;
-}
-
 @media (prefers-reduced-motion: no-preference) {
-  .features summary,
-  .confirmationActions button {
+  .features summary {
     transition:
       background 180ms ease,
       border-color 180ms ease,

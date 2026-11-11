@@ -2,13 +2,14 @@
 
 Run `pnpm storybook` and open the address it prints, usually
 `http://localhost:6006`. **Shared → Icons** shows the local SVG glyph families.
-**Shared → Controls** shows switches, checkboxes, selects, the read-only
-level bar, and the adjustable level slider used in the sound panel. Click a
-switch or checkbox, choose a select option, or drag the slider to try the
-controls with sample values. Open **Select → Automatic** to preview the
-React Aria menu with the current color mode and accent. The Select and
-App Picker previews reserve space below the field for their open menus
-in Canvas and Docs.
+**Shared → Controls** shows buttons, text inputs, switches, checkboxes,
+selects, the read-only level bar, and the adjustable level slider used in
+the sound panel. Open **Button** to compare neutral, primary, destructive,
+quiet, and disabled states. **Text Input** includes editable examples and
+shows password, invalid, and disabled states. Open **Select → Automatic**
+to preview the React Aria menu with the current color mode and accent.
+The Select and App Picker previews reserve space below the field for
+their open menus in Canvas and Docs.
 **Desktop** groups the presentational components by the surface that uses
 them, including the battery and sound panels under **Desktop → Shell**.
 Choose **Color mode** in the toolbar to preview the same story in Light or
@@ -35,5 +36,11 @@ is shared across stories. Reuse the preview wrappers in
 [surfaces.tsx](../.storybook/surfaces.tsx) for positioning and portals.
 [main.ts](../.storybook/main.ts) discovers the stories, and
 [preview.tsx](../.storybook/preview.tsx) applies the theme and Docs settings.
+
+[Button](../src/components/controls/button.tsx) and
+[TextInput](../src/components/controls/text-input.tsx) render native controls.
+Use Button for standard actions and supply `type="submit"` for form
+submission. Pair TextInput with a label and use `aria-invalid` and
+`aria-describedby` to associate a validation message.
 
 Run `pnpm build:storybook` to create the static catalog in `storybook-static/`.

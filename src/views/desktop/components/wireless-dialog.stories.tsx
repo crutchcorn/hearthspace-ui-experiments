@@ -1,3 +1,5 @@
+import TextInput from '../../../components/controls/text-input'
+import Button from '../../../components/controls/button'
 import preview from '../../../../.storybook/preview'
 import WirelessDialog from './wireless-dialog'
 import { useState } from 'react'
@@ -14,7 +16,7 @@ const meta = preview.meta({
     onClose: fn(),
     children: (
       <label>
-        Password <input type="password" />
+        Password <TextInput type="password" />
       </label>
     ),
   },
@@ -26,17 +28,17 @@ const meta = preview.meta({
     }
     return (
       <>
-        <button type="button" onClick={() => setOpen(true)}>
+        <Button type="button" onClick={() => setOpen(true)}>
           Open network dialog
-        </button>
+        </Button>
         {open && (
           <WirelessDialog
             {...args}
             onClose={close}
             actions={
-              <button type="button" onClick={close}>
+              <Button type="button" onClick={close}>
                 Cancel
-              </button>
+              </Button>
             }
           />
         )}

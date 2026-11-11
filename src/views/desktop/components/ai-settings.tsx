@@ -1,3 +1,4 @@
+import Button from '../../../components/controls/button'
 import LevelBar from '../../../components/controls/level-bar'
 import ToggleSwitch from '../../../components/controls/toggle-switch'
 import { ChevronDown } from '../../../components/icons'
@@ -100,23 +101,23 @@ export default function AISettings({ ai }: AISettingsProps) {
           it again to turn AI back on.
         </p>
         <div className={styles.confirmationActions}>
-          <button
+          <Button
             type="button"
             autoFocus
             onClick={() => confirmation.current?.close()}
           >
             Keep AI
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
-            className={styles.confirmButton}
+            variant="danger"
             onClick={() => {
               ai.setEnabled(false)
               confirmation.current?.close()
             }}
           >
             Turn off and delete
-          </button>
+          </Button>
         </div>
       </dialog>
     </div>

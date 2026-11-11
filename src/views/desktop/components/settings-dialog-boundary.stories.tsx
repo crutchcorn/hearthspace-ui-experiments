@@ -1,3 +1,5 @@
+import TextInput from '../../../components/controls/text-input'
+import Button from '../../../components/controls/button'
 import preview from '../../../../.storybook/preview'
 import SettingsDialogBoundary from './settings-dialog-boundary'
 import { useState } from 'react'
@@ -9,21 +11,21 @@ function NetworkPanel() {
   const close = () => setOpen(false)
   return (
     <div style={{ padding: 20 }}>
-      <button type="button" onClick={() => setOpen(true)}>
+      <Button type="button" onClick={() => setOpen(true)}>
         Open adapter settings
-      </button>
+      </Button>
       {open && (
         <WirelessDialog
           title="Adapter settings"
           onClose={close}
           actions={
-            <button type="button" onClick={close}>
+            <Button type="button" onClick={close}>
               Done
-            </button>
+            </Button>
           }
         >
           <label>
-            Computer name <input defaultValue="Hearthspace desktop" />
+            Computer name <TextInput defaultValue="Hearthspace desktop" />
           </label>
         </WirelessDialog>
       )}

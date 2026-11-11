@@ -1,3 +1,4 @@
+import Button from '../../../components/controls/button'
 import { useEffect, useRef, type ReactNode } from 'react'
 import styles from './layout-confirm.module.css'
 
@@ -43,16 +44,16 @@ export default function LayoutConfirm({
       <h2>{title}</h2>
       <p>{children}</p>
       <div>
-        <button type="button" autoFocus onClick={() => finish(onCancel)}>
+        <Button type="button" autoFocus onClick={() => finish(onCancel)}>
           Cancel
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
-          data-destructive={destructive}
+          variant={destructive ? 'danger' : 'neutral'}
           onClick={() => finish(onConfirm)}
         >
           {confirmLabel}
-        </button>
+        </Button>
       </div>
     </dialog>
   )

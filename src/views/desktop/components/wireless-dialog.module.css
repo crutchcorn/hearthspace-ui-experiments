@@ -63,43 +63,11 @@
   scrollbar-color: var(--scrollbar) transparent;
 }
 
-.dialog button:where(:not([aria-haspopup='listbox'])) {
-  min-height: 36px;
-  padding: 8px 12px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-control);
-  background: var(--surface-control);
-  box-shadow: var(--glass-edge);
-  color: var(--chrome-text);
-  font: inherit;
-  font-size: 12px;
-  cursor: pointer;
-}
-
-.dialog
-  button:where(:not([aria-haspopup='listbox'])):is(:hover, :focus-visible):not(
-    :disabled
-  ) {
-  border-color: var(--accent-border);
-  background: var(--chrome-hover);
-  box-shadow: var(--control-glow), var(--glass-edge-active);
-}
-
-.dialog button:where(:not([aria-haspopup='listbox'])):disabled {
-  opacity: 0.5;
-  cursor: default;
-}
-
-.dialog .close {
-  display: grid;
+.header .close {
   width: 34px;
   min-height: 34px;
   flex-shrink: 0;
   padding: 0;
-  place-items: center;
-  border-color: transparent;
-  background: transparent;
-  box-shadow: none;
 }
 
 .form,
@@ -126,24 +94,6 @@
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
-}
-
-.dialog input:not([type='checkbox']) {
-  width: 100%;
-  min-width: 0;
-  min-height: 42px;
-  padding: 10px 14px;
-  border: 1px solid var(--chrome-border);
-  border-radius: var(--radius-control);
-  background: var(--surface-control);
-  color: var(--chrome-text);
-  font: inherit;
-  font-size: 12px;
-}
-
-.dialog :is(button, input):focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
 }
 
 .checkRow {
@@ -205,28 +155,6 @@
   border-top: 1px solid var(--line);
 }
 
-.dialog .primary {
-  border-color: var(--accent-border);
-  background: var(--accent);
-  color: var(--accent-ink);
-}
-
-.dialog .primary:is(:hover, :focus-visible):not(:disabled) {
-  background: var(--accent-bright);
-  color: var(--accent-ink);
-}
-
-.dialog .danger {
-  border-color: #ba3b32;
-  background: #ba3b32;
-  color: white;
-}
-
-.dialog .danger:is(:hover, :focus-visible):not(:disabled) {
-  background: #d1483e;
-  color: white;
-}
-
 .code {
   display: block;
   margin: 18px 0;
@@ -245,9 +173,7 @@
 }
 
 .inline > button {
-  display: grid;
   flex-shrink: 0;
-  place-items: center;
 }
 
 @container settings (width < 420px) {

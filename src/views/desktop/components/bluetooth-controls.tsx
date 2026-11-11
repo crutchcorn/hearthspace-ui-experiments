@@ -1,3 +1,5 @@
+import Button from '../../../components/controls/button'
+import TextInput from '../../../components/controls/text-input'
 import Checkbox from '../../../components/controls/checkbox'
 import SelectControl from '../../../components/controls/select-control'
 import ToggleSwitch from '../../../components/controls/toggle-switch'
@@ -97,58 +99,54 @@ function PairingDialog({
       onClose={onClose}
       actions={
         <>
-          <button ref={cancelAction} type="button" onClick={onClose}>
+          <Button ref={cancelAction} type="button" onClick={onClose}>
             {pairing.stage === 'connecting' ? 'Cancel connection' : 'Cancel'}
-          </button>
+          </Button>
           {pairing.stage === 'pin' && (
-            <button
-              className={dialogStyles.primary}
-              type="submit"
-              form={formId}
-            >
+            <Button variant="primary" type="submit" form={formId}>
               Pair
-            </button>
+            </Button>
           )}
           {comparison && (
             <>
-              <button
+              <Button
                 type="button"
                 onClick={() =>
                   status.bluetoothConfirmPairing(pairing.requestId, false)
                 }
               >
                 Codes don’t match
-              </button>
-              <button
-                className={dialogStyles.primary}
+              </Button>
+              <Button
+                variant="primary"
                 type="button"
                 onClick={() =>
                   status.bluetoothConfirmPairing(pairing.requestId, true)
                 }
               >
                 Codes match
-              </button>
+              </Button>
             </>
           )}
           {pairing.stage === 'passkey' && (
-            <button
-              className={dialogStyles.primary}
+            <Button
+              variant="primary"
               type="button"
               onClick={() =>
                 status.bluetoothConfirmPairing(pairing.requestId, true)
               }
             >
               Code entered
-            </button>
+            </Button>
           )}
           {pairing.stage === 'failed' && (
-            <button
-              className={dialogStyles.primary}
+            <Button
+              variant="primary"
               type="button"
               onClick={() => status.bluetoothRetryConnection(device.id)}
             >
               Retry
-            </button>
+            </Button>
           )}
         </>
       }
@@ -165,7 +163,7 @@ function PairingDialog({
           <div className={dialogStyles.field}>
             <label htmlFor={`${formId}-pin`}>PIN</label>
             <span className={dialogStyles.inline}>
-              <input
+              <TextInput
                 id={`${formId}-pin`}
                 aria-label="PIN"
                 type="password"
@@ -177,14 +175,14 @@ function PairingDialog({
                 aria-describedby={pairing.error ? errorId : undefined}
                 onChange={(event) => setPin(event.target.value)}
               />
-              <button
+              <Button
                 type="button"
                 aria-label="Fill PIN"
                 title="Fill PIN"
                 onClick={() => setPin(device.pairingCode)}
               >
                 <Eye size={18} />
-              </button>
+              </Button>
             </span>
           </div>
           <p className={dialogStyles.notice}>
@@ -274,26 +272,22 @@ function DeviceDetails({
       onClose={onClose}
       actions={
         <>
-          <button type="button" onClick={onClose}>
+          <Button type="button" onClick={onClose}>
             Close
-          </button>
+          </Button>
           {paired && (
-            <button
-              type="button"
-              className={dialogStyles.danger}
-              onClick={onForget}
-            >
+            <Button type="button" variant="danger" onClick={onForget}>
               Forget device…
-            </button>
+            </Button>
           )}
-          <button
+          <Button
             type="submit"
             form={formId}
-            className={dialogStyles.primary}
+            variant="primary"
             disabled={!name.trim()}
           >
             Save changes
-          </button>
+          </Button>
         </>
       }
     >
@@ -334,7 +328,7 @@ function DeviceDetails({
           </p>
         )}
         <div className={dialogStyles.actions}>
-          <button
+          <Button
             type="button"
             disabled={
               !status.bluetoothEnabled ||
@@ -357,7 +351,7 @@ function DeviceDetails({
                   : error
                     ? 'Retry connection'
                     : 'Connect'}
-          </button>
+          </Button>
         </div>
       </section>
       <section className={dialogStyles.section}>
@@ -377,7 +371,7 @@ function DeviceDetails({
         >
           <label className={dialogStyles.field}>
             Device name
-            <input
+            <TextInput
               value={name}
               maxLength={48}
               required
@@ -467,17 +461,17 @@ function AdapterSettings({
       onClose={onClose}
       actions={
         <>
-          <button type="button" onClick={onClose}>
+          <Button type="button" onClick={onClose}>
             Cancel
-          </button>
-          <button
+          </Button>
+          <Button
             type="submit"
             form={formId}
-            className={dialogStyles.primary}
+            variant="primary"
             disabled={!computerName.trim()}
           >
             Save settings
-          </button>
+          </Button>
         </>
       }
     >
@@ -494,7 +488,7 @@ function AdapterSettings({
         >
           <label className={dialogStyles.field}>
             Computer name
-            <input
+            <TextInput
               value={computerName}
               maxLength={48}
               required
@@ -524,7 +518,7 @@ function AdapterSettings({
         </form>
       </section>
       <section className={dialogStyles.section}>
-        <button
+        <Button
           type="button"
           disabled={
             !status.bluetoothEnabled ||
@@ -540,7 +534,7 @@ function AdapterSettings({
           }}
         >
           Simulate incoming pairing
-        </button>
+        </Button>
         <p className={dialogStyles.notice}>
           {phonePaired
             ? `Forget ${phone.name} to try another incoming request.`
@@ -717,9 +711,9 @@ export default function BluetoothControls({
         </div>
       )}
       <div className={styles.toolbar}>
-        <button
+        <Button
           type="button"
-          className={styles.smallButton}
+          variant="quiet"
           disabled={!status.bluetoothEnabled || status.bluetoothScanning}
           onClick={status.bluetoothRescan}
         >
@@ -728,15 +722,15 @@ export default function BluetoothControls({
             className={status.bluetoothScanning ? styles.spinning : undefined}
           />
           {status.bluetoothScanning ? 'Scanning…' : 'Scan for devices'}
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
-          className={styles.smallButton}
+          variant="quiet"
           onClick={() => setDialog({ kind: 'adapter' })}
         >
           <Settings size={15} />
           Adapter settings
-        </button>
+        </Button>
       </div>
       {status.bluetoothMessage && (
         <p className={styles.feedback} role="status">
@@ -768,17 +762,17 @@ export default function BluetoothControls({
           onClose={() => setDialog({ kind: 'details', deviceId: device.id })}
           actions={
             <>
-              <button
+              <Button
                 type="button"
                 onClick={() =>
                   setDialog({ kind: 'details', deviceId: device.id })
                 }
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
-                className={dialogStyles.danger}
+                variant="danger"
                 onClick={() => {
                   returnFocusDevice.current = device.id
                   status.bluetoothForgetDevice(device.id)
@@ -786,7 +780,7 @@ export default function BluetoothControls({
                 }}
               >
                 Forget device
-              </button>
+              </Button>
             </>
           }
         >
