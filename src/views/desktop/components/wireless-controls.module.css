@@ -28,17 +28,6 @@
   font-size: 11px;
 }
 
-.toggle {
-  transition:
-    background 180ms ease,
-    border-color 180ms ease,
-    box-shadow 180ms ease;
-}
-
-.toggle::before {
-  transition: transform 140ms ease;
-}
-
 .list {
   margin: 16px -8px -8px;
 }
@@ -260,11 +249,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .toggle,
-  .toggle::before {
-    transition: none;
-  }
-
   .spinning {
     animation: none;
   }

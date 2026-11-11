@@ -1,0 +1,49 @@
+.control {
+  position: relative;
+  display: block;
+  min-width: 0;
+  color: var(--chrome-muted);
+}
+
+.control > select {
+  appearance: none;
+  width: 100%;
+  min-width: 0;
+  min-height: 42px;
+  padding: 10px 14px;
+  padding-inline-end: 44px;
+  border: 1px solid var(--chrome-border);
+  border-radius: var(--radius-control);
+  background: var(--surface-control);
+  color: var(--chrome-text);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.control > svg {
+  position: absolute;
+  top: 50%;
+  inset-inline-end: 14px;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.control > select:hover:not(:disabled) {
+  border-color: var(--accent-border);
+  box-shadow: var(--control-glow), var(--glass-edge-active);
+}
+
+.control > select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.control > select:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.control > select:disabled + svg {
+  opacity: 0.5;
+}

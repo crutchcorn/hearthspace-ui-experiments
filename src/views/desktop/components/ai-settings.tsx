@@ -1,3 +1,5 @@
+import LevelBar from '../../../components/controls/level-bar'
+import ToggleSwitch from '../../../components/controls/toggle-switch'
 import { ChevronDown } from '../../../components/icons'
 import { useId, useRef } from 'react'
 import type { AIControls } from '../types/ai'
@@ -23,10 +25,7 @@ export default function AISettings({ ai }: AISettingsProps) {
         <span className={settingsStyles.toggleCopy}>
           <strong id={`${settingId}-label`}>Enable AI features</strong>
         </span>
-        <input
-          className={settingsStyles.toggle}
-          type="checkbox"
-          role="switch"
+        <ToggleSwitch
           aria-labelledby={`${settingId}-label`}
           aria-describedby={
             !ai.enabled ? `${settingId}-description` : undefined
@@ -55,16 +54,12 @@ export default function AISettings({ ai }: AISettingsProps) {
             <span className={styles.amount}>
               {((ai.progress / 100) * 3).toFixed(1)} / 3 GB
             </span>
-            <div
+            <LevelBar
               className={styles.progress}
               role="progressbar"
-              aria-label="AI model download"
-              aria-valuemin={0}
-              aria-valuemax={100}
-              aria-valuenow={ai.progress}
-            >
-              <span style={{ width: `${ai.progress}%` }} />
-            </div>
+              label="AI model download"
+              value={ai.progress}
+            />
           </>
         )}
       </div>

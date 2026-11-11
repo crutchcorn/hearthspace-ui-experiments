@@ -1,3 +1,6 @@
+import Checkbox from '../../../components/controls/checkbox'
+import SelectControl from '../../../components/controls/select-control'
+import ToggleSwitch from '../../../components/controls/toggle-switch'
 import { useId, useRef, useState, type FormEvent } from 'react'
 import {
   Check,
@@ -18,9 +21,7 @@ import {
   type WifiState,
 } from '../types/wifi'
 import { WIFI_IDENTITY, WIFI_PASSWORD } from '../constants/wifi'
-import settingsStyles from './settings.module.css'
 import WirelessDialog from './wireless-dialog'
-import { WirelessCheckbox, WirelessSelect } from './wireless-form-controls'
 import dialogStyles from './wireless-dialog.module.css'
 import styles from './wireless-controls.module.css'
 
@@ -45,9 +46,8 @@ export default function WifiControls({
           <strong>Wi-Fi</strong>
           {presentation === 'settings' && <span>{status.wifiLabel}</span>}
         </span>
-        <input
-          className={`${settingsStyles.toggle} ${styles.toggle}`}
-          type="checkbox"
+        <ToggleSwitch
+          role="checkbox"
           aria-label="Wi-Fi"
           checked={status.wifiEnabled}
           onChange={(event) => status.setWifiEnabled(event.target.checked)}
@@ -404,7 +404,7 @@ function EnterpriseFields({
       <div className={dialogStyles.fieldRow}>
         <label className={dialogStyles.field}>
           EAP method
-          <WirelessSelect
+          <SelectControl
             value={value.method}
             onChange={(event) =>
               onChange({
@@ -416,11 +416,11 @@ function EnterpriseFields({
           >
             <option value="PEAP">PEAP</option>
             <option value="TTLS">TTLS</option>
-          </WirelessSelect>
+          </SelectControl>
         </label>
         <label className={dialogStyles.field}>
           Certificate validation
-          <WirelessSelect
+          <SelectControl
             value={value.certificate}
             onChange={(event) =>
               onChange({
@@ -432,7 +432,7 @@ function EnterpriseFields({
           >
             <option value="hearthspace">Hearthspace certificate</option>
             <option value="system">System certificates</option>
-          </WirelessSelect>
+          </SelectControl>
         </label>
       </div>
       <p className={dialogStyles.notice}>
@@ -509,7 +509,7 @@ function PasswordDialog({
         />
         <label className={dialogStyles.checkRow}>
           {enterpriseRequired ? 'Remember credentials' : 'Remember password'}
-          <WirelessCheckbox
+          <Checkbox
             checked={remember}
             onChange={(event) => setRemember(event.target.checked)}
           />
@@ -587,7 +587,7 @@ function HiddenNetworkDialog({
         </label>
         <label className={dialogStyles.field}>
           Security
-          <WirelessSelect
+          <SelectControl
             value={security}
             onChange={(event) => {
               setSecurity(event.target.value as WifiSecurity)
@@ -599,7 +599,7 @@ function HiddenNetworkDialog({
             <option>WPA3 Personal</option>
             <option>WPA2 Enterprise</option>
             <option>Open</option>
-          </WirelessSelect>
+          </SelectControl>
         </label>
         {security === 'WPA2 Enterprise' && (
           <EnterpriseFields
@@ -624,7 +624,7 @@ function HiddenNetworkDialog({
               {security === 'WPA2 Enterprise'
                 ? 'Remember credentials'
                 : 'Remember password'}
-              <WirelessCheckbox
+              <Checkbox
                 checked={remember}
                 onChange={(event) => setRemember(event.target.checked)}
               />
@@ -803,21 +803,21 @@ function NetworkDetailsDialog({
       <form className={dialogStyles.section} id={formId} onSubmit={submit}>
         <label className={dialogStyles.checkRow}>
           Auto-connect
-          <WirelessCheckbox
+          <Checkbox
             checked={draft.autoConnect}
             onChange={(event) => update('autoConnect', event.target.checked)}
           />
         </label>
         <label className={dialogStyles.checkRow}>
           Metered connection
-          <WirelessCheckbox
+          <Checkbox
             checked={draft.metered}
             onChange={(event) => update('metered', event.target.checked)}
           />
         </label>
         <label className={dialogStyles.checkRow}>
           Private MAC address
-          <WirelessCheckbox
+          <Checkbox
             checked={draft.privateMac}
             onChange={(event) => update('privateMac', event.target.checked)}
           />
@@ -829,7 +829,7 @@ function NetworkDetailsDialog({
         )}
         <label className={dialogStyles.field}>
           IPv4 configuration
-          <WirelessSelect
+          <SelectControl
             value={draft.ipv4Mode}
             onChange={(event) =>
               update(
@@ -840,7 +840,7 @@ function NetworkDetailsDialog({
           >
             <option value="automatic">Automatic (DHCP)</option>
             <option value="manual">Manual</option>
-          </WirelessSelect>
+          </SelectControl>
         </label>
         {draft.ipv4Mode === 'manual' && (
           <>
@@ -877,7 +877,7 @@ function NetworkDetailsDialog({
         )}
         <label className={dialogStyles.field}>
           DNS configuration
-          <WirelessSelect
+          <SelectControl
             value={draft.dnsMode}
             onChange={(event) =>
               update(
@@ -888,7 +888,7 @@ function NetworkDetailsDialog({
           >
             <option value="automatic">Automatic</option>
             <option value="manual">Manual</option>
-          </WirelessSelect>
+          </SelectControl>
         </label>
         {draft.dnsMode === 'manual' && (
           <label className={dialogStyles.field}>
@@ -960,7 +960,7 @@ function PortalDialog({
         </p>
         <label className={dialogStyles.checkRow}>
           I agree to the guest network terms
-          <WirelessCheckbox
+          <Checkbox
             checked={accepted}
             onChange={(event) => setAccepted(event.target.checked)}
           />

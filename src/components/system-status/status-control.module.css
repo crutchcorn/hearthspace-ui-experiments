@@ -1,0 +1,44 @@
+.heading {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.heading strong,
+.heading label {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.heading > span {
+  font-size: 30px;
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -1px;
+  line-height: 1;
+}
+
+.heading small {
+  margin-left: 2px;
+  font-size: 12px;
+  letter-spacing: 0;
+}
+
+.volumeRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.batteryMeter {
+  margin: 24px 0 20px;
+  border: 1px solid var(--chrome-border);
+}
+
+.batteryDescription {
+  margin: 0;
+  font-size: 13px;
+}

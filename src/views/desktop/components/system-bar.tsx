@@ -1,3 +1,5 @@
+import BatteryStatus from '../../../components/system-status/battery-status'
+import SoundControl from '../../../components/system-status/sound-control'
 import { useEffect, useRef, useState } from 'react'
 import {
   BatteryFull,
@@ -326,26 +328,7 @@ export default function SystemBar({
               data-system-panel
               tabIndex={-1}
             >
-              <div className={styles.settingHeading}>
-                <label htmlFor="system-volume">Sound</label>
-                <span>
-                  {volume}
-                  <small>%</small>
-                </span>
-              </div>
-              <div className={styles.volumeRow}>
-                <VolumeMuted size={16} />
-                <input
-                  id="system-volume"
-                  className={styles.volumeSlider}
-                  type="range"
-                  min="0"
-                  max="100"
-                  value={volume}
-                  onChange={(event) => setVolume(Number(event.target.value))}
-                />
-                <Volume size={17} />
-              </div>
+              <SoundControl value={volume} onChange={setVolume} />
             </div>
           )}
 
@@ -356,17 +339,10 @@ export default function SystemBar({
               data-system-panel
               tabIndex={-1}
             >
-              <div className={styles.settingHeading}>
-                <strong>Battery</strong>
-                <span>
-                  {batteryPercentage}
-                  <small>%</small>
-                </span>
-              </div>
-              <div className={styles.batteryMeter}>
-                <span />
-              </div>
-              <p className={styles.batteryDescription}>On battery power</p>
+              <BatteryStatus
+                percentage={batteryPercentage}
+                powerSource="On battery power"
+              />
             </div>
           )}
 

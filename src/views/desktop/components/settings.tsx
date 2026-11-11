@@ -1,3 +1,4 @@
+import ToggleSwitch from '../../../components/controls/toggle-switch'
 import type {
   SettingsCategory,
   SettingsNavigationRequest,
@@ -375,10 +376,7 @@ export default function Settings({
                         Ctrl+K to find and restore them with search.
                       </span>
                     </span>
-                    <input
-                      className={styles.toggle}
-                      type="checkbox"
-                      role="switch"
+                    <ToggleSwitch
                       aria-labelledby={`${canvasToolsSettingId}-label`}
                       aria-describedby={`${canvasToolsSettingId}-description`}
                       checked={allowHideTools}

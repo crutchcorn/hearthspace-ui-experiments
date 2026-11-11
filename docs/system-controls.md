@@ -303,10 +303,17 @@ and [SystemBar](../src/views/desktop/components/system-bar.tsx). Those views own
 drafts and dialog selection; the shared hooks hold submitted session changes.
 The shared
 [CSS Module](../src/views/desktop/components/wireless-controls.module.css) adapts the shared
-controls to dropdown and Settings page presentation. The switches reuse the
-[Settings switch styles](../src/views/desktop/components/settings.module.css)
-so both themes stay consistent with the Settings app. SystemBar retains the
-shell triggers, detail labels, and popover placement.
+controls to dropdown and Settings page presentation.
+[ToggleSwitch](../src/components/controls/toggle-switch.tsx) supplies the
+same themed control to Wi-Fi, Bluetooth, AI, and canvas-tool settings.
+SystemBar owns the shell triggers, detail labels, and popover placement.
+[SoundControl](../src/components/system-status/sound-control.tsx) displays the
+current simulated volume and reports changes from its native
+[LevelSlider](../src/components/controls/level-slider.tsx).
+[BatteryStatus](../src/components/system-status/battery-status.tsx) displays the
+simulated percentage and power source, and its
+[LevelBar](../src/components/controls/level-bar.tsx) fills to the supplied
+charge. The shared controls receive these values from the desktop.
 [WirelessDialog](../src/views/desktop/components/wireless-dialog.tsx) provides the shared
 prompt and detail/settings surface, choosing a window-contained overlay in
 Settings or a native desktop modal for shell controls. It handles initial
@@ -317,10 +324,11 @@ each Settings window its own portal host through the
 is inert while a local dialog is open; the rest of the desktop is unaffected.
 The boundary's [CSS Module](../src/views/desktop/components/settings-dialog-boundary.module.css)
 keeps the backdrop and scrolling form within that window.
-[WirelessFormControls](../src/views/desktop/components/wireless-form-controls.tsx) wraps native
-selects and checkboxes with the local `ChevronDown` and `Check` glyphs; the
-dialog's [CSS Module](../src/views/desktop/components/wireless-dialog.module.css) supplies
-their spacing and theme treatment and keeps long forms scrollable.
+[Checkbox](../src/components/controls/checkbox.tsx) and
+[SelectControl](../src/components/controls/select-control.tsx) style native
+inputs with the local `Check` and `ChevronDown` glyphs. The dialog's
+[CSS Module](../src/views/desktop/components/wireless-dialog.module.css)
+lays out the fields and keeps long forms scrollable.
 Power confirmations reuse [LayoutConfirm](../src/views/desktop/components/layout-confirm.tsx)
 for the shell's native modal presentation and default Cancel focus.
 [PlacedWidget](../src/views/desktop/components/placed-widget.tsx) places it, and

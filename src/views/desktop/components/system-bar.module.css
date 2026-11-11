@@ -137,79 +137,6 @@
   outline-offset: -2px;
 }
 
-.settingHeading {
-  display: flex;
-  min-height: 44px;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-}
-
-.settingHeading strong,
-.settingHeading label {
-  font-size: 16px;
-  font-weight: 500;
-}
-
-.settingHeading > span {
-  font-size: 30px;
-  font-weight: 400;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: -1px;
-  line-height: 1;
-}
-
-.settingHeading small {
-  margin-left: 2px;
-  font-size: 12px;
-  letter-spacing: 0;
-}
-
-.volumeRow {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-top: 24px;
-}
-
-.volumeSlider {
-  flex: 1;
-  min-width: 0;
-  height: 28px;
-  margin: 0;
-  accent-color: var(--accent);
-  cursor: pointer;
-  transition: filter 180ms ease;
-}
-
-.volumeSlider:is(:hover, :focus-visible) {
-  filter: drop-shadow(
-    0 0 8px color-mix(in srgb, var(--accent) 35%, transparent)
-  );
-}
-
-.batteryMeter {
-  height: 8px;
-  overflow: hidden;
-  margin: 24px 0 20px;
-  border: 1px solid var(--chrome-border);
-  border-radius: var(--radius-round);
-  background: var(--control-track);
-}
-
-.batteryMeter > span {
-  display: block;
-  width: 87%;
-  height: 100%;
-  border-radius: inherit;
-  background: linear-gradient(90deg, var(--accent-light), var(--accent));
-}
-
-.batteryDescription {
-  margin: 0;
-  font-size: 13px;
-}
-
 .calendarPopover {
   padding: 22px;
 }
@@ -276,12 +203,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .volumeSlider,
   .popover {
     transition: none;
-  }
-
-  .popover {
     animation: none;
   }
 }
