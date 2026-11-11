@@ -10,7 +10,7 @@ const meta = preview.meta({
   render: function Render(args) {
     const [, updateArgs] = useArgs()
     return (
-      <div style={{ width: 280 }}>
+      <div style={{ width: 280, maxWidth: '100%', minHeight: 360 }}>
         <AppPicker
           {...args}
           onChange={(selectedId) => {

@@ -6,7 +6,9 @@ Run `pnpm storybook` and open the address it prints, usually
 level bar, and the adjustable level slider used in the sound panel. Click a
 switch or checkbox, choose a select option, or drag the slider to try the
 controls with sample values. Open **Select → Automatic** to preview the
-React Aria menu with the current color mode and accent.
+React Aria menu with the current color mode and accent. The Select and
+App Picker previews reserve space below the field for their open menus
+in Canvas and Docs.
 **Desktop** groups the presentational components by the surface that uses
 them, including the battery and sound panels under **Desktop → Shell**.
 Choose **Color mode** in the toolbar to preview the same story in Light or

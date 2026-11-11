@@ -23,7 +23,7 @@ const meta = preview.meta({
     const [, updateArgs] = useArgs()
 
     return (
-      <div style={{ width: 220, maxWidth: '100%' }}>
+      <div style={{ width: 220, maxWidth: '100%', minHeight: 200 }}>
         <SelectControl
           {...args}
           onChange={(value) => {
