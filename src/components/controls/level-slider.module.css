@@ -7,6 +7,17 @@
   --slider-fill-top: var(--accent-bright);
   --slider-fill-bottom: var(--accent);
   --slider-thumb-size: 20px;
+  --slider-thumb-border: color-mix(
+    in srgb,
+    var(--chrome-muted) 80%,
+    var(--control-thumb)
+  );
+  --slider-thumb-shadow: color-mix(
+    in srgb,
+    var(--chrome-text) 24%,
+    transparent
+  );
+  --slider-thumb-active-border: var(--accent-strong);
 
   display: grid;
   min-width: 0;
@@ -24,6 +35,9 @@
     var(--accent-base) 72%,
     var(--surface-tint)
   );
+  --slider-thumb-border: var(--chrome-border);
+  --slider-thumb-shadow: var(--line);
+  --slider-thumb-active-border: var(--accent-border);
 }
 
 .rail {
@@ -52,18 +66,18 @@
   top: 50%;
   width: var(--slider-thumb-size);
   height: var(--slider-thumb-size);
-  border: 1px solid var(--chrome-border);
+  border: 1px solid var(--slider-thumb-border);
   border-radius: var(--radius-round);
   background: var(--control-thumb);
   box-shadow:
     var(--glass-edge-active),
-    0 1px 3px var(--line);
+    0 1px 3px var(--slider-thumb-shadow);
   cursor: grab;
 }
 
 .thumb[data-hovered],
 .thumb[data-dragging] {
-  border-color: var(--accent-border);
+  border-color: var(--slider-thumb-active-border);
   box-shadow:
     var(--glass-edge-active),
     0 1px 4px var(--accent-border);
