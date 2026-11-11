@@ -3,7 +3,7 @@ import { test } from 'node:test'
 import {
   getCanvasMoveDelta,
   getCanvasResizeBounds,
-} from '../src/canvas-grid.ts'
+} from '../src/views/desktop/utils/canvas-grid.ts'
 
 const world = { width: 1000, height: 800 }
 const window = { x: 103, y: 209, width: 280, height: 200 }

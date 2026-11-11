@@ -1,6 +1,6 @@
 import js from '@eslint/js'
 import globals from 'globals'
-import lrs from 'lrs-eslint-plugin'
+import lrs, { createLrsConfig } from 'lrs-eslint-plugin'
 import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
 import tseslint from 'typescript-eslint'
@@ -20,5 +20,6 @@ export default defineConfig([
       globals: globals.browser,
     },
   },
-  ...lrs.configs.recommended,
+  ...createLrsConfig({ root: import.meta.dirname }),
+  ...lrs.configs.strict,
 ])

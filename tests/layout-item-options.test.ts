@@ -1,11 +1,11 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { readFrameLayout } from '../src/frame-layout.ts'
+import { readFrameLayout } from '../src/views/desktop/utils/frame-layout.ts'
 import {
   getLayoutItemOptions,
   readLayoutItemOptions,
   setLayoutItemOptions,
-} from '../src/layout-item-options.ts'
+} from '../src/views/desktop/utils/layout-item-options.ts'
 
 test('layouts without saved item options retain the current time-only clock', () => {
   const layout = readFrameLayout(undefined)

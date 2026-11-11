@@ -53,8 +53,8 @@ temporary homes across reloads.
 
 ## Where this lives
 
-[peek-layout.ts](../src/peek-layout.ts) calculates coverage and restoration.
-[layout-workspace.ts](../src/layout-workspace.ts) applies layer rules and excludes
+[peek-layout.ts](../src/views/desktop/utils/peek-layout.ts) calculates coverage and restoration.
+[layout-workspace.ts](../src/views/desktop/utils/layout-workspace.ts) applies layer rules and excludes
 frame work and pinned drawings. It passes each drawing's resolved surface
 separately from the drawing content, so background ink participates without
 temporarily rewriting its layer or strokes.
@@ -66,7 +66,7 @@ can still peek beneath a real window. Ordinary windows remain fixed throughout
 background and decoration drops, so an intermediate movement cannot distort where
 their background neighbors settle.
 
-[usePeekMotion](../src/usePeekMotion.ts) animates the result.
+[usePeekMotion](../src/views/desktop/hooks/use-peek-motion.ts) animates the result.
 [Peek tests](../tests/peek-layout.test.ts),
 [layout tests](../tests/layout-workspace.test.ts), and
 [scene tests](../tests/scene.test.ts) cover repeated displacement, folder

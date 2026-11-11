@@ -82,22 +82,22 @@ continue independently of the lockscreen.
 
 ## Source files
 
-- [LockScreen.tsx](../src/components/LockScreen.tsx) and its
-  [CSS module](../src/components/LockScreen.module.css): modal, clock, wallpaper,
+- [lock-screen.tsx](../src/views/desktop/components/lock-screen.tsx) and its
+  [CSS module](../src/views/desktop/components/lock-screen.module.css): modal, clock, wallpaper,
   password feedback, and responsive presentation.
-- [SystemBar.tsx](../src/components/SystemBar.tsx): power trigger, dropdown,
+- [system-bar.tsx](../src/views/desktop/components/system-bar.tsx): power trigger, dropdown,
   and temporary power confirmation state.
-- [LayoutConfirm.tsx](../src/components/LayoutConfirm.tsx) and its
-  [CSS module](../src/components/LayoutConfirm.module.css): shared native modal,
+- [layout-confirm.tsx](../src/views/desktop/components/layout-confirm.tsx) and its
+  [CSS module](../src/views/desktop/components/layout-confirm.module.css): shared native modal,
   centered presentation, Cancel focus, and action-specific confirmation labels.
-- [App.tsx](../src/App.tsx): lock state, session cleanup, and desktop shortcut gate.
-- [useSystemStatus.ts](../src/useSystemStatus.ts): shared clock, battery, selected
+- [use-desktop.ts](../src/views/desktop/hooks/use-desktop.ts): lock state, session cleanup, and desktop shortcut gate.
+- [use-system-status.ts](../src/views/desktop/hooks/use-system-status.ts): shared clock, battery, selected
   Wi-Fi network, and Bluetooth connection count.
-- [useWindowSwitcher.ts](../src/useWindowSwitcher.ts): capture-phase shortcut gate.
-- [frame-layout.ts](../src/frame-layout.ts), [FrameShell.tsx](../src/components/FrameShell.tsx),
-  and [SearchControlPreview.tsx](../src/components/SearchControlPreview.tsx):
+- [use-window-switcher.ts](../src/views/desktop/hooks/use-window-switcher.ts): capture-phase shortcut gate.
+- [frame-layout.ts](../src/views/desktop/utils/frame-layout.ts), [frame-shell.tsx](../src/views/desktop/components/frame-shell.tsx),
+  and [search-control-preview.tsx](../src/views/desktop/components/search-control-preview.tsx):
   placement, default group, mobile bar, and search discovery.
-- [system.tsx](../src/icons/system.tsx): power, lock, log-off, user, and eye glyphs.
+- [system.tsx](../src/components/icons/system.tsx): power, lock, log-off, user, and eye glyphs.
 - [Lockscreen browser tests](../tests/browser/lockscreen.test.tsx): password
   errors and unlocking, preserved work, shortcut isolation, power confirmation
   previews, and narrow-screen operation.

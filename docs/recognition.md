@@ -62,14 +62,17 @@ load or inference may finish inside the worker. Calls are serialized, with only
 the latest queued image retained. Worker failures discard the instance so retry
 can initialize a fresh one while retaining downloaded browser assets.
 
-| File                                                         | Responsibility                                                                    |
-| ------------------------------------------------------------ | --------------------------------------------------------------------------------- |
-| [`CanvasSearch.tsx`](../src/components/CanvasSearch.tsx)     | Pad visibility, appending text, and ordinary query/result navigation.             |
-| [`HandwritingPad.tsx`](../src/components/HandwritingPad.tsx) | Pointer strokes, pause/check submission, clear/retry, progress, and cancellation. |
-| [`handwriting-image.ts`](../src/handwriting-image.ts)        | Cropped black-on-white input image.                                               |
-| [`handwriting.ts`](../src/handwriting.ts)                    | Lazy worker creation, request IDs, abort handling, and worker recovery.           |
-| [`handwriting-protocol.ts`](../src/handwriting-protocol.ts)  | PNG request and text/status/error response contract.                              |
-| [`handwriting.worker.ts`](../src/handwriting.worker.ts)      | Pinned model loading, local inference, and latest-request processing.             |
+| File                                                                            | Responsibility                                                          |
+| ------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| [`canvas-search.tsx`](../src/views/desktop/components/canvas-search.tsx)        | Search field, pad visibility, and result navigation controls.           |
+| [`handwriting-pad.tsx`](../src/views/desktop/components/handwriting-pad.tsx)    | Ink strokes, clear and retry buttons, and progress display.             |
+| [`use-handwriting.ts`](../src/views/desktop/hooks/use-handwriting.ts)           | Stroke capture, pause and submit, worker status, and cancellation.      |
+| [`handwriting-image.ts`](../src/views/desktop/services/handwriting-image.ts)    | Cropped black-on-white input image.                                     |
+| [`handwriting.ts`](../src/views/desktop/services/handwriting.ts)                | Lazy worker creation, request IDs, abort handling, and worker recovery. |
+| [`handwriting-protocol.ts`](../src/views/desktop/types/handwriting-protocol.ts) | PNG request and text/status/error response contract.                    |
+| [`handwriting-worker.ts`](../src/views/desktop/services/handwriting-worker.ts)  | Pinned model loading, local inference, and latest-request processing.   |
+
+[The Chromium test](../tests/browser/handwriting-search.test.tsx) supplies worker replies to exercise cancellation and retry through the search UI.
 
 Handwriting strokes and recognized queries are not saved with the workspace.
 Downloaded assets may survive a reload in the browser cache; the live worker

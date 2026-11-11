@@ -3,8 +3,8 @@ import { test } from 'node:test'
 import {
   addDrawingStroke,
   readDrawingStrokes,
-  type CanvasDrawing,
-} from '../src/drawings.ts'
+} from '../src/views/desktop/utils/drawings.ts'
+import { type CanvasDrawing } from '../src/views/desktop/types/drawing.ts'
 
 const world = { width: 1000, height: 800 }
 const drawing: CanvasDrawing = {

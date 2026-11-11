@@ -85,12 +85,11 @@ map is open aren't saved, so reloading returns to the starting view.
 
 ## Where this lives
 
-[App.tsx](../src/App.tsx) coordinates scrolling, tool shortcuts, edge travel,
-and viewport locks. [Minimap](../src/components/Minimap.tsx) translates map
+[use-desktop.ts](../src/views/desktop/hooks/use-desktop.ts) coordinates scrolling, tool shortcuts, and viewport locks. [Canvas gestures](../src/views/desktop/hooks/use-canvas-gestures.ts) handle panning and carrying items at the edge. [Minimap](../src/views/desktop/components/minimap.tsx) translates map
 pointer positions into canvas coordinates. Initial dimensions and tool defaults
-live in [desktop.ts](../src/desktop.ts); the
-[tool catalog](../src/canvas-tool-catalog.ts) supplies names, icons, and search
-entries. [CanvasTools styles](../src/components/CanvasTools.module.css) keep
+live in [desktop.ts](../src/views/desktop/utils/desktop.ts); the
+[tool catalog](../src/views/desktop/constants/canvas-tool-catalog.ts) supplies names, icons, and search
+entries. [CanvasTools styles](../src/views/desktop/components/canvas-tools.module.css) keep
 the picker chevrons aligned across desktop, side, and compact toolbars.
 See [canvas search](canvas-search.md) for bringing work into view
 without manually traveling to it.

@@ -1,6 +1,6 @@
 import { expect, test } from 'vitest'
 import { page, userEvent } from 'vitest/browser'
-import { SCENE_STORAGE_KEY } from '../../src/scene-storage'
+import { SCENE_STORAGE_KEY } from '../../src/views/desktop/services/scene-storage'
 import { renderDesktop } from './desktop'
 
 test('Wi-Fi selects one network, remembers it across toggles, and respects a manual disconnect', async () => {

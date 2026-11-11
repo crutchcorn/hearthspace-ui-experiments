@@ -1,9 +1,12 @@
 import { expect, test } from 'vitest'
 import { page, userEvent } from 'vitest/browser'
-import { createWorkspace } from '../../src/desktop'
-import { readFrameLayout, type FrameEdge } from '../../src/frame-layout'
-import { createScene } from '../../src/scene'
-import { SCENE_STORAGE_KEY } from '../../src/scene-storage'
+import { createWorkspace } from '../../src/views/desktop/utils/desktop'
+import {
+  readFrameLayout,
+  type FrameEdge,
+} from '../../src/views/desktop/utils/frame-layout'
+import { createScene } from '../../src/views/desktop/utils/scene'
+import { SCENE_STORAGE_KEY } from '../../src/views/desktop/services/scene-storage'
 import { renderDesktop, windowBounds } from './desktop'
 
 function preparePinnedShortcut(edge: FrameEdge, position: number) {
@@ -15,7 +18,15 @@ function preparePinnedShortcut(edge: FrameEdge, position: number) {
   }
   localStorage.setItem(
     SCENE_STORAGE_KEY,
-    JSON.stringify(createScene(createWorkspace(), layout)),
+    JSON.stringify(
+      createScene(
+        createWorkspace({
+          width: window.innerWidth,
+          height: window.innerHeight,
+        }),
+        layout,
+      ),
+    ),
   )
 }
 
@@ -77,7 +88,15 @@ test('the grouped Sound popup stays above a pinned window', async () => {
   }
   localStorage.setItem(
     SCENE_STORAGE_KEY,
-    JSON.stringify(createScene(createWorkspace(), layout)),
+    JSON.stringify(
+      createScene(
+        createWorkspace({
+          width: window.innerWidth,
+          height: window.innerHeight,
+        }),
+        layout,
+      ),
+    ),
   )
   await renderDesktop()
   await page.getByRole('button', { name: 'Sound settings' }).click()

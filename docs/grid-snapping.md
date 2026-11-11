@@ -62,10 +62,10 @@ work off-grid to expose it.
 
 ## Where this lives
 
-[canvas-grid.ts](../src/canvas-grid.ts) shares bounded snapping across movement
-and resizing. [frame-grid.ts](../src/frame-grid.ts) accounts for the viewport's
-scroll offset and frame inset. [App.tsx](../src/App.tsx) and
-[useObjectLayout](../src/useObjectLayout.ts) update active gestures when Alt
+[canvas-grid.ts](../src/views/desktop/utils/canvas-grid.ts) shares bounded snapping across movement
+and resizing. [frame-grid.ts](../src/views/desktop/utils/frame-grid.ts) accounts for the viewport's
+scroll offset and frame inset. [use-canvas-gestures.ts](../src/views/desktop/hooks/use-canvas-gestures.ts) and
+[useObjectLayout](../src/views/desktop/hooks/use-object-layout.ts) update active gestures when Alt
 changes. [Canvas-grid tests](../tests/canvas-grid.test.ts) and
 [frame-grid tests](../tests/frame-grid.test.ts) cover grouping, all resize edges,
 scrolled coordinates, corners, and constrained geometry.

@@ -43,10 +43,10 @@ from their preview positions into the restored scene, without cloned windows or
 a detour through their previous screen coordinates. Reduced-motion preferences
 skip that animation. Pinned windows use their frame-edge reveal instead.
 
-[`useWindowSwitcher.ts`](../src/useWindowSwitcher.ts) owns the keyboard session,
-fixed order, and cancellation. [`canvas-search.ts`](../src/canvas-search.ts)
-fits the preview grid; [`WindowSwitcher.tsx`](../src/components/WindowSwitcher.tsx)
+[`use-window-switcher.ts`](../src/views/desktop/hooks/use-window-switcher.ts) owns the keyboard session,
+fixed order, and cancellation. [`canvas-search.ts`](../src/views/desktop/utils/canvas-search.ts)
+fits the preview grid; [`window-switcher.tsx`](../src/views/desktop/components/window-switcher.tsx)
 renders its caption. Activation and viewport movement live in
-[`App.tsx`](../src/App.tsx), with reveal motion in
-[`preview-motion.ts`](../src/preview-motion.ts). The shared layout's tests are in
+[`use-desktop.ts`](../src/views/desktop/hooks/use-desktop.ts), with reveal motion in
+[`preview-motion.ts`](../src/views/desktop/services/preview-motion.ts). The shared layout's tests are in
 [`canvas-search.test.ts`](../tests/canvas-search.test.ts).

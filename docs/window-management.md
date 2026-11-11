@@ -70,12 +70,12 @@ bounds rather than resuming maximized or focused presentation.
 
 ## Where this lives
 
-[App.tsx](../src/App.tsx) coordinates gestures, focus, launching, and Arrange.
-[App styles](../src/App.module.css) draw the shared active rim around each app's
+[use-desktop.ts](../src/views/desktop/hooks/use-desktop.ts) coordinates focus, launching, and Arrange. [Canvas gestures](../src/views/desktop/hooks/use-canvas-gestures.ts) handle moving and resizing.
+[App styles](../src/views/desktop/desktop.module.css) draw the shared active rim around each app's
 window chrome.
-[desktop.ts](../src/desktop.ts) supplies resizing and grid arrangement;
-[window-layout.ts](../src/window-layout.ts) defines maximized bounds.
-[useShellPeek](../src/useShellPeek.ts) handles focused-view reveal.
+[desktop.ts](../src/views/desktop/utils/desktop.ts) supplies resizing and grid arrangement;
+[window-layout.ts](../src/views/desktop/utils/window-layout.ts) defines maximized bounds.
+[useShellPeek](../src/views/desktop/hooks/use-shell-peek.ts) handles focused-view reveal.
 [Layout workspace tests](../tests/layout-workspace.test.ts) verify that Arrange
 leaves frame attachments alone. See [window selection](window-selection.md)
 for moving several windows together.

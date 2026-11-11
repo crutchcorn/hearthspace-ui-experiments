@@ -3,12 +3,12 @@ import { after, afterEach, before, test } from 'node:test'
 import {
   cancelHandwritingRecognition,
   recognizeHandwriting,
-} from '../src/handwriting.ts'
+} from '../src/views/desktop/services/handwriting.ts'
 import type {
   HandwritingRequest,
   HandwritingResponse,
   HandwritingStatus,
-} from '../src/handwriting-protocol.ts'
+} from '../src/views/desktop/types/handwriting-protocol.ts'
 
 const image =
   'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScLbtAAAAABJRU5ErkJggg=='

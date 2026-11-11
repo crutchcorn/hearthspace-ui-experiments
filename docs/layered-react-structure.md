@@ -4,13 +4,32 @@ Use the [project skill](../.agents/skills/layered-react-structure/SKILL.md) when
 organizing or reviewing a React feature. It explains where to put view
 orchestration, presentation, reusable hooks, and I/O.
 
-Run `pnpm lint` to check those boundaries. The [ESLint configuration](../eslint.config.js)
-adds `lrs-eslint-plugin`'s recommended preset alongside the existing rules.
-The preset checks imports and I/O in `src/components/` today and recognizes
-LRS paths such as `views/`, `hooks/`, `services/`, and `utils/` as features adopt
-them. It also checks `.view.tsx` composition and limits each folder to one
-`.view` source file and one `.logic.ts` file. The recommended preset lets the
-playground adopt layers feature by feature within its existing layout.
+## Desktop view
+
+The canvas, windows, frame, and shell panels share one scene and one pointer
+lifecycle. [`app.tsx`](../src/app.tsx) mounts the desktop view, which composes
+the UI with values and actions from the desktop hooks.
+
+- [`desktop.view.tsx`](../src/views/desktop/desktop.view.tsx) composes the canvas, windows, frame widgets, and overlays.
+- [`desktop.ui.tsx`](../src/views/desktop/desktop.ui.tsx) and the [desktop components](../src/views/desktop/components/) render the surfaces and provide DOM and portal hosts. [`window-host.tsx`](../src/views/desktop/components/window-host.tsx) moves the host while keeping the app mounted.
+- [`use-desktop.ts`](../src/views/desktop/hooks/use-desktop.ts) coordinates windows, panels, tools, search, and the viewport. [`use-scene.ts`](../src/views/desktop/hooks/use-scene.ts) owns the saved scene state and [`use-canvas-gestures.ts`](../src/views/desktop/hooks/use-canvas-gestures.ts) owns pointer capture, selection geometry, and draft ink.
+- [Desktop services](../src/views/desktop/services/) handle browser storage, photo decoding, and handwriting worker requests. [Desktop utilities](../src/views/desktop/utils/) calculate placement, search results, and gesture matches.
+- [Shared SVG icons](../src/components/icons/) keep glyphs and the icon factory together. App and tool catalogs in [desktop constants](../src/views/desktop/constants/) contain searchable data. Rendering components choose the corresponding glyphs.
+
+The saved scene and preferences use their existing browser storage keys and
+formats. Temporary search previews, drafts, and simulated device state live
+in the desktop session. See the [feature guide](features.md#what-survives-a-reload)
+for what persists.
+
+## ESLint
+
+Run `pnpm lint` to enforce the full structure preset and strict component
+placement alongside the existing TypeScript and React rules. The
+[`eslint.config.js`](../eslint.config.js) passes the application root to
+`createLrsConfig`. The preset checks paths under `src/`, including CSS, and
+enforces import boundaries, view composition, and the one-view and one-logic
+file limits. The strict preset keeps hooks and non-rendering modules out of
+component folders.
 
 Import checks read module specifiers. Review opaque aliases and indirect barrel
 exports during code review. The boundary rules skip tests, specs, stories, and

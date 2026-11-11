@@ -68,7 +68,7 @@ back to dots on the next load.
 
 ## Where it lives
 
-- [`BackgroundSettings.tsx`](../src/components/BackgroundSettings.tsx) owns the upload, fit, reset, and error controls.
-- [`useBackground.ts`](../src/useBackground.ts) decodes images and manages IndexedDB and object URLs.
-- [`App.tsx`](../src/App.tsx) places repeating images on the world and fixed images behind the viewport, and exposes the active background to the shared styles.
-- [`index.css`](../src/index.css) and [`DesktopItems.module.css`](../src/components/DesktopItems.module.css) provide the photo-specific contrast support.
+- [`background-settings.tsx`](../src/views/desktop/components/background-settings.tsx) owns the upload, fit, reset, and error controls.
+- [`use-background.ts`](../src/views/desktop/hooks/use-background.ts) manages the active photo and upload state. The [background service](../src/views/desktop/services/background.ts) handles decoding, object URLs, and IndexedDB.
+- [`desktop.ui.tsx`](../src/views/desktop/desktop.ui.tsx) places fixed images behind the viewport. [The canvas](../src/views/desktop/components/desktop-canvas.tsx) places repeating images on the world.
+- [`index.css`](../src/index.css) and [`desktop-items.module.css`](../src/views/desktop/components/desktop-items.module.css) provide the photo-specific contrast support.

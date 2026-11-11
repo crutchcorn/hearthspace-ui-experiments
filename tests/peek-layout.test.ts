@@ -5,13 +5,13 @@ import type {
   DesktopItem,
   DesktopWindow,
   Workspace,
-} from '../src/desktop.ts'
-import type { CanvasDrawing } from '../src/drawings.ts'
+} from '../src/views/desktop/types/desktop.ts'
+import type { CanvasDrawing } from '../src/views/desktop/types/drawing.ts'
 import {
   restoreBackgroundItems,
   settleBackgroundItems,
   settleCoveredItems,
-} from '../src/peek-layout.ts'
+} from '../src/views/desktop/utils/peek-layout.ts'
 
 function window(
   id: string,

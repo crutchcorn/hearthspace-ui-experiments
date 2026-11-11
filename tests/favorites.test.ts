@@ -3,9 +3,11 @@ import { after, before, beforeEach, test } from 'node:test'
 import {
   addFavoriteApp,
   DEFAULT_FAVORITE_APP_IDS,
+} from '../src/views/desktop/utils/favorites.ts'
+import {
   loadFavoriteApps,
   saveFavoriteApps,
-} from '../src/favorites.ts'
+} from '../src/views/desktop/services/favorites-storage.ts'
 
 const storageKey = 'hearthspace-favorite-apps-v1'
 const originalStorage = Object.getOwnPropertyDescriptor(

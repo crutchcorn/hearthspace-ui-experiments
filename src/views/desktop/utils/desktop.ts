@@ -1,0 +1,136 @@
+import { APP_CATALOG } from '../constants/launcher-apps.ts'
+import type { Bounds, DesktopItem, Workspace } from '../types/desktop'
+
+export const MIN_WIDTH = 280
+export const MIN_HEIGHT = 200
+export const CANVAS_GRID_SIZE = 28
+
+const INITIAL_NOTE =
+  'Interface notes\n\nUse the corners for controls.\nKeep the canvas for work.\n\nTo explore\n- Compare grid and freeform layouts\n- Open a second browser window\n- Record a launch gesture\n\nOne accent color. Clear states.'
+export const clamp = (value: number, min: number, max: number) =>
+  Math.max(min, Math.min(value, max))
+
+function createDesktopItems(home: Workspace['home']): DesktopItem[] {
+  const items: Pick<DesktopItem, 'id' | 'title' | 'kind' | 'appId'>[] = [
+    { id: 'projects', title: 'Projects', kind: 'folder', appId: 'files' },
+    { id: 'pictures', title: 'Pictures', kind: 'folder', appId: 'files' },
+    { id: 'notes-file', title: 'Notes.txt', kind: 'file', appId: 'notes' },
+    ...APP_CATALOG.map((app) => ({
+      id: `${app.id}-shortcut`,
+      title: app.name,
+      kind: 'app' as const,
+      appId: app.id,
+    })),
+  ]
+  return items.map((item, index) => ({
+    ...item,
+    x: home.x + 28 + 104 * Math.floor(index / 4),
+    y: home.y + 112 + 104 * (index % 4),
+    width: 88,
+    height: 96,
+  }))
+}
+
+export function createWorkspace(view = { width: 960, height: 720 }): Workspace {
+  const width = Math.max(view.width, 960)
+  const height = Math.max(view.height, 720)
+  const home = { x: width * 4.5, y: height * 4.5 }
+  return {
+    width: width * 10,
+    height: height * 10,
+    home,
+    note: INITIAL_NOTE,
+    items: createDesktopItems(home),
+    drawings: [],
+    windows: [
+      {
+        id: 'notes',
+        title: 'Scratchpad',
+        kind: 'notes',
+        x: home.x + width * 0.66,
+        y: home.y + height * 0.3,
+        width: 350,
+        height: 360,
+      },
+      {
+        id: 'canvas',
+        title: 'Files',
+        kind: 'empty',
+        appId: 'files',
+        x: home.x + width * 0.3,
+        y: home.y + height * 0.46,
+        width: 480,
+        height: 280,
+      },
+    ],
+  }
+}
+
+export function arrangeWindows(
+  workspace: Workspace,
+  origin: { x: number; y: number },
+): Workspace {
+  if (workspace.windows.length === 0) return workspace
+
+  const windows = workspace.windows.map(({ restore, ...item }) => ({
+    ...item,
+    ...restore,
+  }))
+  const columns = Math.ceil(Math.sqrt(windows.length))
+  const rows = Math.ceil(windows.length / columns)
+  const cellWidth = Math.max(...windows.map((item) => item.width))
+  const cellHeight = Math.max(...windows.map((item) => item.height))
+  const gap = 24
+  const x = origin.x + 24
+  const y = origin.y + 96
+  const arranged = new Map(
+    windows
+      .toSorted((a, b) => a.y - b.y || a.x - b.x || a.id.localeCompare(b.id))
+      .map((item, index) => [
+        item.id,
+        {
+          ...item,
+          x: x + (index % columns) * (cellWidth + gap),
+          y: y + Math.floor(index / columns) * (cellHeight + gap),
+        },
+      ]),
+  )
+
+  return {
+    ...workspace,
+    width: Math.max(workspace.width, x + columns * (cellWidth + gap)),
+    height: Math.max(workspace.height, y + rows * (cellHeight + gap)),
+    windows: workspace.windows.map((item) => arranged.get(item.id)!),
+  }
+}
+
+export function resizeBounds(
+  bounds: Bounds,
+  edge: string,
+  dx: number,
+  dy: number,
+  world: { width: number; height: number },
+): Bounds {
+  const right = bounds.x + bounds.width
+  const bottom = bounds.y + bounds.height
+  const x = edge.includes('w')
+    ? clamp(bounds.x + dx, 0, right - MIN_WIDTH)
+    : bounds.x
+  const y = edge.includes('n')
+    ? clamp(bounds.y + dy, 0, bottom - MIN_HEIGHT)
+    : bounds.y
+  return {
+    x,
+    y,
+    width: edge.includes('w')
+      ? right - x
+      : edge.includes('e')
+        ? clamp(bounds.width + dx, MIN_WIDTH, world.width - x)
+        : bounds.width,
+    height: edge.includes('n')
+      ? bottom - y
+      : edge.includes('s')
+        ? clamp(bounds.height + dy, MIN_HEIGHT, world.height - y)
+        : bounds.height,
+  }
+}

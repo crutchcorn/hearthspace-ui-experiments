@@ -62,9 +62,9 @@ Reduced-motion preferences bypass this reveal animation. Pinned windows use
 their frame-edge reveal instead.
 
 The layout and matching rules live in
-[`canvas-search.ts`](../src/canvas-search.ts), with coverage in
+[`canvas-search.ts`](../src/views/desktop/utils/canvas-search.ts), with coverage in
 [`canvas-search.test.ts`](../tests/canvas-search.test.ts). See
-[`CanvasSearch.tsx`](../src/components/CanvasSearch.tsx),
-[`SearchControlPreview.tsx`](../src/components/SearchControlPreview.tsx),
-[`preview-motion.ts`](../src/preview-motion.ts), and
-[`App.tsx`](../src/App.tsx) for input, previews, motion, and activation.
+[`canvas-search.tsx`](../src/views/desktop/components/canvas-search.tsx),
+[`search-control-preview.tsx`](../src/views/desktop/components/search-control-preview.tsx),
+[`preview-motion.ts`](../src/views/desktop/services/preview-motion.ts), and
+[`use-desktop.ts`](../src/views/desktop/hooks/use-desktop.ts) for input, previews, motion, and activation.

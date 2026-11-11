@@ -131,27 +131,27 @@ doesn't open the layout editor or alter a visible control's placement.
 
 ## Implementation
 
-[useSystemStatus](../src/useSystemStatus.ts) owns the sample network/device lists,
+[useSystemStatus](../src/views/desktop/hooks/use-system-status.ts) owns the sample network/device lists,
 radio state, Wi-Fi selection, Bluetooth pairings and connections, and shared
-status labels. [SystemBar](../src/components/SystemBar.tsx) renders each control
+status labels. [SystemBar](../src/views/desktop/components/system-bar.tsx) renders each control
 and its immediate row actions. Its wireless switches reuse the
-[Settings switch styles](../src/components/Settings.module.css)
+[Settings switch styles](../src/views/desktop/components/settings.module.css)
 so both themes stay consistent with the Settings app.
-Power confirmations reuse [LayoutConfirm](../src/components/LayoutConfirm.tsx)
+Power confirmations reuse [LayoutConfirm](../src/views/desktop/components/layout-confirm.tsx)
 for the shell's native modal presentation and default Cancel focus.
-[PlacedWidget](../src/components/PlacedWidget.tsx) places it, and
-[WidgetPopover](../src/components/WidgetPopover.tsx) separates popup layering
+[PlacedWidget](../src/views/desktop/components/placed-widget.tsx) places it, and
+[WidgetPopover](../src/views/desktop/components/widget-popover.tsx) separates popup layering
 from the control body through a shared popup host above frame attachments.
-Its [shared panel styles](../src/components/WidgetPopover.module.css)
+Its [shared panel styles](../src/views/desktop/components/widget-popover.module.css)
 also own viewport clamping, opening direction, and available height for system
 controls, notifications, running-app lists, and canvas tool menus. Each popup
 supplies its width through `--widget-panel-width` and keeps its own content
 styles. Moving a control between edges doesn't require separate placement rules
 in each popup.
 
-[SearchControlPreview](../src/components/SearchControlPreview.tsx) and
-[LockScreen](../src/components/LockScreen.tsx) read the same state.
-[System glyphs](../src/icons/system.tsx) supply the wireless and device icons.
+[SearchControlPreview](../src/views/desktop/components/search-control-preview.tsx) and
+[LockScreen](../src/views/desktop/components/lock-screen.tsx) read the same state.
+[System glyphs](../src/components/icons/system.tsx) supply the wireless and device icons.
 [Wireless browser tests](../tests/browser/wireless.test.tsx) cover the pickers
 and shared status behavior. Movement and settling are covered by
 [layout workspace tests](../tests/layout-workspace.test.ts).

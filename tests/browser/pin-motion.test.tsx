@@ -1,15 +1,21 @@
 import { afterEach, expect, test, vi } from 'vitest'
 import { commands, page, userEvent } from 'vitest/browser'
-import { createWorkspace } from '../../src/desktop'
-import { FRAME_WIDGETS, readFrameLayout } from '../../src/frame-layout'
-import { createScene } from '../../src/scene'
-import { SCENE_STORAGE_KEY } from '../../src/scene-storage'
+import { createWorkspace } from '../../src/views/desktop/utils/desktop'
+import {
+  FRAME_WIDGETS,
+  readFrameLayout,
+} from '../../src/views/desktop/utils/frame-layout'
+import { createScene } from '../../src/views/desktop/utils/scene'
+import { SCENE_STORAGE_KEY } from '../../src/views/desktop/services/scene-storage'
 import { renderDesktop } from './desktop'
 
 type Rect = { x: number; y: number; width: number; height: number }
 
 function prepareObjects() {
-  const workspace = createWorkspace()
+  const workspace = createWorkspace({
+    width: window.innerWidth,
+    height: window.innerHeight,
+  })
   workspace.windows = workspace.windows
     .filter(({ id }) => id === 'canvas')
     .map((window) => ({

@@ -19,7 +19,7 @@ import {
   ungroupFrameTarget,
   type FrameLayout,
   type ObjectPlacement,
-} from '../src/frame-layout.ts'
+} from '../src/views/desktop/utils/frame-layout.ts'
 
 const defaults: FrameLayout = { placements: {}, allowHideTools: false }
 const tools = { kind: 'widget', id: 'tools' } as const

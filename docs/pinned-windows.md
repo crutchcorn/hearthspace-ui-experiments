@@ -66,17 +66,17 @@ available until that Settings window is closed.
 
 ## Implementation
 
-[App](../src/App.tsx) coordinates focus, reveal, closing, and group preview slots.
-[getPinnedWindowOffset](../src/frame-layout.ts) calculates each edge's exposed
+[The desktop hook](../src/views/desktop/hooks/use-desktop.ts) coordinates focus, reveal, closing, and group preview slots.
+[getPinnedWindowOffset](../src/views/desktop/utils/frame-layout.ts) calculates each edge's exposed
 strip, with [tests](../tests/frame-layout.test.ts) for resting, hover, fully open,
-and small-window cases. [FramePreviewSlot](../src/components/FramePreviewSlot.tsx)
+and small-window cases. [FramePreviewSlot](../src/views/desktop/components/frame-preview-slot.tsx)
 measures grouped previews without substituting a second window visual.
 [Browser coverage](../tests/browser/pinned-window-preview.test.tsx) checks all
 four corner previews, dragging between corners, and reopening after editing.
-[WindowHost](../src/components/WindowHost.tsx) gives each window a persistent
+[WindowHost](../src/views/desktop/components/window-host.tsx) gives each window a persistent
 portal container. Changing placement moves that container without remounting
 the app inside it.
-[useObjectLayout](../src/useObjectLayout.ts) measures the window's full screen
+[useObjectLayout](../src/views/desktop/hooks/use-object-layout.ts) measures the window's full screen
 bounds around placement changes and starts its movement before paint, including
 when the old bounds extend beyond the viewport.
 

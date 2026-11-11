@@ -55,10 +55,10 @@ are transient. Window placement persists with the scene.
 For all object types together, use [canvas search](canvas-search.md). For
 frequent apps and existing instances, use [the dock](dock-favorites.md).
 
-[`AppLauncher.tsx`](../src/components/AppLauncher.tsx) owns the panel and
-navigation; its [CSS module](../src/components/AppLauncher.module.css) composes
-the surfaces. [`AppIcon.tsx`](../src/components/AppIcon.tsx) preserves app
-artwork, and [`launcher-apps.ts`](../src/components/launcher-apps.ts) defines the
-catalog. [`App.tsx`](../src/App.tsx) creates windows and coordinates panel
+[`app-launcher.tsx`](../src/views/desktop/components/app-launcher.tsx) owns the panel and
+navigation; its [CSS module](../src/views/desktop/components/app-launcher.module.css) composes
+the surfaces. [`app-icon.tsx`](../src/views/desktop/components/app-icon.tsx) preserves app
+artwork, and [`launcher-apps.ts`](../src/views/desktop/constants/launcher-apps.ts) defines the
+catalog. [`use-desktop.ts`](../src/views/desktop/hooks/use-desktop.ts) creates windows and coordinates panel
 dismissal. These interactions are checked in the browser; the current test suite
 doesn't include a launcher component test.

@@ -1,7 +1,10 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { setObjectPlacement, type FrameLayout } from '../src/frame-layout.ts'
-import { resolveObjectLocation } from '../src/object-location.ts'
+import {
+  setObjectPlacement,
+  type FrameLayout,
+} from '../src/views/desktop/utils/frame-layout.ts'
+import { resolveObjectLocation } from '../src/views/desktop/utils/object-location.ts'
 
 const icon = { kind: 'item', id: 'browser-shortcut' } as const
 const drawing = { kind: 'drawing', id: 'sketch' } as const

@@ -51,8 +51,8 @@ leave edits usable for the current session.
 
 See [Drawing recognition](recognition.md) for the `$P` adaptation, normalization,
 rejection rules, and provenance. The UI lives in
-[`GesturePad.tsx`](../src/components/GesturePad.tsx),
-[`GestureSettings.tsx`](../src/components/GestureSettings.tsx), and
-[`AppPicker.tsx`](../src/components/AppPicker.tsx). Persistence lives in
-[`gestures.ts`](../src/gestures.ts); rough-input and rejection coverage is in
+[`gesture-pad.tsx`](../src/views/desktop/components/gesture-pad.tsx),
+[`gesture-settings.tsx`](../src/views/desktop/components/gesture-settings.tsx), and
+[`app-picker.tsx`](../src/views/desktop/components/app-picker.tsx). Persistence lives in
+[`gestures-storage.ts`](../src/views/desktop/services/gestures-storage.ts); rough-input and rejection coverage is in
 [`gesture-recognition.test.ts`](../tests/gesture-recognition.test.ts).

@@ -49,8 +49,8 @@ the result editable instead of treating recognition as authoritative. Neither
 handwriting nor search queries are saved with the scene. Cached model assets may
 survive a reload, while the live worker belongs to the current page.
 
-[`HandwritingPad.tsx`](../src/components/HandwritingPad.tsx) owns ink, submission,
-and feedback. [`CanvasSearch.tsx`](../src/components/CanvasSearch.tsx) appends the
+[`handwriting-pad.tsx`](../src/views/desktop/components/handwriting-pad.tsx) owns ink, submission,
+and feedback. [`canvas-search.tsx`](../src/views/desktop/components/canvas-search.tsx) appends the
 text. [Drawing recognition](recognition.md) documents image preparation,
 worker ownership, model revision, and cancellation in more detail. Coverage in
 [`handwriting.test.ts`](../tests/handwriting.test.ts) and

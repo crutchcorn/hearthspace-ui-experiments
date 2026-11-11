@@ -55,9 +55,9 @@ the original shortcut, rather than consuming it as a group member.
 
 ## Implementation
 
-[frame-layout](../src/frame-layout.ts) owns membership and ordering;
-[frame-collisions](../src/frame-collisions.ts) combines overlapping attachments.
-[FrameShell](../src/components/FrameShell.tsx) renders the strip and its grip.
+[frame-layout](../src/views/desktop/utils/frame-layout.ts) owns membership and ordering;
+[frame-collisions](../src/views/desktop/utils/frame-collisions.ts) combines overlapping attachments.
+[FrameShell](../src/views/desktop/components/frame-shell.tsx) renders the strip and its grip.
 [Frame layout tests](../tests/frame-layout.test.ts) cover merging, separating,
 reordering, and persistence; [collision tests](../tests/frame-collisions.test.ts)
 cover overlap chains, corners, and invalid measurements.

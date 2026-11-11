@@ -45,7 +45,7 @@ configuration or saved scene data.
 
 ## Where it lives
 
-- [`DisplaySettings.tsx`](../src/components/DisplaySettings.tsx) handles pointer capture, selection, arrow-key placement, and settings controls.
-- [`display-layout.ts`](../src/display-layout.ts) bounds, connects, and recenters the two rectangles.
-- [`DisplaySettings.module.css`](../src/components/DisplaySettings.module.css) caps the preview, applies the [raised material](materials-and-light.md), and animates settled moves.
-- [`Settings.tsx`](../src/components/Settings.tsx) owns the temporary layout and per-display values.
+- [`display-settings.tsx`](../src/views/desktop/components/display-settings.tsx) handles pointer capture, selection, arrow-key placement, and settings controls.
+- [`display-layout.ts`](../src/views/desktop/utils/display-layout.ts) bounds, connects, and recenters the two rectangles.
+- [`display-settings.module.css`](../src/views/desktop/components/display-settings.module.css) caps the preview, applies the [raised material](materials-and-light.md), and animates settled moves.
+- [`settings.tsx`](../src/views/desktop/components/settings.tsx) owns the temporary layout and per-display values.

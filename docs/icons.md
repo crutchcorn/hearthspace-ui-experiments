@@ -1,6 +1,6 @@
 # Hearthspace icons
 
-Hearthspace controls share a local SVG icon set in [`src/icons/`](../src/icons/).
+Hearthspace controls share a local SVG icon set in [`src/components/icons/`](../src/components/icons/).
 Simple geometry and restrained strokes keep a small tool recognizable over a
 translucent surface. Square line caps and miter joins give the set a consistent
 shape, while the surrounding control supplies its color and interaction light.
@@ -12,7 +12,7 @@ icons a stronger silhouette over photos. Neither variant needs a separate tile.
 The shell can share a visual language without making every app look as though
 Hearthspace built it. Browser, Files, Terminal, Notes, Music, Photos, and Calendar
 keep their existing Lucide glyphs and colored artwork. This applies wherever
-[`AppIcon`](../src/components/AppIcon.tsx) represents them: desktop shortcuts,
+[`AppIcon`](../src/views/desktop/components/app-icon.tsx) represents them: desktop shortcuts,
 the launcher, dock, window titles, notifications, and previews. The simulated
 app contents also keep their Lucide icons.
 
@@ -23,15 +23,15 @@ shared factory's optical stroke widths. Neither gets simulated third-party
 artwork. Likewise, a desktop folder or file is a Hearthspace object and uses
 the local `Folder` or `FileText` glyph; the **Files app** keeps its own artwork.
 
-The cog appears in the [gesture pad](../src/components/GesturePad.tsx) at
+The cog appears in the [gesture pad](../src/views/desktop/components/gesture-pad.tsx) at
 18 pixels for **Customize gestures**, and in the
-[Bluetooth controls](../src/components/BluetoothControls.tsx) at 17 pixels for
+[Bluetooth controls](../src/views/desktop/components/system-bar.tsx) at 17 pixels for
 device details and 15 pixels for **Adapter settings**. Both the shell popup and
 the Bluetooth page in Settings share those controls.
 
 The current desktop uses the `realistic` presentation, which makes `AppIcon`
 show the third-party artwork in place of the catalog's local fallback glyph.
-Those fallback glyphs still exist in `src/icons/apps.tsx`; their presence isn't
+Those fallback glyphs still exist in `src/components/icons/apps.tsx`; their presence isn't
 a reason to replace an app's displayed identity. Lucide remains a dependency
 for this boundary, rather than a second source for new shell controls.
 
@@ -67,14 +67,14 @@ change the app's identity or replace simulated third-party artwork.
 
 ## Using and adding icons
 
-Import glyphs from `src/icons`. Use the `size` prop for the rendered dimensions
+Import glyphs from `src/components/icons`. Use the `size` prop for the rendered dimensions
 and inherit `currentColor` from the surrounding control. Give interactive
 controls their accessible name; icons are decorative by default.
 
-For example, a component under `src/components/` can render a search control as:
+A component under `src/views/desktop/components/` can render a search control this way.
 
 ```tsx
-import { Search } from '../icons'
+import { Search } from '../../../components/icons'
 
 function SearchButton({ onOpen }: { onOpen: () => void }) {
   return (
@@ -140,16 +140,16 @@ optical sizing as the status controls.
 
 ## Source files
 
-- [`createIcon.ts`](../src/icons/createIcon.ts): variant selection, SVG defaults, and optical stroke sizing.
-- [`actions.tsx`](../src/icons/actions.tsx): common actions and window controls.
-- [`apps.tsx`](../src/icons/apps.tsx): outline and filled app and document glyphs.
-- [`canvas.tsx`](../src/icons/canvas.tsx): canvas, drawing, selection, and layout glyphs.
-- [`system.tsx`](../src/icons/system.tsx): status, settings, and notification glyphs.
-- [`index.ts`](../src/icons/index.ts): public exports.
-- [`AppIcon.tsx`](../src/components/AppIcon.tsx) and
-  [`AppIcon.module.css`](../src/components/AppIcon.module.css): app identity
+- [`create-icon.tsx`](../src/components/icons/create-icon.tsx): variant selection, SVG defaults, and optical stroke sizing.
+- [`actions.tsx`](../src/components/icons/actions.tsx): common actions and window controls.
+- [`apps.tsx`](../src/components/icons/apps.tsx): outline and filled app and document glyphs.
+- [`canvas.tsx`](../src/components/icons/canvas.tsx): canvas, drawing, selection, and layout glyphs.
+- [`system.tsx`](../src/components/icons/system.tsx): status, settings, and notification glyphs.
+- [`index.ts`](../src/components/icons/index.ts): public exports.
+- [`app-icon.tsx`](../src/views/desktop/components/app-icon.tsx) and
+  [`app-icon.module.css`](../src/views/desktop/components/app-icon.module.css): app identity
   mapping and simulated artwork.
-- [`WindowContent.tsx`](../src/components/WindowContent.tsx): simulated app content.
+- [`window-content.tsx`](../src/views/desktop/components/window-content.tsx): simulated app content.
 - [`app-icon-variants.svg`](../assets/app-icon-variants.svg): the app and document glyphs shown in outline and filled forms, rendered from the shared components.
 - [`icon-set.svg`](../assets/icon-set.svg): a visual reference sheet. It includes
   fallback app glyphs and isn't a complete inventory of the running UI; for

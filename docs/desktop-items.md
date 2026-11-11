@@ -90,11 +90,11 @@ remain intact; see [saved state](spatial-playground.md#saved-state).
 
 ## Where this lives
 
-[DesktopItems](../src/components/DesktopItems.tsx) handles the item presentation
-and activation differences; its [styles](../src/components/DesktopItems.module.css)
-provide the photo-specific contrast support. [App.tsx](../src/App.tsx) coordinates mixed selections
-and movement. [desktop.ts](../src/desktop.ts) defines starter items;
-[scene-storage.ts](../src/scene-storage.ts) validates saved objects and restores
-catalog completeness. [scene.ts](../src/scene.ts) owns their locations.
+[DesktopItems](../src/views/desktop/components/desktop-items.tsx) handles the item presentation
+and activation differences; its [styles](../src/views/desktop/components/desktop-items.module.css)
+provide the photo-specific contrast support. [use-canvas-gestures.ts](../src/views/desktop/hooks/use-canvas-gestures.ts) coordinates mixed selections
+and movement. [desktop.ts](../src/views/desktop/utils/desktop.ts) defines starter items;
+[scene-storage.ts](../src/views/desktop/services/scene-storage.ts) validates saved objects and restores
+catalog completeness. [scene.ts](../src/views/desktop/utils/scene.ts) owns their locations.
 [Scene storage tests](../tests/scene-storage.test.ts) and
 [scene tests](../tests/scene.test.ts) cover saved homes and location ownership.

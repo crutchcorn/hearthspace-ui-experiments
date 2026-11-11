@@ -3,10 +3,10 @@ import { test } from 'node:test'
 import {
   getCanvasSearchLayout,
   getWindowSwitcherLayout,
-} from '../src/canvas-search.ts'
-import type { Bounds, Workspace } from '../src/desktop.ts'
-import { FRAME_WIDGETS } from '../src/frame-layout.ts'
-import { CANVAS_TOOL_CATALOG } from '../src/canvas-tool-catalog.ts'
+} from '../src/views/desktop/utils/canvas-search.ts'
+import type { Bounds, Workspace } from '../src/views/desktop/types/desktop.ts'
+import { FRAME_WIDGETS } from '../src/views/desktop/utils/frame-layout.ts'
+import { CANVAS_TOOL_CATALOG } from '../src/views/desktop/constants/canvas-tool-catalog.ts'
 
 const view: Bounds = { x: 4000, y: 3000, width: 1200, height: 800 }
 const workspace: Workspace = {

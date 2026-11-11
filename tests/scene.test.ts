@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import type { Bounds, Workspace } from '../src/desktop.ts'
+import type { Bounds, Workspace } from '../src/views/desktop/types/desktop.ts'
 import {
   getFrameBounds,
   getPlacement,
@@ -8,11 +8,11 @@ import {
   mergeFrameTargets,
   setObjectPlacement,
   type FrameLayout,
-} from '../src/frame-layout.ts'
+} from '../src/views/desktop/utils/frame-layout.ts'
 import {
   restoreBackgroundItems,
   settleCoveredItems,
-} from '../src/peek-layout.ts'
+} from '../src/views/desktop/utils/peek-layout.ts'
 import {
   createScene,
   groupSceneObjects,
@@ -26,8 +26,8 @@ import {
   ungroupSceneObject,
   updateSceneLayout,
   updateSceneWorkspace,
-} from '../src/scene.ts'
-import { transformCanvasWorkspace } from '../src/layout-workspace.ts'
+} from '../src/views/desktop/utils/scene.ts'
+import { transformCanvasWorkspace } from '../src/views/desktop/utils/layout-workspace.ts'
 
 const view: Bounds = { x: 1000, y: 800, width: 1280, height: 720 }
 const defaults: FrameLayout = { placements: {}, allowHideTools: false }

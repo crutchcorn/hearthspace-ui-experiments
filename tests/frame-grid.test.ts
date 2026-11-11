@@ -1,12 +1,12 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import type { Bounds } from '../src/desktop.ts'
+import type { Bounds } from '../src/views/desktop/types/desktop.ts'
 import {
   getFrameBounds,
   type FrameEdge,
   type ObjectPlacement,
-} from '../src/frame-layout.ts'
-import { snapFramePlacement } from '../src/frame-grid.ts'
+} from '../src/views/desktop/utils/frame-layout.ts'
+import { snapFramePlacement } from '../src/views/desktop/utils/frame-grid.ts'
 
 type FramePlacement = Extract<ObjectPlacement, { surface: 'frame' }>
 const view: Bounds = { x: 101, y: 213, width: 1000, height: 800 }

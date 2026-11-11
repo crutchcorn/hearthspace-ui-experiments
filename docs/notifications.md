@@ -55,8 +55,8 @@ shadows follow [materials and light](materials-and-light.md).
 
 ## Implementation
 
-[useNotifications](../src/useNotifications.ts) owns entries and unread state.
-[NotificationInbox](../src/components/NotificationInbox.tsx) implements actions,
+[useNotifications](../src/views/desktop/hooks/use-notifications.ts) owns entries and unread state.
+[NotificationInbox](../src/views/desktop/components/notification-inbox.tsx) implements actions,
 dismissal, and the preview toast. Its
-[styles](../src/components/NotificationInbox.module.css) handle quiet versus
+[styles](../src/views/desktop/components/notification-inbox.module.css) handle quiet versus
 unread appearance and vertical text.

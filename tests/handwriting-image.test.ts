@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { handwritingImage } from '../src/handwriting-image.ts'
+import { handwritingImage } from '../src/views/desktop/services/handwriting-image.ts'
 
 test('an empty handwriting pad needs no image or browser canvas', () => {
   assert.equal(handwritingImage([]), null)

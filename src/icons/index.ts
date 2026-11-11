@@ -1,5 +1,0 @@
-export * from './actions'
-export * from './apps'
-export * from './canvas'
-export * from './system'
-export type { IconComponent, IconVariant } from './createIcon'

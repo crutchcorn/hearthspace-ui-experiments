@@ -143,7 +143,7 @@ labels stay white.
 After typing in a field, click an icon or a system control. Pointer input
 should hide the keyboard outline while keeping selection and material
 highlights; Tab should bring the outline back. The desktop tracks input
-modality in [`useInputModality.ts`](../src/useInputModality.ts) because scripted
+modality in [`use-input-modality.ts`](../src/views/desktop/hooks/use-input-modality.ts) because scripted
 focus during a drag can otherwise preserve the browser's keyboard heuristic.
 Try a grouped toolbar and a narrow viewport to catch doubled material layers.
 Compare a repeating photo with a fixed fit, then restore Canvas dots to confirm

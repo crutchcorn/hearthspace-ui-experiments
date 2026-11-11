@@ -57,8 +57,8 @@ disabling this preview doesn't install or delete that model.
 
 ## Where it lives
 
-- [`useAI.ts`](../src/useAI.ts) owns opt-in persistence and simulated progress.
-- [`AISettings.tsx`](../src/components/AISettings.tsx) presents the feature details and confirmation.
-- [`Settings.module.css`](../src/components/Settings.module.css) owns the switch's restrained highlight and dark-mode fill.
-- [`GatherWindows.tsx`](../src/components/GatherWindows.tsx) owns the contextual action, delay, and glow state; [`canvas.tsx`](../src/icons/canvas.tsx) supplies its glyph.
-- [`gather-windows.ts`](../src/gather-windows.ts) matches app identities and places candidates; [`App.tsx`](../src/App.tsx) limits the operation to canvas work and cancels incompatible contexts.
+- [`use-ai.ts`](../src/views/desktop/hooks/use-ai.ts) owns opt-in persistence and simulated progress.
+- [`ai-settings.tsx`](../src/views/desktop/components/ai-settings.tsx) presents the feature details and confirmation.
+- [`settings.module.css`](../src/views/desktop/components/settings.module.css) owns the switch's restrained highlight and dark-mode fill.
+- [`gather-windows.tsx`](../src/views/desktop/components/gather-windows.tsx) owns the contextual action, delay, and glow state; [`canvas.tsx`](../src/components/icons/canvas.tsx) supplies its glyph.
+- [`gather-windows.ts`](../src/views/desktop/utils/gather-windows.ts) matches app identities and places candidates; [`use-desktop.ts`](../src/views/desktop/hooks/use-desktop.ts) limits the operation to canvas work and cancels incompatible contexts.

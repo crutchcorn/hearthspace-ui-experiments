@@ -152,10 +152,10 @@ IndexedDB. Wi-Fi, sound, battery, display configuration, and application
 previews remain simulated. Backdrop blur depends on browser support.
 
 - [`index.css`](../src/index.css): palette, material roles, edge light, blur, radii, and shadows.
-- [`App.module.css`](../src/App.module.css): solid canvas field and Hearthspace window composition.
-- [`ShellControls.module.css`](../src/components/ShellControls.module.css): toolbar surfaces and control states.
-- [`Settings.module.css`](../src/components/Settings.module.css): nested layers, appearance previews, compact navigation, and switches.
-- [`DisplaySettings.module.css`](../src/components/DisplaySettings.module.css): raised monitor surfaces and selection.
-- [`DesktopItems.tsx`](../src/components/DesktopItems.tsx) and its [styles](../src/components/DesktopItems.module.css): photo-only filled native icons, white labels, and unclipped shadows.
-- [`PlacedWidget.module.css`](../src/components/PlacedWidget.module.css), [`LauncherDock.module.css`](../src/components/LauncherDock.module.css), and [`NotificationInbox.module.css`](../src/components/NotificationInbox.module.css): standalone and grouped mobile surfaces.
-- [`theme.ts`](../src/theme.ts) and [`useBackground.ts`](../src/useBackground.ts): preference and image storage.
+- [`desktop.module.css`](../src/views/desktop/desktop.module.css): solid canvas field and Hearthspace window composition.
+- [`shell-controls.module.css`](../src/views/desktop/components/shell-controls.module.css): toolbar surfaces and control states.
+- [`settings.module.css`](../src/views/desktop/components/settings.module.css): nested layers, appearance previews, compact navigation, and switches.
+- [`display-settings.module.css`](../src/views/desktop/components/display-settings.module.css): raised monitor surfaces and selection.
+- [`desktop-items.tsx`](../src/views/desktop/components/desktop-items.tsx) and its [styles](../src/views/desktop/components/desktop-items.module.css): photo-only filled native icons, white labels, and unclipped shadows.
+- [`placed-widget.module.css`](../src/views/desktop/components/placed-widget.module.css), [`launcher-dock.module.css`](../src/views/desktop/components/launcher-dock.module.css), and [`notification-inbox.module.css`](../src/views/desktop/components/notification-inbox.module.css): standalone and grouped mobile surfaces.
+- [`theme-storage.ts`](../src/views/desktop/services/theme-storage.ts) and [`use-background.ts`](../src/views/desktop/hooks/use-background.ts): preference and image storage.

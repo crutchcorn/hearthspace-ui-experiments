@@ -1,9 +1,12 @@
 import { afterEach, expect, test, vi } from 'vitest'
 import { commands, page } from 'vitest/browser'
-import { createWorkspace } from '../../src/desktop'
-import { FRAME_WIDGETS, type FrameLayout } from '../../src/frame-layout'
-import { createScene, type Scene } from '../../src/scene'
-import { SCENE_STORAGE_KEY } from '../../src/scene-storage'
+import { createWorkspace } from '../../src/views/desktop/utils/desktop'
+import {
+  FRAME_WIDGETS,
+  type FrameLayout,
+} from '../../src/views/desktop/utils/frame-layout'
+import { createScene, type Scene } from '../../src/views/desktop/utils/scene'
+import { SCENE_STORAGE_KEY } from '../../src/views/desktop/services/scene-storage'
 import { renderDesktop } from './desktop'
 
 function canvasTools() {
@@ -141,7 +144,10 @@ test.each([
 ] as const)(
   'an off-center icon grab snaps only inside the visible $corner square',
   async ({ corner, destinations }) => {
-    const workspace = createWorkspace()
+    const workspace = createWorkspace({
+      width: window.innerWidth,
+      height: window.innerHeight,
+    })
     workspace.windows = []
     const layout: FrameLayout = {
       allowHideTools: false,

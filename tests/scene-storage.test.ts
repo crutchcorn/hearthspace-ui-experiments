@@ -1,29 +1,33 @@
 import assert from 'node:assert/strict'
 import { beforeEach, test } from 'node:test'
-import { createWorkspace } from '../src/desktop.ts'
+import { createWorkspace } from '../src/views/desktop/utils/desktop.ts'
 import {
   getPlacement,
   getTargetGroup,
   mergeFrameTargets,
   readFrameLayout,
   setObjectPlacement,
-} from '../src/frame-layout.ts'
-import { createScene, projectScene, updateSceneLayout } from '../src/scene.ts'
+} from '../src/views/desktop/utils/frame-layout.ts'
+import {
+  createScene,
+  projectScene,
+  updateSceneLayout,
+} from '../src/views/desktop/utils/scene.ts'
 import {
   loadScene,
   readScene,
   saveScene,
   SCENE_STORAGE_KEY,
-} from '../src/scene-storage.ts'
-import { transformCanvasWorkspace } from '../src/layout-workspace.ts'
-import { restoreBackgroundItems } from '../src/peek-layout.ts'
+} from '../src/views/desktop/services/scene-storage.ts'
+import { transformCanvasWorkspace } from '../src/views/desktop/utils/layout-workspace.ts'
+import { restoreBackgroundItems } from '../src/views/desktop/utils/peek-layout.ts'
 import {
   getLayoutItemOptions,
   setLayoutItemOptions,
-} from '../src/layout-item-options.ts'
-import { APP_CATALOG } from '../src/components/launcher-apps.ts'
-import { MAX_DRAWING_STROKES } from '../src/drawings.ts'
-import type { Scene } from '../src/scene.ts'
+} from '../src/views/desktop/utils/layout-item-options.ts'
+import { APP_CATALOG } from '../src/views/desktop/constants/launcher-apps.ts'
+import { MAX_DRAWING_STROKES } from '../src/views/desktop/utils/drawings.ts'
+import type { Scene } from '../src/views/desktop/utils/scene.ts'
 
 const storage = new Map<string, string>()
 Object.defineProperty(globalThis, 'localStorage', {

@@ -41,7 +41,7 @@ pointer-event or selection-event cancellation, which would interfere with
 the input behavior we're preserving.
 
 [`index.css`](../src/index.css) owns the global policy and field exceptions.
-[`App.module.css`](../src/App.module.css) owns window-body, title-bar, menu,
-and drag rules; [`Settings.module.css`](../src/components/Settings.module.css)
-keeps Settings non-selectable. [`App.tsx`](../src/App.tsx) handles inert app
+[`desktop.module.css`](../src/views/desktop/desktop.module.css) owns window-body, title-bar, menu,
+and drag rules; [`settings.module.css`](../src/views/desktop/components/settings.module.css)
+keeps Settings non-selectable. [`desktop-window.tsx`](../src/views/desktop/components/desktop-window.tsx) handles inert app
 content during canvas selection and layout editing.

@@ -31,18 +31,19 @@ overlap, following the normal [frame grouping](frame-groups.md) rule.
 ## Add options for another item
 
 The generic layout editor accepts item-specific controls as children. It doesn't
-contain a clock branch. [LayoutItemControls](../src/components/LayoutItemControls.tsx)
-looks up a component by target key, currently `widget:clock`, and renders
-[ClockLayoutControls](../src/components/ClockLayoutControls.tsx).
+contain a clock branch. [LayoutItemControls](../src/views/desktop/components/layout-item-controls.tsx)
+looks up controls by target key. [The desktop view](../src/views/desktop/desktop.view.tsx)
+supplies [ClockLayoutControls](../src/views/desktop/components/clock-layout-controls.tsx)
+for `widget:clock`.
 
 To add another item's options, extend the typed map in
-[layout-item-options](../src/layout-item-options.ts), define defaults and a reader
-that validates saved values, then register its controls component. Keep the
+[layout-item-options](../src/views/desktop/utils/layout-item-options.ts), define defaults and a reader
+that validates saved values, then supply its controls for that target in the desktop view. Keep the
 item's behavior in its own implementation. This lets another control expose a
 different kind of option without turning the common editor into a growing list
 of special cases.
 
-[clock-format](../src/clock-format.ts) supplies the shared label formatter.
+[clock-format](../src/views/desktop/utils/clock-format.ts) supplies the shared label formatter.
 [Formatting tests](../tests/clock-format.test.ts) cover midnight, every format,
 and locale order; [option tests](../tests/layout-item-options.test.ts) cover
 defaults, invalid saved data, and updates that preserve the rest of the layout.

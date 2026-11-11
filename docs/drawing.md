@@ -78,15 +78,15 @@ screen positions; this change doesn't reset the saved scene. Drawing names in
 [search](canvas-search.md) are generated from their current order, such as
 “Drawing 2”; there is no naming or image-export UI.
 
-[`drawings.ts`](../src/drawings.ts) normalizes stroke bounds and validates local
+[`drawings.ts`](../src/views/desktop/utils/drawings.ts) normalizes stroke bounds and validates local
 ink, covered by [`drawings.test.ts`](../tests/drawings.test.ts).
-[`scene-storage.ts`](../src/scene-storage.ts) validates saved artwork and its
+[`scene-storage.ts`](../src/views/desktop/services/scene-storage.ts) validates saved artwork and its
 owned location, covered by [scene storage tests](../tests/scene-storage.test.ts).
-[`DrawingLayer.tsx`](../src/components/DrawingLayer.tsx) renders and targets ink;
-[`DrawingActions.tsx`](../src/components/DrawingActions.tsx) provides the actions.
-[`App.tsx`](../src/App.tsx) owns recording, movement, and launch/consume behavior.
-[`useObjectLayout`](../src/useObjectLayout.ts) changes placement and moves pinned
-ink; [`scene.ts`](../src/scene.ts) owns its exclusive canvas or screen location.
+[`drawing-layer.tsx`](../src/views/desktop/components/drawing-layer.tsx) renders and targets ink;
+[`drawing-actions.tsx`](../src/views/desktop/components/drawing-actions.tsx) provides the actions.
+[`use-canvas-gestures.ts`](../src/views/desktop/hooks/use-canvas-gestures.ts) owns recording and movement. [The desktop hook](../src/views/desktop/hooks/use-desktop.ts) plays the selected drawing and consumes it after a match.
+[`useObjectLayout`](../src/views/desktop/hooks/use-object-layout.ts) changes placement and moves pinned
+ink; [`scene.ts`](../src/views/desktop/utils/scene.ts) owns its exclusive canvas or screen location.
 [Browser layer tests](../tests/browser/layout-layers.test.tsx) cover free pinned
 placement, overlap with windows and controls, panning, reload, and moving ink
 to the background.

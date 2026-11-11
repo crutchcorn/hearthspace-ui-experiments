@@ -98,10 +98,10 @@ window coverage remains temporary.
 
 ## Implementation
 
-[useObjectLayout](../src/useObjectLayout.ts) owns editing and drag transitions;
-[frame-layout](../src/frame-layout.ts) defines placement and recovery rules.
+[useObjectLayout](../src/views/desktop/hooks/use-object-layout.ts) owns editing and drag transitions;
+[frame-layout](../src/views/desktop/utils/frame-layout.ts) defines placement and recovery rules.
 The guide size and corner hit test share geometry with
-[FrameGuides](../src/components/FrameGuides.tsx), so the rendered square and
+[FrameGuides](../src/views/desktop/components/frame-guides.tsx), so the rendered square and
 pointer target stay aligned across viewport sizes. Ordinary edge capture still
 uses the dragged object's bounds; toolbars use a square probe at the pointer.
 The active drag remembers its orientation and grip between pointer events.
@@ -109,20 +109,20 @@ Layout motion uses that grip as the turn's pivot and owns the toolbar's snap
 animation. For icons and windows, it measures the current screen rectangle
 before changing placement, then starts the movement to the new rectangle before
 the browser paints. Window measurements include the off-screen body, so
-detaching begins from the recessed position. [Peek motion](../src/usePeekMotion.ts)
+detaching begins from the recessed position. [Peek motion](../src/views/desktop/hooks/use-peek-motion.ts)
 animates displaced neighbors while layout motion owns the moved object,
 preventing competing placement animations.
 
-The editing overlays in [App](../src/App.tsx) separate the guides and active drag
+The editing overlays in [the desktop UI](../src/views/desktop/desktop.ui.tsx) separate the guides and active drag
 from the ordinary canvas stack. FrameGuides keeps the fill in the canvas
 background and the outline above windows. Dragged
 objects use canvas coordinates in an overlay that follows the current viewport.
-[WindowHost](../src/components/WindowHost.tsx) moves a window between these hosts
+[WindowHost](../src/views/desktop/components/window-host.tsx) moves a window between these hosts
 without restarting the app inside it.
 
-[frame-grid](../src/frame-grid.ts) and its [tests](../tests/frame-grid.test.ts)
+[frame-grid](../src/views/desktop/utils/frame-grid.ts) and its [tests](../tests/frame-grid.test.ts)
 cover Alt alignment. [Layout workspace tests](../tests/layout-workspace.test.ts)
-cover settling, and [scene storage](../src/scene-storage.ts) saves the result.
+cover settling, and [scene storage](../src/views/desktop/services/scene-storage.ts) saves the result.
 [Browser drag tests](../tests/browser/frame-drag.test.tsx) cover grabs near both
 ends, the gripped point throughout a turn, visible corner targets, and release
 placement.

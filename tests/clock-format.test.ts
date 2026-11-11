@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { formatClock } from '../src/clock-format.ts'
+import { formatClock } from '../src/views/desktop/utils/clock-format.ts'
 
 const now = new Date(2026, 9, 18, 14, 5)
 

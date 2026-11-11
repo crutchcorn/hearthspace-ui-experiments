@@ -56,9 +56,9 @@ switching, and the window focus view can hide controls independently of screen s
 
 ## Implementation
 
-[FrameShell](../src/components/FrameShell.tsx) decides whether default corners
-can merge. [FrameShell styles](../src/components/FrameShell.module.css) and
-[PlacedWidget styles](../src/components/PlacedWidget.module.css) build the bars.
-[CanvasTools](../src/components/CanvasTools.tsx) owns the flat picker, and
-[LauncherDock styles](../src/components/LauncherDock.module.css) keep the app
+[FrameShell](../src/views/desktop/components/frame-shell.tsx) decides whether default corners
+can merge. [FrameShell styles](../src/views/desktop/components/frame-shell.module.css) and
+[PlacedWidget styles](../src/views/desktop/components/placed-widget.module.css) build the bars.
+[CanvasTools](../src/views/desktop/components/canvas-tools.tsx) owns the flat picker, and
+[LauncherDock styles](../src/views/desktop/components/launcher-dock.module.css) keep the app
 strip right-aligned and scrollable.

@@ -49,12 +49,12 @@ persists with the scene. The Apps widget itself can move or join a frame group,
 and its popover follows that placement. On a narrow default layout, the app strip
 scrolls horizontally and stays right-aligned.
 
-[`LauncherDock.tsx`](../src/components/LauncherDock.tsx) renders app groups and
-instance reordering. Its [CSS module](../src/components/LauncherDock.module.css)
+[`launcher-dock.tsx`](../src/views/desktop/components/launcher-dock.tsx) renders app groups and
+instance reordering. Its [CSS module](../src/views/desktop/components/launcher-dock.module.css)
 styles previews and the list, while
-[`ShellControls.module.css`](../src/components/ShellControls.module.css) supplies
-the shared toolbar material. [`favorites.ts`](../src/favorites.ts) validates and
+[`shell-controls.module.css`](../src/views/desktop/components/shell-controls.module.css) supplies
+the shared toolbar material. [`favorites-storage.ts`](../src/views/desktop/services/favorites-storage.ts) validates and
 saves favorites, with coverage in [`favorites.test.ts`](../tests/favorites.test.ts).
-[`App.tsx`](../src/App.tsx) handles the drop, shortcut return, and window reveal;
-[`useObjectLayout.ts`](../src/useObjectLayout.ts) shares that drop action during
+[`use-dock-favorites.ts`](../src/views/desktop/hooks/use-dock-favorites.ts) handles the drop and shortcut return. [The desktop hook](../src/views/desktop/hooks/use-desktop.ts) reveals running windows;
+[`use-object-layout.ts`](../src/views/desktop/hooks/use-object-layout.ts) shares that drop action during
 layout editing.

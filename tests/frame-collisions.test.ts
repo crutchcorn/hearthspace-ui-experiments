@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { mergeOverlappingFrameItems } from '../src/frame-collisions.ts'
+import { mergeOverlappingFrameItems } from '../src/views/desktop/utils/frame-collisions.ts'
 import {
   getFrameGroups,
   getPlacement,
@@ -9,7 +9,7 @@ import {
   setObjectPlacement,
   type FrameLayout,
   type LayoutTarget,
-} from '../src/frame-layout.ts'
+} from '../src/views/desktop/utils/frame-layout.ts'
 
 const apps: LayoutTarget = { kind: 'widget', id: 'apps' }
 const tools: LayoutTarget = { kind: 'widget', id: 'tools' }

@@ -1,17 +1,20 @@
 import { afterEach, expect, test } from 'vitest'
 import { commands, page } from 'vitest/browser'
-import { createWorkspace } from '../../src/desktop'
+import { createWorkspace } from '../../src/views/desktop/utils/desktop'
 import {
   FRAME_WIDGETS,
   readFrameLayout,
   type FrameEdge,
-} from '../../src/frame-layout'
-import { createScene, type Scene } from '../../src/scene'
-import { SCENE_STORAGE_KEY } from '../../src/scene-storage'
+} from '../../src/views/desktop/utils/frame-layout'
+import { createScene, type Scene } from '../../src/views/desktop/utils/scene'
+import { SCENE_STORAGE_KEY } from '../../src/views/desktop/services/scene-storage'
 import { renderDesktop } from './desktop'
 
 function preparePinnedWindow(edge: FrameEdge, position: number) {
-  const workspace = createWorkspace()
+  const workspace = createWorkspace({
+    width: window.innerWidth,
+    height: window.innerHeight,
+  })
   workspace.windows = workspace.windows.filter(({ id }) => id === 'canvas')
   const layout = readFrameLayout(undefined)
   layout.groups = {}

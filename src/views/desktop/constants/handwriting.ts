@@ -1,0 +1,1 @@
+export const HANDWRITING_STROKE_WIDTH = 2.5

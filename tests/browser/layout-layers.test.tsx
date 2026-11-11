@@ -1,14 +1,20 @@
 import { afterEach, expect, test } from 'vitest'
 import { commands, page, userEvent } from 'vitest/browser'
 import { cleanup } from 'vitest-browser-react'
-import { createWorkspace } from '../../src/desktop'
-import { FRAME_WIDGETS, readFrameLayout } from '../../src/frame-layout'
-import { createScene } from '../../src/scene'
-import { SCENE_STORAGE_KEY } from '../../src/scene-storage'
+import { createWorkspace } from '../../src/views/desktop/utils/desktop'
+import {
+  FRAME_WIDGETS,
+  readFrameLayout,
+} from '../../src/views/desktop/utils/frame-layout'
+import { createScene } from '../../src/views/desktop/utils/scene'
+import { SCENE_STORAGE_KEY } from '../../src/views/desktop/services/scene-storage'
 import { renderDesktop, windowElement } from './desktop'
 
 function prepareOverlappingWindows(pinBrowser = false) {
-  const workspace = createWorkspace()
+  const workspace = createWorkspace({
+    width: window.innerWidth,
+    height: window.innerHeight,
+  })
   workspace.windows = workspace.windows.map((window) => ({
     ...window,
     x: workspace.home.x + 20,
@@ -155,7 +161,10 @@ test('a frame shortcut rises during dragging and returns beneath windows on the 
 })
 
 function prepareDrawing() {
-  const workspace = createWorkspace()
+  const workspace = createWorkspace({
+    width: window.innerWidth,
+    height: window.innerHeight,
+  })
   workspace.windows = workspace.windows
     .filter((window) => window.title === 'Scratchpad')
     .map((window) => ({
@@ -323,7 +332,10 @@ test('pinned drawings keep their screen position through panning and reload unti
 })
 
 test('a pinned window preview stays above its group strip while it moves', async () => {
-  const workspace = createWorkspace()
+  const workspace = createWorkspace({
+    width: window.innerWidth,
+    height: window.innerHeight,
+  })
   const layout = readFrameLayout(undefined)
   layout.groups = {
     previews: {

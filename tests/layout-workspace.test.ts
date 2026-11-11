@@ -1,15 +1,19 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { arrangeWindows, type Workspace } from '../src/desktop.ts'
-import { setObjectPlacement, type FrameLayout } from '../src/frame-layout.ts'
+import { arrangeWindows } from '../src/views/desktop/utils/desktop.ts'
+import { type Workspace } from '../src/views/desktop/types/desktop.ts'
+import {
+  setObjectPlacement,
+  type FrameLayout,
+} from '../src/views/desktop/utils/frame-layout.ts'
 import {
   settleLayoutDrop,
   transformCanvasWorkspace,
-} from '../src/layout-workspace.ts'
+} from '../src/views/desktop/utils/layout-workspace.ts'
 import {
   restoreBackgroundItems,
   settleCoveredItems,
-} from '../src/peek-layout.ts'
+} from '../src/views/desktop/utils/peek-layout.ts'
 
 const frame = { surface: 'frame', edge: 'right', position: 0.5 } as const
 const workspace: Workspace = {

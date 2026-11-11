@@ -62,8 +62,8 @@ between controls and content.
 
 ## Where it lives
 
-- [`theme.ts`](../src/theme.ts) owns allowed accents, initial mode, and saved preferences.
+- [`theme-storage.ts`](../src/views/desktop/services/theme-storage.ts) owns allowed accents, initial mode, and saved preferences.
 - [`index.css`](../src/index.css) defines shared light/dark color tokens and canvas tints.
-- [`Settings.tsx`](../src/components/Settings.tsx) presents the choices.
-- [`Settings.module.css`](../src/components/Settings.module.css) sizes the mode previews and styles their selection states.
-- [`App.module.css`](../src/App.module.css) and [`WindowContent.module.css`](../src/components/WindowContent.module.css) give app previews their individual chrome and surfaces.
+- [`settings.tsx`](../src/views/desktop/components/settings.tsx) presents the choices.
+- [`settings.module.css`](../src/views/desktop/components/settings.module.css) sizes the mode previews and styles their selection states.
+- [`desktop.module.css`](../src/views/desktop/desktop.module.css) and [`window-content.module.css`](../src/views/desktop/components/window-content.module.css) give app previews their individual chrome and surfaces.

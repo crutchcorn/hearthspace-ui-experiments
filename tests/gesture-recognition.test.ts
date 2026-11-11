@@ -1,7 +1,10 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { recognizeGesture } from '../src/gesture-recognition.ts'
-import type { GesturePoint, GestureShortcut } from '../src/gestures.ts'
+import { recognizeGesture } from '../src/views/desktop/utils/gesture-recognition.ts'
+import type {
+  GesturePoint,
+  GestureShortcut,
+} from '../src/views/desktop/types/gestures.ts'
 
 const B: GesturePoint[] = [
   [178, 150],

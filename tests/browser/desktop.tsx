@@ -1,6 +1,6 @@
 import { page } from 'vitest/browser'
 import { render } from 'vitest-browser-react'
-import App from '../../src/App'
+import App from '../../src/app'
 
 export function renderDesktop() {
   return render(<App />, { container: document.getElementById('root')! })
