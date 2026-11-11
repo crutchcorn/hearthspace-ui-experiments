@@ -121,17 +121,17 @@ holds the raised treatment, and containers select one through `--chrome-hover`.
 mobile, and merged mobile surfaces. None of these hover fills adds a radial
 gradient.
 
-## Keep small switches quiet
+## Switch and checkbox finishes
 
-Enabled Settings switches, including **Enable AI features** and **Make canvas
-tools hide-able**, use one faint top highlight and a small accent shadow.
-Their checked state doesn't stack the general control and surface highlights.
+Checked switches and checkboxes share one faint top highlight and a small
+accent shadow. Hover on a checkbox emphasizes its border and keeps that
+finish intact.
 
 Light mode keeps its accent gradient with a 25%-alpha white top inset. Dark
 mode uses an 8%-alpha inset and mixes 72% of the base accent with the dark
-surface tint. This avoids brightening an already lightened accent again. The
-pale thumb, its position, and the keyboard focus outline still make the state
-clear.
+surface tint. The pale switch thumb and the checkbox's checkmark distinguish
+the checked state. The checkmark stays light against the darker fill in Dark
+mode.
 
 ## Let motion explain changes
 
@@ -154,7 +154,8 @@ previews remain simulated. Backdrop blur depends on browser support.
 - [`index.css`](../src/index.css): palette, material roles, edge light, blur, radii, and shadows.
 - [`desktop.module.css`](../src/views/desktop/desktop.module.css): solid canvas field and Hearthspace window composition.
 - [`shell-controls.module.css`](../src/views/desktop/components/shell-controls.module.css): toolbar surfaces and control states.
-- [`settings.module.css`](../src/views/desktop/components/settings.module.css): nested layers, appearance previews, compact navigation, and switches.
+- [`settings.module.css`](../src/views/desktop/components/settings.module.css) styles nested layers, appearance previews, and compact navigation.
+- [Switch styles](../src/components/controls/toggle-switch.module.css) and [checkbox styles](../src/components/controls/checkbox.module.css) use the shared checked-state finish from `index.css`.
 - [`display-settings.module.css`](../src/views/desktop/components/display-settings.module.css): raised monitor surfaces and selection.
 - [`desktop-items.tsx`](../src/views/desktop/components/desktop-items.tsx) and its [styles](../src/views/desktop/components/desktop-items.module.css): photo-only filled native icons, white labels, and unclipped shadows.
 - [`placed-widget.module.css`](../src/views/desktop/components/placed-widget.module.css), [`launcher-dock.module.css`](../src/views/desktop/components/launcher-dock.module.css), and [`notification-inbox.module.css`](../src/views/desktop/components/notification-inbox.module.css): standalone and grouped mobile surfaces.

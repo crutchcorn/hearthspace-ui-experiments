@@ -51,7 +51,7 @@ interaction and points to its implementation.
 - [Testing the playground](testing.md): TSX-aware Node tests, real-browser interactions, deterministic motion checks, isolation, and test boundaries.
 - [A canvas inside a frame](canvas-and-frame.md): the spatial analogy, layers, user-controlled attachments, and recovery through search.
 - [Visual language](visual-language.md): thin translucent layers, clear interaction states, compact controls, and restrained copy.
-- [Materials and light](materials-and-light.md): surface roles, photo contrast, toolbar and popup blur, subtle accent hover, quiet switches, and the uniform dotted canvas.
+- [Materials and light](materials-and-light.md): surface roles, photo contrast, toolbar and popup blur, shared switch and checkbox finishes, and the dotted canvas.
 - [Hearthspace icons](icons.md): local outline and filled SVG geometry, optical sizing, canvas glyphs, the rounded Settings cog, and preserved third-party app artwork.
 - [Spatial playground](spatial-playground.md): scene ownership, coordinates, layer invariants, source map, canonical saved-state validation, and layout resets.
 - [Drawing recognition](recognition.md): geometric gesture matching, handwriting worker/model ownership, and vendored recognizer provenance.

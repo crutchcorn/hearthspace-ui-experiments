@@ -38,6 +38,15 @@
   --scrollbar: #52696138;
   --control-track: #53686040;
   --control-thumb: #f6faf7;
+  --checked-control-fill: linear-gradient(
+    135deg,
+    var(--accent-bright),
+    var(--accent)
+  );
+  --checked-control-highlight: #ffffff40;
+  --checked-control-shadow:
+    inset 0 1px 0 var(--checked-control-highlight),
+    0 4px 14px -5px color-mix(in srgb, var(--accent) 10%, transparent);
   --field: #e5e9e3;
   --field-dot: #586f6826;
   --light-tint: color-mix(in srgb, var(--accent) 5%, transparent);
@@ -109,6 +118,12 @@
   --scrollbar: #c2dcd238;
   --control-track: #d9f3e82b;
   --control-thumb: #eff4ee;
+  --checked-control-fill: color-mix(
+    in srgb,
+    var(--accent-base) 72%,
+    var(--surface-tint)
+  );
+  --checked-control-highlight: #ffffff14;
   --glass-edge: inset 0 1px 0 #e5fff214, inset 0 -1px 0 #0816161a;
   --glass-edge-active: inset 0 1px 0 #e5fff22e, inset 0 0 0 1px #e5fff20a;
   --window-shadow:

@@ -16,14 +16,14 @@
     color-mix(in srgb, var(--chrome-muted) 45%, var(--chrome-border));
   border-radius: var(--radius-detail);
   background: var(--surface-control);
-  box-shadow: var(--glass-edge);
+  box-shadow: inset 0 1px 2px var(--line);
   cursor: pointer;
 }
 
 .checkbox > input:checked {
   border-color: var(--accent-border);
-  background: var(--accent);
-  box-shadow: var(--glass-edge-active);
+  background: var(--checked-control-fill);
+  box-shadow: var(--checked-control-shadow);
 }
 
 .checkbox > svg {
@@ -31,6 +31,10 @@
   color: var(--accent-ink);
   opacity: 0;
   pointer-events: none;
+}
+
+:global([data-color-mode='dark']) .checkbox > svg {
+  color: var(--control-thumb);
 }
 
 .checkbox > input:checked + svg {
@@ -49,7 +53,6 @@
 :where(label:hover) .checkbox > input:not(:disabled),
 .checkbox > input:hover:not(:disabled) {
   border-color: var(--accent-border);
-  box-shadow: var(--control-glow), var(--glass-edge-active);
 }
 
 .checkbox > input:focus-visible {

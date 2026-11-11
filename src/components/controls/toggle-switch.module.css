@@ -1,11 +1,4 @@
 .toggle {
-  --toggle-highlight: #ffffff40;
-  --toggle-on-fill: linear-gradient(
-    135deg,
-    var(--accent-bright),
-    var(--accent)
-  );
-
   appearance: none;
   position: relative;
   width: 40px;
@@ -33,19 +26,8 @@
 
 .toggle:checked {
   border-color: var(--accent-border);
-  background: var(--toggle-on-fill);
-  box-shadow:
-    inset 0 1px 0 var(--toggle-highlight),
-    0 4px 14px -5px color-mix(in srgb, var(--accent) 10%, transparent);
-}
-
-:global([data-color-mode='dark']) .toggle {
-  --toggle-highlight: #ffffff14;
-  --toggle-on-fill: color-mix(
-    in srgb,
-    var(--accent-base) 72%,
-    var(--surface-tint)
-  );
+  background: var(--checked-control-fill);
+  box-shadow: var(--checked-control-shadow);
 }
 
 .toggle:checked::before {
