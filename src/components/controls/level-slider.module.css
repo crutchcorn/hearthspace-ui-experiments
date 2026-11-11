@@ -7,11 +7,7 @@
   --slider-fill-top: var(--accent-bright);
   --slider-fill-bottom: var(--accent);
   --slider-thumb-size: 20px;
-  --slider-thumb-border: color-mix(
-    in srgb,
-    var(--chrome-muted) 80%,
-    var(--control-thumb)
-  );
+  --slider-thumb-border: color-mix(in oklab, #808080 80%, var(--accent-base));
   --slider-thumb-shadow: color-mix(
     in srgb,
     var(--chrome-text) 24%,

@@ -23,9 +23,9 @@ older battery-percentage setting with one consistent detail control.
 Click the Sound track or drag its thumb to change the simulated volume.
 The arrow keys adjust it one point at a time, and Home and End jump to
 0 and 100. The track and accent fill use the same inset edge lighting as
-other system controls. In Light mode, the thumb has a neutral rim and a
-soft shadow so it stays visible over both parts of the track and against
-the panel. The rim takes on the accent when hovered or dragged.
+other system controls. In Light mode, a soft shadow and a gray rim tinted
+with the selected accent keep the thumb visible over both parts of the
+track. The rim takes on a stronger accent when hovered or dragged.
 
 Power has no detail toggle. Its Lock screen action opens the password preview;
 Log off, Reboot, and Turn off close the menu and open centered confirmation
