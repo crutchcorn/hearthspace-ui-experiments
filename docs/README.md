@@ -46,6 +46,7 @@ interaction and points to its implementation.
 
 ## Shared design and implementation
 
+- [Storybook catalog](storybook.md) covers component stories, the icon gallery, themes, and preview fixtures.
 - [Layered React Structure](layered-react-structure.md) covers the project skill, ESLint checks, and which paths they cover.
 - [Testing the playground](testing.md): TSX-aware Node tests, real-browser interactions, deterministic motion checks, isolation, and test boundaries.
 - [A canvas inside a frame](canvas-and-frame.md): the spatial analogy, layers, user-controlled attachments, and recovery through search.

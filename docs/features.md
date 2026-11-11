@@ -10,6 +10,9 @@ important exceptions, saved state, and source ownership. These pages reflect
 the implemented experiment, including the later revisions to earlier ideas.
 They aren't a promise that the browser controls a Linux desktop.
 
+The [Storybook catalog](storybook.md) lets you preview shared controls and
+desktop components in either theme.
+
 ## Move and organize work
 
 | Feature                                                            | Start here                                                                                        |

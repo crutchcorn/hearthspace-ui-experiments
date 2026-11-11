@@ -14,6 +14,8 @@ pnpm dev
 | `pnpm dev`                | Start the Vite development server.                         |
 | `pnpm build`              | Build the static application into `dist/`.                 |
 | `pnpm preview`            | Serve the production build locally.                        |
+| `pnpm storybook`          | Browse shared components and SVG icons locally.            |
+| `pnpm build:storybook`    | Build the component catalog into `storybook-static/`.      |
 | `pnpm test`               | Run Node tests for geometry, recognition, and saved state. |
 | `pnpm test:browser`       | Run browser interaction tests in Chromium.                 |
 | `pnpm test:browser:watch` | Watch browser tests in a visible Chromium window.          |
@@ -52,6 +54,8 @@ Keep experiments small enough to change quickly. The app uses React, TypeScript,
 Use [Layered React Structure](docs/layered-react-structure.md) to guide React code placement. `pnpm lint` runs the architecture rules alongside the existing checks.
 
 See the [features list](docs/features.md) for the current experiment, and [the spatial playground architecture](docs/spatial-playground.md) for file ownership and coordinate behavior. Keep durable technical decisions in [docs](docs/README.md) and provisional investigations in [notes](notes/README.md).
+
+Use the [Storybook catalog](docs/storybook.md) to inspect shared UI in isolation. Add stories next to shared components and run `pnpm build:storybook` when changing the catalog.
 
 ## Verify interactions
 

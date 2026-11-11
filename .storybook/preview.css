@@ -1,0 +1,30 @@
+/* The playground fills its window. The catalog and long examples can scroll. */
+html,
+body {
+  overflow: auto;
+}
+
+.hearthspace-preview {
+  --shell-popup-z: 1110;
+
+  position: relative;
+  height: auto;
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  padding: 24px;
+  color: var(--ink);
+  background-color: var(--field);
+  background-image: radial-gradient(var(--field-dot) 1px, transparent 1.2px);
+  background-size: 28px 28px;
+}
+
+.hearthspace-preview[data-story-canvas='true'] {
+  min-height: 100dvh;
+}
+
+.hearthspace-preview[data-story-canvas='false'] {
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: safe center;
+  overflow: auto;
+}
